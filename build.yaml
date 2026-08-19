@@ -1,0 +1,27 @@
+# Kod uretimi (code generation) ayarlari.
+# ADIM 3'te Freezed modelleri yazildiginda kullanilacak.
+#
+# Kod uretmek icin:
+#   dart run build_runner build --delete-conflicting-outputs
+# Gelistirirken surekli izlemek icin:
+#   dart run build_runner watch --delete-conflicting-outputs
+
+targets:
+  $default:
+    builders:
+      freezed:
+        options:
+          # copyWith ve toString varsayilan olarak uretilsin
+          copy_with: true
+          equal: true
+          to_string: true
+
+      json_serializable:
+        options:
+          # Supabase kolon adlari snake_case, Dart alanlari camelCase.
+          # Bu ayar donusumu otomatik yapar: user_card_id <-> userCardId
+          field_rename: snake
+          # JSON'da olmayan alanlar null kalsin, hata firlatmasin
+          create_factory: true
+          create_to_json: true
+          explicit_to_json: true

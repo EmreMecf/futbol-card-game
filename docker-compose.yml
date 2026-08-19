@@ -1,0 +1,65 @@
+# =====================================================================
+# FUTBOL KART - GELISTIRME ORTAMI
+# =====================================================================
+# Baslatmak icin:   docker compose up -d
+# Durdurmak icin:   docker compose down
+# Veritabanini SIFIRLAMAK icin (tum veriler silinir):
+#                   docker compose down -v
+#
+# NOT: database/migrations klasorundeki SQL dosyalari, veritabani ILK
+# olusturuldugunda alfabetik sirayla otomatik calisir. Sema degistirince
+# "docker compose down -v" ile sifirlaman gerekir.
+# =====================================================================
+
+services:
+  # ------------------------------------------------------------------
+  # PostgreSQL - Oyunun veritabani
+  # ------------------------------------------------------------------
+  postgres:
+    image: postgres:17-alpine
+    container_name: futbol_card_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: futbol
+      POSTGRES_PASSWORD: futbol_dev_sifre_2026
+      POSTGRES_DB: futbol_card
+      # Turkce karakter ve tarih sorunlari yasamamak icin
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+      TZ: Europe/Istanbul
+    ports:
+      # Bilgisayarindan baglanmak icin: localhost:5432
+      - "5432:5432"
+    volumes:
+      - futbol_pg_data:/var/lib/postgresql/data
+      # Ilk acilista otomatik calisacak SQL dosyalari
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U futbol -d futbol_card"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ------------------------------------------------------------------
+  # pgAdmin - Tarayicidan veritabanini gormek icin (istege bagli)
+  # ------------------------------------------------------------------
+  # Adres: http://localhost:5050
+  # Giris: admin@futbol.local / admin
+  # Icerideki sunucuya baglanirken host olarak "postgres" yaz (localhost DEGIL).
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: futbol_card_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@futbol.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  futbol_pg_data:
+    name: futbol_card_pg_data
