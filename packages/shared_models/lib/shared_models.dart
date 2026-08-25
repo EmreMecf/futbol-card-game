@@ -12,6 +12,7 @@
 library;
 
 export 'src/auth_models.dart';
+export 'src/card_attributes.dart';
 export 'src/card_model.dart';
 export 'src/chemistry.dart';
 export 'src/deck_models.dart';

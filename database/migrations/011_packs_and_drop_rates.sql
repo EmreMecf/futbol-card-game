@@ -385,7 +385,14 @@ begin
           'tier', c.tier,
           'power', c.power,
           'nationality', c.nationality,
+          -- 'league' eksikti: paketten cikan kart koleksiyona duserken
+          -- ligi bos geliyor, kimya onizlemesi yanlis hesapliyordu.
+          'league', c.league,
           'club', c.club,
+          'attributes', card_attributes_json(
+            c.shooting, c.pace, c.physical,
+            c.defending, c.dribbling, c.acceleration
+          ),
           'image_url', c.image_url
         ) order by tier_rank(c.tier) desc, c.power desc
       ), '[]'::json)
@@ -440,20 +447,53 @@ begin
 
   -- Zorunlu formasyonu otomatik kur: 1 GK + 4 DEF + 4 MID + 2 FWD
   -- (her pozisyondan en guclu kartlar secilir)
-  insert into deck_cards (deck_id, user_card_id)
-  select v_deck_id, y.id from (
-    (select uc.id from user_cards uc join cards c on c.id = uc.card_id
-      where uc.owner_id = p_user_id and c.position = 'GK'  order by c.power desc limit 1)
+  --
+  -- =================================================================
+  -- SLOT ATAMASI NEDEN SART?
+  -- =================================================================
+  -- 014 ile kimya sistemi geldiginde validate_deck() "her kart
+  -- formasyonda bir slotta durmali" kuralini kazandi; kimya
+  -- baglantilari slot numaralarindan hesaplaniyor.
+  --
+  -- Burasi guncellenmedigi icin yeni kayit olan oyuncunun kadrosu
+  -- slotsuz kaliyordu: kadroda 11 kart goruyordu ama mac aramaya
+  -- basinca "Kadro dizilisi eksik" hatasi aliyor ve kadro ekranina
+  -- girip kaydetmeden OYUNA HIC BASLAYAMIYORDU.
+  --
+  -- Slot numaralarini elle yazmiyoruz (0=GK, 1-4=DEF, ...). O bilgi
+  -- zaten formation_slot_position() icinde; burada tekrar edersek
+  -- formasyon degistiginde iki yerden birini unuturuz. Bunun yerine
+  -- her pozisyonun ILK slotunu o fonksiyona sorup, pozisyon icinde
+  -- guce gore siralayarak uzerine ekliyoruz.
+  with secilen as (
+    (select uc.id, c.position as poz, c.power
+       from user_cards uc join cards c on c.id = uc.card_id
+      where uc.owner_id = p_user_id and c.position = 'GK'
+      order by c.power desc limit 1)
     union all
-    (select uc.id from user_cards uc join cards c on c.id = uc.card_id
-      where uc.owner_id = p_user_id and c.position = 'DEF' order by c.power desc limit 4)
+    (select uc.id, c.position, c.power
+       from user_cards uc join cards c on c.id = uc.card_id
+      where uc.owner_id = p_user_id and c.position = 'DEF'
+      order by c.power desc limit 4)
     union all
-    (select uc.id from user_cards uc join cards c on c.id = uc.card_id
-      where uc.owner_id = p_user_id and c.position = 'MID' order by c.power desc limit 4)
+    (select uc.id, c.position, c.power
+       from user_cards uc join cards c on c.id = uc.card_id
+      where uc.owner_id = p_user_id and c.position = 'MID'
+      order by c.power desc limit 4)
     union all
-    (select uc.id from user_cards uc join cards c on c.id = uc.card_id
-      where uc.owner_id = p_user_id and c.position = 'FWD' order by c.power desc limit 2)
-  ) y;
+    (select uc.id, c.position, c.power
+       from user_cards uc join cards c on c.id = uc.card_id
+      where uc.owner_id = p_user_id and c.position = 'FWD'
+      order by c.power desc limit 2)
+  )
+  insert into deck_cards (deck_id, user_card_id, slot_index)
+  select v_deck_id,
+         s.id,
+         -- pozisyonun ilk slotu + pozisyon icindeki sira
+         (select min(g) from generate_series(0, squad_size() - 1) g
+           where formation_slot_position(g) = s.poz)
+         + (row_number() over (partition by s.poz order by s.power desc) - 1)::int
+  from secilen s;
 
   return json_build_object(
     'status', 'ok',

@@ -467,6 +467,11 @@ $$;
 -- =====================================================================
 -- Backend bu fonksiyonu SADECE istegi yapan oyuncunun kimligiyle cagirir.
 -- Rakibin kartlari hicbir uc noktadan disari cikmaz.
+-- DONUS TIPI DEGISTI (016 ile ozellikler eklendi). PostgreSQL bir
+-- fonksiyonun donus tipini "create or replace" ile degistirmeye izin
+-- vermez; once dusurmek sart.
+drop function if exists get_my_hand(uuid, uuid);
+
 create or replace function get_my_hand(p_user_id uuid, p_match_id uuid)
 returns table (
   user_card_id uuid,
@@ -477,6 +482,15 @@ returns table (
   "position"   card_position,
   tier         card_tier,
   power        int,
+
+  -- Kart ozellikleri (sadece gosterim; tur sonucunu etkilemez)
+  shooting     int,
+  pace         int,
+  physical     int,
+  defending    int,
+  dribbling    int,
+  acceleration int,
+
   image_url    text,
   is_played    boolean,
   is_protected boolean
@@ -501,6 +515,12 @@ begin
          mh.position,
          mh.tier,
          mh.power,
+         c.shooting,
+         c.pace,
+         c.physical,
+         c.defending,
+         c.dribbling,
+         c.acceleration,
          c.image_url,
          mh.is_played,
          (mh.user_card_id = any (mp.protected_card_ids)) as is_protected

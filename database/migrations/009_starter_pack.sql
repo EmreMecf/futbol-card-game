@@ -1,5 +1,16 @@
 -- =====================================================================
--- 009 - BASLANGIC PAKETI
+-- 009 - BASLANGIC PAKETI  (*** GECERSIZ - 011 TARAFINDAN EZILIYOR ***)
+-- =====================================================================
+-- DIKKAT: Bu dosyadaki grant_starter_pack() CALISMIYOR.
+-- 011_packs_and_drop_rates.sql ayni ada sahip yeni bir surum
+-- tanimliyor ve daha sonra calistigi icin gecerli olan O.
+--
+-- Farklar: bu surum 17 kart veriyor ve kartlari formasyon slotlarina
+-- yerlestirmiyor. Gecerli kurallar (15 kart, Diamond/Legend yok,
+-- slotlu kadro) 011'de.
+--
+-- Dosya, migration gecmisi bozulmasin diye duruyor. Degisiklik
+-- yapacaksan 011'deki surumu duzenle.
 -- =====================================================================
 -- Yeni oyuncuya 17 kart verir ve gecerli bir 4-4-2 kadro
 -- (1 GK, 4 DEF, 4 MID, 2 FWD) otomatik olusturur.

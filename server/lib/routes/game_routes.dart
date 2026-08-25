@@ -29,6 +29,7 @@ Router gameRoutes(Database db) {
     final kartlar = await db.query(
       '''
       select id, slug, full_name, position, tier, power,
+             shooting, pace, physical, defending, dribbling, acceleration,
              nationality, league, club, image_url
       from cards
       where is_active
@@ -54,6 +55,8 @@ Router gameRoutes(Database db) {
              uc.acquired_at,
              c.id as card_id, c.slug, c.full_name, c.position, c.tier,
              c.power, c.nationality, c.league, c.club, c.image_url,
+             c.shooting, c.pace, c.physical,
+             c.defending, c.dribbling, c.acceleration,
              (dc.deck_id is not null) as in_deck
       from user_cards uc
       join cards c on c.id = uc.card_id
@@ -346,7 +349,9 @@ Router gameRoutes(Database db) {
       select uc.id as user_card_id,
              dc.slot_index,
              c.id as card_id, c.slug, c.full_name, c.position, c.tier,
-             c.power, c.nationality, c.league, c.club, c.image_url
+             c.power, c.nationality, c.league, c.club, c.image_url,
+             c.shooting, c.pace, c.physical,
+             c.defending, c.dribbling, c.acceleration
       from deck_cards dc
       join decks d      on d.id = dc.deck_id
       join user_cards uc on uc.id = dc.user_card_id

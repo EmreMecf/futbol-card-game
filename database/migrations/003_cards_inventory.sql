@@ -20,6 +20,24 @@ create table if not exists cards (
   -- Kart gucu. Legend kartlarin gucu sadece diger Legend'lara karsi anlamlidir.
   power        int not null check (power between 1 and 99),
 
+  -- -------------------------------------------------------------------
+  -- OYUNCU OZELLIKLERI (SUT / HIZ / FIZIK / DEFANS / DRIBLING / HIZLANMA)
+  -- -------------------------------------------------------------------
+  -- DIKKAT - BUNLAR MACI BELIRLEMEZ:
+  -- Turlari kazanan hala `power` (+ kimya). Bu alti deger su an sadece
+  -- GOSTERIM icindir; kartin karakterini anlatir ("hizli ama zayif
+  -- defans"). Ileride bir ozelligi mac kuralina baglamak istersek
+  -- _resolve_round() icinde tek satirlik bir degisiklik yeter.
+  --
+  -- Degerler elle yazilmadi; 016_card_attributes.sql pozisyona gore
+  -- uretiyor. Boylece 100 kart icin 600 sayiyi elle bakim etmiyoruz.
+  shooting     int check (shooting     between 1 and 99),  -- SUT
+  pace         int check (pace         between 1 and 99),  -- HIZ
+  physical     int check (physical     between 1 and 99),  -- FIZIK
+  defending    int check (defending    between 1 and 99),  -- DEFANS
+  dribbling    int check (dribbling    between 1 and 99),  -- DRIBLING
+  acceleration int check (acceleration between 1 and 99),  -- HIZLANMA
+
   nationality  text,
 
   -- KIMYA SISTEMI: lig ve kulup baglantilari icin.
@@ -41,6 +59,38 @@ create table if not exists cards (
 );
 
 comment on table cards is 'Kart katalogu (master data). Sadece yonetici degistirir.';
+
+-- ---------------------------------------------------------------------
+-- OZELLIKLERI JSON'A CEVIREN YARDIMCI
+-- ---------------------------------------------------------------------
+-- NEDEN AYRI FONKSIYON?
+-- Kart JSON'u uc ayri yerde uretiliyor (paket acma, mac sonucu, ...).
+-- Alti alani her birine elle yazarsak birinde unutulur ve o ekranda
+-- ozellikler sessizce kaybolur. Tek yerden uretiyoruz.
+--
+-- Ozellikler henuz uretilmemisse NULL doner; istemci de bolumu
+-- gostermez (bos bir izgara cizmek yerine hic cizmemek dogrusu).
+create or replace function card_attributes_json(
+  p_shooting     int,
+  p_pace         int,
+  p_physical     int,
+  p_defending    int,
+  p_dribbling    int,
+  p_acceleration int
+)
+returns json
+language sql
+immutable
+as $$
+  select case when p_shooting is null then null else json_build_object(
+    'shooting',     p_shooting,
+    'pace',         p_pace,
+    'physical',     p_physical,
+    'defending',    p_defending,
+    'dribbling',    p_dribbling,
+    'acceleration', p_acceleration
+  ) end;
+$$;
 
 create index if not exists idx_cards_position_tier on cards (position, tier);
 create index if not exists idx_cards_active on cards (is_active) where is_active;

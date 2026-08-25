@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'card_attributes.dart';
 import 'chemistry.dart';
 import 'enums.dart';
 
@@ -27,6 +28,10 @@ abstract class CardModel with _$CardModel implements ChemistrySource {
     String? nationality,
     String? league,
     String? club,
+
+    /// SUT / HIZ / FIZIK / DEFANS / DRIBLING / HIZLANMA.
+    /// Sunucu henuz uretmemisse null gelir; arayuz bolumu gizler.
+    CardAttributes? attributes,
 
     /// Yapay zeka ile uretilmis 3D Pixar tarzi gorselin yolu
     String? imageUrl,
@@ -66,6 +71,10 @@ abstract class InventoryCard with _$InventoryCard implements ChemistrySource {
     String? league,
     String? club,
 
+    /// SUT / HIZ / FIZIK / DEFANS / DRIBLING / HIZLANMA.
+    /// Sunucu henuz uretmemisse null gelir; arayuz bolumu gizler.
+    CardAttributes? attributes,
+
     String? imageUrl,
 
     /// Bu kart bir destede mi?
@@ -96,6 +105,7 @@ abstract class InventoryCard with _$InventoryCard implements ChemistrySource {
         nationality: nationality,
         league: league,
         club: club,
+        attributes: attributes,
         imageUrl: imageUrl,
       );
 }

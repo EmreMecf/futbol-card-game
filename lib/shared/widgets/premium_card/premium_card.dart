@@ -10,6 +10,7 @@
 /// Aksi halde her kart kendi animasyonunu calistirir ve arayuz takilir.
 library;
 
+export 'card_attributes_grid.dart';
 export 'card_frame_painter.dart';
 export 'card_tier_theme.dart';
 export 'card_tilt.dart';

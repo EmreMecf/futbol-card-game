@@ -65,7 +65,12 @@ begin
           'power',        c.power,
           'image_url',    c.image_url,
           'nationality',  c.nationality,
-          'club',         c.club
+          'league',       c.league,
+          'club',         c.club,
+          'attributes',   card_attributes_json(
+            c.shooting, c.pace, c.physical,
+            c.defending, c.dribbling, c.acceleration
+          )
         ) order by tier_rank(c.tier) desc, c.power desc
       ), '[]'::json)
       from card_transfers ct
@@ -85,7 +90,12 @@ begin
           'power',        c.power,
           'image_url',    c.image_url,
           'nationality',  c.nationality,
-          'club',         c.club
+          'league',       c.league,
+          'club',         c.club,
+          'attributes',   card_attributes_json(
+            c.shooting, c.pace, c.physical,
+            c.defending, c.dribbling, c.acceleration
+          )
         ) order by tier_rank(c.tier) desc, c.power desc
       ), '[]'::json)
       from card_transfers ct

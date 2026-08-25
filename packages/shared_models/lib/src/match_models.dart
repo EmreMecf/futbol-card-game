@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'card_attributes.dart';
 import 'chemistry.dart';
 import 'enums.dart';
 import 'game_rules.dart';
@@ -32,6 +33,10 @@ abstract class HandCard with _$HandCard implements ChemistrySource {
     String? nationality,
     String? league,
     String? club,
+
+    /// SUT / HIZ / FIZIK / DEFANS / DRIBLING / HIZLANMA.
+    /// Sunucu henuz uretmemisse null gelir; arayuz bolumu gizler.
+    CardAttributes? attributes,
 
     String? imageUrl,
 

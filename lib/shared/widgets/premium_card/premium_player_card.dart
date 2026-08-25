@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import 'card_attributes_grid.dart';
 import 'card_frame_painter.dart';
 import 'card_tier_theme.dart';
 import 'card_tilt.dart';
@@ -28,6 +29,12 @@ class PremiumPlayerCard extends StatefulWidget {
   final String? imageUrl;
   final String? nationality;
   final String? club;
+
+  /// SUT / HIZ / FIZIK / DEFANS / DRIBLING / HIZLANMA.
+  ///
+  /// Null ise ya da kart 150 pikselden darsa izgara cizilmez;
+  /// kucuk kartta alti sayi okunmaz hale gelir.
+  final CardAttributes? attributes;
 
   /// Kartin genisligi. Yukseklik oran ile hesaplanir (FIFA orani ~0.70).
   final double width;
@@ -66,6 +73,7 @@ class PremiumPlayerCard extends StatefulWidget {
     this.imageUrl,
     this.nationality,
     this.club,
+    this.attributes,
     this.width = 200,
     this.isProtected = false,
     this.isLocked = false,
@@ -95,6 +103,7 @@ class PremiumPlayerCard extends StatefulWidget {
       imageUrl: kart.imageUrl,
       nationality: kart.nationality,
       club: kart.club,
+      attributes: kart.attributes,
       width: width,
       isLocked: kart.isLocked,
       isSelected: isSelected,
@@ -119,6 +128,9 @@ class PremiumPlayerCard extends StatefulWidget {
       tier: kart.tier,
       power: kart.power,
       imageUrl: kart.imageUrl,
+      nationality: kart.nationality,
+      club: kart.club,
+      attributes: kart.attributes,
       width: width,
       isProtected: kart.isProtected,
       isPlayed: kart.isPlayed,
@@ -503,10 +515,32 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
               ],
             ),
           ),
+
+          // ---- OZELLIKLER (SUT / HIZ / DRP / HZL / DEF / FIZ) ----
+          if (_ozellikleriGoster) ...[
+            SizedBox(height: olcek * 0.05),
+            CardAttributesGrid(
+              attributes: widget.attributes!,
+              theme: tema,
+              scale: olcek,
+            ),
+          ],
         ],
       ),
     );
   }
+
+  /// Ozellik izgarasi bu genisligin ALTINDA cizilmez.
+  ///
+  /// 150 piksel deneyerek bulundu: bunun altinda etiket yazilari
+  /// (0.058 x genislik) 8 pikselin altina duser ve telefonda
+  /// okunamaz hale gelir. Koleksiyon izgarasindaki kartlar bu esigin
+  /// altinda kaldigi icin liste sade kalmaya devam ediyor.
+  static const double _ozellikEsigi = 150;
+
+  bool get _ozellikleriGoster =>
+      widget.width >= _ozellikEsigi &&
+      (widget.attributes?.isNotEmpty ?? false);
 
   // ==================================================================
   // 7) ROZETLER

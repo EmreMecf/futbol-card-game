@@ -46,6 +46,7 @@ class RowMappers {
       nationality: row['nationality'] as String?,
       league: row['league'] as String?,
       club: row['club'] as String?,
+      attributes: _attributes(row),
       imageUrl: row['image_url'] as String?,
     );
   }
@@ -65,6 +66,7 @@ class RowMappers {
       nationality: row['nationality'] as String?,
       league: row['league'] as String?,
       club: row['club'] as String?,
+      attributes: _attributes(row),
       imageUrl: row['image_url'] as String?,
       inDeck: row['in_deck'] == true,
       isLocked: row['locked_match_id'] != null,
@@ -101,6 +103,7 @@ class RowMappers {
       nationality: row['nationality'] as String?,
       league: row['league'] as String?,
       club: row['club'] as String?,
+      attributes: _attributes(row),
 
       imageUrl: row['image_url'] as String?,
       isPlayed: row['is_played'] == true,
@@ -249,6 +252,38 @@ class RowMappers {
       if (cozulmus is Map) return Map<String, dynamic>.from(cozulmus);
     }
     throw StateError('JSON nesnesi bekleniyordu: $deger');
+  }
+
+  // ------------------------------------------------------------------
+  // KART OZELLIKLERI (SUT / HIZ / FIZIK / DEFANS / DRIBLING / HIZLANMA)
+  // ------------------------------------------------------------------
+  /// IKI FARKLI SEKLI DE KARSILAR:
+  ///
+  ///   1. DUZ KOLONLAR  — `select c.shooting, c.pace, ...` yapan
+  ///      sorgulardan gelen satirlar.
+  ///   2. IC ICE NESNE  — `card_attributes_json()` ile uretilen
+  ///      JSON'lar (paket acma, mac sonucu). Orada alanlar
+  ///      `attributes` altinda toplanir.
+  ///
+  /// Ikisini de tek yerde karsilamak, yeni bir uc nokta eklendiginde
+  /// "ozellikler neden bos geliyor?" hatasini bastan kapatiyor.
+  static CardAttributes? _attributes(Map<String, dynamic> row) {
+    final icIce = row['attributes'];
+    final kaynak = icIce == null ? row : asMap(icIce);
+
+    // Sunucu ozellikleri henuz uretmemisse null donuyoruz; arayuz de
+    // bolumu hic cizmiyor. Sifirlarla dolu bir kart gostermek
+    // "bu oyuncunun sutu 0" gibi YANLIS bir bilgi olurdu.
+    if (kaynak['shooting'] == null) return null;
+
+    return CardAttributes(
+      shooting: _int(kaynak['shooting']),
+      pace: _int(kaynak['pace']),
+      physical: _int(kaynak['physical']),
+      defending: _int(kaynak['defending']),
+      dribbling: _int(kaynak['dribbling']),
+      acceleration: _int(kaynak['acceleration']),
+    );
   }
 
   static int _int(dynamic deger, [int varsayilan = 0]) {
