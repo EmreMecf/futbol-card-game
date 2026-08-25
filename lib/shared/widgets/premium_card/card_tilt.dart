@@ -22,8 +22,15 @@ class CardTiltController extends ValueNotifier<Offset> {
   /// Egilmenin en fazla ne kadar olabilecegi (radyan)
   final double maxTilt;
 
-  /// Parmak cekildikten sonra merkeze donme animasyonu
+  /// Parmak cekildikten sonra merkeze donme animasyonu.
+  ///
+  /// TEK BIR KEZ kuruluyor, her donuste YENIDEN KULLANILIYOR.
+  /// Bkz. [reset] icindeki aciklama.
   AnimationController? _geriDonus;
+  CurvedAnimation? _geriDonusEgrisi;
+
+  /// Donusun baslayacagi egim (her reset cagrisinda guncellenir)
+  Offset _donusBaslangici = Offset.zero;
 
   CardTiltController({this.maxTilt = 0.22}) : super(Offset.zero);
 
@@ -38,31 +45,63 @@ class CardTiltController extends ValueNotifier<Offset> {
     value = Offset(dx.clamp(-1.0, 1.0), dy.clamp(-1.0, 1.0));
   }
 
-  /// Parmak cekilince yumusakca merkeze don
+  /// Parmak cekilince yumusakca merkeze don.
+  ///
+  /// =================================================================
+  /// NEDEN HER SEFERINDE YENI CONTROLLER KURULMUYOR?
+  /// =================================================================
+  /// Bu fonksiyonun ilk hali her cagrida eskisini dispose edip YENI bir
+  /// AnimationController yaratiyordu. Iki ayri hataya yol aciyordu:
+  ///
+  /// 1) IKINCI SURUKLEMEDE COKME
+  ///    Cagiran State'ler `SingleTickerProviderStateMixin` kullaniyor.
+  ///    Bu mixin ismi geregi SADECE BIR ticker'a izin verir ve eskisi
+  ///    dispose edilse bile ikinci `createTicker` cagrisinda hata
+  ///    firlatir:
+  ///      "... is a SingleTickerProviderStateMixin but multiple
+  ///       tickers were created."
+  ///    Yani oyuncu ayni karti IKINCI KEZ suruklediginde uygulama
+  ///    hata veriyordu. Herkes kartlarla oynamaya bayildigi icin bu
+  ///    cok kolay tetiklenen bir hataydi.
+  ///
+  /// 2) TICKER SIZINTISI
+  ///    Controller'in sahibi ile ticker'i veren State farkliysa, cocuk
+  ///    State once yok edilip ticker hala calisir durumda kaliyordu.
+  ///
+  /// Cozum: controller BIR KEZ kuruluyor, sonraki donuslerde sadece
+  /// baslangic noktasi guncellenip bastan oynatiliyor.
   void reset({TickerProvider? vsync}) {
     if (vsync == null) {
       value = Offset.zero;
       return;
     }
 
-    _geriDonus?.dispose();
-    final baslangic = value;
+    _donusBaslangici = value;
 
-    _geriDonus = AnimationController(
-      vsync: vsync,
-      duration: const Duration(milliseconds: 420),
-    );
+    if (_geriDonus == null) {
+      _geriDonus = AnimationController(
+        vsync: vsync,
+        duration: const Duration(milliseconds: 420),
+      );
 
-    final egri = CurvedAnimation(
-      parent: _geriDonus!,
-      curve: Curves.easeOutBack,
-    );
+      _geriDonusEgrisi = CurvedAnimation(
+        parent: _geriDonus!,
+        curve: Curves.easeOutBack,
+      );
 
-    egri.addListener(() {
-      value = Offset.lerp(baslangic, Offset.zero, egri.value) ?? Offset.zero;
-    });
+      // Dinleyici de bir kez baglaniyor; `_donusBaslangici` alan
+      // oldugu icin her donuste guncel degeri okuyor.
+      _geriDonusEgrisi!.addListener(() {
+        value = Offset.lerp(
+              _donusBaslangici,
+              Offset.zero,
+              _geriDonusEgrisi!.value,
+            ) ??
+            Offset.zero;
+      });
+    }
 
-    _geriDonus!.forward();
+    _geriDonus!.forward(from: 0);
   }
 
   /// Jiroskop ile egilme (telefonu egdikce kart doner).
@@ -108,6 +147,7 @@ class CardTiltController extends ValueNotifier<Offset> {
   @override
   void dispose() {
     _jiroskop?.cancel();
+    _geriDonusEgrisi?.dispose();
     _geriDonus?.dispose();
     super.dispose();
   }

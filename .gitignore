@@ -60,3 +60,9 @@ app.*.map.json
 server/*.log
 # Gecici test ciktilari
 *.tmp
+
+# Baska bir bos deponun kopyasi olarak yanlislikla olusmus klasor.
+# Icinde kendi .git'i oldugu icin, yok sayilmazsa depoya "submodule"
+# (gitlink) olarak ekleniyor ve GitHub'da bos/kirik bir klasor
+# gorunuyor. Silinmesinde sakinca yok.
+/futbol_card/

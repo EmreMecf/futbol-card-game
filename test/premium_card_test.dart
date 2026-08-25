@@ -242,4 +242,152 @@ void main() {
       }
     });
   });
+
+  // ==================================================================
+  // EGILME (REGRESYON)
+  // ==================================================================
+  testWidgets('karti UST USTE suruklemek cokme yapmaz', (tester) async {
+    // REGRESYON: CardTiltController.reset() her cagrida YENI bir
+    // AnimationController yaratiyordu. Cagiran State
+    // SingleTickerProviderStateMixin kullandigi icin ikinci ticker
+    // istegi hata firlatiyordu:
+    //   "... is a SingleTickerProviderStateMixin but multiple tickers
+    //    were created."
+    //
+    // Yani oyuncu ayni karti IKINCI KEZ suruklediginde uygulama hata
+    // veriyordu. Kartlarla oynamak en cok yapilan sey oldugu icin cok
+    // kolay tetikleniyordu.
+    await tester.pumpWidget(
+      sarmala(
+        const PremiumPlayerCard(
+          fullName: 'Surukleme Testi',
+          position: CardPosition.midfielder,
+          tier: CardTier.gold,
+          power: 84,
+          width: 200,
+          interactive: true,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final merkez = tester.getCenter(find.byType(PremiumPlayerCard));
+
+    for (var i = 1; i <= 3; i++) {
+      final hareket = await tester.startGesture(merkez);
+      await hareket.moveBy(const Offset(28, 18));
+      await tester.pump(const Duration(milliseconds: 16));
+      await hareket.up();
+
+      // Merkeze donus animasyonunun tamamini oynat
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(tester.takeException(), isNull, reason: '$i. surukleme');
+    }
+  });
+
+  // ==================================================================
+  // OZELLIKLER (SUT / HIZ / FIZIK / DEFANS / DRIBLING / HIZLANMA)
+  // ==================================================================
+  group('Kart ozellikleri', () {
+    const ozellikler = CardAttributes(
+      shooting: 88,
+      pace: 92,
+      physical: 71,
+      defending: 44,
+      dribbling: 85,
+      acceleration: 90,
+    );
+
+    PremiumPlayerCard kart({required double genislik, CardAttributes? ozel}) {
+      return PremiumPlayerCard(
+        fullName: 'Ozellik Testi',
+        position: CardPosition.forward,
+        tier: CardTier.gold,
+        power: 84,
+        attributes: ozel,
+        width: genislik,
+        interactive: false,
+      );
+    }
+
+    testWidgets('genis kartta alti ozellik de gorunur', (tester) async {
+      await tester.pumpWidget(sarmala(kart(genislik: 220, ozel: ozellikler)));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(tester.takeException(), isNull);
+      for (final etiket in ['SUT', 'HIZ', 'DRP', 'HZL', 'DEF', 'FIZ']) {
+        expect(find.text(etiket), findsOneWidget, reason: '$etiket etiketi');
+      }
+      expect(find.text('88'), findsOneWidget, reason: 'Sut degeri');
+      expect(find.text('44'), findsOneWidget, reason: 'Defans degeri');
+    });
+
+    testWidgets('dar kartta ozellikler GIZLENIR', (tester) async {
+      // Koleksiyon izgarasindaki kucuk kartlar. Alti sayi daha
+      // sikistirmak yazilari okunmaz yapardi.
+      await tester.pumpWidget(sarmala(kart(genislik: 110, ozel: ozellikler)));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('SUT'), findsNothing);
+      expect(find.text('88'), findsNothing);
+      // Kartin asil bilgisi yerinde duruyor
+      expect(find.text('84'), findsOneWidget);
+    });
+
+    testWidgets('ozellik yoksa izgara cizilmez', (tester) async {
+      await tester.pumpWidget(sarmala(kart(genislik: 220)));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('SUT'), findsNothing);
+    });
+
+    testWidgets('hepsi sifirsa izgara cizilmez', (tester) async {
+      // Sunucu ozellikleri henuz uretmemisse "sutu 0" yazmak
+      // YANLIS bilgi olurdu; hic gostermemek dogrusu.
+      await tester.pumpWidget(
+        sarmala(kart(genislik: 220, ozel: const CardAttributes())),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('SUT'), findsNothing);
+    });
+
+    testWidgets('esik ve buyuk boyutlarda tasma olmaz', (tester) async {
+      // Izgara esigi tam 150. Hem esikte hem vitrin boyutunda
+      // yerlesimin sigdigini dogruluyoruz; RenderFlex tasmasi
+      // takeException ile yakalanir.
+      for (final genislik in [150.0, 200.0, 300.0]) {
+        await tester.pumpWidget(
+          sarmala(kart(genislik: genislik, ozel: ozellikler)),
+        );
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(tester.takeException(), isNull, reason: 'genislik $genislik');
+        expect(find.text('SUT'), findsOneWidget, reason: 'genislik $genislik');
+      }
+    });
+
+    testWidgets('detay paneli tam Turkce adlari gosterir', (tester) async {
+      await tester.pumpWidget(
+        sarmala(
+          const SizedBox(
+            width: 320,
+            child: CardAttributesPanel(attributes: ozellikler),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      for (final ad in ['Şut', 'Hız', 'Dribling', 'Hızlanma', 'Defans', 'Fizik']) {
+        expect(find.text(ad), findsOneWidget, reason: ad);
+      }
+      expect(find.text('Ort. 78'), findsOneWidget);
+    });
+  });
 }

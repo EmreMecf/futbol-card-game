@@ -47,6 +47,7 @@ flutter run
 | `server/` | Dart + Shelf backend — [README](server/README.md) |
 | `packages/shared_models/` | **Sunucu ve uygulamanın ortak modelleri** — [README](packages/shared_models/README.md) |
 | `lib/shared/widgets/premium_card/` | FIFA seviyesi kart widget'ları — [README](lib/shared/widgets/premium_card/README.md) |
+| `lib/shared/widgets/walkout/` | Görkemli paket açılışı: spot ışığı, bayrak, arma, konfeti |
 | `database/` | PostgreSQL şeması ve oyun kuralları — [README](database/README.md) |
 | `scripts/` | Veritabanı ve sunucu başlatma betikleri |
 | `supabase/` | **Ölü kod** — eski Supabase şeması, silinebilir |
@@ -70,11 +71,50 @@ backend kuralları *bilmez*, sadece sorar.
 | Maç sonucu ve kart transferleri | `get_match_result()` |
 | SBC şart doğrulama ve kart eritme | `evaluate_sbc_squad()`, `submit_sbc()` |
 | Paket açma / kart çıkma ihtimalleri | `open_pack()`, `_roll_tier()` |
+| **Kart özellikleri:** şut/hız/fizik/defans/dribling/hızlanma | `fill_card_attributes()`, `position_attribute_profile()` |
 | Başlangıç paketi: 15 kart, Diamond/Legend yok | `grant_starter_pack()` |
 | 45 sn + 15 sn AFK → hükmen mağlubiyet | `claim_turn_timeout()`, `sweep_timed_out_matches()` |
 
 Bunun getirisi: bir kuralı değiştirmek için tek bir SQL fonksiyonunu
 güncellemen yeterli. Uygulamayı yeniden yayınlamana gerek yok.
+
+> **Kart özellikleri turu KAZANDIRMAZ.** Şut, hız, fizik, defans,
+> dribling ve hızlanma şu an sadece kartın karakterini gösterir; turu
+> hâlâ `güç + kimya` belirliyor. Bir özelliği maça bağlamak istersek
+> değişecek tek yer `_resolve_round()`.
+>
+> Değerler elle yazılmadı: `position_attribute_profile()` pozisyona göre
+> bir profil veriyor, üstüne kartın kendi kimliğinden türetilen sabit
+> bir sapma ekleniyor. Bu yüzden aynı kart her sıfırlamada **aynı**
+> değerleri alır ve yeni kart eklendiğinde sadece
+> `select fill_card_attributes();` çağırmak yeterlidir.
+
+---
+
+## Paket açılışı: üç kademe
+
+Paketten çıkan **en yüksek seviyeli karta** göre farklı bir açılış oynar.
+Karar `PackOpeningViewModel` içinde, çizim `lib/shared/widgets/walkout/`
+altında.
+
+| Çıkan en iyi kart | Açılış | Süre |
+|---|---|---|
+| Bronz / Gümüş | Hızlı kart dönme (flip) | 0,35 sn |
+| Altın | Parlamalı dönme + hafif titreşim | 0,75 sn |
+| **Diamond / Legend** | **WALKOUT sahnesi** | ~4,6 sn |
+
+**Walkout akışı:** ekran kararır ve stadyum ışıkları yanar → **bayrak**
+(1 sn) → **pozisyon** (1 sn) → **kulüp arması** (1 sn) → kart ekrana
+*vurur*, telefon titrer (`HapticFeedback.heavyImpact`), konfeti patlar.
+Ekrana dokunmak sahneyi doğrudan kartın vuruş anına atlar.
+
+Walkout **paket başına bir kez** oynar; hak paketin en iyi kartınındır.
+İki Legend çıkarsa ikincisi altın kademesinde açılır — aynı 4,6 saniyelik
+sahneyi tekrar izletmek heyecan değil sabırsızlık üretir.
+
+Bayraklar ve kulüp armaları **görsel dosyası kullanmaz**, `CustomPainter`
+ile çizilir. Arma kulüp adından türetilir, yani `Anadolu SK` her zaman
+aynı armayı alır.
 
 ---
 
@@ -150,5 +190,9 @@ testler atlanır, başarısız olmaz.
 | Premium kart widget'ı (FIFA seviyesi) | ✅ Tamamlandı, 15 test |
 | 100 kartlık test kadrosu | ✅ Tamamlandı |
 | Koleksiyon ekranı (filtre, arama, sıralama) | ✅ Tamamlandı, 12 test |
-| Flutter: koleksiyon, kadro, profil ekranları | 🔨 Sırada |
-| Flutter: eşleşme ve maç ekranı | 🔨 ADIM 4 |
+| Flutter: koleksiyon, kadro, profil ekranları | ✅ Tamamlandı |
+| Kimya sistemi (uyruk / lig / kulüp) | ✅ Tamamlandı, test edildi |
+| SBC (kadro kurma görevleri) + ekonomi | ✅ Tamamlandı, test edildi |
+| Kart özellikleri (6 özellik) | ✅ Tamamlandı, 20 test |
+| Kademeli paket açılışı + Walkout animasyonu | ✅ Tamamlandı, 24 test |
+| Flutter: eşleşme ve maç ekranı | ✅ Tamamlandı, test edildi |
