@@ -80,6 +80,30 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # ---- YAZI TIPLERI ----
+  # Display  : Barlow Condensed - dar ve guclu. Kart gucu, skor, baslik.
+  #            Rakamlar dar oldugu icin 3 haneli guc degeri karta sigiyor.
+  # Body     : Nunito - yumusak ve okunakli. Aciklama ve etiketler.
+  #
+  # Nunito DEGISKEN (variable) bir font. Flutter'da agirlik secimi
+  # fontWeight yerine fontVariations ile guvenilir calisir; bu yuzden
+  # AppTypography her stile ikisini birden yaziyor.
+  fonts:
+    - family: BarlowCondensed
+      fonts:
+        - asset: assets/fonts/BarlowCondensed-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/BarlowCondensed-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/BarlowCondensed-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/BarlowCondensed-Black.ttf
+          weight: 900
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Variable.ttf
+
+
   # Varliklar. .env dosyasi da asset olarak yuklenir ki
   # flutter_dotenv onu okuyabilsin.
   assets:
@@ -87,6 +111,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/animations/
+    - assets/fonts/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

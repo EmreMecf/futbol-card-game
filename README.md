@@ -46,6 +46,9 @@ flutter run
 | `lib/` | Flutter uygulaması (MVVM) |
 | `server/` | Dart + Shelf backend — [README](server/README.md) |
 | `packages/shared_models/` | **Sunucu ve uygulamanın ortak modelleri** — [README](packages/shared_models/README.md) |
+| `lib/core/theme/` | Tasarım sistemi: renk, yazı tipi ölçeği, kırılma noktaları |
+| `lib/shared/widgets/app_shell.dart` | Gezinme kabuğu: telefonda alt çubuk, masaüstünde kenar çubuğu |
+| `assets/fonts/` | Barlow Condensed (başlık/rakam) + Nunito (metin) |
 | `lib/shared/widgets/premium_card/` | FIFA seviyesi kart widget'ları — [README](lib/shared/widgets/premium_card/README.md) |
 | `lib/shared/widgets/walkout/` | Görkemli paket açılışı: spot ışığı, bayrak, arma, konfeti |
 | `database/` | PostgreSQL şeması ve oyun kuralları — [README](database/README.md) |
@@ -88,6 +91,49 @@ güncellemen yeterli. Uygulamayı yeniden yayınlamana gerek yok.
 > bir sapma ekleniyor. Bu yüzden aynı kart her sıfırlamada **aynı**
 > değerleri alır ve yeni kart eklendiğinde sadece
 > `select fill_card_attributes();` çağırmak yeterlidir.
+
+---
+
+## Tek kod, iki ekran: telefon ve tarayıcı
+
+Aynı ViewModel'i paylaşan **iki yerleşim** var. Hangisinin çizileceğine
+`AppBreakpoints` karar veriyor.
+
+| Genişlik | Sınıf | Gezinme | Ana sayfa | Maç ekranı |
+|---|---|---|---|---|
+| < 600 px | `mobile` | Alt sekme çubuğu | Tek sütun | Masa dikey, el altta |
+| 600–1024 px | `tablet` | Alt sekme çubuğu | Geniş tek sütun | Üç sütun |
+| > 1024 px | `desktop` | Sol kenar çubuğu | İki sütunlu ızgara | Üç sütun + yan panel |
+
+Alt çubuk **en fazla 5 madde** taşır; fazlası dokunma hedeflerini 44 px'in
+altına düşürür. Telefona sığmayan Koleksiyon ve Görevler kenar çubuğunda
+yer alır.
+
+**Maç ekranı kaydırılamaz.** Oyuncu 45 saniyede karar verirken kaydırma
+yapmak zorunda kalmamalı; bu yüzden kart ölçüleri sabit değil, mevcut
+yüksekliğe göre hesaplanıyor.
+
+### Yazı tipleri
+
+| Aile | Nerede | Neden |
+|---|---|---|
+| Barlow Condensed | Kart gücü, skor, sayaç, başlık, buton | Rakamları dar; 3 haneli güç değeri karta sığıyor |
+| Nunito | Açıklama, etiket, gövde metni | Yumuşak köşeli, uzun metinde yormuyor |
+
+Nunito **değişken (variable)** bir font. Flutter'da yalnızca `fontWeight`
+vermek her platformda çalışmıyor; `AppTypography` her stile `fontVariations`
+ile `wght` eksenini de yazıyor.
+
+### Kimya artık maç ekranında görünüyor
+
+Turu `güç + kimya` belirliyor ama bu bonus hiçbir yerde gösterilmiyordu.
+Şimdi her kartın köşesinde **+N** rozeti var, seçili kartta altında
+**MAÇTA 86** yazıyor, masaüstü yan panelinde ise dökümü duruyor:
+`83 + 3 kimya = 86`.
+
+Ayrıca kart artık dokunulur dokunulmaz oynanmıyor: önce **seçiliyor**,
+sonra ayrı bir butonla onaylanıyor. Hamle geri alınamaz; telefonda listeyi
+kaydırırken yanlışlıkla kart oynanıyordu.
 
 ---
 
@@ -196,3 +242,8 @@ testler atlanır, başarısız olmaz.
 | Kart özellikleri (6 özellik) | ✅ Tamamlandı, 20 test |
 | Kademeli paket açılışı + Walkout animasyonu | ✅ Tamamlandı, 24 test |
 | Flutter: eşleşme ve maç ekranı | ✅ Tamamlandı, test edildi |
+| Tasarım sistemi (renk, yazı tipi, kırılma noktaları) | ✅ Tamamlandı, 29 test |
+| Duyarlı gezinme kabuğu (telefon + masaüstü) | ✅ Tamamlandı, 12 test |
+| Ana sayfa ve maç ekranı yeni tasarımı | ✅ Tamamlandı, tarayıcıda doğrulandı |
+| Günlük ödül / sezon geçidi | ❌ Sunucuda karşılığı yok, arayüzde de yok |
+| Gerçek oyuncu görselleri | ❌ Siluet yer tutucu |

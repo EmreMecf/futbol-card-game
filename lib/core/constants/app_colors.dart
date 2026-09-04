@@ -15,6 +15,10 @@ class AppColors {
   static const Color surface = Color(0xFF16203A);
   static const Color surfaceLight = Color(0xFF1F2C4D);
 
+  /// Masaustu kenar cubugu: ana zeminden bir tik acik ki
+  /// icerik alaniyla arasindaki sinir cizgi olmadan da okunsun.
+  static const Color sidebar = Color(0xFF0E1628);
+
   // Metin
   static const Color textPrimary = Color(0xFFF5F7FA);
   static const Color textSecondary = Color(0xFF9AA5B8);

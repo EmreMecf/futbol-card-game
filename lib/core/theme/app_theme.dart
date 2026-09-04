@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
+import 'app_typography.dart';
 
 /// Uygulamanin gorsel kimligi.
 /// Oyun karanlik tema uzerine kuruludur (stadyum gece atmosferi).
@@ -12,6 +13,14 @@ class AppTheme {
 
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.background,
+
+      // ThemeData.copyWith fontFamily KABUL ETMEZ (sadece yapici alir).
+      // Bu yuzden aile, metin olceginin her satirina tek tek yaziliyor.
+      // primaryTextTheme de ayni olcege baglaniyor; aksi halde koyu
+      // zemin uzerindeki bazi Material widget'lari sistem yazi tipiyle
+      // cizilirdi.
+      textTheme: _metinTemasi(base.textTheme),
+      primaryTextTheme: _metinTemasi(base.primaryTextTheme),
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primary,
         secondary: AppColors.accent,
@@ -25,10 +34,11 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
+          fontFamily: AppTypography.displayFamily,
           color: AppColors.textPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.3,
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.8,
         ),
         iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
@@ -36,7 +46,7 @@ class AppTheme {
         color: AppColors.surface,
         elevation: 4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -46,11 +56,13 @@ class AppTheme {
           disabledBackgroundColor: AppColors.surfaceLight,
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontFamily: AppTypography.displayFamily,
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.0,
           ),
         ),
       ),
@@ -58,9 +70,15 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.textPrimary,
           minimumSize: const Size.fromHeight(52),
-          side: const BorderSide(color: AppColors.surfaceLight),
+          side: const BorderSide(color: AppColors.surfaceLight, width: 1.5),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(
+            fontFamily: AppTypography.displayFamily,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.0,
           ),
         ),
       ),
@@ -100,6 +118,39 @@ class AppTheme {
         color: AppColors.surfaceLight,
         thickness: 1,
       ),
+    );
+  }
+
+  /// Material'in hazir metin olcegini uygulamanin ailelerine cevirir.
+  ///
+  /// Buyuk basliklar Barlow Condensed'e, gerisi Nunito'ya gidiyor.
+  /// Bu sayede `Theme.of(context).textTheme` kullanan hazir Material
+  /// widget'lari da (AlertDialog, ListTile, SnackBar) dogru yazi
+  /// tipiyle ciziliyor; her birine tek tek stil vermek gerekmiyor.
+  static TextTheme _metinTemasi(TextTheme temel) {
+    TextStyle? d(TextStyle? s, FontWeight w) => s?.copyWith(
+          fontFamily: AppTypography.displayFamily,
+          fontWeight: w,
+        );
+    TextStyle? b(TextStyle? s) =>
+        s?.copyWith(fontFamily: AppTypography.bodyFamily);
+
+    return temel.copyWith(
+      displayLarge: d(temel.displayLarge, FontWeight.w900),
+      displayMedium: d(temel.displayMedium, FontWeight.w900),
+      displaySmall: d(temel.displaySmall, FontWeight.w900),
+      headlineLarge: d(temel.headlineLarge, FontWeight.w900),
+      headlineMedium: d(temel.headlineMedium, FontWeight.w800),
+      headlineSmall: d(temel.headlineSmall, FontWeight.w800),
+      titleLarge: d(temel.titleLarge, FontWeight.w800),
+      titleMedium: b(temel.titleMedium),
+      titleSmall: b(temel.titleSmall),
+      bodyLarge: b(temel.bodyLarge),
+      bodyMedium: b(temel.bodyMedium),
+      bodySmall: b(temel.bodySmall),
+      labelLarge: d(temel.labelLarge, FontWeight.w800),
+      labelMedium: b(temel.labelMedium),
+      labelSmall: b(temel.labelSmall),
     );
   }
 }

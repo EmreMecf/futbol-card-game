@@ -88,26 +88,46 @@ class _HolographicShineState extends State<HolographicShine>
           // gelip kart disina cikmasini saglar.
           final ilerleme = _kontrolcu.value * 3.0 - 1.5;
 
-          return ShaderMask(
-            blendMode: BlendMode.plus,
-            shaderCallback: (rect) {
-              return LinearGradient(
+          // ============================================================
+          // NEDEN ShaderMask DEGIL, DOGRUDAN DEGRADE?
+          // ============================================================
+          // Onceki surum su sekildeydi:
+          //   ShaderMask(
+          //     blendMode: BlendMode.plus,
+          //     shaderCallback: ...,
+          //     child: ColoredBox(color: Colors.white),
+          //   )
+          // Yani BEYAZ bir zemin bir degrade maskesiyle kesiliyordu.
+          //
+          // Flutter WEB'de bu maske uygulanmiyor ve altindaki beyaz
+          // zemin oldugu gibi kaliyordu: interactive kartlar tarayicida
+          // BOMBOS BEYAZ dikdortgen olarak ciziliyordu. Mac ekraninda
+          // eldeki kartlarin tamami interactive oldugu icin oyun web'de
+          // oynanamaz haldeydi.
+          //
+          // Degrade dogrudan boyaninca maskeye ihtiyac kalmiyor: renkler
+          // zaten yari saydam, saydam uclarla basliyor ve bitiyor.
+          // Toplamali (additive) karisim yerine normal alfa karisimi
+          // kullaniliyor; parlama bir tik daha yumusak ama HER
+          // platformda ayni ve dogru ciziliyor.
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
                 begin: Alignment(ilerleme - 0.6, -1),
                 end: Alignment(ilerleme + 0.6, 1),
                 colors: [
                   Colors.transparent,
                   widget.theme.specularColor.withValues(alpha: 0.0),
-                  widget.theme.specularColor.withValues(alpha: 0.55),
-                  Colors.white.withValues(alpha: 0.35),
-                  widget.theme.specularColor.withValues(alpha: 0.55),
+                  widget.theme.specularColor.withValues(alpha: 0.45),
+                  Colors.white.withValues(alpha: 0.30),
+                  widget.theme.specularColor.withValues(alpha: 0.45),
                   widget.theme.specularColor.withValues(alpha: 0.0),
                   Colors.transparent,
                 ],
                 stops: const [0.0, 0.35, 0.45, 0.5, 0.55, 0.65, 1.0],
-              ).createShader(rect);
-            },
-            // ShaderMask'in bir seyi boyamasi icin opak bir zemin gerekir.
-            child: const ColoredBox(color: Colors.white),
+              ),
+            ),
+            child: const SizedBox.expand(),
           );
         },
       ),

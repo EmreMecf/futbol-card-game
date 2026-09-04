@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "futbol-card-web",
+      "name": "futbol-kart-web",
       "runtimeExecutable": "flutter",
-      "runtimeArgs": ["run", "-d", "web-server", "--web-hostname", "127.0.0.1", "--web-port", "5580"],
+      "runtimeArgs": ["run", "-d", "web-server", "--web-port", "5580", "--web-hostname", "127.0.0.1"],
       "port": 5580
     }
   ]
