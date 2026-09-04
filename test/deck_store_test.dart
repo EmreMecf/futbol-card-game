@@ -584,6 +584,27 @@ void main() {
       expect(standart.signatureTier, isNot(premium.signatureTier));
     });
 
+    test('esit agirlikta YUKSEK seviye secilir', () {
+      // Premium pakette Gumus ve Altin ikisi de %35. Siralamada once
+      // gelen Gumus secilirse premium paket GRI kutuyla cizilir ve
+      // oyuncunun gozunde ucuz gorunur.
+      const premium = PackType(
+        slug: 'premium',
+        name: 'Premium Paket',
+        cardCount: 5,
+        priceCoins: 2500,
+        odds: [
+          TierOdds(tier: CardTier.silver, weight: 3500),
+          TierOdds(tier: CardTier.gold, weight: 3500),
+          TierOdds(tier: CardTier.bronze, weight: 2000),
+          TierOdds(tier: CardTier.diamond, weight: 900),
+          TierOdds(tier: CardTier.legend, weight: 100),
+        ],
+      );
+
+      expect(premium.signatureTier, CardTier.gold);
+    });
+
     test('ust sinirli pakette imza seviyesi siniri asmaz', () {
       // Baslangic paketinde Diamond ve Legend cikmaz; kutu da o
       // seviyelerin renginde olmamali.

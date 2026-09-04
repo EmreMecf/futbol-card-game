@@ -114,7 +114,14 @@ abstract class PackType with _$PackType {
   CardTier get signatureTier {
     if (odds.isEmpty) return maxTier ?? CardTier.bronze;
 
-    final enAgir = odds.reduce((a, b) => a.weight >= b.weight ? a : b);
+    // ESITLIKTE YUKSEK SEVIYE KAZANIR.
+    // Premium pakette Gumus ve Altin ikisi de %35; siralamada once
+    // gelen Gumus seciliyordu ve premium paket GRI bir kutuyla
+    // ciziliyordu. Oyuncunun gozunde gri = ucuz demek.
+    final enAgir = odds.reduce((a, b) {
+      if (a.weight != b.weight) return a.weight > b.weight ? a : b;
+      return a.tier.rank > b.tier.rank ? a : b;
+    });
     final secilen = enAgir.tier;
 
     // Ust sinir varsa onu asamayiz (baslangic paketi gibi)
