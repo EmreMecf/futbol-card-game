@@ -18,6 +18,17 @@ class MatchRemoteDataSource {
   Future<Map<String, dynamic>> result(String matchId) =>
       _api.get('/match/$matchId/result');
 
+  /// Oyuncunun BITMIS maclari (profil ekrani).
+  /// Tek bir macin degil, tum gecmisin listesi.
+  Future<Map<String, dynamic>> matchHistoryList({
+    int limit = 20,
+    int offset = 0,
+  }) =>
+      _api.get('/match/history', sorgu: {
+        'limit': '$limit',
+        'offset': '$offset',
+      });
+
   Future<Map<String, dynamic>> play(String matchId, String? userCardId) {
     return _api.post('/match/$matchId/play', govde: {
       'user_card_id': ?userCardId,

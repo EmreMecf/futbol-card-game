@@ -81,6 +81,37 @@ Router matchRoutes(Database db) {
   });
 
   // ------------------------------------------------------------------
+  // MAC GECMISI
+  // ------------------------------------------------------------------
+  // Profil ekranindaki "son maclarim" listesi.
+  //
+  // GIZLILIK: p_user_id JWT'den geliyor; bir oyuncu baskasinin
+  // gecmisini isteyemez.
+  router.get('/history', (Request request) async {
+    final userId = requireUserId(request);
+
+    final limit = int.tryParse(
+          request.url.queryParameters['limit'] ?? '',
+        ) ??
+        20;
+    final offset = int.tryParse(
+          request.url.queryParameters['offset'] ?? '',
+        ) ??
+        0;
+
+    final satirlar = await db.query(
+      'select * from get_match_history(@userId::uuid, @limit, @offset)',
+      params: {'userId': userId, 'limit': limit, 'offset': offset},
+    );
+
+    return jsonOk({
+      'matches': satirlar
+          .map((r) => RowMappers.matchHistoryEntry(r).toJson())
+          .toList(),
+    });
+  });
+
+  // ------------------------------------------------------------------
   // MACIN DURUMU
   // ------------------------------------------------------------------
   router.get('/<matchId>/state', (Request request, String matchId) async {

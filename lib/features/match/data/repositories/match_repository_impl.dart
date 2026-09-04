@@ -28,6 +28,23 @@ class MatchRepositoryImpl implements MatchRepository {
   }
 
   @override
+  Future<Result<List<MatchHistoryEntry>>> fetchMatchHistoryList({
+    int limit = 20,
+    int offset = 0,
+  }) {
+    return Result.guard(() async {
+      final cevap = await _remote.matchHistoryList(
+        limit: limit,
+        offset: offset,
+      );
+      final ham = cevap['matches'] as List? ?? const [];
+      return ham
+          .map((m) => MatchHistoryEntry.fromJson(m as Map<String, dynamic>))
+          .toList();
+    });
+  }
+
+  @override
   Future<Result<MatchHistory>> fetchHistory(String matchId) {
     return Result.guard(() async {
       return MatchHistory.fromJson(await _remote.history(matchId));

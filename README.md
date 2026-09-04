@@ -47,6 +47,8 @@ flutter run
 | `server/` | Dart + Shelf backend — [README](server/README.md) |
 | `packages/shared_models/` | **Sunucu ve uygulamanın ortak modelleri** — [README](packages/shared_models/README.md) |
 | `lib/core/theme/` | Tasarım sistemi: renk, yazı tipi ölçeği, kırılma noktaları |
+| `lib/features/profile/` | Profil: karne, kazanma oranı, maç geçmişi |
+| `lib/features/settings/` | Ayarlar: ses, titreşim, animasyon (cihazda saklanır) |
 | `lib/shared/widgets/app_shell.dart` | Gezinme kabuğu: telefonda alt çubuk, masaüstünde kenar çubuğu |
 | `assets/fonts/` | Barlow Condensed (başlık/rakam) + Nunito (metin) |
 | `lib/shared/widgets/premium_card/` | FIFA seviyesi kart widget'ları — [README](lib/shared/widgets/premium_card/README.md) |
@@ -72,6 +74,7 @@ backend kuralları *bilmez*, sadece sorar.
 | **Kimya:** aynı kulüp / lig+uyruk = +2, uyruk veya lig = +1 | `chemistry_link_score()` |
 | Kartın maçtaki gücü = güç + kimya | `_resolve_round()` |
 | Maç sonucu ve kart transferleri | `get_match_result()` |
+| Oyuncunun bitmiş maçları | `get_match_history()` |
 | SBC şart doğrulama ve kart eritme | `evaluate_sbc_squad()`, `submit_sbc()` |
 | Paket açma / kart çıkma ihtimalleri | `open_pack()`, `_roll_tier()` |
 | **Kart özellikleri:** şut/hız/fizik/defans/dribling/hızlanma | `fill_card_attributes()`, `position_attribute_profile()` |
@@ -134,6 +137,39 @@ Turu `güç + kimya` belirliyor ama bu bonus hiçbir yerde gösterilmiyordu.
 Ayrıca kart artık dokunulur dokunulmaz oynanmıyor: önce **seçiliyor**,
 sonra ayrı bir butonla onaylanıyor. Hamle geri alınamaz; telefonda listeyi
 kaydırırken yanlışlıkla kart oynanıyordu.
+
+---
+
+## Ekranlar
+
+Hepsi tek kod tabanında, iki yerleşimle. Hangisinin çizileceğine
+`AppBreakpoints` karar veriyor.
+
+| Ekran | Telefon | Masaüstü |
+|---|---|---|
+| Ana sayfa | Tek sütun, alt sekme çubuğu | İki sütunlu ızgara, kenar çubuğu |
+| Maç | Dikey masa, el altta | Üç sütun: tur geçmişi / masa / seçili kart |
+| Koleksiyon | Yatay filtre çipleri | Sol filtre sütunu, 5'li ızgara |
+| Kadro | Saha ortada, kimya üstte | Saha solda, kimya ve kaydet sağda |
+| Mağaza | Yatay paket kartı | Üç sütunlu ızgara, dikey kart |
+| Görevler | Kart listesi | Aynı, geniş |
+| Görev kurma | Şartlar üstte | Saha solda, şartlar sağda |
+| Profil | Karne + maç geçmişi | Aynı, ortalanmış |
+| Ayarlar | Tek sütun | Aynı, ortalanmış |
+| Eşleşme, maç sonucu, paket açılışı | Tam ekran | Ortalanmış, en fazla 720 px |
+
+Tasarım tuvali 20 artboard olarak ayrı tutuluyor; koda dökülmeden önce
+orada karara bağlanıyor.
+
+### Bilerek yapılmayanlar
+
+| İstenen | Neden yok |
+|---|---|
+| Günlük ödül, sezon geçidi | Sunucuda karşılığı yok. Uydurma sayı göstermek yerine o alana gerçek karne kondu. |
+| Profilde rozet ve başarı | Sunucuda böyle bir sistem yok. |
+| Kullanıcı adı / şifre değiştirme | Sunucuda uç yok. Ayarlarda bilgi olarak gösteriliyor. |
+| Liderlik tablosu | Sıralama sorgusu ve API ucu gerekiyor. |
+| Gerçek oyuncu görselleri | Kartlar siluet çiziyor. |
 
 ---
 
@@ -245,5 +281,9 @@ testler atlanır, başarısız olmaz.
 | Tasarım sistemi (renk, yazı tipi, kırılma noktaları) | ✅ Tamamlandı, 29 test |
 | Duyarlı gezinme kabuğu (telefon + masaüstü) | ✅ Tamamlandı, 12 test |
 | Ana sayfa ve maç ekranı yeni tasarımı | ✅ Tamamlandı, tarayıcıda doğrulandı |
+| Koleksiyon, kadro, mağaza, görevler duyarlı | ✅ Tamamlandı |
+| Profil ekranı + maç geçmişi API'si | ✅ Tamamlandı, 17 test |
+| Ayarlar ekranı (cihazda saklanan tercihler) | ✅ Tamamlandı |
 | Günlük ödül / sezon geçidi | ❌ Sunucuda karşılığı yok, arayüzde de yok |
+| Liderlik tablosu | ❌ Kenar çubuğunda maddesi var, arkasında API yok |
 | Gerçek oyuncu görselleri | ❌ Siluet yer tutucu |

@@ -53,10 +53,10 @@ enum CardTier {
   bronze('bronze', 'Bronz', 1),
 
   @JsonValue('silver')
-  silver('silver', 'Gumus', 2),
+  silver('silver', 'Gümüş', 2),
 
   @JsonValue('gold')
-  gold('gold', 'Altin', 3),
+  gold('gold', 'Altın', 3),
 
   @JsonValue('diamond')
   diamond('diamond', 'Diamond', 4),

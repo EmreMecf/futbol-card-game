@@ -28,4 +28,11 @@ abstract interface class MatchRepository {
 
   /// Bitmis macin ozeti: kaybedilen/kazanilan kartlar
   Future<Result<MatchResultSummary>> fetchResult(String matchId);
+
+  /// Oyuncunun BITMIS maclarinin listesi (profil ekrani).
+  /// En yeniden eskiye siralanir.
+  Future<Result<List<MatchHistoryEntry>>> fetchMatchHistoryList({
+    int limit,
+    int offset,
+  });
 }

@@ -28,6 +28,30 @@ class StoreViewModel extends BaseViewModel {
 
   bool canAfford(PackType paket) => coins >= paket.priceCoins;
 
+  /// Vitrinde one cikarilacak TEK paket.
+  ///
+  /// Elle bir "featured" bayragi tutmak yerine veriden turetiliyor:
+  /// Legend cikma ihtimali EN YUKSEK olan satin alinabilir paket.
+  /// Boylece yeni bir paket eklendiginde vitrin kendiliginden
+  /// guncelleniyor.
+  ///
+  /// Hepsini one cikarmak hicbirini one cikarmamakla ayni sey; bu
+  /// yuzden yalnizca bir tane donuyor.
+  String? get featuredSlug {
+    PackType? enIyi;
+    var enYuksek = 0;
+
+    for (final p in _paketler) {
+      if (!p.isPurchasable || p.priceCoins <= 0) continue;
+      final legend = p.legendOdds?.weight ?? 0;
+      if (legend > enYuksek) {
+        enYuksek = legend;
+        enIyi = p;
+      }
+    }
+    return enIyi?.slug;
+  }
+
   Future<void> load() async {
     final liste = await run(
       () => _repository.fetchPacks(),

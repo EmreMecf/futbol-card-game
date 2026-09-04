@@ -3,11 +3,16 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/router/app_routes.dart';
+import '../../../../core/theme/app_breakpoints.dart';
+import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
 import '../../../../shared/widgets/premium_card/premium_card.dart';
+import '../../../../shared/widgets/screen_header.dart';
 import '../viewmodel/collection_view_model.dart';
 import '../widgets/card_detail_sheet.dart';
 import '../widgets/collection_filter_bar.dart';
+import '../widgets/collection_filter_panel.dart';
 
 /// Koleksiyon ekrani: oyuncunun sahip oldugu tum kartlar.
 class CollectionView extends StatelessWidget {
@@ -31,36 +36,94 @@ class _CollectionBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<CollectionViewModel>();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Koleksiyonum'),
-        actions: [
-          IconButton(
-            tooltip: 'Yenile',
-            icon: const Icon(Icons.refresh),
-            onPressed: () => vm.load(),
+    return AppShell(
+      currentRoute: AppRoutes.collection,
+      child: ResponsiveBuilder(
+        builder: (context, boyut) => boyut.usesSidebar
+            ? _genisYerlesim(context, vm)
+            : _darYerlesim(context, vm),
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------------
+  // TELEFON / TABLET
+  // ------------------------------------------------------------------
+  Widget _darYerlesim(BuildContext context, CollectionViewModel vm) {
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: ScreenHeader(
+              title: 'Koleksiyon',
+              subtitle: _altBaslik(vm),
+              actions: [_YenileButonu(viewModel: vm)],
+            ),
+          ),
+          const SizedBox(height: 14),
+          _OzetBant(viewModel: vm),
+          const SizedBox(height: 12),
+          CollectionFilterBar(viewModel: vm),
+          const SizedBox(height: 12),
+          Expanded(child: _icerik(context, vm)),
+        ],
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------------
+  // MASAUSTU: solda filtre sutunu, sagda genis izgara
+  // ------------------------------------------------------------------
+  Widget _genisYerlesim(BuildContext context, CollectionViewModel vm) {
+    return SafeArea(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 260,
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                border: Border(
+                  right: BorderSide(color: AppColors.surfaceLight),
+                ),
+              ),
+              child: CollectionFilterPanel(viewModel: vm),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(36, 32, 36, 0),
+                  child: ScreenHeader(
+                    title: 'Koleksiyonum',
+                    subtitle: _altBaslik(vm),
+                    actions: [_YenileButonu(viewModel: vm)],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Expanded(child: _icerik(context, vm)),
+              ],
+            ),
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ---- OZET BANT ----
-            _OzetBant(viewModel: vm),
-
-            const SizedBox(height: 12),
-
-            // ---- FILTRELER ----
-            CollectionFilterBar(viewModel: vm),
-
-            const SizedBox(height: 12),
-
-            // ---- KART IZGARASI ----
-            Expanded(child: _icerik(context, vm)),
-          ],
-        ),
-      ),
     );
+  }
+
+  /// "101 kart · 63 farkli futbolcu · en iyi 99"
+  String _altBaslik(CollectionViewModel vm) {
+    if (vm.allCards.isEmpty) return 'Kartlarini incele';
+    final farkli = vm.allCards.map((k) => k.cardId).toSet().length;
+    final enIyi = vm.bestCard;
+    final parcalar = [
+      '${vm.totalCards} kart',
+      '$farkli farkli futbolcu',
+      if (enIyi != null) 'en iyi ${enIyi.power}',
+    ];
+    return parcalar.join(' · ');
   }
 
   Widget _icerik(BuildContext context, CollectionViewModel vm) {
@@ -88,8 +151,16 @@ class _CollectionBody extends StatelessWidget {
       onRefresh: () => vm.load(showLoading: false),
       color: AppColors.primary,
       backgroundColor: AppColors.surface,
-      child: GridView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+      child: Builder(builder: (context) {
+        final genis = AppBreakpoints.of(context).usesSidebar;
+        return GridView.builder(
+        padding: EdgeInsets.fromLTRB(
+          genis ? 36 : 16,
+          4,
+          genis ? 36 : 16,
+          // Telefonda alt gezinme cubugunun altina kaymasin
+          genis ? 32 : 110,
+        ),
         // FIFA kart orani 0.70; izgara hucresine biraz nefes payi
         // birakmak icin 0.66 kullaniyoruz.
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -120,6 +191,39 @@ class _CollectionBody extends StatelessWidget {
             },
           );
         },
+        );
+      }),
+    );
+  }
+}
+
+/// Yenileme butonu (baslikta durur)
+class _YenileButonu extends StatelessWidget {
+  final CollectionViewModel viewModel;
+
+  const _YenileButonu({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => viewModel.load(),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.surfaceLight),
+          ),
+          child: const Icon(
+            Icons.refresh_rounded,
+            size: 19,
+            color: AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }
@@ -138,7 +242,7 @@ class _OzetBant extends StatelessWidget {
     final enIyi = viewModel.bestCard;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,

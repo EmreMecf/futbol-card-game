@@ -10,6 +10,10 @@ import '../../../../shared/widgets/premium_card/premium_card.dart';
 import '../viewmodel/deck_view_model.dart';
 import '../widgets/card_picker_sheet.dart';
 import '../widgets/formation_pitch.dart';
+import '../../../../core/router/app_routes.dart';
+import '../../../../core/theme/app_breakpoints.dart';
+import '../../../../shared/widgets/app_shell.dart';
+import '../../../../shared/widgets/screen_header.dart';
 
 /// Kadro düzenleme ekranı — kimya sistemiyle.
 ///
@@ -50,41 +54,27 @@ class _DeckBodyState extends State<_DeckBody> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _cikisOnayi(context, vm);
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Kadrom'),
-          actions: [
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.auto_fix_high),
-              color: AppColors.surface,
-              onSelected: (secim) {
-                switch (secim) {
-                  case 'kimya':
-                    vm.autoFillByChemistry();
-                  case 'guc':
-                    vm.autoFillBest();
-                  case 'temizle':
-                    vm.clearAll();
-                }
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem<String>(
-                  value: 'kimya',
-                  child: Text('Kimyaya göre diz'),
-                ),
-                PopupMenuItem<String>(
-                  value: 'guc',
-                  child: Text('En güçlülerle doldur'),
-                ),
-                PopupMenuItem<String>(
-                  value: 'temizle',
-                  child: Text('Kadroyu boşalt'),
-                ),
-              ],
-            ),
-          ],
-        ),
-        body: SafeArea(child: _icerik(context, vm)),
+      child: AppShell(
+        currentRoute: AppRoutes.deck,
+        child: SafeArea(bottom: false, child: _icerik(context, vm)),
+      ),
+    );
+  }
+
+  /// Başlık: ad, diziliş bilgisi ve otomatik dizme menüsü.
+  Widget _baslik(BuildContext context, DeckViewModel vm, ScreenSize boyut) {
+    final kenar = AppBreakpoints.pagePadding(boyut);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        kenar,
+        boyut.usesSidebar ? 32 : 16,
+        kenar,
+        0,
+      ),
+      child: ScreenHeader(
+        title: 'Kadrom',
+        subtitle: '1-4-4-2 zorunlu',
+        actions: [_OtomatikMenu(viewModel: vm)],
       ),
     );
   }
@@ -122,19 +112,78 @@ class _DeckBodyState extends State<_DeckBody> {
       );
     }
 
-    return Column(
-      children: [
-        _KimyaBandi(viewModel: vm),
-        Expanded(
-          child: _Saha(
-            viewModel: vm,
-            vurgulananSlot: _vurgulananSlot,
-            onSlotBasildi: (slot) => setState(() => _vurgulananSlot = slot),
-            onSlotSecildi: (slot) => _kartSec(context, vm, slot),
-          ),
-        ),
-        _KaydetBandi(viewModel: vm),
-      ],
+    return ResponsiveBuilder(
+      builder: (context, boyut) {
+        final saha = _Saha(
+          viewModel: vm,
+          vurgulananSlot: _vurgulananSlot,
+          onSlotBasildi: (slot) => setState(() => _vurgulananSlot = slot),
+          onSlotSecildi: (slot) => _kartSec(context, vm, slot),
+        );
+
+        // ------------------------------------------------------------
+        // MASAÜSTÜ: solda saha, sağda kimya ve kaydetme
+        // ------------------------------------------------------------
+        // Telefonda kimya bandı sahanın üstünde, kaydet altındadır.
+        // 1440 pikselde bu iki şerit ekranın tamamına yayılıp sahayı
+        // ortada küçük bir kutuya sıkıştırıyordu. Yan panele alınınca
+        // saha bütün yüksekliği kullanabiliyor.
+        if (boyut.usesSidebar) {
+          return Column(
+            children: [
+              _baslik(context, vm, boyut),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 0, 12, 24),
+                        child: saha,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 320,
+                      child: DecoratedBox(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            left: BorderSide(color: AppColors.surfaceLight),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              _KimyaBandi(viewModel: vm),
+                              const Spacer(),
+                              _KaydetBandi(viewModel: vm),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
+
+        // ------------------------------------------------------------
+        // TELEFON: tek sütun
+        // ------------------------------------------------------------
+        return Column(
+          children: [
+            _baslik(context, vm, boyut),
+            _KimyaBandi(viewModel: vm),
+            Expanded(child: saha),
+            _KaydetBandi(viewModel: vm),
+            // Alt gezinme çubuğunun altına kaymasın
+            const SizedBox(height: 92),
+          ],
+        );
+      },
     );
   }
 
@@ -606,6 +655,64 @@ class _KaydetBandi extends StatelessWidget {
                     }
                   }
                 : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ====================================================================
+// OTOMATİK DİZME MENÜSÜ
+// ====================================================================
+/// Başlıktaki sihirli değnek: kadroyu kendiliğinden dizer.
+class _OtomatikMenu extends StatelessWidget {
+  final DeckViewModel viewModel;
+
+  const _OtomatikMenu({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.surfaceLight),
+      ),
+      child: PopupMenuButton<String>(
+        icon: const Icon(
+          Icons.auto_fix_high_rounded,
+          size: 19,
+          color: AppColors.textSecondary,
+        ),
+        tooltip: 'Otomatik diz',
+        color: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: AppColors.surfaceLight),
+        ),
+        onSelected: (secim) {
+          switch (secim) {
+            case 'kimya':
+              viewModel.autoFillByChemistry();
+            case 'guc':
+              viewModel.autoFillBest();
+            case 'temizle':
+              viewModel.clearAll();
+          }
+        },
+        itemBuilder: (context) => const [
+          PopupMenuItem<String>(
+            value: 'kimya',
+            child: Text('Kimyaya göre diz'),
+          ),
+          PopupMenuItem<String>(
+            value: 'guc',
+            child: Text('En güçlülerle doldur'),
+          ),
+          PopupMenuItem<String>(
+            value: 'temizle',
+            child: Text('Kadroyu boşalt'),
           ),
         ],
       ),

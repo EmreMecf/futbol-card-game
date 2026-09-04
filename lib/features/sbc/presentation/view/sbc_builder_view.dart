@@ -12,6 +12,10 @@ import '../../../deck/presentation/widgets/formation_pitch.dart';
 import '../viewmodel/sbc_builder_view_model.dart';
 import '../widgets/requirement_checklist.dart';
 import 'sbc_result_view.dart';
+import '../../../../core/router/app_routes.dart';
+import '../../../../core/theme/app_breakpoints.dart';
+import '../../../../shared/widgets/app_shell.dart';
+import '../../../../shared/widgets/screen_header.dart';
 
 /// Görev kadrosu kurma ekranı.
 class SbcBuilderView extends StatelessWidget {
@@ -55,61 +59,114 @@ class _SbcBuilderBodyState extends State<_SbcBuilderBody> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(vm.challenge.name),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.auto_fix_high),
-            color: AppColors.surface,
-            onSelected: (secim) {
-              switch (secim) {
-                case 'kimya':
-                  vm.autoFillByChemistry();
-                case 'doldur':
-                  vm.autoFill();
-                case 'temizle':
-                  vm.clearAll();
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem<String>(
-                value: 'kimya',
-                child: Text('Kimyaya göre doldur'),
-              ),
-              PopupMenuItem<String>(
-                value: 'doldur',
-                child: Text('En düşük kartlarla doldur'),
-              ),
-              PopupMenuItem<String>(
-                value: 'temizle',
-                child: Text('Kadroyu boşalt'),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: SafeArea(
+    return AppShell(
+      currentRoute: AppRoutes.sbc,
+      child: SafeArea(
+        bottom: false,
         child: vm.isLoading
             ? const Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
               )
-            : Column(
-                children: [
-                  _SartBandi(viewModel: vm),
-                  Expanded(
-                    child: _Saha(
-                      viewModel: vm,
-                      vurgulananSlot: _vurgulananSlot,
-                      onSlotBasildi: (s) =>
-                          setState(() => _vurgulananSlot = s),
-                      onSlotSecildi: (s) => _kartSec(context, vm, s),
-                    ),
-                  ),
-                  _GonderBandi(viewModel: vm),
-                ],
+            : ResponsiveBuilder(
+                builder: (context, boyut) => _yerlesim(context, vm, boyut),
               ),
       ),
+    );
+  }
+
+  Widget _yerlesim(
+    BuildContext context,
+    SbcBuilderViewModel vm,
+    ScreenSize boyut,
+  ) {
+    final kenar = AppBreakpoints.pagePadding(boyut);
+
+    final baslik = Padding(
+      padding: EdgeInsets.fromLTRB(
+        kenar,
+        boyut.usesSidebar ? 30 : 16,
+        kenar,
+        0,
+      ),
+      child: ScreenHeader(
+        title: vm.challenge.name,
+        showBack: true,
+        breadcrumb: 'Görevler',
+        actions: [_OtomatikMenu(viewModel: vm)],
+      ),
+    );
+
+    final saha = _Saha(
+      viewModel: vm,
+      vurgulananSlot: _vurgulananSlot,
+      onSlotBasildi: (s) => setState(() => _vurgulananSlot = s),
+      onSlotSecildi: (s) => _kartSec(context, vm, s),
+    );
+
+    // ----------------------------------------------------------------
+    // MASAÜSTÜ: solda saha, sağda şartlar ve gönderme
+    // ----------------------------------------------------------------
+    // Şart listesi bu ekranın asıl bilgisi: oyuncu kart yerleştirirken
+    // hangi şartın tuttuğunu görmek zorunda. Telefonda üstteki dar
+    // bantta duruyordu; geniş ekranda sağ panelde tamamı okunuyor.
+    if (boyut.usesSidebar) {
+      return Column(
+        children: [
+          baslik,
+          const SizedBox(height: 14),
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 12, 24),
+                    child: saha,
+                  ),
+                ),
+                SizedBox(
+                  width: 330,
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        left: BorderSide(color: AppColors.surfaceLight),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: _SartBandi(viewModel: vm),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          _GonderBandi(viewModel: vm),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    // ----------------------------------------------------------------
+    // TELEFON: tek sütun
+    // ----------------------------------------------------------------
+    return Column(
+      children: [
+        baslik,
+        _SartBandi(viewModel: vm),
+        Expanded(child: saha),
+        _GonderBandi(viewModel: vm),
+        // Alt gezinme çubuğunun altına kaymasın
+        const SizedBox(height: 92),
+      ],
     );
   }
 
@@ -467,5 +524,62 @@ class _GonderBandi extends StatelessWidget {
       AppSnackBar.showError(context, viewModel.errorMessage!);
       viewModel.clearError();
     }
+  }
+}
+
+// ====================================================================
+// OTOMATİK DOLDURMA MENÜSÜ
+// ====================================================================
+class _OtomatikMenu extends StatelessWidget {
+  final SbcBuilderViewModel viewModel;
+
+  const _OtomatikMenu({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.surfaceLight),
+      ),
+      child: PopupMenuButton<String>(
+        icon: const Icon(
+          Icons.auto_fix_high_rounded,
+          size: 19,
+          color: AppColors.textSecondary,
+        ),
+        tooltip: 'Otomatik doldur',
+        color: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: AppColors.surfaceLight),
+        ),
+        onSelected: (secim) {
+          switch (secim) {
+            case 'kimya':
+              viewModel.autoFillByChemistry();
+            case 'doldur':
+              viewModel.autoFill();
+            case 'temizle':
+              viewModel.clearAll();
+          }
+        },
+        itemBuilder: (context) => const [
+          PopupMenuItem<String>(
+            value: 'kimya',
+            child: Text('Kimyaya göre doldur'),
+          ),
+          PopupMenuItem<String>(
+            value: 'doldur',
+            child: Text('En düşük kartlarla doldur'),
+          ),
+          PopupMenuItem<String>(
+            value: 'temizle',
+            child: Text('Kadroyu boşalt'),
+          ),
+        ],
+      ),
+    );
   }
 }

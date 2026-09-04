@@ -548,18 +548,81 @@ void main() {
       expect(vm.errorMessage, contains('Yeterli coin yok'));
     });
 
-    test('ihtimal yuzdeleri dogru bicimlenir', () {
+    test('paket kutusu EN COK CIKAN seviyeden renk alir', () {
+      // Onceki mantik bestPossibleTier kullaniyordu. Neredeyse her
+      // pakette Legend ihtimali sifirdan buyuk oldugu icin UC PAKET DE
+      // ayni mor kutuyla ciziliyordu; oyuncu farki goremiyordu.
+      const standart = PackType(
+        slug: 'standard',
+        name: 'Standart Paket',
+        cardCount: 5,
+        priceCoins: 500,
+        odds: [
+          TierOdds(tier: CardTier.bronze, weight: 5500),
+          TierOdds(tier: CardTier.silver, weight: 3000),
+          TierOdds(tier: CardTier.gold, weight: 1300),
+          TierOdds(tier: CardTier.diamond, weight: 190),
+          TierOdds(tier: CardTier.legend, weight: 10),
+        ],
+      );
+      const premium = PackType(
+        slug: 'premium',
+        name: 'Premium Paket',
+        cardCount: 5,
+        priceCoins: 2500,
+        odds: [
+          TierOdds(tier: CardTier.gold, weight: 6200),
+          TierOdds(tier: CardTier.diamond, weight: 3200),
+          TierOdds(tier: CardTier.legend, weight: 600),
+        ],
+      );
+
+      expect(standart.signatureTier, CardTier.bronze);
+      expect(premium.signatureTier, CardTier.gold);
+
+      // Iki paket AYNI renkte olmamali
+      expect(standart.signatureTier, isNot(premium.signatureTier));
+    });
+
+    test('ust sinirli pakette imza seviyesi siniri asmaz', () {
+      // Baslangic paketinde Diamond ve Legend cikmaz; kutu da o
+      // seviyelerin renginde olmamali.
+      const baslangic = PackType(
+        slug: 'starter',
+        name: 'Baslangic Paketi',
+        cardCount: 15,
+        maxTier: CardTier.gold,
+        odds: [
+          TierOdds(tier: CardTier.legend, weight: 9000),
+        ],
+      );
+
+      expect(baslangic.signatureTier, CardTier.gold);
+    });
+
+    test('ihtimal yuzdeleri TURKCE bicimlenir', () {
+      // ONDALIK AYRACI VIRGUL OLMALI.
+      // Onceki surum nokta kullaniyordu: "%0.10". Turkce'de nokta
+      // BINLIK ayracidir; oyuncu bunu yuzde on diye okuyabilirdi.
+      // Cikma ihtimalinde bu ciddi bir yanlis anlama olurdu.
       expect(
         const TierOdds(tier: CardTier.bronze, weight: 5500).displayPercent,
         '%55',
+        reason: 'Tam sayida ondalik hic yazilmamali',
       );
       expect(
         const TierOdds(tier: CardTier.diamond, weight: 190).displayPercent,
-        '%1.9',
+        '%1,9',
       );
       expect(
         const TierOdds(tier: CardTier.legend, weight: 10).displayPercent,
-        '%0.10',
+        '%0,1',
+        reason: 'Sondaki gereksiz sifir atilmali',
+      );
+      expect(
+        const TierOdds(tier: CardTier.legend, weight: 5).displayPercent,
+        '%0,05',
+        reason: 'Cok kucuk ihtimallerde iki basamak korunmali',
       );
     });
   });

@@ -9,6 +9,8 @@ import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
 import '../../../../shared/widgets/premium_card/premium_card.dart';
 import '../viewmodel/matchmaking_view_model.dart';
+import '../../../../core/theme/app_breakpoints.dart';
+import '../../../../shared/widgets/screen_header.dart';
 
 /// Eşleşme ekranı: kadro seç, kartlarını korumaya al, rakip ara.
 class MatchmakingView extends StatelessWidget {
@@ -54,14 +56,40 @@ class _MatchmakingBodyState extends State<_MatchmakingBody> {
         if (!didPop) vm.cancelSearch();
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            vm.stage == MatchmakingStage.searching
-                ? 'Rakip Aranıyor'
-                : 'Maça Hazırlan',
+        body: SafeArea(
+          child: ResponsiveBuilder(
+            builder: (context, boyut) {
+              final kenar = AppBreakpoints.pagePadding(boyut);
+              return ContentWidth(
+                maxWidth: 720,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        kenar,
+                        boyut.usesSidebar ? 32 : 16,
+                        kenar,
+                        0,
+                      ),
+                      child: ScreenHeader(
+                        title: vm.stage == MatchmakingStage.searching
+                            ? 'Rakip Aranıyor'
+                            : 'Maça Hazırlan',
+                        subtitle: vm.stage == MatchmakingStage.searching
+                            ? 'Yakın puanlı bir rakip bekleniyor'
+                            : 'Kartlarını koru, sonra rakip ara',
+                        showBack: vm.stage != MatchmakingStage.searching,
+                        breadcrumb: 'Ana sayfa',
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Expanded(child: _icerik(context, vm)),
+                  ],
+                ),
+              );
+            },
           ),
         ),
-        body: SafeArea(child: _icerik(context, vm)),
       ),
     );
   }

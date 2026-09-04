@@ -8,6 +8,9 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_routes.dart';
 import '../viewmodel/sbc_list_view_model.dart';
 import '../widgets/requirement_checklist.dart';
+import '../../../../core/theme/app_breakpoints.dart';
+import '../../../../shared/widgets/app_shell.dart';
+import '../../../../shared/widgets/screen_header.dart';
 
 /// Kadro kurma gorevleri listesi.
 class SbcListView extends StatelessWidget {
@@ -29,18 +32,37 @@ class _SbcListBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<SbcListViewModel>();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Görevler'),
-        actions: [
-          IconButton(
-            tooltip: 'Yenile',
-            icon: const Icon(Icons.refresh),
-            onPressed: vm.load,
-          ),
-        ],
+    return AppShell(
+      currentRoute: AppRoutes.sbc,
+      child: SafeArea(
+        bottom: false,
+        child: ResponsiveBuilder(
+          builder: (context, boyut) {
+            final kenar = AppBreakpoints.pagePadding(boyut);
+            return Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    kenar,
+                    boyut.usesSidebar ? 32 : 16,
+                    kenar,
+                    0,
+                  ),
+                  child: ScreenHeader(
+                    title: 'Görevler',
+                    subtitle: 'Kart erit, ödül kazan',
+                    actions: [
+                      _YenileButonu(onTap: vm.load),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Expanded(child: _icerik(context, vm)),
+              ],
+            );
+          },
+        ),
       ),
-      body: SafeArea(child: _icerik(context, vm)),
     );
   }
 
@@ -257,6 +279,38 @@ class _GorevKarti extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Başlıktaki yenileme butonu
+class _YenileButonu extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _YenileButonu({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.surfaceLight),
+          ),
+          child: const Icon(
+            Icons.refresh_rounded,
+            size: 19,
+            color: AppColors.textSecondary,
           ),
         ),
       ),

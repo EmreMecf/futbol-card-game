@@ -222,6 +222,26 @@ class RowMappers {
       MatchResultSummary.fromJson(asMap(ham));
 
   // ------------------------------------------------------------------
+  // MAC GECMISI SATIRI
+  // ------------------------------------------------------------------
+  static MatchHistoryEntry matchHistoryEntry(Map<String, dynamic> satir) =>
+      MatchHistoryEntry(
+        matchId: satir['match_id'].toString(),
+        opponentId: satir['opponent_id'].toString(),
+        opponentUsername: satir['opponent_username'] as String? ?? 'Rakip',
+        myScore: (satir['my_score'] as int?) ?? 0,
+        opponentScore: (satir['opponent_score'] as int?) ?? 0,
+        outcome: switch (satir['outcome'] as String?) {
+          'win' => MatchOutcome.win,
+          'loss' => MatchOutcome.loss,
+          _ => MatchOutcome.draw,
+        },
+        cardsWon: (satir['cards_won'] as int?) ?? 0,
+        cardsLost: (satir['cards_lost'] as int?) ?? 0,
+        finishedAt: satir['finished_at'] as DateTime?,
+      );
+
+  // ------------------------------------------------------------------
   // SBC SONUCU
   // ------------------------------------------------------------------
   static SbcSubmitResult sbcResult(dynamic ham) =>

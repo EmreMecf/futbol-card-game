@@ -33,12 +33,27 @@ abstract class TierOdds with _$TierOdds {
   /// Yuzde degeri (5500 -> 55.0)
   double get percent => weight / 100.0;
 
-  /// Ekranda gosterilecek metin: "%55", "%1.9", "%0.1"
+  /// Ekranda gosterilecek metin: "%55", "%1,9", "%0,1"
+  ///
+  /// TURKCE ONDALIK AYRACI VIRGUL. Onceki surum nokta kullaniyordu
+  /// ve gereksiz sifir birakiyordu: "%0.10" gibi. Turkce'de nokta
+  /// binlik ayraci oldugu icin "%0.10" yuzde on olarak da okunabilir;
+  /// bu, cikma ihtimali gibi bir sayida ciddi bir yanlis anlama.
   String get displayPercent {
     final yuzde = percent;
-    if (yuzde >= 10) return '%${yuzde.toStringAsFixed(0)}';
-    if (yuzde >= 1) return '%${yuzde.toStringAsFixed(1)}';
-    return '%${yuzde.toStringAsFixed(2)}';
+
+    // Tam sayiysa ondalik hic yazilmaz: "%55"
+    if (yuzde == yuzde.roundToDouble()) return '%${yuzde.round()}';
+
+    // Tek ondalik yeter: "%1,9". Daha kucukler icin iki basamak: "%0,05"
+    final basamak = yuzde >= 1 ? 1 : 2;
+    final metin = yuzde
+        .toStringAsFixed(basamak)
+        // Sondaki gereksiz sifirlari at: "0.10" -> "0.1"
+        .replaceFirst(RegExp(r'0+$'), '')
+        .replaceFirst(RegExp(r'\.$'), '');
+
+    return '%${metin.replaceAll('.', ',')}';
   }
 }
 
@@ -84,6 +99,28 @@ abstract class PackType with _$PackType {
     return cikabilenler
         .reduce((a, b) => a.tier.rank > b.tier.rank ? a : b)
         .tier;
+  }
+
+  /// Paketin KARAKTERINI veren seviye (vitrin rengi icin).
+  ///
+  /// NEDEN bestPossibleTier DEGIL?
+  /// Neredeyse her pakette Legend cikma ihtimali sifirdan buyuk
+  /// oldugu icin bestPossibleTier hepsi icin 'legend' donuyordu ve
+  /// magazada UC PAKET DE AYNI mor kutuyla ciziliyordu. Oyuncu hangi
+  /// paketin daha iyi oldugunu renkten anlayamiyordu.
+  ///
+  /// Bu getter EN COK CIKAN seviyeyi veriyor: oyuncunun gercekte ne
+  /// bekleyebilecegini gosteriyor ve paketleri birbirinden ayiriyor.
+  CardTier get signatureTier {
+    if (odds.isEmpty) return maxTier ?? CardTier.bronze;
+
+    final enAgir = odds.reduce((a, b) => a.weight >= b.weight ? a : b);
+    final secilen = enAgir.tier;
+
+    // Ust sinir varsa onu asamayiz (baslangic paketi gibi)
+    final sinir = maxTier;
+    if (sinir != null && secilen.rank > sinir.rank) return sinir;
+    return secilen;
   }
 
   /// Legend cikma ihtimali (vitrinde one cikarilir)

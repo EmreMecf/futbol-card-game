@@ -373,6 +373,17 @@ class _SahteRepository implements MatchRepository {
   Future<Result<MatchHistory>> fetchHistory(String matchId) async =>
       Success(gecmis);
 
+  /// Profil ekranindaki mac listesi. Bu testler mac ekranini
+  /// dogruladigi icin bos donmesi yeterli.
+  List<MatchHistoryEntry> macListesi = const [];
+
+  @override
+  Future<Result<List<MatchHistoryEntry>>> fetchMatchHistoryList({
+    int limit = 20,
+    int offset = 0,
+  }) async =>
+      Success(macListesi);
+
   @override
   Future<Result<MatchResultSummary>> fetchResult(String matchId) async {
     final s = sonuc;

@@ -36,6 +36,8 @@ import '../network/websocket_service.dart';
 import '../router/app_router.dart';
 import '../storage/token_storage.dart';
 import '../utils/logger.dart';
+import '../../features/profile/presentation/viewmodel/profile_view_model.dart';
+import '../../features/settings/presentation/viewmodel/settings_view_model.dart';
 
 /// Uygulamanin servis konteyneri (Service Locator).
 final GetIt getIt = GetIt.instance;
@@ -150,6 +152,16 @@ Future<void> configureDependencies() async {
     ..registerFactoryParam<SbcBuilderViewModel, SbcChallenge, void>(
       (gorev, _) => SbcBuilderViewModel(getIt<SbcRepository>(), challenge: gorev),
     )
+    ..registerFactory<ProfileViewModel>(
+      () => ProfileViewModel(
+        getIt<MatchRepository>(),
+        getIt<AuthRepository>(),
+        getIt<SessionManager>(),
+      ),
+    )
+    // Ayarlar cihazda saklandigi icin repository'ye ihtiyaci yok.
+    // Tek ornek yeterli: ayni tercihleri her ekran ayni anda gormeli.
+    ..registerLazySingleton<SettingsViewModel>(() => SettingsViewModel())
     ..registerFactory<MatchmakingViewModel>(
       () => MatchmakingViewModel(
         getIt<MatchmakingRepository>(),
