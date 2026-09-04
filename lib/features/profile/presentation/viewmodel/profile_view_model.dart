@@ -3,6 +3,7 @@ import 'package:shared_models/shared_models.dart';
 import '../../../../core/auth/session_manager.dart';
 import '../../../../core/base/base_view_model.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
+import '../../../leaderboard/domain/repositories/leaderboard_repository.dart';
 import '../../../match/domain/repositories/match_repository.dart';
 
 /// Profil ekranının verisi.
@@ -16,13 +17,20 @@ import '../../../match/domain/repositories/match_repository.dart';
 class ProfileViewModel extends BaseViewModel {
   final MatchRepository _matchRepository;
   final AuthRepository _authRepository;
+  final LeaderboardRepository _leaderboardRepository;
   final SessionManager _session;
 
   ProfileViewModel(
     this._matchRepository,
     this._authRepository,
+    this._leaderboardRepository,
     this._session,
   );
+
+  PlayerRank? _rutbe;
+
+  /// Oyuncunun lig basamagi. Sunucu hesapliyor.
+  PlayerRank? get rank => _rutbe;
 
   List<MatchHistoryEntry> _gecmis = const [];
   List<MatchHistoryEntry> get history => _gecmis;
@@ -58,7 +66,17 @@ class ProfileViewModel extends BaseViewModel {
     // Sayaçlar sessizce tazeleniyor: oturumda zaten bir değer var,
     // spinner göstermek ekranı gereksiz yere boşaltırdı.
     await _tazeleSayaclar();
-    await loadHistory();
+    // Rütbe ve geçmiş birbirini beklemesin
+    await Future.wait([loadRank(), loadHistory()]);
+  }
+
+  Future<void> loadRank() async {
+    final sonuc = await run(
+      () => _leaderboardRepository.fetchMyRank(),
+      showLoading: false,
+    );
+    if (sonuc != null) _rutbe = sonuc;
+    safeNotify();
   }
 
   Future<void> _tazeleSayaclar() async {

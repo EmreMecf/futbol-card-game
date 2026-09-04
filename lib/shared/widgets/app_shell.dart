@@ -64,6 +64,12 @@ const kNavDestinations = <NavDestination>[
     route: AppRoutes.sbc,
     sidebarOnly: true,
   ),
+  NavDestination(
+    label: 'Liderlik',
+    icon: Icons.emoji_events_rounded,
+    route: AppRoutes.leaderboard,
+    sidebarOnly: true,
+  ),
 ];
 
 /// Ana ekranların ortak çerçevesi.

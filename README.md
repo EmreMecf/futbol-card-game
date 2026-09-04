@@ -49,6 +49,7 @@ flutter run
 | `lib/core/theme/` | Tasarım sistemi: renk, yazı tipi ölçeği, kırılma noktaları |
 | `lib/features/profile/` | Profil: karne, kazanma oranı, maç geçmişi |
 | `lib/features/settings/` | Ayarlar: ses, titreşim, animasyon (cihazda saklanır) |
+| `lib/features/leaderboard/` | Lig sistemi ve liderlik tablosu |
 | `lib/shared/widgets/app_shell.dart` | Gezinme kabuğu: telefonda alt çubuk, masaüstünde kenar çubuğu |
 | `assets/fonts/` | Barlow Condensed (başlık/rakam) + Nunito (metin) |
 | `lib/shared/widgets/premium_card/` | FIFA seviyesi kart widget'ları — [README](lib/shared/widgets/premium_card/README.md) |
@@ -75,6 +76,8 @@ backend kuralları *bilmez*, sadece sorar.
 | Kartın maçtaki gücü = güç + kimya | `_resolve_round()` |
 | Maç sonucu ve kart transferleri | `get_match_result()` |
 | Oyuncunun bitmiş maçları | `get_match_history()` |
+| Puanın hangi lige denk geldiği | `rank_for_mmr()`, `league_tiers` |
+| Liderlik sıralaması | `get_leaderboard()` |
 | SBC şart doğrulama ve kart eritme | `evaluate_sbc_squad()`, `submit_sbc()` |
 | Paket açma / kart çıkma ihtimalleri | `open_pack()`, `_roll_tier()` |
 | **Kart özellikleri:** şut/hız/fizik/defans/dribling/hızlanma | `fill_card_attributes()`, `position_attribute_profile()` |
@@ -156,6 +159,7 @@ Hepsi tek kod tabanında, iki yerleşimle. Hangisinin çizileceğine
 | Görev kurma | Şartlar üstte | Saha solda, şartlar sağda |
 | Profil | Karne + maç geçmişi | Aynı, ortalanmış |
 | Ayarlar | Tek sütun | Aynı, ortalanmış |
+| Liderlik | Rütbe kartı + sıralama | Aynı, ortalanmış |
 | Eşleşme, maç sonucu, paket açılışı | Tam ekran | Ortalanmış, en fazla 720 px |
 
 Tasarım tuvali 20 artboard olarak ayrı tutuluyor; koda dökülmeden önce
@@ -168,8 +172,48 @@ orada karara bağlanıyor.
 | Günlük ödül, sezon geçidi | Sunucuda karşılığı yok. Uydurma sayı göstermek yerine o alana gerçek karne kondu. |
 | Profilde rozet ve başarı | Sunucuda böyle bir sistem yok. |
 | Kullanıcı adı / şifre değiştirme | Sunucuda uç yok. Ayarlarda bilgi olarak gösteriliyor. |
-| Liderlik tablosu | Sıralama sorgusu ve API ucu gerekiyor. |
 | Gerçek oyuncu görselleri | Kartlar siluet çiziyor. |
+
+---
+
+## Lig sistemi
+
+Puan (MMR) tek başına bir sayıydı: 1240'ın iyi mi kötü mü olduğu
+anlaşılmıyordu. Lig o sayıya anlam veriyor.
+
+**4 lig × 3 seviye = 12 basamak.** Bir maç ±25 puan.
+
+| Lig | Seviye 1 | Seviye 2 | Seviye 3 |
+|---|---|---|---|
+| Amatör | 1.000 | 1.100 | 1.200 |
+| Usta | 1.300 | 1.400 | 1.500 |
+| Master | 1.625 | 1.750 | 1.875 |
+| Master Class | 2.025 | 2.225 | 2.475 |
+
+Bantlar yukarı çıkıldıkça genişliyor: Amatör'de bir seviye atlamak
+4 net galibiyet isterken Master Class 2'ye geçmek 10 net galibiyet
+istiyor. **Ligden düşme yok**, en alt basamak zemin.
+
+### Neden tabloda, kodda değil?
+
+Lig adları ve eşikleri bir denge ayarı. Oyuncular birikince
+"Master Class'a çok kolay çıkılıyor" denebilir. Bunun çözümü tek
+satır SQL olmalı, uygulamayı yeniden yayınlamak değil.
+
+Aynı sebeple **ad değiştirmek de tek satır**:
+
+```sql
+update league_tiers set league_name = 'Efsane' where league_code = 'master_class';
+```
+
+### Renkler neden kart seviyelerinden farklı?
+
+Kartlar bronz, gümüş, altın, elmas ve mor kullanıyor. Ligler o
+paletten uzak duruyor (arduvaz, turkuaz, turuncu, gül). Aynı renkler
+kullanılsaydı oyuncu "Altın lig" ile "Altın kart"ı karıştırırdı; biri
+oyuncunun becerisi, diğeri elindeki kartın gücü.
+
+Rozet de biçim olarak ayrı: lig **kalkan**, kart **dikdörtgen**.
 
 ---
 
@@ -284,6 +328,6 @@ testler atlanır, başarısız olmaz.
 | Koleksiyon, kadro, mağaza, görevler duyarlı | ✅ Tamamlandı |
 | Profil ekranı + maç geçmişi API'si | ✅ Tamamlandı, 17 test |
 | Ayarlar ekranı (cihazda saklanan tercihler) | ✅ Tamamlandı |
+| Lig sistemi (4 lig × 3 seviye) + liderlik | ✅ Tamamlandı, 22 test |
 | Günlük ödül / sezon geçidi | ❌ Sunucuda karşılığı yok, arayüzde de yok |
-| Liderlik tablosu | ❌ Kenar çubuğunda maddesi var, arkasında API yok |
 | Gerçek oyuncu görselleri | ❌ Siluet yer tutucu |

@@ -20,6 +20,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:futbol_card_server/routes/leaderboard_routes.dart';
 
 /// Futbol Kart sunucusu.
 ///
@@ -72,6 +73,7 @@ Future<void> main(List<String> args) async {
   api.mount('/game', korumali.addHandler(gameRoutes(db).call));
   api.mount('/match', korumali.addHandler(matchRoutes(db).call));
   api.mount('/sbc', korumali.addHandler(sbcRoutes(db).call));
+  api.mount('/leaderboard', korumali.addHandler(leaderboardRoutes(db).call));
 
   // ---- 5. WEBSOCKET ----
   // Baglanti adresi: ws://localhost:8080/ws?token=<access_token>

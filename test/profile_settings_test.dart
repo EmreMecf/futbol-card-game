@@ -5,6 +5,7 @@ import 'package:futbol_card/core/storage/token_storage.dart';
 import 'package:futbol_card/core/error/app_exception.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/auth/domain/repositories/auth_repository.dart';
+import 'package:futbol_card/features/leaderboard/domain/repositories/leaderboard_repository.dart';
 import 'package:futbol_card/features/match/domain/repositories/match_repository.dart';
 import 'package:futbol_card/features/profile/presentation/viewmodel/profile_view_model.dart';
 import 'package:futbol_card/features/settings/presentation/viewmodel/settings_view_model.dart';
@@ -117,15 +118,17 @@ void main() {
   group('ProfileViewModel', () {
     late _SahteMatchRepo macRepo;
     late _SahteAuthRepo authRepo;
+    late _SahteLigRepo ligRepo;
     late SessionManager oturum;
     late ProfileViewModel vm;
 
     setUp(() {
       macRepo = _SahteMatchRepo();
       authRepo = _SahteAuthRepo();
+      ligRepo = _SahteLigRepo();
       // SessionManager cihaz deposunu ister; testte sahte depo yeterli.
       oturum = SessionManager(TokenStorage(_SahteGuvenliDepo()));
-      vm = ProfileViewModel(macRepo, authRepo, oturum);
+      vm = ProfileViewModel(macRepo, authRepo, ligRepo, oturum);
     });
 
     test('hiç maç yoksa kazanma oranı SIFIRA BÖLÜNMEZ', () {
@@ -281,6 +284,21 @@ class _SahteMatchRepo implements MatchRepository {
     final h = hata;
     if (h != null) return Failure(AppException(message: h));
     return Success(gecmis);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('Bu test icin gerekmiyor');
+}
+
+class _SahteLigRepo implements LeaderboardRepository {
+  PlayerRank? rutbe;
+
+  @override
+  Future<Result<PlayerRank>> fetchMyRank() async {
+    final r = rutbe;
+    if (r == null) return const Failure(AppException(message: 'Yok'));
+    return Success(r);
   }
 
   @override

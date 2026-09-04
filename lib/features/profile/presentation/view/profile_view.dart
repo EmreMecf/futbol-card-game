@@ -11,6 +11,7 @@ import '../../../../core/theme/app_breakpoints.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/screen_header.dart';
+import '../../../leaderboard/presentation/widgets/rank_badge.dart';
 import '../viewmodel/profile_view_model.dart';
 
 /// Profil — oyuncunun karnesi ve maç geçmişi.
@@ -72,6 +73,12 @@ class _ProfileBody extends StatelessWidget {
                     const SizedBox(height: 20),
                     _Kimlik(viewModel: vm),
                     const SizedBox(height: 20),
+                    // Lig rozeti: oyuncunun puani artik bir sayi degil,
+                    // bir basamak. Hedefi de altinda yaziyor.
+                    if (vm.rank != null) ...[
+                      RankProgressCard(rank: vm.rank!),
+                      const SizedBox(height: 12),
+                    ],
                     _SkorKarolari(viewModel: vm),
                     const SizedBox(height: 12),
                     _OzetKarti(viewModel: vm),

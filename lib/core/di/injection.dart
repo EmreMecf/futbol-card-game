@@ -38,6 +38,10 @@ import '../storage/token_storage.dart';
 import '../utils/logger.dart';
 import '../../features/profile/presentation/viewmodel/profile_view_model.dart';
 import '../../features/settings/presentation/viewmodel/settings_view_model.dart';
+import '../../features/leaderboard/data/datasources/leaderboard_remote_datasource.dart';
+import '../../features/leaderboard/data/repositories/leaderboard_repository_impl.dart';
+import '../../features/leaderboard/domain/repositories/leaderboard_repository.dart';
+import '../../features/leaderboard/presentation/viewmodel/leaderboard_view_model.dart';
 
 /// Uygulamanin servis konteyneri (Service Locator).
 final GetIt getIt = GetIt.instance;
@@ -127,6 +131,11 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<StoreRepository>(
       () => StoreRepositoryImpl(getIt<StoreRemoteDataSource>()),
     )
+    ..registerLazySingleton<LeaderboardRepository>(
+      () => LeaderboardRepositoryImpl(
+        LeaderboardRemoteDataSource(getIt<ApiClient>()),
+      ),
+    )
     ..registerLazySingleton<SbcRepository>(
       () => SbcRepositoryImpl(getIt<SbcRemoteDataSource>()),
     );
@@ -152,10 +161,17 @@ Future<void> configureDependencies() async {
     ..registerFactoryParam<SbcBuilderViewModel, SbcChallenge, void>(
       (gorev, _) => SbcBuilderViewModel(getIt<SbcRepository>(), challenge: gorev),
     )
+    ..registerFactory<LeaderboardViewModel>(
+      () => LeaderboardViewModel(
+        getIt<LeaderboardRepository>(),
+        getIt<SessionManager>(),
+      ),
+    )
     ..registerFactory<ProfileViewModel>(
       () => ProfileViewModel(
         getIt<MatchRepository>(),
         getIt<AuthRepository>(),
+        getIt<LeaderboardRepository>(),
         getIt<SessionManager>(),
       ),
     )

@@ -127,6 +127,7 @@ void main() {
         AppRoutes.profile,
         AppRoutes.collection,
         AppRoutes.sbc,
+        AppRoutes.leaderboard,
       };
 
       for (final hedef in kNavDestinations) {

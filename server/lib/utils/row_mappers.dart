@@ -222,6 +222,25 @@ class RowMappers {
       MatchResultSummary.fromJson(asMap(ham));
 
   // ------------------------------------------------------------------
+  // LIDERLIK TABLOSU SATIRI
+  // ------------------------------------------------------------------
+  static LeaderboardEntry leaderboardEntry(Map<String, dynamic> satir) =>
+      LeaderboardEntry(
+        // Postgres bigint -> Dart int
+        rankPosition: (satir['rank_position'] as num).toInt(),
+        userId: satir['user_id'].toString(),
+        username: satir['username'] as String? ?? 'Oyuncu',
+        mmr: (satir['mmr'] as int?) ?? 0,
+        wins: (satir['wins'] as int?) ?? 0,
+        losses: (satir['losses'] as int?) ?? 0,
+        draws: (satir['draws'] as int?) ?? 0,
+        leagueName: satir['league_name'] as String? ?? 'Amator',
+        // smallint -> int
+        division: (satir['division'] as num?)?.toInt() ?? 1,
+        color: satir['color'] as String? ?? '#7C8DA6',
+      );
+
+  // ------------------------------------------------------------------
   // MAC GECMISI SATIRI
   // ------------------------------------------------------------------
   static MatchHistoryEntry matchHistoryEntry(Map<String, dynamic> satir) =>

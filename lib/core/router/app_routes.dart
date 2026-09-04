@@ -15,6 +15,7 @@ class AppRoutes {
   static const String match = '/mac';
   static const String profile = '/profil';
   static const String settings = '/ayarlar';
+  static const String leaderboard = '/liderlik';
   static const String store = '/magaza';
   static const String sbc = '/gorevler';
 

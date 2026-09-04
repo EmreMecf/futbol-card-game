@@ -8,6 +8,7 @@ import '../../features/auth/presentation/view/splash_view.dart';
 import '../../features/collection/presentation/view/collection_view.dart';
 import '../../features/deck/presentation/view/deck_view.dart';
 import '../../features/home/presentation/view/home_view.dart';
+import '../../features/leaderboard/presentation/view/leaderboard_view.dart';
 import '../../features/match/presentation/view/match_view.dart';
 import '../../features/matchmaking/presentation/view/matchmaking_view.dart';
 import '../../features/profile/presentation/view/profile_view.dart';
@@ -72,6 +73,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.profile,
         builder: (context, state) => const ProfileView(),
+      ),
+      GoRoute(
+        path: AppRoutes.leaderboard,
+        builder: (context, state) => const LeaderboardView(),
       ),
       GoRoute(
         path: AppRoutes.settings,
