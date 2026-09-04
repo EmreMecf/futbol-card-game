@@ -18,4 +18,7 @@ class LeaderboardRemoteDataSource {
 
   /// Oyuncunun lig basamagi ve ilerlemesi
   Future<Map<String, dynamic>> myRank() => _api.get('/leaderboard/rank');
+
+  /// Butun lig basamaklarinin tanimi (Ligler tanitim ekrani)
+  Future<Map<String, dynamic>> tiers() => _api.get('/leaderboard/tiers');
 }

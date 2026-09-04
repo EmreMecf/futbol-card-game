@@ -78,6 +78,7 @@ backend kuralları *bilmez*, sadece sorar.
 | Oyuncunun bitmiş maçları | `get_match_history()` |
 | Puanın hangi lige denk geldiği | `rank_for_mmr()`, `league_tiers` |
 | Liderlik sıralaması | `get_leaderboard()` |
+| Bütün lig basamaklarının tanımı | `league_tiers` tablosu |
 | SBC şart doğrulama ve kart eritme | `evaluate_sbc_squad()`, `submit_sbc()` |
 | Paket açma / kart çıkma ihtimalleri | `open_pack()`, `_roll_tier()` |
 | **Kart özellikleri:** şut/hız/fizik/defans/dribling/hızlanma | `fill_card_attributes()`, `position_attribute_profile()` |
@@ -160,6 +161,7 @@ Hepsi tek kod tabanında, iki yerleşimle. Hangisinin çizileceğine
 | Profil | Karne + maç geçmişi | Aynı, ortalanmış |
 | Ayarlar | Tek sütun | Aynı, ortalanmış |
 | Liderlik | Rütbe kartı + sıralama | Aynı, ortalanmış |
+| Ligler | 12 basamak, üçlü gruplar | Aynı, daha geniş kartlar |
 | Eşleşme, maç sonucu, paket açılışı | Tam ekran | Ortalanmış, en fazla 720 px |
 
 Tasarım tuvali 20 artboard olarak ayrı tutuluyor; koda dökülmeden önce
@@ -328,6 +330,7 @@ testler atlanır, başarısız olmaz.
 | Koleksiyon, kadro, mağaza, görevler duyarlı | ✅ Tamamlandı |
 | Profil ekranı + maç geçmişi API'si | ✅ Tamamlandı, 17 test |
 | Ayarlar ekranı (cihazda saklanan tercihler) | ✅ Tamamlandı |
-| Lig sistemi (4 lig × 3 seviye) + liderlik | ✅ Tamamlandı, 22 test |
+| Lig sistemi (4 lig × 3 seviye) + liderlik | ✅ Tamamlandı, 28 test |
+| Ligler tanıtım ekranı (12 basamak) | ✅ Tamamlandı |
 | Günlük ödül / sezon geçidi | ❌ Sunucuda karşılığı yok, arayüzde de yok |
 | Gerçek oyuncu görselleri | ❌ Siluet yer tutucu |

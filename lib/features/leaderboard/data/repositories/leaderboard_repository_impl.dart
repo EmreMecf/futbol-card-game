@@ -29,6 +29,17 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
   }
 
   @override
+  Future<Result<List<LeagueTier>>> fetchTiers() {
+    return Result.guard(() async {
+      final cevap = await _remote.tiers();
+      final ham = cevap['tiers'] as List? ?? const [];
+      return ham
+          .map((t) => LeagueTier.fromJson(t as Map<String, dynamic>))
+          .toList();
+    });
+  }
+
+  @override
   Future<Result<PlayerRank>> fetchMyRank() {
     return Result.guard(() async {
       return PlayerRank.fromJson(await _remote.myRank());

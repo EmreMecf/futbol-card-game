@@ -155,3 +155,83 @@ abstract class Leaderboard with _$Leaderboard {
 
   bool get isEmpty => entries.isEmpty;
 }
+
+/// Tek bir lig basamaginin TANIMI.
+///
+/// `league_tiers` tablosunun bir satiri. "Ligler" tanitim ekrani
+/// butun basamaklari bu tiple listeliyor.
+///
+/// [PlayerRank] ile karistirilmamali: o OYUNCUNUN su anki durumu,
+/// bu ise basamagin kendi tanimi (oyuncudan bagimsiz).
+@freezed
+abstract class LeagueTier with _$LeagueTier {
+  const LeagueTier._();
+
+  const factory LeagueTier({
+    required int tierId,
+    required String leagueCode,
+    required String leagueName,
+    required int division,
+
+    /// Bu basamaga girmek icin gereken en dusuk puan
+    required int minMmr,
+
+    required String color,
+  }) = _LeagueTier;
+
+  factory LeagueTier.fromJson(Map<String, dynamic> json) =>
+      _$LeagueTierFromJson(json);
+
+  /// "Usta 2"
+  String get label => '$leagueName $division';
+}
+
+/// Basamaklarin lige gore gruplanmis hali.
+///
+/// Arayuz "Amatör" basligi altinda uc kart gostermek istiyor; bu
+/// gruplamayi her ekranda tekrar yazmak yerine burada yapiyoruz.
+class LeagueGroup {
+  final String code;
+  final String name;
+  final String color;
+  final List<LeagueTier> tiers;
+
+  const LeagueGroup({
+    required this.code,
+    required this.name,
+    required this.color,
+    required this.tiers,
+  });
+
+  /// Bu ligin en dusuk giris puani
+  int get minMmr => tiers.isEmpty
+      ? 0
+      : tiers.map((t) => t.minMmr).reduce((a, b) => a < b ? a : b);
+
+  /// Duz listeyi lige gore gruplar. Siralama KORUNUR: sunucu
+  /// basamaklari zaten id sirasinda gonderiyor.
+  static List<LeagueGroup> fromTiers(List<LeagueTier> tiers) {
+    final gruplar = <String, List<LeagueTier>>{};
+    final sira = <String>[];
+
+    for (final t in tiers) {
+      if (!gruplar.containsKey(t.leagueCode)) {
+        gruplar[t.leagueCode] = [];
+        sira.add(t.leagueCode);
+      }
+      gruplar[t.leagueCode]!.add(t);
+    }
+
+    return [
+      for (final kod in sira)
+        LeagueGroup(
+          code: kod,
+          name: gruplar[kod]!.first.leagueName,
+          color: gruplar[kod]!.first.color,
+          tiers: List.unmodifiable(
+            gruplar[kod]!..sort((a, b) => a.division.compareTo(b.division)),
+          ),
+        ),
+    ];
+  }
+}

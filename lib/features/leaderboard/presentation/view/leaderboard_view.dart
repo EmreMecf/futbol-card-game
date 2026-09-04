@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -61,9 +62,10 @@ class _LeaderboardBody extends StatelessWidget {
                       kenar,
                       0,
                     ),
-                    child: const ScreenHeader(
+                    child: ScreenHeader(
                       title: 'Liderlik',
                       subtitle: 'Puana göre sıralama',
+                      actions: [_LiglerButonu()],
                     ),
                   ),
                   const SizedBox(height: 18),
@@ -150,6 +152,53 @@ class _LeaderboardBody extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Başlıktaki "Ligler" butonu.
+///
+/// Oyuncu rütbesini gördüğü yerden "kaç lig var, en tepede ne var"
+/// sorusuna gidebilmeli. Ayrı bir gezinme maddesi açmak yerine
+/// liderlik ekranının içinden ulaşılıyor.
+class _LiglerButonu extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => context.push(AppRoutes.leagueTiers),
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.surfaceLight),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.military_tech_rounded,
+                size: 17,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 7),
+              Text(
+                'LİGLER',
+                style: AppTypography.display(
+                  size: 14,
+                  weight: FontWeight.w800,
+                  color: AppColors.textSecondary,
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -9,4 +9,7 @@ abstract interface class LeaderboardRepository {
 
   /// Oyuncunun lig basamagi ve bir sonrakine ilerlemesi.
   Future<Result<PlayerRank>> fetchMyRank();
+
+  /// Butun lig basamaklarinin tanimi. Ligler tanitim ekrani kullanir.
+  Future<Result<List<LeagueTier>>> fetchTiers();
 }

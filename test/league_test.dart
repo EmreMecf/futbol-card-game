@@ -270,6 +270,81 @@ void main() {
   });
 
   // ==================================================================
+  // BASAMAK GRUPLAMA
+  // ==================================================================
+  group('LeagueGroup', () {
+    LeagueTier bas(int id, String kod, String ad, int seviye, int mmr) =>
+        LeagueTier(
+          tierId: id,
+          leagueCode: kod,
+          leagueName: ad,
+          division: seviye,
+          minMmr: mmr,
+          color: '#7C8DA6',
+        );
+
+    final hepsi = [
+      bas(1, 'amateur', 'Amatör', 1, 1000),
+      bas(2, 'amateur', 'Amatör', 2, 1100),
+      bas(3, 'amateur', 'Amatör', 3, 1200),
+      bas(4, 'usta', 'Usta', 1, 1300),
+      bas(5, 'usta', 'Usta', 2, 1400),
+      bas(6, 'usta', 'Usta', 3, 1500),
+    ];
+
+    test('basamaklar lige göre gruplanır', () {
+      final gruplar = LeagueGroup.fromTiers(hepsi);
+
+      expect(gruplar.length, 2);
+      expect(gruplar[0].name, 'Amatör');
+      expect(gruplar[1].name, 'Usta');
+      expect(gruplar[0].tiers.length, 3);
+    });
+
+    test('lig SIRASI korunur', () {
+      // Sunucu basamaklari id sirasinda gonderiyor. Gruplama bunu
+      // bozarsa Usta, Amatör'un ustunde gorunurdu.
+      final gruplar = LeagueGroup.fromTiers(hepsi);
+      expect(gruplar.map((g) => g.code).toList(), ['amateur', 'usta']);
+    });
+
+    test('seviyeler kendi icinde 1-2-3 sirali', () {
+      // Karisik gelirse bile duzelmeli
+      final karisik = [hepsi[2], hepsi[0], hepsi[1]];
+      final gruplar = LeagueGroup.fromTiers(karisik);
+
+      expect(gruplar.single.tiers.map((t) => t.division).toList(), [1, 2, 3]);
+    });
+
+    test('ligin giris puani en dusuk seviyeninki', () {
+      final gruplar = LeagueGroup.fromTiers(hepsi);
+      expect(gruplar[0].minMmr, 1000);
+      expect(gruplar[1].minMmr, 1300);
+    });
+
+    test('bos liste cokmez', () {
+      expect(LeagueGroup.fromTiers(const []), isEmpty);
+    });
+
+    test('JSON alan adlari sunucununkiyle eslesir', () {
+      final json = {
+        'tier_id': 7,
+        'league_code': 'master',
+        'league_name': 'Master',
+        'division': 1,
+        'min_mmr': 1625,
+        'color': '#F97316',
+      };
+
+      final t = LeagueTier.fromJson(json);
+
+      expect(t.tierId, 7);
+      expect(t.label, 'Master 1');
+      expect(t.minMmr, 1625);
+    });
+  });
+
+  // ==================================================================
   // ROZET ÇİZİMİ
   // ==================================================================
   group('RankBadge', () {
@@ -352,6 +427,17 @@ class _SahteLigRepo implements LeaderboardRepository {
     final h = tabloHatasi;
     if (h != null) return Failure(AppException(message: h));
     return Success(tablo);
+  }
+
+  /// Lig basamaklarinin tanimi. Ligler tanitim ekrani kullaniyor.
+  List<LeagueTier> basamaklar = const [];
+  String? basamakHatasi;
+
+  @override
+  Future<Result<List<LeagueTier>>> fetchTiers() async {
+    final h = basamakHatasi;
+    if (h != null) return Failure(AppException(message: h));
+    return Success(basamaklar);
   }
 
   @override

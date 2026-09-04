@@ -42,6 +42,7 @@ import '../../features/leaderboard/data/datasources/leaderboard_remote_datasourc
 import '../../features/leaderboard/data/repositories/leaderboard_repository_impl.dart';
 import '../../features/leaderboard/domain/repositories/leaderboard_repository.dart';
 import '../../features/leaderboard/presentation/viewmodel/leaderboard_view_model.dart';
+import '../../features/leaderboard/presentation/viewmodel/league_tiers_view_model.dart';
 
 /// Uygulamanin servis konteyneri (Service Locator).
 final GetIt getIt = GetIt.instance;
@@ -160,6 +161,9 @@ Future<void> configureDependencies() async {
     // Gorev kadrosu kurma ekrani hangi gorev icin acildigini bilmeli
     ..registerFactoryParam<SbcBuilderViewModel, SbcChallenge, void>(
       (gorev, _) => SbcBuilderViewModel(getIt<SbcRepository>(), challenge: gorev),
+    )
+    ..registerFactory<LeagueTiersViewModel>(
+      () => LeagueTiersViewModel(getIt<LeaderboardRepository>()),
     )
     ..registerFactory<LeaderboardViewModel>(
       () => LeaderboardViewModel(
