@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../core/auth/session_manager.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
@@ -330,7 +331,7 @@ class _Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final harf = (username?.trim().isNotEmpty ?? false)
-        ? username!.trim()[0].toUpperCase()
+        ? username!.trim()[0].toUpperTr()
         : '?';
 
     return InkWell(

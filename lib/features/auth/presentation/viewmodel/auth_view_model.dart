@@ -21,10 +21,7 @@ class AuthViewModel extends BaseViewModel {
   // ------------------------------------------------------------------
   // GIRIS
   // ------------------------------------------------------------------
-  Future<bool> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> signIn({required String email, required String password}) async {
     final kullanici = await run(
       () => _repository.signIn(email: email, password: password),
     );

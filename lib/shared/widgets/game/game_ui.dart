@@ -15,6 +15,7 @@
 library;
 
 export 'game_button.dart';
+export 'game_logo.dart';
 export 'game_progress_bar.dart';
 export 'glass_panel.dart';
 export 'tier_badge.dart';

@@ -15,27 +15,24 @@ class AuthRemoteDataSource {
     required String password,
     required String username,
   }) {
-    return _api.post('/auth/register', govde: {
-      'email': email,
-      'password': password,
-      'username': username,
-    });
+    return _api.post(
+      '/auth/register',
+      govde: {'email': email, 'password': password, 'username': username},
+    );
   }
 
   Future<Map<String, dynamic>> signIn({
     required String email,
     required String password,
   }) {
-    return _api.post('/auth/login', govde: {
-      'email': email,
-      'password': password,
-    });
+    return _api.post(
+      '/auth/login',
+      govde: {'email': email, 'password': password},
+    );
   }
 
   Future<void> signOut(String? refreshToken) async {
-    await _api.post('/auth/logout', govde: {
-      'refresh_token': ?refreshToken,
-    });
+    await _api.post('/auth/logout', govde: {'refresh_token': ?refreshToken});
   }
 
   /// Profil + devam eden mac bilgisi

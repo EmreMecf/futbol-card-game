@@ -3,15 +3,19 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/error/app_exception.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../shared/widgets/app_button.dart';
-import '../../../../shared/widgets/error_snackbar.dart';
+import '../../../../core/theme/app_tokens.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/game/game_ui.dart';
 import '../viewmodel/auth_view_model.dart';
+import '../widgets/auth_scaffold.dart';
+import '../widgets/auth_validators.dart';
 
-/// Giris ekrani.
+/// Giriş ekranı.
 ///
-/// MVVM NOTU: Bu sinif sadece "gosterim" yapar. Hicbir is mantigi
-/// icermez; butun islemleri [AuthViewModel] uzerinden yapar.
+/// MVVM NOTU: Bu sınıf sadece "gösterim" yapar. Hiçbir iş mantığı
+/// içermez; bütün işlemleri [AuthViewModel] üzerinden yapar.
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -25,6 +29,9 @@ class _LoginViewState extends State<LoginView> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  /// Son denemenin hatası (formun içinde gösterilir)
+  AppException? _hata;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -34,6 +41,7 @@ class _LoginViewState extends State<LoginView> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    setState(() => _hata = null);
 
     final viewModel = context.read<AuthViewModel>();
     final basarili = await viewModel.signIn(
@@ -45,8 +53,8 @@ class _LoginViewState extends State<LoginView> {
 
     if (basarili) {
       context.go(AppRoutes.home);
-    } else if (viewModel.errorMessage != null) {
-      AppSnackBar.showError(context, viewModel.errorMessage!);
+    } else {
+      setState(() => _hata = viewModel.error);
       viewModel.clearError();
     }
   }
@@ -54,69 +62,57 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<AuthViewModel>();
+    final hata = _hata;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+    return AuthScaffold(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const GameLogo(size: 42),
+          const SizedBox(height: AppSpacing.xxxl),
+          GlassPanel(
+            padding: const EdgeInsets.all(AppSpacing.xl),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(
-                    Icons.sports_soccer,
-                    size: 72,
-                    color: AppColors.accent,
+                  Text('TEKRAR HOŞ GELDİN', style: AppTypography.h2),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Kadrona dönmek için giriş yap.',
+                    style: AppTypography.bodyS,
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Tekrar hos geldin!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Kadrona geri donmek icin giris yap.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xl),
 
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email],
+                    onChanged: (_) => _hataTemizle(),
                     decoration: const InputDecoration(
                       labelText: 'E-posta',
-                      prefixIcon: Icon(Icons.mail_outline),
+                      prefixIcon: Icon(Icons.mail_outline_rounded),
                     ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'E-posta adresinizi girin.';
-                      }
-                      if (!value.contains('@') || !value.contains('.')) {
-                        return 'Gecerli bir e-posta adresi girin.';
-                      }
-                      return null;
-                    },
+                    validator: AuthValidators.email,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.password],
+                    onChanged: (_) => _hataTemizle(),
                     onFieldSubmitted: (_) => _submit(),
                     decoration: InputDecoration(
-                      labelText: 'Sifre',
-                      prefixIcon: const Icon(Icons.lock_outline),
+                      labelText: 'Şifre',
+                      prefixIcon: const Icon(Icons.lock_outline_rounded),
                       suffixIcon: IconButton(
+                        tooltip: _obscurePassword
+                            ? 'Şifreyi göster'
+                            : 'Şifreyi gizle',
                         icon: Icon(
                           _obscurePassword
                               ? Icons.visibility_outlined
@@ -127,41 +123,58 @@ class _LoginViewState extends State<LoginView> {
                         ),
                       ),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Sifrenizi girin.';
-                      }
-                      if (value.length < 6) {
-                        return 'Sifre en az 6 karakter olmali.';
-                      }
-                      return null;
-                    },
+                    validator: AuthValidators.password,
                   ),
-                  const SizedBox(height: 28),
 
-                  AppButton(
-                    label: 'Giris Yap',
-                    icon: Icons.login,
+                  if (hata != null) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    AuthErrorBanner(
+                      message: hata.message,
+                      isConnection: hata.type == AppErrorType.network,
+                    ),
+                  ],
+
+                  const SizedBox(height: AppSpacing.xl),
+                  GameButton(
+                    label: 'Giriş yap',
+                    icon: Icons.login_rounded,
                     isLoading: viewModel.isBusy,
                     onPressed: _submit,
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextButton(
-                    onPressed: viewModel.isBusy
-                        ? null
-                        : () => context.push(AppRoutes.register),
-                    child: const Text(
-                      'Hesabin yok mu? Hemen kaydol',
-                      style: TextStyle(color: AppColors.accent),
-                    ),
                   ),
                 ],
               ),
             ),
           ),
-        ),
+          const SizedBox(height: AppSpacing.lg),
+          // Wrap: dar ekranda ya da büyük yazı boyutunda alt satıra geçer
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text('Hesabın yok mu?', style: AppTypography.bodyS),
+              TextButton(
+                onPressed: viewModel.isBusy
+                    ? null
+                    : () => context.push(AppRoutes.register),
+                child: Text(
+                  'Hemen kaydol',
+                  style: AppTypography.body(
+                    size: 13,
+                    weight: FontWeight.w900,
+                    color: AppColors.victoryGold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
+  }
+
+  /// Oyuncu yazmaya başlayınca eski hata kaybolsun; yoksa düzeltilmiş
+  /// bir e-postanın altında hâlâ "hatalı" yazıyor olurdu.
+  void _hataTemizle() {
+    if (_hata != null) setState(() => _hata = null);
   }
 }

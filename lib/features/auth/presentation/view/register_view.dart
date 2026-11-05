@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/error/app_exception.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../shared/widgets/app_button.dart';
+import '../../../../core/theme/app_tokens.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
+import '../../../../shared/widgets/game/game_ui.dart';
 import '../viewmodel/auth_view_model.dart';
+import '../widgets/auth_scaffold.dart';
+import '../widgets/auth_validators.dart';
 
-/// Kayit ekrani.
+/// Kayıt ekranı.
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
@@ -22,6 +26,7 @@ class _RegisterViewState extends State<RegisterView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  AppException? _hata;
 
   @override
   void dispose() {
@@ -33,6 +38,7 @@ class _RegisterViewState extends State<RegisterView> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    setState(() => _hata = null);
 
     final viewModel = context.read<AuthViewModel>();
     final basarili = await viewModel.signUp(
@@ -46,117 +52,126 @@ class _RegisterViewState extends State<RegisterView> {
     if (basarili) {
       AppSnackBar.showSuccess(
         context,
-        'Hesabin olusturuldu! Baslangic kadron hazir.',
+        'Hesabın oluşturuldu! Başlangıç kadron hazır.',
       );
       context.go(AppRoutes.home);
-    } else if (viewModel.errorMessage != null) {
-      AppSnackBar.showError(context, viewModel.errorMessage!);
+    } else {
+      setState(() => _hata = viewModel.error);
       viewModel.clearError();
     }
+  }
+
+  void _hataTemizle() {
+    if (_hata != null) setState(() => _hata = null);
   }
 
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<AuthViewModel>();
+    final hata = _hata;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Kaydol')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'Kendi efsane kadronu kur.',
-                  style: TextStyle(color: AppColors.textSecondary),
-                ),
-                const SizedBox(height: 24),
-
-                TextFormField(
-                  controller: _usernameController,
-                  textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'Kullanici Adi',
-                    prefixIcon: Icon(Icons.person_outline),
+    return AuthScaffold(
+      showBack: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const GameLogo(size: 30, showTagline: false),
+          const SizedBox(height: AppSpacing.xxl),
+          GlassPanel(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('KADRONU KUR', style: AppTypography.h2),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Hesabını oluştur; 15 kartlık başlangıç kadron hemen '
+                    'hazır olsun.',
+                    style: AppTypography.bodyS,
                   ),
-                  validator: (value) {
-                    final v = value?.trim() ?? '';
-                    if (v.isEmpty) return 'Bir kullanici adi secin.';
-                    if (v.length < 3) {
-                      return 'Kullanici adi en az 3 karakter olmali.';
-                    }
-                    if (v.length > 20) {
-                      return 'Kullanici adi en fazla 20 karakter olabilir.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.xl),
 
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'E-posta',
-                    prefixIcon: Icon(Icons.mail_outline),
+                  TextFormField(
+                    controller: _usernameController,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.newUsername],
+                    maxLength: AuthValidators.maxUsernameLength,
+                    onChanged: (_) => _hataTemizle(),
+                    decoration: const InputDecoration(
+                      labelText: 'Kullanıcı adı',
+                      helperText: 'Rakiplerin seni bu adla görecek',
+                      prefixIcon: Icon(Icons.person_outline_rounded),
+                      counterText: '',
+                    ),
+                    validator: AuthValidators.username,
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'E-posta adresinizi girin.';
-                    }
-                    if (!value.contains('@') || !value.contains('.')) {
-                      return 'Gecerli bir e-posta adresi girin.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _submit(),
-                  decoration: InputDecoration(
-                    labelText: 'Sifre',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                      ),
-                      onPressed: () => setState(
-                        () => _obscurePassword = !_obscurePassword,
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email],
+                    onChanged: (_) => _hataTemizle(),
+                    decoration: const InputDecoration(
+                      labelText: 'E-posta',
+                      prefixIcon: Icon(Icons.mail_outline_rounded),
+                    ),
+                    validator: AuthValidators.email,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.newPassword],
+                    onChanged: (_) => _hataTemizle(),
+                    onFieldSubmitted: (_) => _submit(),
+                    decoration: InputDecoration(
+                      labelText: 'Şifre',
+                      helperText:
+                          'En az ${AuthValidators.minPasswordLength} karakter',
+                      prefixIcon: const Icon(Icons.lock_outline_rounded),
+                      suffixIcon: IconButton(
+                        tooltip: _obscurePassword
+                            ? 'Şifreyi göster'
+                            : 'Şifreyi gizle',
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
+                    validator: AuthValidators.password,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Bir sifre belirleyin.';
-                    }
-                    if (value.length < 6) {
-                      return 'Sifre en az 6 karakter olmali.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 28),
 
-                AppButton(
-                  label: 'Hesap Olustur',
-                  icon: Icons.person_add_alt,
-                  isLoading: viewModel.isBusy,
-                  onPressed: _submit,
-                ),
-              ],
+                  if (hata != null) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    AuthErrorBanner(
+                      message: hata.message,
+                      isConnection: hata.type == AppErrorType.network,
+                    ),
+                  ],
+
+                  const SizedBox(height: AppSpacing.xl),
+                  GameButton(
+                    label: 'Hesap oluştur',
+                    icon: Icons.person_add_alt_1_rounded,
+                    isLoading: viewModel.isBusy,
+                    onPressed: _submit,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

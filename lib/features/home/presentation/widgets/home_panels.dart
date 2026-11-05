@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_tokens.dart';
@@ -187,7 +188,7 @@ class _LigHapi extends StatelessWidget {
             RankBadge.fromRank(rank, size: 22),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              rank.label.toUpperCase(),
+              rank.label.toUpperTr(),
               style: AppTypography.display(
                 size: 13,
                 weight: FontWeight.w900,
@@ -654,7 +655,7 @@ class HomeSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(title.toUpperCase(), style: AppTypography.h3),
+        Text(title.toUpperTr(), style: AppTypography.h3),
         const Spacer(),
         if (actionLabel != null)
           TextButton(
