@@ -36,6 +36,7 @@ import '../network/websocket_service.dart';
 import '../router/app_router.dart';
 import '../storage/token_storage.dart';
 import '../utils/logger.dart';
+import '../../features/home/presentation/viewmodel/home_view_model.dart';
 import '../../features/profile/presentation/viewmodel/profile_view_model.dart';
 import '../../features/settings/presentation/viewmodel/settings_view_model.dart';
 import '../../features/leaderboard/data/datasources/leaderboard_remote_datasource.dart';
@@ -169,6 +170,12 @@ Future<void> configureDependencies() async {
       () => LeaderboardViewModel(
         getIt<LeaderboardRepository>(),
         getIt<SessionManager>(),
+      ),
+    )
+    ..registerFactory<HomeViewModel>(
+      () => HomeViewModel(
+        getIt<LeaderboardRepository>(),
+        getIt<MatchRepository>(),
       ),
     )
     ..registerFactory<ProfileViewModel>(
