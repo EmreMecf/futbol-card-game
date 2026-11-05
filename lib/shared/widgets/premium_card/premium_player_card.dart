@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/feedback/game_feedback.dart';
 import 'card_attributes_grid.dart';
 import 'card_frame_painter.dart';
 import 'card_tier_theme.dart';
@@ -155,7 +156,7 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
     super.initState();
     _egim = CardTiltController();
 
-    if (widget.interactive && widget.useGyroscope) {
+    if (_efektler && widget.useGyroscope) {
       _egim.enableGyroscope();
     }
   }
@@ -168,6 +169,17 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
 
   double get _yukseklik => widget.width / _enBoyOrani;
 
+  /// Eğilme, holografik parlama ve dönen çerçeve açık mı?
+  ///
+  /// İki şartın İKİSİ de gerekiyor:
+  ///   1. Çağıran taraf istemiş olmalı (`interactive: true`),
+  ///   2. Oyuncu ayarlardan "Kart animasyonları"nı kapatmamış olmalı.
+  ///
+  /// Kapalıyken dokunma (onTap) çalışmaya devam ediyor; sadece görsel
+  /// efektler duruyor. Bkz. [GameFeedback.cardAnimationsEnabled].
+  bool get _efektler =>
+      widget.interactive && GameFeedback.cardAnimationsEnabled;
+
   @override
   Widget build(BuildContext context) {
     final tema = CardTierTheme.of(widget.tier);
@@ -176,7 +188,7 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
     Widget kart = _kartYigini(tema, boyut);
 
     // Egilme sadece etkilesimli modda
-    if (widget.interactive) {
+    if (_efektler) {
       kart = CardTilt(controller: _egim, child: kart);
 
       kart = GestureDetector(
@@ -204,7 +216,7 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
 
     return AnimatedBorderGlow(
       theme: tema,
-      enabled: widget.interactive,
+      enabled: _efektler,
       builder: (context, aci) {
         return SizedBox(
           width: boyut.width,
@@ -238,13 +250,10 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
                     _bilgiKatmani(tema, boyut),
 
                     // ---- 5) HOLOGRAFIK PARLAMA ----
-                    HolographicShine(
-                      theme: tema,
-                      enabled: widget.interactive,
-                    ),
+                    HolographicShine(theme: tema, enabled: _efektler),
 
                     // ---- 6) YUZEY YANSIMASI ----
-                    if (widget.interactive)
+                    if (_efektler)
                       SpecularHighlight(
                         controller: _egim,
                         color: tema.specularColor,
@@ -315,7 +324,7 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
   Widget _oyuncuGorseli(CardTierTheme tema, Size boyut) {
     final gorsel = _gorselWidget(tema, boyut);
 
-    if (!widget.interactive) {
+    if (!_efektler) {
       return Align(
         alignment: Alignment.topCenter,
         child: Padding(
@@ -398,11 +407,7 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
             tema.textColor.withValues(alpha: 0.08),
           ],
         ).createShader(rect),
-        child: Icon(
-          Icons.person,
-          size: yukseklik,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.person, size: yukseklik, color: Colors.white),
       ),
     );
   }
@@ -539,8 +544,7 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
   static const double _ozellikEsigi = 150;
 
   bool get _ozellikleriGoster =>
-      widget.width >= _ozellikEsigi &&
-      (widget.attributes?.isNotEmpty ?? false);
+      widget.width >= _ozellikEsigi && (widget.attributes?.isNotEmpty ?? false);
 
   // ==================================================================
   // 7) ROZETLER
@@ -613,10 +617,10 @@ class _KartSiluetiKirpici extends CustomClipper<Path> {
 
   @override
   Path getClip(Size size) => CardFramePainter.buildCardPath(
-        size,
-        cornerRadius: cornerRadius,
-        bevel: bevel,
-      );
+    size,
+    cornerRadius: cornerRadius,
+    bevel: bevel,
+  );
 
   @override
   bool shouldReclip(_KartSiluetiKirpici oldClipper) =>

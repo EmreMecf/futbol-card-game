@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/feedback/game_feedback.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_routes.dart';
@@ -78,7 +79,9 @@ class _MatchBodyState extends State<_MatchBody> {
 
     if (vm.isLoading && vm.matchState == null) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
@@ -212,16 +215,19 @@ class _DarMasa extends StatelessWidget {
               final masaYuksekligi = kalan - elYuksekligi;
 
               // Masada iki kart + sayaç dikey sığmalı
-              final masaKartYuksekligi =
-                  ((masaYuksekligi - 92) / 2).clamp(72.0, 180.0);
+              final masaKartYuksekligi = ((masaYuksekligi - 92) / 2).clamp(
+                72.0,
+                180.0,
+              );
               final masaKartGenisligi = masaKartYuksekligi / 1.5;
-              final sayacBoyutu =
-                  (masaYuksekligi * 0.24).clamp(64.0, 100.0);
+              final sayacBoyutu = (masaYuksekligi * 0.24).clamp(64.0, 100.0);
 
               // Eldeki kart: rozet ve seçili kartın yükselmesi için
               // 34px pay bırakılıyor (bkz. _Elim).
-              final elKartGenisligi =
-                  ((elYuksekligi - 34) / 1.5).clamp(72.0, 116.0);
+              final elKartGenisligi = ((elYuksekligi - 34) / 1.5).clamp(
+                72.0,
+                116.0,
+              );
 
               return Column(
                 children: [
@@ -428,18 +434,22 @@ class _UstBant extends StatelessWidget {
     final rakip = durum.opponent;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(compact ? 16 : 32, 12, compact ? 16 : 32, 12),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 16 : 32,
+        12,
+        compact ? 16 : 32,
+        12,
+      ),
       decoration: BoxDecoration(
         color: AppColors.sidebar.withValues(alpha: 0.8),
-        border: const Border(
-          bottom: BorderSide(color: AppColors.surfaceLight),
-        ),
+        border: const Border(bottom: BorderSide(color: AppColors.surfaceLight)),
       ),
       child: Row(
         children: [
           _OyuncuRozeti(
             name: rakip?.username ?? 'Rakip',
-            detail: '${durum.opponentCardsLeft} kart · '
+            detail:
+                '${durum.opponentCardsLeft} kart · '
                 '${rakip?.mmr ?? 0} puan',
             color: AppColors.danger,
           ),
@@ -534,8 +544,9 @@ class _OyuncuRozeti extends StatelessWidget {
     );
 
     final metin = Column(
-      crossAxisAlignment:
-          reversed ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: reversed
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
@@ -601,7 +612,9 @@ class _TurSeridi extends StatelessWidget {
           else
             Flexible(
               child: Text(
-                viewModel.isMyTurn ? 'Pozisyonu sen seçiyorsun' : 'Tur açılıyor',
+                viewModel.isMyTurn
+                    ? 'Pozisyonu sen seçiyorsun'
+                    : 'Tur açılıyor',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.body(size: 12.5, weight: FontWeight.w800),
@@ -701,7 +714,8 @@ class _RakipYuvasi extends StatelessWidget {
     return PlayedMoveCard(
       move: hamle,
       width: width,
-      isWinner: tur != null &&
+      isWinner:
+          tur != null &&
           tur.roundNumber == hamle.roundNumber &&
           tur.winnerId != null &&
           tur.winnerId != viewModel.myUserId,
@@ -729,7 +743,8 @@ class _BenimYuvam extends StatelessWidget {
       return PlayedMoveCard(
         move: hamle,
         width: width,
-        isWinner: tur != null &&
+        isWinner:
+            tur != null &&
             tur.roundNumber == hamle.roundNumber &&
             tur.winnerId == viewModel.myUserId,
       );
@@ -739,10 +754,10 @@ class _BenimYuvam extends StatelessWidget {
     final mesaj = !viewModel.isMyTurn
         ? 'Sıra rakipte'
         : viewModel.mustPass
-            ? 'Bu pozisyonda kartın yok'
-            : zorunlu != null
-                ? '${zorunlu.label} kartı seç'
-                : 'Bir kart seç';
+        ? 'Bu pozisyonda kartın yok'
+        : zorunlu != null
+        ? '${zorunlu.label} kartı seç'
+        : 'Bir kart seç';
 
     return EmptyPlaySlot(
       width: width,
@@ -771,7 +786,8 @@ class _MasaOrtasi extends StatelessWidget {
     final sayac = TurnRing(
       remaining: viewModel.remainingTime,
       isMyTurn: viewModel.isMyTurn,
-      isUrgent: viewModel.isTimeRunningOut,
+      // Oyuncu ayarlardan süre uyarısını kapattıysa sayaç kırmızıya dönmez
+      isUrgent: viewModel.isTimeRunningOut && GameFeedback.turnWarningEnabled,
       size: ringSize,
     );
 
@@ -865,8 +881,8 @@ class _SonTurOzeti extends StatelessWidget {
     final (metin, renk) = tur.isDraw
         ? ('Berabere', AppColors.warning)
         : tur.winnerId == viewModel.myUserId
-            ? ('Turu kazandın', AppColors.success)
-            : ('Turu kaybettin', AppColors.danger);
+        ? ('Turu kazandın', AppColors.success)
+        : ('Turu kaybettin', AppColors.danger);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -921,7 +937,8 @@ class _Elim extends StatelessWidget {
         itemBuilder: (context, index) {
           final kart = kartlar[index];
           final oynanabilir = zorunlu == null || kart.position == zorunlu;
-          final etkin = viewModel.isMyTurn &&
+          final etkin =
+              viewModel.isMyTurn &&
               oynanabilir &&
               !viewModel.isSubmittingMove &&
               viewModel.myTableMove == null;
@@ -966,7 +983,8 @@ class _AksiyonCubugu extends StatelessWidget {
     }
 
     final secili = state.seciliKart(viewModel);
-    final oynanabilir = secili != null &&
+    final oynanabilir =
+        secili != null &&
         viewModel.isMyTurn &&
         !viewModel.isSubmittingMove &&
         viewModel.myTableMove == null;
@@ -977,7 +995,9 @@ class _AksiyonCubugu extends StatelessWidget {
         children: [
           Expanded(
             child: ElevatedButton(
-              onPressed: oynanabilir ? () => state.seciliyiOyna(viewModel) : null,
+              onPressed: oynanabilir
+                  ? () => state.seciliyiOyna(viewModel)
+                  : null,
               child: viewModel.isSubmittingMove
                   ? const SizedBox(
                       width: 20,
@@ -991,7 +1011,7 @@ class _AksiyonCubugu extends StatelessWidget {
                       secili == null
                           ? 'BİR KART SEÇ'
                           : '${secili.fullName.toUpperCase()} · '
-                              '${secili.effectivePower}',
+                                '${secili.effectivePower}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1035,7 +1055,8 @@ class _YanPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final secili = state.seciliKart(viewModel);
     final durum = viewModel.matchState!;
-    final oynanabilir = secili != null &&
+    final oynanabilir =
+        secili != null &&
         viewModel.isMyTurn &&
         !viewModel.isSubmittingMove &&
         viewModel.myTableMove == null;
@@ -1059,13 +1080,17 @@ class _YanPanel extends StatelessWidget {
           if (viewModel.mustPass && viewModel.isMyTurn)
             ElevatedButton.icon(
               onPressed: viewModel.isSubmittingMove ? null : viewModel.pass,
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.danger,
+              ),
               icon: const Icon(Icons.skip_next_rounded),
               label: const Text('PAS GEÇ'),
             )
           else
             ElevatedButton(
-              onPressed: oynanabilir ? () => state.seciliyiOyna(viewModel) : null,
+              onPressed: oynanabilir
+                  ? () => state.seciliyiOyna(viewModel)
+                  : null,
               child: viewModel.isSubmittingMove
                   ? const SizedBox(
                       width: 20,
@@ -1084,7 +1109,11 @@ class _YanPanel extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.danger.withValues(alpha: 0.45)),
             ),
-            icon: const Icon(Icons.flag_rounded, size: 18, color: AppColors.danger),
+            icon: const Icon(
+              Icons.flag_rounded,
+              size: 18,
+              color: AppColors.danger,
+            ),
             label: const Text(
               'TESLİM OL',
               style: TextStyle(color: AppColors.danger),
@@ -1298,8 +1327,8 @@ class _TurSatiri extends StatelessWidget {
     final renk = round.isDraw
         ? AppColors.warning
         : round.winnerId == myUserId
-            ? AppColors.success
-            : AppColors.danger;
+        ? AppColors.success
+        : AppColors.danger;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -1326,8 +1355,8 @@ class _TurSatiri extends StatelessWidget {
               round.isDraw
                   ? 'Berabere'
                   : round.winnerId == myUserId
-                      ? 'Kazandın'
-                      : 'Kaybettin',
+                  ? 'Kazandın'
+                  : 'Kaybettin',
               style: AppTypography.body(
                 size: 12.5,
                 weight: FontWeight.w800,

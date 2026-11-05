@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/feedback/game_feedback.dart';
 import '../premium_card/premium_card.dart';
 import 'club_crest.dart';
 import 'confetti_overlay.dart';
@@ -124,7 +124,8 @@ class _WalkoutScreenState extends State<WalkoutScreen>
       _konfetiPatladi = true;
 
       // Kart ekrana VURUYOR: en güçlü titreşim burada.
-      HapticFeedback.heavyImpact();
+      // Ayarlardan titreşim kapalıysa hiçbir şey yapmaz.
+      GameFeedback.haptic(HapticStrength.heavy);
 
       // setState sadece konfetiyi başlatmak için; sahnenin geri kalanı
       // AnimatedBuilder ile çiziliyor ve bundan etkilenmiyor.

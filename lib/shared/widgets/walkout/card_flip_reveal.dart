@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/feedback/game_feedback.dart';
 import '../../../features/store/domain/reveal_style.dart';
 import '../premium_card/premium_card.dart';
 
@@ -73,14 +73,8 @@ class _CardFlipRevealState extends State<CardFlipReveal>
     if (_titredi || _kontrolcu.value < 0.5) return;
     _titredi = true;
 
-    switch (widget.style.haptic) {
-      case HapticStrength.none:
-        break;
-      case HapticStrength.light:
-        HapticFeedback.lightImpact();
-      case HapticStrength.heavy:
-        HapticFeedback.heavyImpact();
-    }
+    // Ayarlardan titreşim kapalıysa GameFeedback hiçbir şey yapmaz.
+    GameFeedback.haptic(widget.style.haptic);
   }
 
   @override

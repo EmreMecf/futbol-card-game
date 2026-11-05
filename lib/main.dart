@@ -7,6 +7,7 @@ import 'core/config/app_config.dart';
 import 'core/di/injection.dart';
 import 'core/utils/logger.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
+import 'features/settings/presentation/viewmodel/settings_view_model.dart';
 
 /// Uygulamanin giris noktasi.
 ///
@@ -28,6 +29,11 @@ Future<void> main() async {
   try {
     await dotenv.load(fileName: '.env');
     await configureDependencies();
+
+    // Cihaz tercihleri (titreşim, animasyon, süre uyarısı) İLK ekrandan
+    // önce okunmalı. Aksi halde ayarlar ekranı açılana kadar her yer
+    // varsayılanlarla çalışır ve oyuncunun kapattığı titreşim gelir.
+    await getIt<SettingsViewModel>().load();
 
     AppLogger.info('Backend adresi: ${AppConfig.apiBaseUrl}');
 

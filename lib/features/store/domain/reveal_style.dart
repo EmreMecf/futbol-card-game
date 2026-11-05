@@ -1,5 +1,11 @@
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/feedback/game_feedback.dart';
+
+// HapticStrength artik core'da (tek geri bildirim kapisi). Bu dosyayi
+// iceri aktaran eski kod kirilmasin diye yeniden disa aciliyor.
+export '../../../core/feedback/game_feedback.dart' show HapticStrength;
+
 /// Bir kartın nasıl açılacağını belirleyen üç kademe.
 ///
 /// -------------------------------------------------------------------
@@ -54,5 +60,3 @@ enum RevealStyle {
       };
 }
 
-/// Titreşim şiddeti (Flutter'ın HapticFeedback çağrılarına eşlenir)
-enum HapticStrength { none, light, heavy }

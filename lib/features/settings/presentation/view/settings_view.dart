@@ -26,8 +26,15 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SettingsViewModel>(
-      create: (_) => getIt<SettingsViewModel>()..load(),
+    // `.value` ŞART, `create:` DEĞİL.
+    //
+    // SettingsViewModel uygulama genelinde TEK örnek (singleton) ve
+    // main() içinde yükleniyor. `create:` ile verilseydi Provider bu
+    // ekran kapanınca onu dispose ederdi; ekran ikinci kez açıldığında
+    // "dispose edilmiş ChangeNotifier kullanıldı" hatası alınırdı ve
+    // titreşim/animasyon ayarları bütün uygulamada okunamaz olurdu.
+    return ChangeNotifierProvider<SettingsViewModel>.value(
+      value: getIt<SettingsViewModel>(),
       child: const _SettingsBody(),
     );
   }
@@ -71,19 +78,26 @@ class _SettingsBody extends StatelessWidget {
 
                   const SectionTitle('Ses ve titreşim'),
                   const SizedBox(height: 10),
+                  // SES VE MÜZİK HENÜZ YOK.
+                  // Oyunda ses dosyası ve ses motoru bulunmuyor. Anahtarı
+                  // çalışıyormuş gibi göstermek oyuncuyu yanıltırdı
+                  // (MD kural 12: eksik kaynağı tamamlanmış gibi
+                  // gösterme). Ses sistemi eklenince `enabled` açılır.
                   _AnahtarSatiri(
                     icon: Icons.volume_up_rounded,
                     title: 'Ses efektleri',
-                    subtitle: 'Kart, buton ve paket sesleri',
-                    value: vm.soundEffects,
+                    subtitle: 'Yakında — ses dosyaları henüz eklenmedi',
+                    value: false,
                     onChanged: vm.setSoundEffects,
+                    enabled: false,
                   ),
                   _AnahtarSatiri(
                     icon: Icons.music_note_rounded,
                     title: 'Müzik',
-                    subtitle: 'Menü ve maç müziği',
-                    value: vm.music,
+                    subtitle: 'Yakında — müzik henüz eklenmedi',
+                    value: false,
                     onChanged: vm.setMusic,
+                    enabled: false,
                   ),
                   _AnahtarSatiri(
                     icon: Icons.vibration_rounded,
@@ -162,58 +176,65 @@ class _AnahtarSatiri extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
+  /// Kapalıysa satır soluk görünür ve dokunulamaz
+  final bool enabled;
+
   const _AnahtarSatiri({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.value,
     required this.onChanged,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 9),
-      child: SurfaceCard(
-        radius: 14,
-        padding: const EdgeInsets.fromLTRB(15, 10, 10, 10),
-        // Satırın tamamı dokunma hedefi: küçük anahtarı isabet
-        // ettirmeye çalışmak telefonda sinir bozucu.
-        onTap: () => onChanged(!value),
-        child: Row(
-          children: [
-            Icon(icon, size: 19, color: AppColors.textSecondary),
-            const SizedBox(width: 13),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTypography.body(
-                      size: 13.5,
-                      weight: FontWeight.w800,
+    return Opacity(
+      opacity: enabled ? 1 : 0.5,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 9),
+        child: SurfaceCard(
+          radius: 14,
+          padding: const EdgeInsets.fromLTRB(15, 10, 10, 10),
+          // Satırın tamamı dokunma hedefi: küçük anahtarı isabet
+          // ettirmeye çalışmak telefonda sinir bozucu.
+          onTap: enabled ? () => onChanged(!value) : null,
+          child: Row(
+            children: [
+              Icon(icon, size: 19, color: AppColors.textSecondary),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTypography.body(
+                        size: 13.5,
+                        weight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.bodyXS,
-                  ),
-                ],
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodyXS,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Switch(
-              value: value,
-              onChanged: onChanged,
-              activeThumbColor: AppColors.textPrimary,
-              activeTrackColor: AppColors.primary,
-              inactiveThumbColor: AppColors.textSecondary,
-              inactiveTrackColor: AppColors.surfaceLight,
-            ),
-          ],
+              const SizedBox(width: 8),
+              Switch(
+                value: value,
+                onChanged: enabled ? onChanged : null,
+                activeThumbColor: AppColors.textPrimary,
+                activeTrackColor: AppColors.primary,
+                inactiveThumbColor: AppColors.textSecondary,
+                inactiveTrackColor: AppColors.surfaceLight,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -248,10 +269,7 @@ class _BilgiSatiri extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: AppTypography.body(
-                  size: 13.5,
-                  weight: FontWeight.w800,
-                ),
+                style: AppTypography.body(size: 13.5, weight: FontWeight.w800),
               ),
             ),
             Flexible(
@@ -284,10 +302,7 @@ class _CikisButonu extends StatelessWidget {
         side: BorderSide(color: AppColors.danger.withValues(alpha: 0.42)),
       ),
       icon: const Icon(Icons.logout_rounded, size: 18, color: AppColors.danger),
-      label: const Text(
-        'ÇIKIŞ YAP',
-        style: TextStyle(color: AppColors.danger),
-      ),
+      label: const Text('ÇIKIŞ YAP', style: TextStyle(color: AppColors.danger)),
     );
   }
 
