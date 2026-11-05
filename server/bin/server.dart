@@ -32,6 +32,19 @@ import 'package:futbol_card_server/routes/leaderboard_routes.dart';
 Future<void> main(List<String> args) async {
   _banner();
 
+  // ---- 0. URETIM GUVENLIGI ----
+  // Varsayilan (herkese acik) anahtarla yayina cikmayi ENGELLE.
+  if (Env.isProduction) {
+    final sorunlar = Env.productionProblems(Platform.environment);
+    if (sorunlar.isNotEmpty) {
+      stderr.writeln('SUNUCU BASLATILMADI - uretim ayarlari guvensiz:');
+      for (final s in sorunlar) {
+        stderr.writeln('  - $s');
+      }
+      exit(1);
+    }
+  }
+
   // ---- 1. VERITABANI ----
   final db = Database();
   await db.connect();
@@ -186,8 +199,7 @@ void _banner() {
   Veritabani: ${Env.dbHost}:${Env.dbPort}/${Env.dbName}
 =====================================================''');
 
-  if (!Env.isProduction &&
-      Env.jwtSecret == 'gelistirme-icin-gecici-anahtar-uretimde-degistir') {
+  if (!Env.isProduction && Env.jwtSecret == Env.devJwtSecret) {
     // ignore: avoid_print
     print('  UYARI: Varsayilan JWT anahtari kullaniliyor.');
     // ignore: avoid_print
