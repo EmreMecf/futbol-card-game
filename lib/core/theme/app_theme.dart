@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
+import 'app_tokens.dart';
 import 'app_typography.dart';
 
 /// Uygulamanin gorsel kimligi.
@@ -26,7 +27,9 @@ class AppTheme {
         secondary: AppColors.accent,
         surface: AppColors.surface,
         error: AppColors.danger,
-        onPrimary: Colors.white,
+        // Emerald ustunde beyaz yazi okunmaz (kontrast 2.54).
+        onPrimary: AppColors.onPrimary,
+        tertiary: AppColors.gold,
         onSurface: AppColors.textPrimary,
       ),
       appBarTheme: const AppBarTheme(
@@ -46,17 +49,18 @@ class AppTheme {
         color: AppColors.surface,
         elevation: 4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          // Beyaz DEGIL: bkz. AppColors sinif aciklamasi (kontrast)
+          foregroundColor: AppColors.onPrimary,
           disabledBackgroundColor: AppColors.surfaceLight,
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           textStyle: const TextStyle(
             fontFamily: AppTypography.displayFamily,
@@ -72,7 +76,7 @@ class AppTheme {
           minimumSize: const Size.fromHeight(52),
           side: const BorderSide(color: AppColors.surfaceLight, width: 1.5),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           textStyle: const TextStyle(
             fontFamily: AppTypography.displayFamily,
@@ -85,22 +89,21 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.all(AppSpacing.lg),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: const BorderSide(color: AppColors.danger),
         ),
         hintStyle: const TextStyle(color: AppColors.textSecondary),
@@ -111,7 +114,7 @@ class AppTheme {
         contentTextStyle: const TextStyle(color: AppColors.textPrimary),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppRadius.md),
         ),
       ),
       dividerTheme: const DividerThemeData(
@@ -128,10 +131,8 @@ class AppTheme {
   /// widget'lari da (AlertDialog, ListTile, SnackBar) dogru yazi
   /// tipiyle ciziliyor; her birine tek tek stil vermek gerekmiyor.
   static TextTheme _metinTemasi(TextTheme temel) {
-    TextStyle? d(TextStyle? s, FontWeight w) => s?.copyWith(
-          fontFamily: AppTypography.displayFamily,
-          fontWeight: w,
-        );
+    TextStyle? d(TextStyle? s, FontWeight w) =>
+        s?.copyWith(fontFamily: AppTypography.displayFamily, fontWeight: w);
     TextStyle? b(TextStyle? s) =>
         s?.copyWith(fontFamily: AppTypography.bodyFamily);
 

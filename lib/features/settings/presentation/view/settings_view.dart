@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -146,6 +147,42 @@ class _SettingsBody extends StatelessWidget {
                     'Kullanıcı adı ve şifre değiştirme sunucuya henüz '
                     'eklenmedi. Eklendiğinde bu bölümden yapılabilecek.',
                   ),
+
+                  // Gelistirici araci: yayin surumunde derlenmez bile
+                  // (kDebugMode sabit oldugu icin agac-silkeleme kaldirir).
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 22),
+                    const SectionTitle('Geliştirici'),
+                    const SizedBox(height: 10),
+                    SurfaceCard(
+                      radius: 14,
+                      padding: const EdgeInsets.fromLTRB(15, 14, 10, 14),
+                      onTap: () => context.push(AppRoutes.designSystem),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.palette_rounded,
+                            size: 19,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 13),
+                          Expanded(
+                            child: Text(
+                              'Tasarım sistemi',
+                              style: AppTypography.body(
+                                size: 13.5,
+                                weight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.chevron_right_rounded,
+                            color: AppColors.textSecondary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
 
                   const SizedBox(height: 26),
                   const _CikisButonu(),

@@ -15,6 +15,9 @@ class AppRoutes {
   static const String match = '/mac';
   static const String profile = '/profil';
   static const String settings = '/ayarlar';
+
+  /// Tasarim sistemi vitrini. SADECE gelistirme surumunde baglanti var.
+  static const String designSystem = '/ayarlar/tasarim';
   static const String leaderboard = '/liderlik';
   static const String leagueTiers = '/ligler';
   static const String store = '/magaza';

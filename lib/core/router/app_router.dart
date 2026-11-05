@@ -15,6 +15,7 @@ import '../../features/matchmaking/presentation/view/matchmaking_view.dart';
 import '../../features/profile/presentation/view/profile_view.dart';
 import '../../features/sbc/presentation/view/sbc_builder_view.dart';
 import '../../features/sbc/presentation/view/sbc_list_view.dart';
+import '../../features/settings/presentation/view/design_system_view.dart';
 import '../../features/settings/presentation/view/settings_view.dart';
 import '../../features/store/presentation/view/store_view.dart';
 import '../auth/session_manager.dart';
@@ -86,6 +87,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsView(),
+      ),
+      GoRoute(
+        path: AppRoutes.designSystem,
+        builder: (context, state) => const DesignSystemView(),
       ),
       GoRoute(
         path: AppRoutes.store,
