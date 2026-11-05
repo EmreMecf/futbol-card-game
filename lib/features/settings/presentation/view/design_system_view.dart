@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -164,7 +165,7 @@ class _DesignSystemViewState extends State<DesignSystemView> {
 
   Widget _baslik(String metin) => Padding(
     padding: const EdgeInsets.only(top: AppSpacing.xxl, bottom: AppSpacing.sm),
-    child: Text(metin.toUpperCase(), style: AppTypography.label),
+    child: Text(metin.toUpperTr(), style: AppTypography.label),
   );
 
   Widget _cubuk(String ad, ProgressKind tur) => Padding(

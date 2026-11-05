@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/turkish_text.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/feedback/game_feedback.dart';
 import '../../../core/theme/app_tokens.dart';
@@ -249,7 +250,7 @@ class _GameButtonState extends State<GameButton> {
         ],
         Flexible(
           child: Text(
-            widget.label.toUpperCase(),
+            widget.label.toUpperTr(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: yaziStili,

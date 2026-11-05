@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_routes.dart';
@@ -140,7 +141,7 @@ class _SbcListBody extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 10, top: 6),
               child: Text(
-                grup.key.toUpperCase(),
+                grup.key.toUpperTr(),
                 style: const TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 11,

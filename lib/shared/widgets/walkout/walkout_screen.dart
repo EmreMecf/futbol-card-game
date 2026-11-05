@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/utils/turkish_text.dart';
 import '../../../core/feedback/game_feedback.dart';
 import '../premium_card/premium_card.dart';
 import 'club_crest.dart';
@@ -372,7 +373,7 @@ class _WalkoutScreenState extends State<WalkoutScreen>
         ),
         const SizedBox(height: 6),
         Text(
-          pozisyon.label.toUpperCase(),
+          pozisyon.label.toUpperTr(),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.82),
             fontSize: 15,

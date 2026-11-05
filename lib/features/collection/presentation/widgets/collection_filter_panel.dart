@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/premium_card/premium_card.dart';
@@ -217,7 +218,7 @@ class _PozisyonDugmesi extends StatelessWidget {
             ),
           ),
           child: Text(
-            label.toUpperCase(),
+            label.toUpperTr(),
             style: AppTypography.display(
               size: 14,
               weight: FontWeight.w800,

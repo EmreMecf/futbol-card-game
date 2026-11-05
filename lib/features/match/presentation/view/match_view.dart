@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../core/feedback/game_feedback.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
@@ -537,7 +538,7 @@ class _OyuncuRozeti extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          name.isEmpty ? '?' : name[0].toUpperCase(),
+          name.isEmpty ? '?' : name[0].toUpperTr(),
           style: AppTypography.display(size: 18, weight: FontWeight.w900),
         ),
       ),
@@ -643,7 +644,7 @@ class _PozisyonRozeti extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        position.label.toUpperCase(),
+        position.label.toUpperTr(),
         style: AppTypography.display(
           size: 12,
           weight: FontWeight.w900,

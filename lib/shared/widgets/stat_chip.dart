@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/utils/turkish_text.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 
@@ -152,7 +153,7 @@ class SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(text.toUpperCase(), style: AppTypography.label),
+        Text(text.toUpperTr(), style: AppTypography.label),
         if (trailing != null) ...[const Spacer(), trailing!],
       ],
     );

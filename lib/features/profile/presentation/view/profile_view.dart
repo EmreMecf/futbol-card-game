@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_routes.dart';
@@ -134,7 +135,7 @@ class _Kimlik extends StatelessWidget {
   Widget build(BuildContext context) {
     final kullanici = viewModel.user;
     final ad = kullanici?.username ?? 'Oyuncu';
-    final harf = ad.trim().isEmpty ? '?' : ad.trim()[0].toUpperCase();
+    final harf = ad.trim().isEmpty ? '?' : ad.trim()[0].toUpperTr();
 
     return Row(
       children: [
