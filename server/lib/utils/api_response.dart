@@ -56,9 +56,34 @@ class ApiException implements Exception {
   String toString() => 'ApiException($status): $message';
 }
 
+/// Kabul edilen en buyuk istek govdesi (bayt).
+///
+/// Oyundaki en buyuk govde bir kadro kaydi (11 kart kimligi), 1-2 KB.
+/// 64 KB bol bir pay. Sinir olmasaydi 1 GB'lik bir govde sunucunun
+/// bellegini doldurabilirdi.
+const int maxBodyBytes = 64 * 1024;
+
 /// Istek govdesini JSON olarak okur.
 Future<Map<String, dynamic>> readJsonBody(Request request) async {
-  final raw = await request.readAsString();
+  final bildirilen = request.contentLength;
+  if (bildirilen != null && bildirilen > maxBodyBytes) {
+    throw const ApiException('Istek govdesi cok buyuk.', status: 413);
+  }
+
+  // Content-Length gonderilmemis (parcali) govdeyi de okurken say
+  final parcalar = <int>[];
+  await for (final parca in request.read()) {
+    parcalar.addAll(parca);
+    if (parcalar.length > maxBodyBytes) {
+      throw const ApiException('Istek govdesi cok buyuk.', status: 413);
+    }
+  }
+  final String raw;
+  try {
+    raw = utf8.decode(parcalar);
+  } on FormatException {
+    throw const ApiException('Istek govdesi gecerli UTF-8 degil.');
+  }
   if (raw.trim().isEmpty) return <String, dynamic>{};
 
   try {

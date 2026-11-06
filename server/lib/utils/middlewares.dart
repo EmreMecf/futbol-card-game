@@ -2,6 +2,7 @@ import 'package:postgres/postgres.dart';
 import 'package:shelf/shelf.dart';
 
 import 'api_response.dart';
+import 'security.dart';
 
 /// Tum hatalari yakalayip TURKCE JSON cevabina cevirir.
 ///
@@ -15,6 +16,12 @@ Middleware errorHandler() {
     return (Request request) async {
       try {
         return await innerHandler(request);
+      } on HijackException {
+        // WebSocket el sikismasi: Shelf istegi bu istisnayla "devraliyor".
+        // Yakalanip 500'e cevrilmemeli; eskiden her WS baglantisi
+        // gunluge hata olarak dusuyor ve hata mesajinda jeton acikta
+        // yaziliyordu (FAZ 7'de bulundu).
+        rethrow;
       } on ApiException catch (e) {
         return jsonError(e.message, status: e.status, code: e.code);
       } on ServerException catch (e) {
@@ -31,7 +38,7 @@ Middleware errorHandler() {
           );
         }
         // ignore: avoid_print
-        print('[HATA] Veritabani hatasi ${e.code}: ${e.message}');
+        print(redactText('[HATA] Veritabani hatasi ${e.code}: ${e.message}'));
         return jsonError(
           'Sunucuda bir sorun olustu. Lutfen tekrar deneyin.',
           status: 500,
@@ -39,7 +46,8 @@ Middleware errorHandler() {
         );
       } catch (e, s) {
         // ignore: avoid_print
-        print('[HATA] Beklenmeyen: $e\n$s');
+        // Mesaj jeton icerebilir (ornek: istek adresi) -> maskele
+        print(redactText('[HATA] Beklenmeyen: $e\n$s'));
         return jsonError(
           'Beklenmeyen bir hata olustu.',
           status: 500,
@@ -58,28 +66,9 @@ Middleware requestLogger() {
       final response = await innerHandler(request);
       final sure = DateTime.now().difference(basladi).inMilliseconds;
       // ignore: avoid_print
-      print('[${response.statusCode}] ${request.method} /${request.url} (${sure}ms)');
+      // Adres gizli parametreleri (WebSocket jetonu) maskelenerek yazilir
+      print('[${response.statusCode}] ${request.method} /${redactUrl(request.url)} (${sure}ms)');
       return response;
-    };
-  };
-}
-
-/// Flutter Web'den gelistirme yaparken tarayici engellemesin diye CORS.
-Middleware corsHeaders() {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Origin, Content-Type, Authorization',
-    'Access-Control-Max-Age': '86400',
-  };
-
-  return (Handler innerHandler) {
-    return (Request request) async {
-      if (request.method == 'OPTIONS') {
-        return Response.ok('', headers: headers);
-      }
-      final response = await innerHandler(request);
-      return response.change(headers: headers);
     };
   };
 }

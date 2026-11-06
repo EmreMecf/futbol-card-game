@@ -108,8 +108,16 @@ Router authRoutes(Database db, JwtService jwt) {
 
     // GUVENLIK: "kullanici yok" ile "sifre yanlis" ayrimi YAPILMAZ.
     // Aksi halde saldirgan hangi e-postalarin kayitli oldugunu ogrenir.
-    if (kullanici == null ||
-        !PasswordService.verify(password, kullanici['password_hash'] as String)) {
+    //
+    // SURE DE AYNI OLMALI: kullanici yokken bcrypt hic calismazsa cevap
+    // ~250 ms erken gelir ve e-postanin kayitli olmadigini ele verir.
+    // Bu yuzden kullanici yokken de sahte bir ozete karsi dogrulama
+    // yapiliyor.
+    final ozet = kullanici == null
+        ? PasswordService.dummyHash
+        : kullanici['password_hash'] as String;
+    final dogru = PasswordService.verify(password, ozet);
+    if (kullanici == null || !dogru) {
       throw const ApiException('E-posta veya sifre hatali.', status: 401);
     }
 

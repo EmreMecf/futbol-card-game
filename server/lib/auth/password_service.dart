@@ -17,6 +17,11 @@ class PasswordService {
     return BCrypt.hashpw(plainPassword, BCrypt.gensalt(logRounds: _cost));
   }
 
+  /// Kullanici bulunamadiginda dogrulamayi ayni surede yapmak icin
+  /// kullanilan ozet (hicbir sifreyle eslesmez; ilk kullanimda uretilir).
+  static final String dummyHash =
+      hash('kullanici-yok-${DateTime.now().microsecondsSinceEpoch}');
+
   static bool verify(String plainPassword, String hashed) {
     try {
       return BCrypt.checkpw(plainPassword, hashed);

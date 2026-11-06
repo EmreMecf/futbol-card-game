@@ -53,6 +53,18 @@ class Env {
   /// Refresh token omru (gun). Kullanici bu sure boyunca tekrar giris yapmaz.
   static int get refreshTokenDays => intVal('REFRESH_TOKEN_DAYS', 30);
 
+  /// Tarayicidan (Flutter Web) erisime izin verilen koken.
+  /// Uretimde web sitenin adresi verilmeli: https://oyun.ornek.com
+  static String get corsOrigin => str('CORS_ORIGIN', '*');
+
+  /// Sunucu bir ters vekil (nginx, yuk dengeleyici) arkasindaysa true.
+  /// O zaman istemci IP'si X-Forwarded-For'dan okunur. Vekil YOKKEN
+  /// acilirsa saldirgan basligi degistirip istek sinirini atlatabilir.
+  static bool get trustProxy => str('TRUST_PROXY', 'false') == 'true';
+
+  /// /auth uclarina IP basina dakikada izin verilen istek
+  static int get authRateLimitPerMinute => intVal('AUTH_RATE_LIMIT', 20);
+
   // ---- ZAMANLAYICI ----
   /// Suresi dolmus maclarin taranma araligi (saniye)
   static int get sweepIntervalSeconds => intVal('SWEEP_INTERVAL_SECONDS', 15);

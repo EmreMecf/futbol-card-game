@@ -15,6 +15,7 @@ import 'package:futbol_card_server/routes/sbc_routes.dart';
 import 'package:futbol_card_server/scheduler/timeout_sweeper.dart';
 import 'package:futbol_card_server/utils/api_response.dart';
 import 'package:futbol_card_server/utils/middlewares.dart';
+import 'package:futbol_card_server/utils/security.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
@@ -77,7 +78,19 @@ Future<void> main(List<String> args) async {
   });
 
   // Kimlik dogrulama (jeton GEREKTIRMEZ)
-  api.mount('/auth', authRoutes(db, jwt).call);
+  //
+  // ISTEK SINIRI: sifre deneme ve bcrypt islemci saldirisina karsi
+  // IP + uc nokta basina dakikada AUTH_RATE_LIMIT istek (varsayilan 20).
+  final authSiniri = RateLimiter(
+    maxRequests: Env.authRateLimitPerMinute,
+    window: const Duration(minutes: 1),
+  );
+  api.mount(
+    '/auth',
+    Pipeline()
+        .addMiddleware(rateLimit(authSiniri, trustProxy: Env.trustProxy))
+        .addHandler(authRoutes(db, jwt).call),
+  );
 
   // Korumali uc noktalar (jeton GEREKLI)
   final korumali = Pipeline().addMiddleware(requireAuth(jwt));
@@ -107,7 +120,7 @@ Future<void> main(List<String> args) async {
 
   final handler = Pipeline()
       .addMiddleware(requestLogger())
-      .addMiddleware(corsHeaders())
+      .addMiddleware(corsHeaders(allowOrigin: Env.corsOrigin))
       .addMiddleware(errorHandler())
       .addHandler(root.call);
 
