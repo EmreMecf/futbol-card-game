@@ -67,6 +67,19 @@ class MatchViewModel extends BaseViewModel {
   MatchResultSummary? _sonuc;
   MatchResultSummary? get result => _sonuc;
 
+  MatchRewardDelta? _odulFarki;
+
+  /// Maçın coin / puan / koruma hakkına etkisi (sonuç ekranı için).
+  ///
+  /// Sunucu maç sonrası YENİ profili gönderiyor ama farkı göndermiyor.
+  /// Fark, oturumu güncellemeden hemen önceki (maç öncesi) değerle
+  /// sunucunun gönderdiği yeni değer arasından çıkarılıyor; iki sayı
+  /// da sunucudan, istemci hiçbir ödül hesaplamıyor.
+  ///
+  /// Maç öncesi profil bilinmiyorsa (oturum boş) null: sonuç ekranı
+  /// o zaman ödül kutularını hiç göstermez, yanlış "+0" yazmaz.
+  MatchRewardDelta? get rewardDelta => _odulFarki;
+
   /// Kart oynanırken buton kilitlensin diye
   bool _hamleGonderiliyor = false;
   bool get isSubmittingMove => _hamleGonderiliyor;
@@ -300,7 +313,18 @@ class MatchViewModel extends BaseViewModel {
       _sonuc = veri;
       // Maç sonrası coin / MMR / koruma hakkı değişti
       final profil = veri.myProfile;
-      if (profil != null) await _session.updateUser(profil);
+      if (profil != null) {
+        // ÖNCE farkı al: güncellemeden sonra eski değer kaybolur
+        final once = _session.user;
+        if (once != null) {
+          _odulFarki = MatchRewardDelta(
+            coins: profil.coins - once.coins,
+            rating: profil.mmr - once.mmr,
+            protectionSlots: profil.protectionSlots - once.protectionSlots,
+          );
+        }
+        await _session.updateUser(profil);
+      }
     }
   }
 
@@ -400,4 +424,17 @@ class MatchViewModel extends BaseViewModel {
     _olayAboneligi?.cancel();
     super.dispose();
   }
+}
+
+/// Maçın oyuncunun sayaçlarına etkisi (maç sonrası - maç öncesi).
+class MatchRewardDelta {
+  final int coins;
+  final int rating;
+  final int protectionSlots;
+
+  const MatchRewardDelta({
+    required this.coins,
+    required this.rating,
+    required this.protectionSlots,
+  });
 }

@@ -98,7 +98,9 @@ class _MatchBodyState extends State<_MatchBody> {
     if (vm.isOver && vm.currentClash == null) {
       return MatchResultView(
         result: vm.result,
+        rewardDelta: vm.rewardDelta,
         onClose: () => context.go(AppRoutes.home),
+        onNewMatch: () => context.go(AppRoutes.matchmaking),
       );
     }
 
