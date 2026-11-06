@@ -303,6 +303,16 @@ kapanır.
 
 ## Test
 
+**Hepsi tek komutla** (analizler, 4 test takımı, veritabanı testleri,
+uçtan uca maç). Veritabanı ve sunucu kapalıysa o adımlar "ATLANDI" yazar,
+"geçti" sayılmaz:
+
+```powershell
+.\scripts\testleri-calistir.ps1
+```
+
+Tek tek:
+
 ```bash
 flutter test
 ```
@@ -347,6 +357,51 @@ testler atlanır, başarısız olmaz.
 
 ---
 
+## Yayına hazırlık
+
+FAZ 7 kalite kontrolünde `flutter build apk --release` ve
+`flutter build web --release` gerçekten çalıştırıldı ve başarılı.
+
+### Yayın derlemesi
+
+```bash
+flutter build appbundle --release --dart-define=API_BASE_URL=https://api.ornek.com
+```
+
+* **Sunucu adresi derleme anında verilir.** `.env` pakete gömülüyor;
+  orada `http://localhost:8080` yazıyorsa yayın paketi telefonda hiçbir
+  yere bağlanamaz. Yayın sürümü `http` ya da yerel bir adresle derlenirse
+  uygulama açılışta bunu açıkça söyler.
+* **Üretimde `https` şart:** Android ve iOS yayın sürümleri şifresiz
+  bağlantıyı engeller.
+* **İmza:** `android/key.properties.example` dosyasındaki adımları izle.
+  `key.properties` yoksa paket debug anahtarıyla imzalanır ve Play
+  Store'a **yüklenemez**.
+
+### Sunucu (üretim)
+
+| Ortam değişkeni | Not |
+|---|---|
+| `ENVIRONMENT=production` | Varsayılan JWT anahtarı / geliştirme DB şifresiyle sunucu **açılmaz** |
+| `JWT_SECRET` | En az 32 karakter, rastgele |
+| `DB_PASSWORD` | Geliştirme şifresi kabul edilmez |
+| `CORS_ORIGIN` | Web sürümünün adresi (varsayılan `*`) |
+| `TRUST_PROXY=true` | Sadece nginx / yük dengeleyici arkasındaysa |
+| `AUTH_RATE_LIMIT` | `/auth` uçlarına IP başına dakikada istek (varsayılan 20) |
+
+Sunucu `wss://` (TLS) arkasında çalışmalı: WebSocket jetonu adreste taşınıyor.
+
+### Henüz eksik olanlar (yayından önce)
+
+| Eksik | Neden benim kararım değil |
+|---|---|
+| Uygulama ikonu | Hâlâ varsayılan Flutter ikonu. Marka tasarımı gerekiyor. |
+| Üretim sunucusu ve alan adı | Barındırma seçimi ve maliyeti senin kararın. |
+| Yükleme anahtarı (keystore) | Senin saklaman gereken gizli bilgi; kaybedilirse uygulama güncellenemez. |
+| Gizlilik politikası sayfası | Play Store ve App Store zorunlu tutuyor (e-posta topluyoruz). |
+| Gerçek cihazda 60 FPS ölçümü | Bağlı telefon yoktu; `flutter run --profile` + DevTools ile ölçülmeli. |
+| iOS derlemesi | Mac gerekiyor; bu bilgisayarda yapılamadı. |
+
 ## Durum
 
 | Parça | Durum |
@@ -365,6 +420,7 @@ testler atlanır, başarısız olmaz.
 | Taktik ve enerji sistemi (Pres / Kontra / Duvar) | ✅ Tamamlandı, SQL + e2e + arayüz testli |
 | Maç sonu lig ilerlemesi + lig atlama ekranı | ✅ Tamamlandı, SQL + e2e + arayüz testli |
 | Mühürlü paket (dokunarak açma) + paket sonucu ekranı | ✅ Tamamlandı, 7 test |
+| FAZ 7 kalite kontrol (güvenlik, kopma kurtarma, cihaz, yayın) | ✅ Tamamlandı, `scripts/testleri-calistir.ps1` |
 | SBC (kadro kurma görevleri) + ekonomi | ✅ Tamamlandı, test edildi |
 | Kart özellikleri (6 özellik) | ✅ Tamamlandı, 20 test |
 | Kademeli paket açılışı + Walkout animasyonu | ✅ Tamamlandı, 24 test |
