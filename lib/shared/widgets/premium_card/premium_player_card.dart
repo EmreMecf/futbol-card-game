@@ -65,6 +65,15 @@ class PremiumPlayerCard extends StatefulWidget {
 
   final VoidCallback? onTap;
 
+  /// Özgün karakterin oyun tarzı ("Hızlı Kanat"). Null ise rozet yok.
+  final String? playstyleLabel;
+
+  /// Görsel yokken siluetin üstüne "PORTRE YOK" yazılsın mı?
+  ///
+  /// Özgün karakter kartlarında açık: portre henüz üretilmemişse bu
+  /// AÇIKÇA görünmeli; siluet tamamlanmış bir görsel gibi durmamalı.
+  final bool flagMissingPortrait;
+
   const PremiumPlayerCard({
     super.key,
     required this.fullName,
@@ -83,7 +92,45 @@ class PremiumPlayerCard extends StatefulWidget {
     this.interactive = true,
     this.useGyroscope = false,
     this.onTap,
+    this.playstyleLabel,
+    this.flagMissingPortrait = false,
   });
+
+  /// Özgün karakterden (025) ve Denge Motoru önerisinden kart.
+  ///
+  /// Kimlik [Character]'dan, oyun değerleri [CharacterCardProposal]'dan
+  /// gelir; ikisi ayrı tutulur (yapay zekâ güç belirleyemez).
+  /// [portraitUri] sunucunun onaylı portresi (`character_presentation`);
+  /// yoksa siluet + "PORTRE YOK".
+  factory PremiumPlayerCard.fromCharacter(
+    Character karakter,
+    CharacterCardProposal oneri, {
+    Key? key,
+    String? portraitUri,
+    String? clubName,
+    double width = 200,
+    bool interactive = true,
+    bool useGyroscope = false,
+    VoidCallback? onTap,
+  }) {
+    return PremiumPlayerCard(
+      key: key,
+      fullName: karakter.displayName,
+      position: karakter.primaryPosition,
+      tier: oneri.tier,
+      power: oneri.power,
+      imageUrl: portraitUri,
+      nationality: karakter.regionCode,
+      club: clubName,
+      attributes: oneri.attributes,
+      width: width,
+      interactive: interactive,
+      useGyroscope: useGyroscope,
+      onTap: onTap,
+      playstyleLabel: karakter.playstyle.label,
+      flagMissingPortrait: true,
+    );
+  }
 
   /// Envanterdeki bir karttan olustur
   factory PremiumPlayerCard.fromInventory(
@@ -395,7 +442,7 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
   /// Gorsel yokken gosterilen stilize siluet.
   /// Bos bir kutu yerine kartin kimligini koruyan bir yer tutucu.
   Widget _siluet(CardTierTheme tema, double yukseklik) {
-    return SizedBox(
+    final siluet = SizedBox(
       height: yukseklik,
       child: ShaderMask(
         blendMode: BlendMode.srcIn,
@@ -409,6 +456,34 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
         ).createShader(rect),
         child: Icon(Icons.person, size: yukseklik, color: Colors.white),
       ),
+    );
+    if (!widget.flagMissingPortrait) return siluet;
+
+    // Eksik görsel AÇIKÇA belirtilir (tamamlanmış gibi gösterilmez)
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        siluet,
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.width * 0.04,
+            vertical: widget.width * 0.012,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.55),
+            borderRadius: BorderRadius.circular(widget.width * 0.03),
+          ),
+          child: Text(
+            'PORTRE YOK',
+            style: TextStyle(
+              fontSize: widget.width * 0.052,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1,
+              color: tema.textColor.withValues(alpha: 0.85),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -475,6 +550,37 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
                     ),
                 ],
               ),
+              // ---- UST SAG: OYUN TARZI (özgün karakter) ----
+              if (widget.playstyleLabel != null) ...[
+                const Spacer(),
+                Flexible(
+                  flex: 4,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: olcek * 0.035,
+                      vertical: olcek * 0.012,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(olcek * 0.04),
+                      border: Border.all(
+                        color: tema.mutedTextColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: Text(
+                      widget.playstyleLabel!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: olcek * 0.052,
+                        fontWeight: FontWeight.w800,
+                        color: tema.textColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
 
