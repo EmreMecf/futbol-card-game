@@ -168,13 +168,24 @@ Router matchRoutes(Database db) {
       '''
       select mm.round_number, mm.user_id, mm.is_lead, mm.is_pass,
              mm.position, mm.tier, mm.power, mm.chemistry, mm.created_at,
-             mm.user_card_id, c.full_name, c.image_url
+             mm.user_card_id, c.full_name, c.image_url, mm.tactic_bonus,
+             -- GIZLILIK: rakibin taktigi, o tur cozulene kadar gonderilmez.
+             -- (Turu acan taktigini secip bekliyorken cevap veren onu
+             -- gorebilseydi her zaman karsi taktigi secerdi.)
+             case
+               when mm.user_id = @userId::uuid
+                 or exists (select 1 from match_rounds r
+                            where r.match_id = mm.match_id
+                              and r.round_number = mm.round_number)
+               then mm.tactic
+               else null
+             end as tactic
       from match_moves mm
       left join cards c on c.id = mm.card_id
       where mm.match_id = @matchId::uuid
       order by mm.round_number, mm.is_lead desc
       ''',
-      params: {'matchId': matchId},
+      params: {'matchId': matchId, 'userId': userId},
     );
 
     final turlar = await db.query(
@@ -214,7 +225,12 @@ Router matchRoutes(Database db) {
   // ------------------------------------------------------------------
   // KART OYNA
   // ------------------------------------------------------------------
-  // Govde: { "user_card_id": "..." }  veya  {} / null  -> PAS
+  // Govde: { "user_card_id": "...", "tactic": "high_press" }
+  //        veya  {} / null  -> PAS
+  //
+  // "tactic" istege baglidir (yoksa 'none'). Gecerliligini ve enerjinin
+  // yetip yetmedigini play_card() veritabaninda dogrular; burada sadece
+  // tipini kontrol ediyoruz.
   router.post('/<matchId>/play', (Request request, String matchId) async {
     final userId = requireUserId(request);
     final body = await readJsonBody(request);
@@ -222,13 +238,20 @@ Router matchRoutes(Database db) {
     final kartId = body['user_card_id'];
     final kart = (kartId is String && kartId.isNotEmpty) ? kartId : null;
 
+    final taktikHam = body['tactic'];
+    if (taktikHam != null && taktikHam is! String) {
+      throw const ApiException('Gecersiz taktik.', status: 400);
+    }
+    final taktik = (taktikHam as String?) ?? MatchTactic.none.code;
+
     final sonuc = await db.scalar(
       kart == null
-          ? 'select play_card(@userId::uuid, @matchId::uuid, null)'
-          : 'select play_card(@userId::uuid, @matchId::uuid, @cardId::uuid)',
+          ? 'select play_card(@userId::uuid, @matchId::uuid, null, @tactic)'
+          : 'select play_card(@userId::uuid, @matchId::uuid, @cardId::uuid, @tactic)',
       params: {
         'userId': userId,
         'matchId': matchId,
+        'tactic': taktik,
         if (kart != null) 'cardId': kart,
       },
     );

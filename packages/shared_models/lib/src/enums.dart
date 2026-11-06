@@ -120,6 +120,72 @@ enum MatchmakingStatus {
   notInQueue;
 }
 
+/// Kart oynarken secilen istege bagli taktik (021_tactics.sql).
+///
+/// Tas - kagit - makas: pres duvari, duvar kontrayi, kontra presi kirar.
+/// Kirilan taktigin bonusu sifirlanir.
+///
+/// ONEMLI: Maliyetler sadece ARAYUZ icindir (dugmeyi pasif gostermek).
+/// Enerjinin yetip yetmedigini ve bonusu HER ZAMAN sunucu hesaplar.
+/// Sayilar `tactic_cost()` SQL fonksiyonuyla aynidir.
+@JsonEnum()
+enum MatchTactic {
+  @JsonValue('none')
+  none('none', 'Taktik Yok', 0, ''),
+
+  @JsonValue('high_press')
+  highPress('high_press', 'Yüksek Pres', 3, '+9 güç. Kontra Atak\'a yakalanırsa boşa gider.'),
+
+  @JsonValue('counter_attack')
+  counterAttack('counter_attack', 'Kontra Atak', 2, '+2 güç; rakip pres yaparsa +13. Savunma Duvarı\'na çarpar.'),
+
+  @JsonValue('defensive_wall')
+  defensiveWall('defensive_wall', 'Savunma Duvarı', 1, 'Savunurken +6, turu açarken +2. Yüksek Pres onu kırar.');
+
+  /// API ve veritabanindaki deger
+  final String code;
+
+  /// Ekranda gosterilecek ad
+  final String label;
+
+  /// Enerji maliyeti (gosterim icin; dogrulamayi sunucu yapar)
+  final int cost;
+
+  /// Kisa aciklama
+  final String hint;
+
+  const MatchTactic(this.code, this.label, this.cost, this.hint);
+
+  /// Kullanilabilir (taktik yok disindaki) taktikler
+  static const playable = [highPress, counterAttack, defensiveWall];
+
+  /// Bu taktigin kirdigi taktik
+  MatchTactic? get beats => switch (this) {
+        MatchTactic.highPress => MatchTactic.defensiveWall,
+        MatchTactic.counterAttack => MatchTactic.highPress,
+        MatchTactic.defensiveWall => MatchTactic.counterAttack,
+        MatchTactic.none => null,
+      };
+
+  /// Bu taktigi kiran taktik
+  MatchTactic? get beatenBy => switch (this) {
+        MatchTactic.highPress => MatchTactic.counterAttack,
+        MatchTactic.counterAttack => MatchTactic.defensiveWall,
+        MatchTactic.defensiveWall => MatchTactic.highPress,
+        MatchTactic.none => null,
+      };
+
+  bool get isNone => this == MatchTactic.none;
+
+  /// Bu enerjiyle secilebilir mi?
+  bool isAffordable(int energy) => cost <= energy;
+
+  static MatchTactic fromCode(String? code) => MatchTactic.values.firstWhere(
+        (t) => t.code == code,
+        orElse: () => MatchTactic.none,
+      );
+}
+
 // =====================================================================
 // OYUNUN EN KRITIK KURALI: KART KARSILASTIRMA
 // =====================================================================

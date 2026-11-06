@@ -118,6 +118,12 @@ abstract class MatchState with _$MatchState {
     @Default(0) int myCardsLeft,
     @Default(0) int opponentCardsLeft,
 
+    /// Taktik enerjisi (021_tactics.sql). Sadece tur cozulurken degisir;
+    /// bu yuzden rakibin enerjisi gizli taktigini ele vermez.
+    @Default(0) int myEnergy,
+    @Default(0) int opponentEnergy,
+    @Default(5) int maxEnergy,
+
     OpponentInfo? opponent,
 
     String? winnerId,
@@ -185,6 +191,14 @@ abstract class MatchMove with _$MatchMove {
     /// Bu hamlede uygulanan kimya bonusu
     @Default(0) int chemistry,
 
+    /// Bu hamlede secilen taktik.
+    /// null = GIZLI: rakibin turu acarken sectigi taktik, tur cozulene
+    /// kadar sunucu tarafindan gonderilmez.
+    MatchTactic? tactic,
+
+    /// Tur cozulurken sunucunun hesapladigi taktik bonusu
+    @Default(0) int tacticBonus,
+
     String? userCardId,
     String? fullName,
     String? imageUrl,
@@ -195,8 +209,13 @@ abstract class MatchMove with _$MatchMove {
 
   bool get isLegend => tier?.isLegend ?? false;
 
-  /// Karsilastirmada kullanilan gercek guc
-  int? get effectivePower => power == null ? null : power! + chemistry;
+  /// Karsilastirmada kullanilan gercek guc (guc + kimya + taktik bonusu).
+  /// Taktik bonusu tur cozulene kadar 0'dir.
+  int? get effectivePower =>
+      power == null ? null : power! + chemistry + tacticBonus;
+
+  /// Bir taktik secildi ve biliniyor mu?
+  bool get hasTactic => tactic != null && !tactic!.isNone;
 
   bool get hasChemistry => chemistry > 0;
 }

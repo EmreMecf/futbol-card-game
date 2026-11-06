@@ -128,6 +128,11 @@ class RowMappers {
       tier: seviye == null ? null : CardTier.fromCode(seviye),
       power: row['power'] == null ? null : _int(row['power']),
       chemistry: _int(row['chemistry']),
+      // null = gizli (rakibin cozulmemis turdaki taktigi)
+      tactic: row['tactic'] == null
+          ? null
+          : MatchTactic.fromCode(row['tactic'].toString()),
+      tacticBonus: _int(row['tactic_bonus']),
       userCardId: row['user_card_id']?.toString(),
       fullName: row['full_name'] as String?,
       imageUrl: row['image_url'] as String?,

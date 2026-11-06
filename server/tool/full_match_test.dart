@@ -158,6 +158,48 @@ Future<void> main() async {
   var tur = 0;
   var hamleSayisi = 0;
 
+  // ---- TAKTIK KONTROLLERI (021_tactics.sql) ----
+  var taktikliHamle = 0;
+  var gizlilikKontrolu = 0;
+  var taktikHatasi = false;
+
+  // Enerjinin yettigi en pahali taktigi sec (sirayla cesitlilik icin
+  // bazen daha ucuzunu)
+  String taktikSec(int enerji, int sira) {
+    const secenekler = [
+      ['high_press', 3],
+      ['counter_attack', 2],
+      ['defensive_wall', 1],
+    ];
+    final uygun =
+        secenekler.where((t) => (t[1] as int) <= enerji).toList();
+    if (uygun.isEmpty || sira % 4 == 3) return 'none';
+    return uygun[sira % uygun.length][0] as String;
+  }
+
+  // Ilk hamlede enerji 2: pres (3) REDDEDILMELI
+  {
+    final d = await istek('GET', '/match/$macId/state',
+        token: oyuncular['mac1']!['token'] as String);
+    final ad = d['is_my_turn'] == true ? 'mac1' : 'mac2';
+    final t = oyuncular[ad]!['token'] as String;
+    final el = await istek('GET', '/match/$macId/hand', token: t);
+    final k = (el['cards'] as List).first as Map<String, dynamic>;
+    try {
+      await istek('POST', '/match/$macId/play',
+          govde: {'user_card_id': k['user_card_id'], 'tactic': 'high_press'},
+          token: t);
+      print('  !!! Enerji yetmedigi halde pres KABUL EDILDI');
+      taktikHatasi = true;
+    } on Exception catch (e) {
+      print('  Enerji 2 iken pres reddedildi: $e');
+    }
+    if (d['my_energy'] != 2 || d['opponent_energy'] != 2) {
+      print('  !!! Baslangic enerjisi 2 degil: $d');
+      taktikHatasi = true;
+    }
+  }
+
   while (true) {
     if (hamleSayisi > 60) {
       print('  !!! Mac bitmedi, guvenlik siniri asildi');
@@ -199,10 +241,45 @@ Future<void> main() async {
       stdout.write('[${sirasiOlan == 'mac1' ? 'A' : 'B'}:PAS] ');
     } else {
       final kart = uygun.first;
+      final enerji = (sirasiOlan == 'mac1'
+          ? durum['my_energy']
+          : durum['opponent_energy']) as int;
+      final taktik = taktikSec(enerji, hamleSayisi);
+      if (taktik != 'none') taktikliHamle++;
+
       await istek('POST', '/match/$macId/play',
-          govde: {'user_card_id': kart['user_card_id']}, token: token);
-      stdout.write(
-          '[${sirasiOlan == 'mac1' ? 'A' : 'B'}:${kart['position']}${kart['power']}] ');
+          govde: {'user_card_id': kart['user_card_id'], 'tactic': taktik},
+          token: token);
+      stdout.write('[${sirasiOlan == 'mac1' ? 'A' : 'B'}:'
+          '${kart['position']}${kart['power']}'
+          '${taktik == 'none' ? '' : '+${taktik.split('_').first}'}] ');
+
+      // GIZLILIK: turu ACTIYSAK, rakip bu taktigi GORMEMELI;
+      // biz kendi taktigimizi gormeliyiz.
+      if (zorunlu == null && taktik != 'none') {
+        final rakip = sirasiOlan == 'mac1' ? 'mac2' : 'mac1';
+        Future<Map<String, dynamic>?> sonHamle(String kim) async {
+          final h = await istek('GET', '/match/$macId/moves',
+              token: oyuncular[kim]!['token'] as String);
+          return (h['moves'] as List)
+              .cast<Map<String, dynamic>>()
+              .where((m) => m['round_number'] == tur && m['is_lead'] == true)
+              .firstOrNull;
+        }
+
+        final rakibinGordugu = await sonHamle(rakip);
+        final benimGordugum = await sonHamle(sirasiOlan);
+        gizlilikKontrolu++;
+        if (rakibinGordugu?['tactic'] != null) {
+          print('\n  !!! GIZLILIK IHLALI: rakip taktigi goruyor: '
+              '${rakibinGordugu?['tactic']}');
+          taktikHatasi = true;
+        }
+        if (benimGordugum?['tactic'] != taktik) {
+          print('\n  !!! Kendi taktigimi goremiyorum: $benimGordugum');
+          taktikHatasi = true;
+        }
+      }
     }
 
     hamleSayisi++;
@@ -212,6 +289,26 @@ Future<void> main() async {
   print('');
   print('');
   print('  Toplam $hamleSayisi hamle oynandi.');
+  print('  Taktikli hamle: $taktikliHamle, gizlilik kontrolu: '
+      '$gizlilikKontrolu');
+
+  // Mac bitince BUTUN taktikler herkese acik olmali ve bonuslar
+  // sunucunun SQL kurallariyla tutarli olmali.
+  {
+    final h = await istek('GET', '/match/$macId/moves',
+        token: oyuncular['mac1']!['token'] as String);
+    final hamleler = (h['moves'] as List).cast<Map<String, dynamic>>();
+    final gizli = hamleler.where((m) => m['tactic'] == null).length;
+    final bonuslu =
+        hamleler.where((m) => (m['tactic_bonus'] as int? ?? 0) > 0).length;
+    print('  Mac sonunda gizli kalan taktik: $gizli, bonus alan hamle: '
+        '$bonuslu');
+    if (gizli > 0) taktikHatasi = true;
+    if (taktikliHamle > 0 && bonuslu == 0) {
+      print('  !!! Taktik oynandi ama hic bonus hesaplanmadi');
+      taktikHatasi = true;
+    }
+  }
 
   await Future<void>.delayed(const Duration(seconds: 1));
 
@@ -246,7 +343,8 @@ Future<void> main() async {
   // ==================================================================
   baslik('7) GERCEK ZAMANLI BILDIRIMLER');
   // ==================================================================
-  var hepsiTamam = true;
+  var hepsiTamam = !taktikHatasi;
+  if (taktikHatasi) print('  !!! TAKTIK KONTROLLERINDE HATA VAR (yukari bak)');
 
   for (final ad in oyuncular.keys) {
     final olaylar = oyuncular[ad]!['events'] as List<String>;

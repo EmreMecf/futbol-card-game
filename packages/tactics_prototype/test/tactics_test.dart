@@ -29,7 +29,8 @@ void main() {
     // geçerlidir. Biri değişip diğeri unutulursa bu test yakalar.
     test('021_tactics.sql sayıları TacticRules.balanced ile AYNI', () {
       final sql = File('../../database/migrations/021_tactics.sql')
-          .readAsStringSync();
+          .readAsStringSync()
+          .replaceAll('\r\n', '\n'); // Windows satır sonlarına dayanıklı
 
       int sabit(String fonksiyon) {
         final eslesme = RegExp('function $fonksiyon\\(\\) returns int\\s+'
