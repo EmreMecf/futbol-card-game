@@ -139,6 +139,7 @@ class MatchViewModel extends BaseViewModel {
 
   /// Bir sonraki kartla birlikte gönderilecek taktik
   MatchTactic get selectedTactic {
+    if (!tacticsEnabled) return MatchTactic.none;
     // Enerji düştüyse (ör. tur çözüldü) seçim artık geçersiz olabilir
     if (!_secilenTaktik.isAffordable(myEnergy)) return MatchTactic.none;
     return _secilenTaktik;
@@ -148,9 +149,17 @@ class MatchViewModel extends BaseViewModel {
   int get opponentEnergy => _durum?.opponentEnergy ?? 0;
   int get maxEnergy => _durum?.maxEnergy ?? 5;
 
+  /// Bu maçta taktik var mı? Maç taktiksiz bir kural sürümüyle
+  /// başladıysa (023) taktik çubuğu hiç gösterilmez.
+  bool get tacticsEnabled => _durum?.tacticsEnabled ?? true;
+
   /// Taktik seçilebilir mi? (sıra bende, pas zorunlu değil, enerji yetiyor)
   bool canUseTactic(MatchTactic t) =>
-      isMyTurn && !isOver && !mustPass && t.isAffordable(myEnergy);
+      tacticsEnabled &&
+      isMyTurn &&
+      !isOver &&
+      !mustPass &&
+      t.isAffordable(myEnergy);
 
   /// Taktiği seçer; aynı taktiğe tekrar dokunmak seçimi kaldırır.
   void selectTactic(MatchTactic t) {

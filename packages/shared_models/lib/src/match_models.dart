@@ -124,6 +124,14 @@ abstract class MatchState with _$MatchState {
     @Default(0) int opponentEnergy,
     @Default(5) int maxEnergy,
 
+    /// Bu macin kural surumu (023). Mac hangi surumle BASLADIYSA onunla
+    /// biter; kural guncellemesi suren maclari degistirmez.
+    @Default(0) int rulesVersion,
+
+    /// Bu macta taktik kullanilabilir mi? (surumden gelir)
+    /// Eski sunucu alani gondermezse true: 021'den beri varsayilan buydu.
+    @Default(true) bool tacticsEnabled,
+
     OpponentInfo? opponent,
 
     String? winnerId,

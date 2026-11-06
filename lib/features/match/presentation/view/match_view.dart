@@ -329,10 +329,12 @@ class _DarMasa extends StatelessWidget {
                     viewModel: viewModel,
                     cardWidth: elKartGenisligi,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
-                    child: _TaktikCubugu(viewModel: viewModel),
-                  ),
+                  // Taktiksiz kural sürümüyle başlamış maçta çubuk yok
+                  if (viewModel.tacticsEnabled)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                      child: _TaktikCubugu(viewModel: viewModel),
+                    ),
                   _AksiyonCubugu(state: state, viewModel: viewModel),
                   const SizedBox(height: 8),
                 ],
@@ -1208,10 +1210,12 @@ class _YanPanel extends StatelessWidget {
           const SizedBox(height: 10),
           _DurumPaneli(state: durum, viewModel: viewModel),
 
-          const SizedBox(height: 16),
-          Text('TAKTİK', style: AppTypography.label),
-          const SizedBox(height: 10),
-          _TaktikCubugu(viewModel: viewModel),
+          if (viewModel.tacticsEnabled) ...[
+            const SizedBox(height: 16),
+            Text('TAKTİK', style: AppTypography.label),
+            const SizedBox(height: 10),
+            _TaktikCubugu(viewModel: viewModel),
+          ],
           if (!viewModel.selectedTactic.isNone) ...[
             const SizedBox(height: 8),
             Text(

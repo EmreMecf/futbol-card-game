@@ -26,7 +26,10 @@ Write-Host "Veritabani yeniden olusturuluyor..." -ForegroundColor Cyan
 $dosyalar = Get-ChildItem "$Proje\database\migrations\*.sql" | Sort-Object Name
 foreach ($d in $dosyalar) {
     Write-Host "  -> $($d.Name)" -ForegroundColor DarkGray
-    & "$Bin\psql.exe" -h 127.0.0.1 -U futbol -d futbol_card -v ON_ERROR_STOP=1 -q -f $d.FullName
+    # -1: her migration TEK ISLEMDE. Yarida hata olursa o dosyadan hicbir
+    # sey uygulanmaz; fonksiyon "silinmis ama yeniden olusturulmamis"
+    # halde kalmaz (021'deki drop+create gibi).
+    & "$Bin\psql.exe" -h 127.0.0.1 -U futbol -d futbol_card -v ON_ERROR_STOP=1 -q -1 -f $d.FullName
     if ($LASTEXITCODE -ne 0) {
         Write-Host "HATA: $($d.Name) calistirilamadi." -ForegroundColor Red
         exit 1

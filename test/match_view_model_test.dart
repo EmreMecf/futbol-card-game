@@ -383,6 +383,19 @@ void main() {
       expect(repo.oynananTaktikler, [MatchTactic.none]);
     });
 
+    test('taktiksiz kural surumundeki macta taktik secilemez (023)',
+        () async {
+      repo.durum = durum(enerji: 5).copyWith(tacticsEnabled: false);
+      repo.el = testEli();
+      await vm.initialize();
+
+      expect(vm.tacticsEnabled, isFalse);
+      expect(vm.canUseTactic(MatchTactic.defensiveWall), isFalse);
+      vm.selectTactic(MatchTactic.defensiveWall);
+      await vm.playCard(repo.el.first);
+      expect(repo.oynananTaktikler, [MatchTactic.none]);
+    });
+
     test('enerji bilgisi sunucudan okunur', () async {
       repo.durum = durum(enerji: 4);
       await vm.initialize();
