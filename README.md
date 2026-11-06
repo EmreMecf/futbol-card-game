@@ -73,7 +73,8 @@ backend kuralları *bilmez*, sadece sorar.
 | Beraberlikte kartlar masada kalır | `_resolve_round()` |
 | Kaybeden 3 korumasız kartını kaptırır | `_finish_match()` |
 | **Kimya:** aynı kulüp / lig+uyruk = +2, uyruk veya lig = +1 | `chemistry_link_score()` |
-| Kartın maçtaki gücü = güç + kimya | `_resolve_round()` |
+| Kartın maçtaki gücü = güç + kimya + taktik bonusu | `_resolve_round()` |
+| **Taktik ve enerji:** Pres / Kontra / Duvar, enerji doğrulaması | `play_card()`, `tactic_bonus()`, `tactic_cost()` |
 | Maç sonucu ve kart transferleri | `get_match_result()` |
 | Oyuncunun bitmiş maçları | `get_match_history()` |
 | Puanın hangi lige denk geldiği | `rank_for_mmr()`, `league_tiers` |
@@ -88,9 +89,25 @@ backend kuralları *bilmez*, sadece sorar.
 Bunun getirisi: bir kuralı değiştirmek için tek bir SQL fonksiyonunu
 güncellemen yeterli. Uygulamayı yeniden yayınlamana gerek yok.
 
+> **Taktik sistemi** (`021_tactics.sql`, FAZ 5 prototipinden kullanıcı
+> onayıyla alındı). Her oyuncu 2 enerjiyle başlar, her tur +1 kazanır
+> (en fazla 5). Kart oynarken istersen bir taktik seçersin:
+>
+> | Taktik | Enerji | Etki | Kırıldığı taktik |
+> |---|---|---|---|
+> | Yüksek Pres | 3 | +9 | Kontra Atak (bonus sıfır) |
+> | Kontra Atak | 2 | +2, rakip pres yaparsa +13 | Savunma Duvarı |
+> | Savunma Duvarı | 1 | savunurken +6, açarken +2 | Yüksek Pres |
+>
+> Bonus güce eklenir ama `compare_cards()` Legend kuralına **önce**
+> baktığı için hiçbir taktik Legend'i yenmeyi sağlayamaz. Turu açanın
+> taktiği tur çözülene kadar rakibe **gönderilmez**; enerji de tur
+> çözülürken düşüldüğü için rakibin enerji çubuğu taktiği ele vermez.
+> Denge raporu: `packages/tactics_prototype/RAPOR.md`.
+
 > **Kart özellikleri turu KAZANDIRMAZ.** Şut, hız, fizik, defans,
 > dribling ve hızlanma şu an sadece kartın karakterini gösterir; turu
-> hâlâ `güç + kimya` belirliyor. Bir özelliği maça bağlamak istersek
+> hâlâ `güç + kimya (+ taktik)` belirliyor. Bir özelliği maça bağlamak istersek
 > değişecek tek yer `_resolve_round()`.
 >
 > Değerler elle yazılmadı: `position_attribute_profile()` pozisyona göre
@@ -295,9 +312,23 @@ cd server; dart run tool/realtime_test.dart
 cd server; dart run tool/full_match_test.dart
 ```
 
+```bash
+psql -h 127.0.0.1 -U futbol -d futbol_card -v ON_ERROR_STOP=1 -f database/tests/021_tactics_test.sql
+```
+
+```bash
+cd packages/tactics_prototype; dart test
+```
+
 `full_match_test.dart` iki oyuncu oluşturur, WebSocket ile bağlar, eşleştirir
 ve maçı **sonuna kadar oynatır**. Şu zincirin tamamını doğrular:
-`REST → PostgreSQL → pg_notify → LISTEN → WebSocket → istemci`
+`REST → PostgreSQL → pg_notify → LISTEN → WebSocket → istemci`.
+Taktikli oynar; enerji yetmezken presin reddedildiğini ve turu açanın
+taktiğinin rakibe sızmadığını da denetler.
+
+`database/tests/021_tactics_test.sql` taktik kurallarını doğrudan
+veritabanında sınar (bonus tablosu, enerji, gizlilik, Legend kuralı).
+Her şeyi bir işlemde yapıp geri alır; veritabanında iz bırakmaz.
 
 `test/api_integration_test.dart` uygulamanın gerçek ağ katmanını canlı
 backend'e karşı çalıştırır (otomatik jeton yenileme dahil). Backend kapalıysa
@@ -320,6 +351,7 @@ testler atlanır, başarısız olmaz.
 | Koleksiyon ekranı (filtre, arama, sıralama) | ✅ Tamamlandı, 12 test |
 | Flutter: koleksiyon, kadro, profil ekranları | ✅ Tamamlandı |
 | Kimya sistemi (uyruk / lig / kulüp) | ✅ Tamamlandı, test edildi |
+| Taktik ve enerji sistemi (Pres / Kontra / Duvar) | ✅ Tamamlandı, SQL + e2e + arayüz testli |
 | SBC (kadro kurma görevleri) + ekonomi | ✅ Tamamlandı, test edildi |
 | Kart özellikleri (6 özellik) | ✅ Tamamlandı, 20 test |
 | Kademeli paket açılışı + Walkout animasyonu | ✅ Tamamlandı, 24 test |

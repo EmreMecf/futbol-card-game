@@ -74,6 +74,11 @@ noktası bir katman yukarı taşındı.
 | `008_realtime_notify.sql` | `pg_notify` trigger'ları (gerçek zamanlı bildirim) |
 | `009_starter_pack.sql` | Yeni oyuncuya 17 kart + hazır kadro |
 | `010_seed_cards.sql` | 35 örnek kart |
+| … | (011-020: paketler, kimya, SBC, özellikler, ligler, kart satışı) |
+| `021_tactics.sql` | **Taktik ve enerji sistemi**: `tactic_bonus`, `tactic_cost`, enerji |
+
+Testler `database/tests/` klasöründe; her biri tek işlem içinde çalışıp
+sonunda geri alınır (`rollback`).
 
 ---
 
@@ -90,7 +95,7 @@ Hepsi ilk parametre olarak `p_user_id` alır. **Bu değeri backend JWT'den
 | `cancel_matchmaking(p_user_id)` | Kuyruktan çıkar |
 | `get_match_state(p_user_id, p_match_id)` | Ekranı çizecek tüm genel bilgi (JSON) |
 | `get_my_hand(p_user_id, p_match_id)` | **Sadece o oyuncunun** kartları |
-| `play_card(p_user_id, p_match_id, p_user_card_id)` | Kart oynar (`NULL` = pas) |
+| `play_card(p_user_id, p_match_id, p_user_card_id, p_tactic)` | Kart oynar (`NULL` = pas). `p_tactic`: `none`, `high_press`, `counter_attack`, `defensive_wall`; enerjiyi sunucu doğrular |
 | `claim_turn_timeout(p_user_id, p_match_id)` | Rakip AFK ise maçı hükmen kazanır |
 | `surrender_match(p_user_id, p_match_id)` | Teslim olur (ceza uygulanır) |
 | `sweep_timed_out_matches()` | Zamanlayıcı çağırır, süresi dolmuş maçları kapatır |
