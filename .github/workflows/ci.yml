@@ -1,0 +1,255 @@
+# =====================================================================
+# SUREKLI ENTEGRASYON (bagimsiz inceleme, madde 6)
+# =====================================================================
+# Her push ve pull request'te calisir. Bir adim calistirilamazsa is
+# KIRMIZI olur; "atlandi" basari sayilmaz.
+#
+# Isler:
+#   uygulama   : Flutter analyze + Flutter testleri
+#   paketler   : ortak modeller, taktik prototipi, sunucu analyze + test
+#   veritabani : izole PostgreSQL'de scripts/db-testleri.sh
+#                (sifirdan kurulum, kural testleri, tekrar calistirma,
+#                 mac surerken yukseltme)
+#   uctan_uca  : izole PostgreSQL + gercek sunucu, tam mac ve
+#                gercek zamanli bildirim zinciri
+#   android    : release APK derleme kontrolu
+#
+# NOT: Bu CI veritabani ve JWT icin GECICI degerler kullanir; hicbiri
+# uretim sirri degildir.
+# =====================================================================
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.44.6"
+
+jobs:
+  # -------------------------------------------------------------------
+  uygulama:
+    name: Flutter analyze + test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # .env pakete gomulen bir varlik; depoda yok (gizli olabilir).
+      # CI ornek dosyayi kullanir.
+      - name: .env olustur
+        run: cp .env.example .env
+
+      # Freezed/json kodu depoda tutulmuyor (.gitignore)
+      - name: Ortak modellerin kodunu uret
+        working-directory: packages/shared_models
+        run: |
+          dart pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - run: flutter pub get
+      - name: Flutter analyze
+        run: flutter analyze
+      # test/api_integration_test.dart canli sunucu ister; burada sunucu
+      # olmadigi icin o testler "atlandi" olarak raporlanir. Canli sunucu
+      # zinciri 'uctan_uca' isinde AYRICA test ediliyor.
+      - name: Flutter testleri
+        run: flutter test
+
+  # -------------------------------------------------------------------
+  paketler:
+    name: Dart paketleri + sunucu
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Ortak modeller
+        working-directory: packages/shared_models
+        run: |
+          dart pub get
+          dart run build_runner build --delete-conflicting-outputs
+          dart analyze
+          dart test
+
+      - name: Taktik prototipi (kurallar + denge)
+        working-directory: packages/tactics_prototype
+        run: |
+          dart pub get
+          dart analyze
+          dart test
+
+      - name: Sunucu
+        working-directory: server
+        run: |
+          dart pub get
+          dart analyze
+          dart test
+
+  # -------------------------------------------------------------------
+  veritabani:
+    name: Veritabani (izole PostgreSQL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: futbol
+          POSTGRES_PASSWORD: ci_gecici_sifre
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U futbol"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: localhost
+      PGUSER: futbol
+      PGPASSWORD: ci_gecici_sifre
+    steps:
+      - uses: actions/checkout@v4
+      - name: psql istemcisi
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+      - name: Veritabani testleri
+        run: bash scripts/db-testleri.sh
+
+  # -------------------------------------------------------------------
+  uctan_uca:
+    name: Uctan uca (gercek sunucu)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: futbol
+          POSTGRES_PASSWORD: ci_gecici_sifre
+          POSTGRES_DB: futbol_card
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U futbol"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: localhost
+      PGUSER: futbol
+      PGPASSWORD: ci_gecici_sifre
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_NAME: futbol_card
+      DB_USER: futbol
+      DB_PASSWORD: ci_gecici_sifre
+      PORT: "8080"
+      ENVIRONMENT: development
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: psql istemcisi
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+
+      - name: Migration'lari uygula (her biri tek islemde)
+        run: |
+          for m in $(git ls-files 'database/migrations/*.sql' | sort); do
+            psql -d futbol_card -v ON_ERROR_STOP=1 -q -1 -f "$m"
+          done
+
+      - name: Ortak modellerin kodunu uret
+        working-directory: packages/shared_models
+        run: |
+          dart pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Sunucuyu baslat
+        working-directory: server
+        run: |
+          dart pub get
+          nohup dart run bin/server.dart > ../sunucu.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/api/health > /dev/null; then
+              echo "Sunucu hazir"; exit 0
+            fi
+            sleep 2
+          done
+          echo "Sunucu acilmadi"; cat ../sunucu.log; exit 1
+
+      - name: Tam mac (taktik, gizlilik, lig degisimi)
+        working-directory: server
+        run: dart run tool/full_match_test.dart
+
+      - name: Gercek zamanli bildirim zinciri
+        working-directory: server
+        run: dart run tool/realtime_test.dart
+
+      - name: Sunucu gunlugunde jeton olmamali
+        if: always()
+        run: |
+          if grep -q 'eyJ' sunucu.log; then
+            echo "HATA: sunucu gunlugunde JWT bulundu"; exit 1
+          fi
+          echo "Gunlukte jeton yok"
+
+  # -------------------------------------------------------------------
+  android:
+    name: Android release derleme
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # flutter_secure_storage API 37 ile derlenmeyi istiyor
+      # (android/app/build.gradle.kts: compileSdk >= 37)
+      - name: Android SDK Platform 37
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" > /dev/null
+
+      - name: .env olustur
+        run: cp .env.example .env
+
+      - name: Ortak modellerin kodunu uret
+        working-directory: packages/shared_models
+        run: |
+          dart pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      # key.properties CI'da yok: paket debug anahtariyla imzalanir
+      # (yuklenemez, sadece DERLENEBILIRLIK kontrolu).
+      - name: Release APK
+        run: flutter build apk --release --dart-define=API_BASE_URL=https://ci.example.invalid
+
+      - name: APK icinde INTERNET izni olmali
+        run: |
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt | sort -V | tail -1)
+          "$AAPT" dump badging build/app/outputs/flutter-apk/app-release.apk | tee badging.txt | grep -E "^package|application-label"
+          grep -q "uses-permission: name='android.permission.INTERNET'" badging.txt
