@@ -77,7 +77,8 @@ backend kuralları *bilmez*, sadece sorar.
 | **Taktik ve enerji:** Pres / Kontra / Duvar, enerji doğrulaması | `play_card()`, `tactic_bonus()`, `tactic_cost()` |
 | Maç sonucu ve kart transferleri | `get_match_result()` |
 | Oyuncunun bitmiş maçları | `get_match_history()` |
-| Puanın hangi lige denk geldiği | `rank_for_mmr()`, `league_tiers` |
+| Puanın hangi lige denk geldiği | `rank_for_mmr()`, `rank_json_for_mmr()`, `league_tiers` |
+| Bir maçın lig etkisi (önce/sonra, yükseldi/düştü) | `get_match_league_change()` |
 | Liderlik sıralaması | `get_leaderboard()` |
 | Bütün lig basamaklarının tanımı | `league_tiers` tablosu |
 | SBC şart doğrulama ve kart eritme | `evaluate_sbc_squad()`, `submit_sbc()` |
@@ -238,6 +239,12 @@ Rozet de biçim olarak ayrı: lig **kalkan**, kart **dikdörtgen**.
 
 ## Paket açılışı: üç kademe
 
+Kartlardan önce **mühürlü paket** sahnesi gelir (`PackSealScene`): paket
+süzülür, dokununca titrer ve patlar. Titreme anındaki parıltı paketin en
+iyi kartının seviye renginde; Diamond ve Legend'da ışık hüzmeleri çıkar.
+Kartlar o anda sunucuda zaten belirlenmiş durumdadır, sahne sadece perdedir.
+"Hepsini göster" her an doğrudan paket sonucuna atlar.
+
 Paketten çıkan **en yüksek seviyeli karta** göre farklı bir açılış oynar.
 Karar `PackOpeningViewModel` içinde, çizim `lib/shared/widgets/walkout/`
 altında.
@@ -320,6 +327,10 @@ psql -h 127.0.0.1 -U futbol -d futbol_card -v ON_ERROR_STOP=1 -f database/tests/
 cd packages/tactics_prototype; dart test
 ```
 
+```bash
+psql -h 127.0.0.1 -U futbol -d futbol_card -v ON_ERROR_STOP=1 -f database/tests/022_league_change_test.sql
+```
+
 `full_match_test.dart` iki oyuncu oluşturur, WebSocket ile bağlar, eşleştirir
 ve maçı **sonuna kadar oynatır**. Şu zincirin tamamını doğrular:
 `REST → PostgreSQL → pg_notify → LISTEN → WebSocket → istemci`.
@@ -352,6 +363,8 @@ testler atlanır, başarısız olmaz.
 | Flutter: koleksiyon, kadro, profil ekranları | ✅ Tamamlandı |
 | Kimya sistemi (uyruk / lig / kulüp) | ✅ Tamamlandı, test edildi |
 | Taktik ve enerji sistemi (Pres / Kontra / Duvar) | ✅ Tamamlandı, SQL + e2e + arayüz testli |
+| Maç sonu lig ilerlemesi + lig atlama ekranı | ✅ Tamamlandı, SQL + e2e + arayüz testli |
+| Mühürlü paket (dokunarak açma) + paket sonucu ekranı | ✅ Tamamlandı, 7 test |
 | SBC (kadro kurma görevleri) + ekonomi | ✅ Tamamlandı, test edildi |
 | Kart özellikleri (6 özellik) | ✅ Tamamlandı, 20 test |
 | Kademeli paket açılışı + Walkout animasyonu | ✅ Tamamlandı, 24 test |

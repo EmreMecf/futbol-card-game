@@ -76,6 +76,7 @@ noktası bir katman yukarı taşındı.
 | `010_seed_cards.sql` | 35 örnek kart |
 | … | (011-019: paketler, kimya, SBC, özellikler, ligler) |
 | `021_tactics.sql` | **Taktik ve enerji sistemi**: `tactic_bonus`, `tactic_cost`, enerji |
+| `022_match_league_change.sql` | Maç öncesi/sonrası puan kaydı (tetikleyici), `get_match_league_change` |
 
 Testler `database/tests/` klasöründe; her biri tek işlem içinde çalışıp
 sonunda geri alınır (`rollback`).
