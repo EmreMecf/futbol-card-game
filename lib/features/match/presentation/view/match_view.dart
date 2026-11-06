@@ -135,6 +135,10 @@ class _MatchBodyState extends State<_MatchBody> {
   }
 
   void kartSec(HandCard kart) {
+    if (_seciliKartId != kart.userCardId) {
+      // Hafif dokunma titreşimi (MD bölüm 10)
+      GameFeedback.haptic(HapticStrength.selection);
+    }
     setState(() => _seciliKartId = kart.userCardId);
   }
 
@@ -224,13 +228,21 @@ class _DarMasa extends StatelessWidget {
               final elYuksekligi = (kalan * 0.42).clamp(120.0, 210.0);
               final masaYuksekligi = kalan - elYuksekligi;
 
-              // Masada iki kart + sayaç dikey sığmalı
-              final masaKartYuksekligi = ((masaYuksekligi - 92) / 2).clamp(
-                72.0,
-                180.0,
-              );
-              final masaKartGenisligi = masaKartYuksekligi / 1.5;
+              // Masada iki kart + sayaç dikey sığmalı.
+              //
+              // ÖNCEKİ HATA: Kartlar için `masaYuksekligi - 92` ayrılıyordu,
+              // ama ortadaki sayaç halkası tek başına 100 piksele kadar
+              // büyüyebiliyor; üstüne kartların etiketleri de geliyor.
+              // 390x844 telefonda masa 16 piksel taşıyordu. Pay artık
+              // sayacın GERÇEK boyutundan hesaplanıyor.
               final sayacBoyutu = (masaYuksekligi * 0.24).clamp(64.0, 100.0);
+              const etiketPayi = 52.0; // iki yuvanın etiket/rozet satırları
+              final masaKartYuksekligi =
+                  ((masaYuksekligi - sayacBoyutu - etiketPayi - 12) / 2).clamp(
+                    64.0,
+                    180.0,
+                  );
+              final masaKartGenisligi = masaKartYuksekligi / 1.5;
 
               // Eldeki kart: rozet ve seçili kartın yükselmesi için
               // 34px pay bırakılıyor (bkz. _Elim).

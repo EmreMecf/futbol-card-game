@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/premium_card/premium_card.dart';
@@ -53,11 +54,19 @@ class HandCardTile extends StatelessWidget {
     final vurgu = isSelected ? AppColors.success : Colors.transparent;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
-      // Seçili kart yukarı kalkar: elde hangi kartın oynanacağı
-      // metin okumadan anlaşılır.
-      transform: Matrix4.translationValues(0, isSelected ? -14 : 0, 0),
+      // MD bölüm 9: kart seçimi 200-350 ms
+      duration: AppDurations.cardSelect,
+      curve: Curves.easeOutBack,
+      // Seçili kart yukarı kalkar ve hafifçe büyür (MD bölüm 6, adım 2):
+      // elde hangi kartın oynanacağı metin okumadan anlaşılır.
+      transformAlignment: Alignment.bottomCenter,
+      transform: Matrix4.translationValues(0, isSelected ? -14 : 0, 0)
+        ..scaleByDouble(
+          isSelected ? 1.06 : 1.0,
+          isSelected ? 1.06 : 1.0,
+          1,
+          1,
+        ),
       child: Opacity(
         // Oynanamayan kartlar silinmiyor, soluklaşıyor. Oyuncunun
         // elinde ne olduğunu görmesi taktik için gerekli.
