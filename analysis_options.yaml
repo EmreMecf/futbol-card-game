@@ -10,6 +10,13 @@ analyzer:
     - "**/*.freezed.dart"
     - "**/*.g.dart"
     - "build/**"
+    # Ayri Dart projeleri: kendi klasorlerinde, kendi bagimliliklariyla
+    # analiz edilirler (CI 'paketler' isi). Kokteki flutter analyze
+    # onlari taramamali: temiz klonda bagimliliklari yuklenmemis oldugu
+    # icin yuzlerce sahte "tanimsiz" hatasi veriyordu (ilk CI calismasi).
+    - "server/**"
+    - "packages/**"
+    - "supabase/**"
 
 linter:
   rules:
