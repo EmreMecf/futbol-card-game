@@ -368,6 +368,12 @@ class _Repo implements MatchRepository {
 }
 
 class _Soket implements WebSocketService {
+
+  // Her zaman bagli: kopma senaryolari match_view_model_test'te.
+  @override
+  Stream<bool> get connectionState => const Stream<bool>.empty();
+  @override
+  bool get isConnected => true;
   @override
   Stream<RealtimeEvent> get events => const Stream<RealtimeEvent>.empty();
 

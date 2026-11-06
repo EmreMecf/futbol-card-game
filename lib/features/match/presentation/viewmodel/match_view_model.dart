@@ -37,8 +37,18 @@ class MatchViewModel extends BaseViewModel {
   final String matchId;
 
   StreamSubscription<RealtimeEvent>? _olayAboneligi;
+  StreamSubscription<bool>? _baglantiAboneligi;
   Timer? _sayacZamanlayici;
   Timer? _tazelemeGecikmesi;
+
+  /// Bağlantı kopukken geçen saniye (sayaç vuruşlarıyla sayılır).
+  ///
+  /// NEDEN DateTime.now() DEĞİL? Cihaz saati değiştirilebilir; sayaç
+  /// vuruşu saymak saatten bağımsız ve daha basit.
+  int _kopukSaniye = 0;
+
+  /// WebSocket kopukken maç durumu bu aralıkla REST'ten çekilir.
+  static const offlinePollInterval = Duration(seconds: 5);
 
   MatchViewModel(
     this._repository,
@@ -273,6 +283,23 @@ class MatchViewModel extends BaseViewModel {
       AppLogger.info('Maç olayı: ${olay.type.name}', tag: 'MAC');
       _gecikmeliTazele();
     });
+
+    // ================================================================
+    // BAĞLANTI KOPMASINDAN KURTARMA (FAZ 7'de bulunan hata)
+    // ================================================================
+    // Bağlantı koptuğu sırada gelen olaylar (ör. rakibin hamlesi)
+    // KAYBOLUR; sunucu onları yeniden göndermez. Eskiden bağlantı geri
+    // geldiğinde ekran tazelenmiyordu: oyuncu "Sıra rakipte" görüp
+    // beklerken aslında sıra ondaydı, süresi dolup hükmen kaybediyordu.
+    //
+    // Artık bağlantı geri geldiği AN durum yeniden çekiliyor. Kopukken
+    // de sayaç her [offlinePollInterval]'da bir REST'ten yokluyor.
+    _baglantiAboneligi?.cancel();
+    _baglantiAboneligi = _socket.connectionState.listen((bagli) {
+      if (!bagli) return;
+      AppLogger.info('Bağlantı geri geldi, maç tazeleniyor.', tag: 'MAC');
+      _gecikmeliTazele();
+    });
   }
 
   /// Aynı hamle birkaç olay üretebilir; hepsi için ayrı istek atmayalım.
@@ -288,6 +315,15 @@ class MatchViewModel extends BaseViewModel {
     _sayacZamanlayici?.cancel();
     _sayacZamanlayici = Timer.periodic(const Duration(seconds: 1), (_) {
       if (isOver) return;
+
+      // Yedek kanal: WebSocket kopuksa olay gelmeyecek, kendimiz yoklayalım
+      if (_socket.isConnected) {
+        _kopukSaniye = 0;
+      } else if (++_kopukSaniye >= offlinePollInterval.inSeconds) {
+        _kopukSaniye = 0;
+        _tazele();
+        return;
+      }
       safeNotify();
     });
   }
@@ -455,6 +491,7 @@ class MatchViewModel extends BaseViewModel {
     _sayacZamanlayici?.cancel();
     _tazelemeGecikmesi?.cancel();
     _olayAboneligi?.cancel();
+    _baglantiAboneligi?.cancel();
     super.dispose();
   }
 }

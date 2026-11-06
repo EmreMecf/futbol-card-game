@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/auth/session_manager.dart';
 import 'package:futbol_card/core/error/app_exception.dart';
@@ -17,6 +20,7 @@ void main() {
   late _SahteRepository repo;
   late SessionManager session;
   late MatchViewModel vm;
+  late _SahteSocket soket;
 
   const macId = 'm-1';
   const benimId = 'u-1';
@@ -85,10 +89,13 @@ void main() {
     );
   }
 
+  setUpAll(() => dotenv.loadFromString(envString: 'ENABLE_LOGGING=false'));
+
   setUp(() {
     repo = _SahteRepository();
     session = SessionManager(_BellektekiDepo());
-    vm = MatchViewModel(repo, _SahteSocket(), session, matchId: macId);
+    soket = _SahteSocket();
+    vm = MatchViewModel(repo, soket, session, matchId: macId);
   });
 
   // ==================================================================
@@ -385,6 +392,51 @@ void main() {
     });
   });
 
+  // ==================================================================
+  // BAGLANTI KOPMASINDAN KURTARMA (FAZ 7'de bulunan hata)
+  // ==================================================================
+  group('Baglanti kopmasi', () {
+    testWidgets('baglanti GERI GELINCE mac durumu hemen yeniden cekilir',
+        (t) async {
+      repo.durum = durum(isMyTurn: false);
+      await vm.initialize();
+      final once = repo.durumIstegi;
+
+      // Kopukken rakip oynadi; olay kayboldu. Sunucuda sira artik bende.
+      soket.kopar();
+      repo.durum = durum(isMyTurn: true);
+      soket.geriGel();
+      await t.pump(const Duration(milliseconds: 300)); // gecikmeli tazeleme
+
+      expect(repo.durumIstegi, greaterThan(once));
+      expect(vm.isMyTurn, isTrue,
+          reason: 'Eskiden ekran "Sira rakipte"de takili kaliyordu');
+      vm.dispose();
+    });
+
+    testWidgets('baglanti YOKKEN mac durumu duzenli yoklanir', (t) async {
+      repo.durum = durum(isMyTurn: false, kalanSure: const Duration(minutes: 5));
+      await vm.initialize();
+      soket.kopar();
+      final once = repo.durumIstegi;
+
+      await t.pump(MatchViewModel.offlinePollInterval +
+          const Duration(seconds: 1));
+      expect(repo.durumIstegi, greaterThan(once));
+      vm.dispose();
+    });
+
+    testWidgets('baglanti varken gereksiz yoklama YAPILMAZ', (t) async {
+      repo.durum = durum(isMyTurn: false, kalanSure: const Duration(minutes: 5));
+      await vm.initialize();
+      final once = repo.durumIstegi;
+
+      await t.pump(MatchViewModel.offlinePollInterval * 3);
+      expect(repo.durumIstegi, once);
+      vm.dispose();
+    });
+  });
+
   test('mac bitince sonuc otomatik cekilir ve profil guncellenir',
       () async {
     repo.durum = durum(status: MatchStatus.finished);
@@ -421,6 +473,7 @@ void main() {
 
 class _SahteRepository implements MatchRepository {
   MatchState? durum;
+  int durumIstegi = 0;
   List<HandCard> el = const [];
   MatchHistory gecmis = const MatchHistory();
   MatchResultSummary? sonuc;
@@ -432,8 +485,10 @@ class _SahteRepository implements MatchRepository {
   final List<MatchTactic> oynananTaktikler = [];
 
   @override
-  Future<Result<MatchState>> fetchState(String matchId) async =>
-      Success(durum!);
+  Future<Result<MatchState>> fetchState(String matchId) async {
+    durumIstegi++;
+    return Success(durum!);
+  }
 
   @override
   Future<Result<List<HandCard>>> fetchHand(String matchId) async =>
@@ -490,16 +545,29 @@ class _SahteRepository implements MatchRepository {
 }
 
 class _SahteSocket implements WebSocketService {
-  // Testlerde gercek zamanli olay uretmiyoruz; ViewModel'in
-  // hesaplamalarini yalitilmis olarak olcuyoruz.
+  // Olay uretmiyoruz; ama baglantiyi koparip geri getirebiliyoruz
+  // (FAZ 7: kopmadan kurtarma testleri).
+  final _baglanti = StreamController<bool>.broadcast();
+  bool bagli = true;
+
+  void kopar() {
+    bagli = false;
+    _baglanti.add(false);
+  }
+
+  void geriGel() {
+    bagli = true;
+    _baglanti.add(true);
+  }
+
   @override
   Stream<RealtimeEvent> get events => const Stream<RealtimeEvent>.empty();
 
   @override
-  Stream<bool> get connectionState => const Stream<bool>.empty();
+  Stream<bool> get connectionState => _baglanti.stream;
 
   @override
-  bool get isConnected => true;
+  bool get isConnected => bagli;
 
   @override
   Future<void> connect() async {}
