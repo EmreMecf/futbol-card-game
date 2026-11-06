@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/feedback/game_feedback.dart';
+import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../shared/widgets/app_button.dart';
@@ -44,6 +46,9 @@ class _DeckBody extends StatefulWidget {
 class _DeckBodyState extends State<_DeckBody> {
   /// Dokunulan slot — bağlantıları vurgulanır
   int? _vurgulananSlot;
+
+  /// Şu an sürüklenen kartın slotu (sürükleme yoksa null)
+  int? _suruklenenSlot;
 
   @override
   Widget build(BuildContext context) {
@@ -116,9 +121,16 @@ class _DeckBodyState extends State<_DeckBody> {
       builder: (context, boyut) {
         final saha = _Saha(
           viewModel: vm,
-          vurgulananSlot: _vurgulananSlot,
+          // Sürüklerken sürüklenen kartın bağları vurgulu kalsın
+          vurgulananSlot: _suruklenenSlot ?? _vurgulananSlot,
+          suruklenenSlot: _suruklenenSlot,
           onSlotBasildi: (slot) => setState(() => _vurgulananSlot = slot),
           onSlotSecildi: (slot) => _kartSec(context, vm, slot),
+          onSurukleme: (slot) => setState(() => _suruklenenSlot = slot),
+          onBirakildi: (kaynak, hedef) {
+            vm.swapSlots(kaynak, hedef);
+            GameFeedback.haptic(HapticStrength.light);
+          },
         );
 
         // ------------------------------------------------------------
@@ -422,18 +434,54 @@ class _KimyaBandi extends StatelessWidget {
 // ====================================================================
 // SAHA
 // ====================================================================
+///
+/// ===================================================================
+/// SÜRÜKLE-BIRAK (MD bölüm 4-E)
+/// ===================================================================
+/// * Kartı SÜRÜKLE  -> aynı mevkideki başka bir yuvaya bırak: yer değişir.
+/// * Hareket etmeden BASILI TUT -> kimya bağları vurgulanır (eskisi gibi).
+///   İki hareket çakışmıyor: parmak kayarsa sürükleme, kaymazsa uzun
+///   basma kazanıyor.
+/// * DOKUN -> kart seçme penceresi (eskisi gibi).
+///
+/// KURAL GÖRSEL OLARAK DA GÖSTERİLİYOR: Sürüklerken yalnızca AYNI
+/// mevkideki yuvalar parlar; diğerleri soluklaşır ve bırakmayı kabul
+/// etmez. Asıl koruma yine ViewModel'de: `swapSlots` farklı mevkiler
+/// arasında yer değiştirmeyi reddediyor (bkz. deck_store_test.dart).
+/// Arayüz bu kuralı sadece GÖRÜNÜR kılıyor; kuralın kendisi değişmedi.
 class _Saha extends StatelessWidget {
   final DeckViewModel viewModel;
   final int? vurgulananSlot;
+  final int? suruklenenSlot;
   final ValueChanged<int?> onSlotBasildi;
   final ValueChanged<int> onSlotSecildi;
+
+  /// Sürükleme başladı (slot) / bitti (null)
+  final ValueChanged<int?> onSurukleme;
+
+  /// Kart [kaynak] slotundan [hedef] slotuna bırakıldı
+  final void Function(int kaynak, int hedef) onBirakildi;
 
   const _Saha({
     required this.viewModel,
     required this.vurgulananSlot,
+    required this.suruklenenSlot,
     required this.onSlotBasildi,
     required this.onSlotSecildi,
+    required this.onSurukleme,
+    required this.onBirakildi,
   });
+
+  /// Kartın altında kimya rozetine ayrılan yükseklik
+  static const double _rozetYeri = 22;
+
+  /// [hedef] slotu, sürüklenen kartı kabul eder mi?
+  ///
+  /// Aynı mevki ve farklı slot olmalı. Boş yuvaya da bırakılabilir
+  /// (kart oraya taşınır).
+  static bool kabulEder(int kaynak, int hedef) =>
+      kaynak != hedef &&
+      formationSlotPosition(kaynak) == formationSlotPosition(hedef);
 
   @override
   Widget build(BuildContext context) {
@@ -493,37 +541,103 @@ class _Saha extends StatelessWidget {
     final kart = viewModel.cardAt(slot);
     final kartYuksekligi = kartGenisligi / 0.70;
     final kimya = viewModel.chemistryAt(slot);
+    final kaynak = suruklenenSlot;
+
+    // Sürükleme sırasında bu yuva geçerli bir hedef mi?
+    final surukleniyor = kaynak != null;
+    final gecerliHedef = surukleniyor && kabulEder(kaynak, slot);
+    final soluk = surukleniyor && !gecerliHedef && kaynak != slot;
+
+    Widget kartGorunumu(InventoryCard k, {double olcek = 1}) => SizedBox(
+          width: kartGenisligi * olcek,
+          height: kartYuksekligi * olcek,
+          child: PremiumPlayerCard.fromInventory(
+            k,
+            key: ValueKey('slot-$slot-${k.userCardId}'),
+            width: kartGenisligi * olcek,
+            interactive: false,
+          ),
+        );
+
+    final govde = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (kart == null)
+          _BosSlot(slot: slot, genislik: kartGenisligi)
+        else
+          Draggable<int>(
+            data: slot,
+            // Parmağın altındaki kart biraz büyük ve gölgeli: "elde
+            // tutuluyor" hissi
+            feedback: Material(
+              color: Colors.transparent,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  boxShadow: AppShadows.glow(AppColors.emerald),
+                ),
+                child: kartGorunumu(kart, olcek: 1.12),
+              ),
+            ),
+            childWhenDragging: Opacity(opacity: 0.25, child: kartGorunumu(kart)),
+            onDragStarted: () {
+              GameFeedback.haptic(HapticStrength.selection);
+              onSurukleme(slot);
+            },
+            onDragEnd: (_) => onSurukleme(null),
+            onDraggableCanceled: (_, _) => onSurukleme(null),
+            child: kartGorunumu(kart),
+          ),
+
+        // ---- KİMYA ROZETİ ----
+        if (kart != null) _kimyaRozeti(kimya),
+      ],
+    );
 
     return Positioned(
       left: konum.dx * genislik - kartGenisligi / 2,
       top: konum.dy * yukseklik - kartYuksekligi / 2,
       width: kartGenisligi,
-      height: kartYuksekligi + 16,
-      child: GestureDetector(
-        onTap: () => onSlotSecildi(slot),
-        onLongPressStart: (_) => onSlotBasildi(slot),
-        onLongPressEnd: (_) => onSlotBasildi(null),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (kart == null)
-              _BosSlot(slot: slot, genislik: kartGenisligi)
-            else
-              SizedBox(
-                width: kartGenisligi,
-                height: kartYuksekligi,
-                child: PremiumPlayerCard.fromInventory(
-                  kart,
-                  key: ValueKey('slot-$slot-${kart.userCardId}'),
-                  width: kartGenisligi,
-                  interactive: false,
+      // Kimya rozeti için kartın altında yer. 16 piksel yetmiyordu
+      // (rozet ~18 px): sütun 2 piksel taşıyor, geliştirme sürümünde
+      // sarı-siyah uyarı şeridi çıkıyordu.
+      height: kartYuksekligi + _rozetYeri,
+      child: DragTarget<int>(
+        onWillAcceptWithDetails: (detay) => kabulEder(detay.data, slot),
+        onAcceptWithDetails: (detay) => onBirakildi(detay.data, slot),
+        builder: (context, adaylar, _) {
+          final ustunde = adaylar.isNotEmpty;
+
+          return AnimatedOpacity(
+            duration: AppDurations.cardSelect,
+            opacity: soluk ? 0.35 : 1,
+            child: AnimatedScale(
+              duration: AppDurations.cardSelect,
+              scale: ustunde ? 1.08 : 1,
+              child: DecoratedBox(
+                // Geçerli hedef çerçevesi: sürüklerken hangi yuvaya
+                // bırakılabileceği tek bakışta görünsün
+                position: DecorationPosition.foreground,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  border: gecerliHedef
+                      ? Border.all(
+                          color: AppColors.emerald.withValues(
+                            alpha: ustunde ? 1 : 0.6,
+                          ),
+                          width: ustunde ? 2.5 : 1.5,
+                        )
+                      : null,
+                ),
+                child: GestureDetector(
+                  onTap: () => onSlotSecildi(slot),
+                  onLongPressStart: (_) => onSlotBasildi(slot),
+                  onLongPressEnd: (_) => onSlotBasildi(null),
+                  child: govde,
                 ),
               ),
-
-            // ---- KİMYA ROZETİ ----
-            if (kart != null) _kimyaRozeti(kimya),
-          ],
-        ),
+            ),
+          );
+        },
       ),
     );
   }
