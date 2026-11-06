@@ -1,0 +1,13 @@
+name: tactics_prototype
+description: >-
+  FAZ 5 - Taktik ve enerji sistemi PROTOTIPI. Gercek maclara BAGLI DEGIL;
+  ne uygulama ne sunucu bu paketi kullaniyor. Denge simulasyonu ve rapor.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.0
+
+dev_dependencies:
+  lints: ^5.1.1
+  test: ^1.31.1
