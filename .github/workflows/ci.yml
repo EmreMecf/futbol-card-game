@@ -96,6 +96,13 @@ jobs:
           dart analyze
           dart test
 
+      - name: Icerik uretim hatti (dogrulayici, Denge Motoru; ag yok, ucretsiz)
+        working-directory: packages/content_pipeline
+        run: |
+          dart pub get
+          dart analyze
+          dart test
+
       - name: Sunucu
         working-directory: server
         run: |

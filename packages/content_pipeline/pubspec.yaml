@@ -1,0 +1,18 @@
+name: content_pipeline
+description: >-
+  Özgün futbolcu karakteri üretim hattı: Claude ile kimlik üretimi,
+  doğrulayıcı, Denge Motoru ve katalog dışa aktarımı. Oyun sunucusundan
+  AYRI bir araçtır; oyuncu isteği asla canlı üretim tetiklemez.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  shared_models:
+    path: ../shared_models
+
+dev_dependencies:
+  lints: ^5.1.1
+  test: ^1.25.15

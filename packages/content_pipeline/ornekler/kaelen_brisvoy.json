@@ -1,0 +1,19 @@
+{
+  "given_name": "Kaelen",
+  "family_name": "Brisvoy",
+  "secondary_position": "MID",
+  "playstyle": "hizli_kanat",
+  "personality": ["sabırsız", "cesur", "şakacı", "takım ruhlu"],
+  "bio_short": "Liman mahallesinde rüzgâra karşı koşarak büyüyen, topu bırakmayan kanat.",
+  "bio_long": "Selvarra Kıyıları'nın fırtınalı liman kasabası Tuzkapı'da, balıkçı teknelerinin arasındaki dar iskelelerde top sürerek büyüdü. Çocukken rüzgâra karşı koşma yarışlarını kimseye kaptırmazdı; mahalle onu bu yüzden 'Rüzgârkıran' diye çağırır. Liman Rüzgârı FK'nın altyapısına on dört yaşında, bir maçta üç kez aynı stoperi geçtikten sonra alındı. Sabırsızdır, bazen pası geciktirip tek başına bitirmeye çalışır; ama kaybettiği her topun peşinden ilk koşan da odur.",
+  "appearance": {
+    "skin_tone": "açık buğday, güneşten hafif yanık",
+    "hair": "kısa, yanları kazınmış bakır rengi, tepede dağınık",
+    "face": "çilli, keskin çene hattı, gülümserken tek gamze",
+    "build": "ince, uzun bacaklı sprinter yapısı",
+    "accessory": "sol bilekte örgülü turkuaz ip bileklik",
+    "shirt_number": 17
+  },
+  "visual_prompt": "Original stylized 3D mobile game footballer character, lean long-legged sprinter build, light olive skin with a slight tan, short copper undercut hair messy on top, freckles, sharp jawline, single dimple when smiling, braided turquoise rope bracelet on left wrist, original kit in cyan and deep navy with no logos or real-world branding, number 17, confident playful expression, premium mobile game art style, clean silhouette, transparent background, full body front view.",
+  "animation_profile": "gosterisci"
+}
