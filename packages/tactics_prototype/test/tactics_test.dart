@@ -247,10 +247,42 @@ void main() {
 
     setUpAll(() => rapor = runBalance(matchesPerPair: 2000, seed: 2026));
 
-    test('bütün hedefler tutuyor', () {
-      final tutmayan =
-          rapor.checks.where((c) => !c.passed).map((c) => '${c.name}: ${c.value}');
+    test('bütün ZORUNLU hedefler tutuyor', () {
+      final tutmayan = rapor.checks
+          .where((c) => c.required && !c.passed)
+          .map((c) => '${c.name}: ${c.value}');
       expect(tutmayan, isEmpty);
+    });
+
+    test('genişletilmiş ölçütler raporda (bağımsız inceleme, madde 1)', () {
+      final adlar = rapor.checks.map((c) => c.name).join('\n');
+      expect(adlar, contains('Hiçbir basit tarz herkesi yenmiyor'));
+      expect(adlar, contains('Güç farkı arttıkça'));
+      expect(adlar, contains('İlk açan'));
+      expect(adlar, contains('Başlangıç kadrosu'));
+      expect(rapor.policyNames, containsAll(['Biriktirici', 'Harcayıcı']));
+    });
+
+    test('izlenen hedefler tutmadıysa GEÇTİ sayılmaz', () {
+      // Tutmayan izlenen hedef raporda açık sorun olarak listelenmeli
+      for (final c in rapor.openIssues) {
+        expect(c.passed, isFalse);
+        expect(c.required, isFalse);
+      }
+      expect(rapor.allPassed, rapor.openIssues.isEmpty &&
+          rapor.allRequiredPassed);
+    });
+
+    test('kadro profilleri gerçek katalog aralıklarında', () {
+      final r = Random(5);
+      final bas = SquadProfile.starter.build(r);
+      expect(bas.any((k) => k.isLegend), isFalse,
+          reason: 'Başlangıç kadrosunda Legend olmamalı');
+      final guclu = SquadProfile.standard.withBonus(4).build(Random(1));
+      final normal = SquadProfile.standard.build(Random(1));
+      for (var i = 0; i < 11; i++) {
+        expect(guclu[i].effectivePower, normal[i].effectivePower + 4);
+      }
     });
 
     test('Legend kuralı hiç ihlal edilmedi', () {

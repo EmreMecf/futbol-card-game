@@ -15,11 +15,12 @@ void main(List<String> args) {
 
   stdout.writeln('${rapor.stats.rounds} tur, ${saat.elapsedMilliseconds} ms');
   for (final c in rapor.checks) {
-    stdout.writeln('${c.passed ? 'OK  ' : 'HATA'} ${c.name}: ${c.value} '
-        '(hedef ${c.target})');
+    stdout.writeln('${c.passed ? 'OK  ' : (c.required ? 'HATA' : 'ACIK')} '
+        '${c.name}: ${c.value} (hedef ${c.target})');
   }
-  stdout.writeln(rapor.allPassed
-      ? 'SONUC: butun denge hedefleri tuttu'
-      : 'SONUC: bazi hedefler TUTMADI');
-  exitCode = rapor.allPassed ? 0 : 1;
+  stdout.writeln(rapor.allRequiredPassed
+      ? 'SONUC: zorunlu hedefler tuttu; acik (izlenen) sorun: '
+          '${rapor.openIssues.length}'
+      : 'SONUC: zorunlu hedefler TUTMADI');
+  exitCode = rapor.allRequiredPassed ? 0 : 1;
 }

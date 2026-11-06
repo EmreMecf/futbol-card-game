@@ -11,6 +11,8 @@ void main(List<String> args) {
         'D>K ${y(m['Hep Savunma Duvarı']!['Hep Kontra Atak']!)}  '
         'P>D ${y(m['Hep Yüksek Pres']!['Hep Savunma Duvarı']!)}  '
         'Akilli>Taktiksiz ${y(m['Akıllı']!['Taktiksiz']!)}  '
-        'cevirme ${y(r.stats.flips / r.stats.rounds)}  tumu=${r.allPassed}');
+        'cevirme ${y(r.stats.flips / r.stats.rounds)}  '
+        'ilk acan ${r.scenarios.firstLeader.values.map(y).join('/')}  '
+        'zorunlu=${r.allRequiredPassed} acik=${r.openIssues.length}');
   }
 }

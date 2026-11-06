@@ -42,12 +42,45 @@ const Map<String, int> kTierWeights = {
   'legend': 3,
 };
 
+/// Kadro profili: seviye dağılımı ve (test için) her karta ek güç.
+///
+/// Denge testleri yalnızca "iki eşit oyuncu" durumunu ölçmemeli:
+/// yeni oyuncu ile kıdemli oyuncu, güç farkı olan kadrolar da
+/// ayrıca ölçülüyor (bağımsız inceleme, madde 1).
+class SquadProfile {
+  final String name;
+  final Map<String, int> weights;
+  final int powerBonus;
+
+  const SquadProfile(this.name, this.weights, {this.powerBonus = 0});
+
+  /// Orta seviye oyuncu (varsayılan)
+  static const standard = SquadProfile('Orta', kTierWeights);
+
+  /// Başlangıç paketiyle oynayan yeni oyuncu (Diamond/Legend yok)
+  static const starter =
+      SquadProfile('Başlangıç', {'bronze': 50, 'silver': 40, 'gold': 10});
+
+  /// Kıdemli oyuncu (%12 Legend)
+  static const veteran = SquadProfile(
+      'Kıdemli', {'silver': 15, 'gold': 40, 'diamond': 33, 'legend': 12});
+
+  SquadProfile withBonus(int b) => SquadProfile('$name +$b', weights, powerBonus: b);
+
+  List<SimCard> build(Random rng) =>
+      randomSquad(rng, weights: weights, powerBonus: powerBonus);
+}
+
 /// Rastgele ama gerçekçi bir kadro üretir.
-List<SimCard> randomSquad(Random rng) {
-  final toplam = kTierWeights.values.reduce((a, b) => a + b);
+List<SimCard> randomSquad(
+  Random rng, {
+  Map<String, int> weights = kTierWeights,
+  int powerBonus = 0,
+}) {
+  final toplam = weights.values.reduce((a, b) => a + b);
   String seviye() {
     var r = rng.nextInt(toplam);
-    for (final e in kTierWeights.entries) {
+    for (final e in weights.entries) {
       if (r < e.value) return e.key;
       r -= e.value;
     }
@@ -61,7 +94,7 @@ List<SimCard> randomSquad(Random rng) {
         final (min, max) = kTierPower[s]!;
         final guc = min + rng.nextInt(max - min + 1);
         final kimya = rng.nextInt(7); // 0-6, gerçek oyundaki aralık
-        return SimCard(poz, guc + kimya, isLegend: s == 'legend');
+        return SimCard(poz, guc + kimya + powerBonus, isLegend: s == 'legend');
       }(),
   ];
 }
@@ -153,6 +186,36 @@ class AlwaysPolicy extends TacticPolicy {
   Tactic chooseLead(PolicyContext c) => _sec(c);
   @override
   Tactic chooseResponse(PolicyContext c, SimCard leadCard) => _sec(c);
+}
+
+/// Enerjiyi BİRİKTİRİR: sadece enerji doluyken pres basar; cevapta,
+/// rakibin pres yapmaya gücü yetiyorsa kontra bekler.
+class HoarderPolicy extends TacticPolicy {
+  @override
+  String get name => 'Biriktirici';
+  @override
+  Tactic chooseLead(PolicyContext c) =>
+      c.myEnergy >= c.rules.maxEnergy ? Tactic.highPress : Tactic.none;
+  @override
+  Tactic chooseResponse(PolicyContext c, SimCard leadCard) =>
+      c.opponentEnergy >= c.rules.pressCost &&
+              c.myEnergy >= c.rules.counterCost
+          ? Tactic.counterAttack
+          : Tactic.none;
+}
+
+/// Enerjiyi HARCAR: açarken gücü yetiyorsa pres, yetmiyorsa duvar;
+/// cevapta her fırsatta duvar.
+class SpenderPolicy extends TacticPolicy {
+  @override
+  String get name => 'Harcayıcı';
+  @override
+  Tactic chooseLead(PolicyContext c) => c.myEnergy >= c.rules.pressCost
+      ? Tactic.highPress
+      : (c.myEnergy >= c.rules.wallCost ? Tactic.defensiveWall : Tactic.none);
+  @override
+  Tactic chooseResponse(PolicyContext c, SimCard leadCard) =>
+      c.myEnergy >= c.rules.wallCost ? Tactic.defensiveWall : Tactic.none;
 }
 
 /// Rakibin en çok kullandığı taktiğin KARŞISINI seçer (okuyan oyuncu).
@@ -276,7 +339,11 @@ class MatchOutcome {
   final int capturedB;
   final MatchStats stats;
 
-  const MatchOutcome(this.result, this.capturedA, this.capturedB, this.stats);
+  /// İlk turu A mı açtı? (ilk açan avantajı ölçümü için)
+  final bool firstLeaderIsA;
+
+  const MatchOutcome(this.result, this.capturedA, this.capturedB, this.stats,
+      {this.firstLeaderIsA = true});
 }
 
 class MatchSimulator {
@@ -296,15 +363,21 @@ class MatchSimulator {
     return adaylar.first;
   }
 
-  MatchOutcome play(TacticPolicy a, TacticPolicy b) {
+  MatchOutcome play(
+    TacticPolicy a,
+    TacticPolicy b, {
+    SquadProfile squadA = SquadProfile.standard,
+    SquadProfile squadB = SquadProfile.standard,
+  }) {
     a.reset();
     b.reset();
-    final eller = [randomSquad(rng), randomSquad(rng)];
+    final eller = [squadA.build(rng), squadB.build(rng)];
     final oyuncular = [a, b];
     final enerji = [rules.startEnergy, rules.startEnergy];
     final toplanan = [0, 0];
     var pot = 0;
     var acan = rng.nextInt(2); // sunucu ilk açanı rastgele seçer
+    final ilkAcanA = acan == 0;
     final st = MatchStats();
 
     for (var tur = 0; tur < kFormation.length; tur++) {
@@ -380,6 +453,7 @@ class MatchSimulator {
     }
 
     final r = toplanan[0].compareTo(toplanan[1]);
-    return MatchOutcome(r, toplanan[0], toplanan[1], st);
+    return MatchOutcome(r, toplanan[0], toplanan[1], st,
+        firstLeaderIsA: ilkAcanA);
   }
 }
