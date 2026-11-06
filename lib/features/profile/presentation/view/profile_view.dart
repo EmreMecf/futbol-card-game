@@ -14,18 +14,22 @@ import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/screen_header.dart';
 import '../../../leaderboard/presentation/widgets/rank_badge.dart';
 import '../viewmodel/profile_view_model.dart';
+import '../widgets/profile_sections.dart';
 
 /// Profil — oyuncunun karnesi ve maç geçmişi.
 ///
 /// ===================================================================
 /// SADECE GERÇEK VERİ
 /// ===================================================================
-/// Bu ekranda rozet, başarı ya da seviye çubuğu yok. Sunucuda böyle
-/// bir sistem bulunmuyor; çizmek boş kutular bırakırdı.
-///
 /// Gösterilenlerin hepsi veritabanında duran gerçek alanlar:
 /// galibiyet, mağlubiyet, beraberlik, coin, puan, koruma hakkı,
 /// kayıt tarihi ve bitmiş maçların listesi.
+///
+/// BAŞARIMLAR bu sayaçlardan hesaplanıyor ve ödül vermiyor; sunucuda
+/// ayrı bir başarım sistemi YOK. Eksik veriye dayanacak başarımlar
+/// (ör. "5 galibiyet serisi") bilerek eklenmedi — bkz. [Achievement].
+///
+/// FAVORİ KARTLAR bu cihazda saklanıyor (bkz. FavoritesStore).
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
@@ -83,6 +87,13 @@ class _ProfileBody extends StatelessWidget {
                     _SkorKarolari(viewModel: vm),
                     const SizedBox(height: 12),
                     _OzetKarti(viewModel: vm),
+                    const SizedBox(height: 22),
+                    AchievementsSection(
+                      viewModel: vm,
+                      columns: boyut.usesSidebar ? 3 : 2,
+                    ),
+                    const SizedBox(height: 22),
+                    FavoriteCardsSection(viewModel: vm),
                     const SizedBox(height: 22),
                     _GecmisBolumu(viewModel: vm),
                   ],

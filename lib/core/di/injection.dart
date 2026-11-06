@@ -191,6 +191,8 @@ Future<void> configureDependencies() async {
         getIt<AuthRepository>(),
         getIt<LeaderboardRepository>(),
         getIt<SessionManager>(),
+        collectionRepository: getIt<CollectionRepository>(),
+        favorites: getIt<FavoritesStore>(),
       ),
     )
     // Ayarlar cihazda saklandigi icin repository'ye ihtiyaci yok.
