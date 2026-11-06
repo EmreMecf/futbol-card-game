@@ -11,25 +11,48 @@ void main() {
   // ==================================================================
   // İZOLASYON: prototip gerçek oyuna BAĞLI DEĞİL
   // ==================================================================
-  group('İzolasyon (MD: "maç kurallarına doğrudan koyma")', () {
-    test('Flutter uygulaması bu paketi KULLANMIYOR', () {
+  // Taktik sistemi kullanıcı onayıyla oyuna alındı (021_tactics.sql).
+  // Prototip artık bir simülasyon/denge aracı; uygulama ve sunucu onu
+  // KOD olarak kullanmıyor, kurallar veritabanında yaşıyor.
+  group('Oyundaki kurallarla tutarlılık', () {
+    test('Flutter uygulaması bu paketi kod olarak KULLANMIYOR', () {
       final pubspec = File('../../pubspec.yaml').readAsStringSync();
       expect(pubspec, isNot(contains('tactics_prototype')));
     });
 
-    test('Dart sunucusu bu paketi KULLANMIYOR', () {
+    test('Dart sunucusu bu paketi kod olarak KULLANMIYOR', () {
       final pubspec = File('../../server/pubspec.yaml').readAsStringSync();
       expect(pubspec, isNot(contains('tactics_prototype')));
     });
 
-    test('veritabanında taktik ya da enerji alanı YOK', () {
-      final migrations = Directory('../../database/migrations')
-          .listSync()
-          .whereType<File>()
-          .map((f) => f.readAsStringSync().toLowerCase())
-          .join('\n');
-      expect(migrations, isNot(contains('tactic')));
-      expect(migrations, isNot(contains('energy')));
+    // Denge raporu ancak oyundaki sayılar prototipteki sayılarla aynıysa
+    // geçerlidir. Biri değişip diğeri unutulursa bu test yakalar.
+    test('021_tactics.sql sayıları TacticRules.balanced ile AYNI', () {
+      final sql = File('../../database/migrations/021_tactics.sql')
+          .readAsStringSync();
+
+      int sabit(String fonksiyon) {
+        final eslesme = RegExp('function $fonksiyon\\(\\) returns int\\s+'
+                r'language sql immutable as \$\$ select (\d+) \$\$')
+            .firstMatch(sql);
+        expect(eslesme, isNotNull, reason: '$fonksiyon bulunamadı');
+        return int.parse(eslesme!.group(1)!);
+      }
+
+      expect(sabit('tactic_start_energy'), k.startEnergy);
+      expect(sabit('tactic_energy_per_round'), k.energyPerRound);
+      expect(sabit('tactic_max_energy'), k.maxEnergy);
+
+      expect(sql, contains("when 'high_press'     then ${k.pressCost}"));
+      expect(sql, contains("when 'counter_attack' then ${k.counterCost}"));
+      expect(sql, contains("when 'defensive_wall' then ${k.wallCost}"));
+
+      expect(sql, contains("then 0 else ${k.pressBonus} end"));
+      expect(sql, contains("when 'high_press'     then ${k.counterVsPressBonus}"));
+      expect(sql, contains('else ${k.counterBaseBonus}\n'));
+      expect(sql, contains('when p_i_am_lead             then ${k.wallLeadBonus}'));
+      expect(sql, contains('else ${k.wallDefendBonus}\n'));
+      expect(sql, contains('check (energy between 0 and ${k.maxEnergy})'));
     });
   });
 

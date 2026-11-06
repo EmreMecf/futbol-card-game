@@ -1,8 +1,11 @@
 # Taktik Sistemi — Prototip (FAZ 5)
 
-> **Bu paket oyunda AKTİF DEĞİL.** Ne Flutter uygulaması ne Dart sunucusu
-> bu paketi kullanıyor; veritabanında taktik ya da enerji alanı yok. Bunu
-> `test/tactics_test.dart` içindeki izolasyon testleri garanti ediyor.
+> **Taktik sistemi kullanıcı onayıyla oyuna alındı.** Kurallar artık
+> `database/migrations/021_tactics.sql` içinde yaşıyor. Bu paket bir
+> simülasyon ve denge aracı olarak kalıyor; uygulama ve sunucu onu kod
+> olarak kullanmıyor. `test/tactics_test.dart`, SQL'deki sayıların buradaki
+> `TacticRules.balanced` ile aynı olduğunu denetler (biri değişip diğeri
+> unutulursa denge raporu geçersiz kalır).
 
 MD bölüm 7: *"Yeni taktik motorunu mevcut maç kurallarının yerine doğrudan
 koyma. Önce ayrı bir prototipte test et ve sonuçlarını bana sun."*
@@ -42,7 +45,7 @@ Enerji: 2 ile başlanır, her tur +1, en fazla 5.
 Aynı mevki zorunluluğu, **Legend kuralı** (hiçbir taktik bunu aşamaz —
 abartılı bonuslarla bile testli), beraberlik/pot ve maç bitirme kuralları.
 
-## Oyuna alınırsa ne gerekir?
+## Oyuna alınırken yapılanlar
 
 Bu prototip sadece KURALI ve DENGEYİ kanıtlıyor. Oyuna almak ayrı bir iş:
 1. Sunucu: `match_moves`'a taktik, `match_players`'a enerji kolonu;
