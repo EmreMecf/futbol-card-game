@@ -154,8 +154,9 @@ PairResult playPair(
   SquadProfile squadA = SquadProfile.standard,
   SquadProfile squadB = SquadProfile.standard,
   void Function(bool aLedFirst, int result)? onMatch,
+  MatchVariant variant = MatchVariant.live,
 }) {
-  final sim = MatchSimulator(rules: rules, rng: rng);
+  final sim = MatchSimulator(rules: rules, rng: rng, variant: variant);
   var ka = 0, kb = 0, ber = 0;
   final pa = a(), pb = b();
   for (var i = 0; i < matches; i++) {
@@ -217,7 +218,9 @@ ScenarioResults runScenarios({
   required TacticRules rules,
   required int matches,
   required Random rng,
+  bool attributes = false,
 }) {
+  SquadProfile oz(SquadProfile p) => attributes ? p.attributed : p;
   double puan(int r) => r > 0 ? 1.0 : (r == 0 ? 0.5 : 0.0);
 
   // İlk açan. Sınıra yakın bir değer (~%45) ve gürültüye açık: tek
@@ -231,6 +234,8 @@ ScenarioResults runScenarios({
   ]) {
     var p = 0.0;
     playPair(f, f, matches: ilkMac, rules: rules, rng: rng,
+        squadA: oz(SquadProfile.standard),
+        squadB: oz(SquadProfile.standard),
         onMatch: (aIlk, r) => p += aIlk ? puan(r) : 1 - puan(r));
     ilk[ad] = p / ilkMac;
   }
@@ -238,11 +243,12 @@ ScenarioResults runScenarios({
   // Güç farkı
   final guc = <int, (double, double)>{};
   for (final g in const [0, 2, 4, 8]) {
-    final guclu = SquadProfile.standard.withBonus(g);
+    final guclu = oz(SquadProfile.standard).withBonus(g);
+    final normal = oz(SquadProfile.standard);
     final t0 = playPair(NoTacticPolicy.new, NoTacticPolicy.new,
-        matches: matches, rules: rules, rng: rng, squadA: guclu);
+        matches: matches, rules: rules, rng: rng, squadA: guclu, squadB: normal);
     final t1 = playPair(SmartPolicy.new, SmartPolicy.new,
-        matches: matches, rules: rules, rng: rng, squadA: guclu);
+        matches: matches, rules: rules, rng: rng, squadA: guclu, squadB: normal);
     guc[g] = (t0.scoreA, t1.scoreA);
   }
 
@@ -256,19 +262,25 @@ ScenarioResults runScenarios({
             matches: matches,
             rules: rules,
             rng: rng,
-            squadA: SquadProfile.starter,
-            squadB: SquadProfile.veteran)
+            squadA: oz(SquadProfile.starter),
+            squadB: oz(SquadProfile.veteran))
         .scoreA;
   }
 
   return ScenarioResults(ilk, guc, nadir);
 }
 
+///
+/// [attributes] true ise kartlara oyuncu tipi üretilir (sürüm 3
+/// karşılaştırması). Sürüm 2 kuralları oyuncu tipini yok sayar; böylece
+/// iki sürüm AYNI kadrolarla karşılaştırılabilir.
 BalanceReport runBalance({
   TacticRules rules = TacticRules.balanced,
   int matchesPerPair = 2000,
   int seed = 2026,
+  bool attributes = false,
 }) {
+  final kadro = attributes ? SquadProfile.standard.attributed : SquadProfile.standard;
   final rng = Random(seed);
   final tarzlar = standardPolicies();
   final adlar = [for (final t in tarzlar) t().name];
@@ -280,13 +292,15 @@ BalanceReport runBalance({
   for (var i = 0; i < tarzlar.length; i++) {
     for (var j = i + 1; j < tarzlar.length; j++) {
       final r = playPair(tarzlar[i], tarzlar[j],
-          matches: matchesPerPair, rules: rules, rng: rng, into: toplam);
+          matches: matchesPerPair, rules: rules, rng: rng, into: toplam,
+          squadA: kadro, squadB: kadro);
       matris[r.a]![r.b] = r.scoreA;
       matris[r.b]![r.a] = 1 - r.scoreA;
     }
   }
 
-  final senaryo = runScenarios(rules: rules, matches: matchesPerPair, rng: rng);
+  final senaryo = runScenarios(
+      rules: rules, matches: matchesPerPair, rng: rng, attributes: attributes);
 
   return BalanceReport(
     rules: rules,

@@ -74,6 +74,61 @@ enum Tactic {
       };
 }
 
+// ====================================================================
+// KURAL SÜRÜMÜ 3 ADAYI: ÖZELLİK → TAKTİK ÇARPANI (oyunda YOK)
+// ====================================================================
+/// Kartın "oyuncu tipi": ilgili özelliklerin kartın KENDİ GÜCÜNDEN
+/// sapması.
+///
+/// NEDEN SAPMA, ÖZELLİĞİN KENDİSİ DEĞİL?
+/// Oyunda özellik = güç + mevki sapması ± 4 (016_card_attributes.sql).
+/// Bonus özelliğin kendisine bağlansaydı güçlü kart her zaman daha
+/// büyük bonus alır ve güç farkı BÜYÜRDÜ. Sapma ise kartın ne kadar
+/// güçlü olduğunu değil, NE TÜR bir oyuncu olduğunu ölçer.
+class TacticAffinity {
+  /// (fizik + hızlanma) / 2 − güç
+  final int press;
+
+  /// (hız + dribling) / 2 − güç
+  final int counter;
+
+  /// (defans + fizik) / 2 − güç
+  final int wall;
+
+  const TacticAffinity(this.press, this.counter, this.wall);
+
+  static const neutral = TacticAffinity(0, 0, 0);
+
+  int forTactic(Tactic t) => switch (t) {
+        Tactic.highPress => press,
+        Tactic.counterAttack => counter,
+        Tactic.defensiveWall => wall,
+        Tactic.none => 0,
+      };
+
+  @override
+  String toString() => 'P$press/K$counter/D$wall';
+}
+
+/// Taktik bonusunun oyuncu tipine göre ölçeklenmesi.
+///
+/// çarpan = 1 + sapma × [perPoint], [-cap, +cap] aralığına kırpılır.
+/// Varsayılan: sapma başına %2,5, en fazla ±%20. Yani en uygun oyuncu
+/// bile bonusu en fazla %20 artırır; taktik yoksa özellik HİÇBİR ŞEY
+/// yapmaz (sınırsız güç yok).
+class AttributeScaling {
+  final double perPoint;
+  final double cap;
+
+  const AttributeScaling({this.perPoint = 0.025, this.cap = 0.20});
+
+  double multiplier(int deviation) =>
+      1 + (deviation * perPoint).clamp(-cap, cap);
+
+  int scale(int baseBonus, int deviation) =>
+      baseBonus <= 0 ? 0 : (baseBonus * multiplier(deviation)).round();
+}
+
 /// Dengeleme sayıları. Hepsi tek yerde, simülasyonla ayarlanıyor.
 ///
 /// [TacticRules.balanced] simülasyon raporundaki hedefleri sağlayan
@@ -106,6 +161,10 @@ class TacticRules {
   /// Duvar'ın turu açarken bonusu (bilerek düşük)
   final int wallLeadBonus;
 
+  /// null = canlı kurallar (sürüm 2). Doluysa sürüm 3 adayı:
+  /// bonus oyuncu tipine göre ölçeklenir.
+  final AttributeScaling? attributeScaling;
+
   const TacticRules({
     required this.startEnergy,
     required this.energyPerRound,
@@ -118,6 +177,7 @@ class TacticRules {
     required this.counterVsPressBonus,
     required this.wallDefendBonus,
     required this.wallLeadBonus,
+    this.attributeScaling,
   });
 
   /// Simülasyonla ayarlanmış değerler (RAPOR.md'deki hedefleri sağlar)
@@ -148,6 +208,23 @@ class TacticRules {
     wallLeadBonus: 2,
   );
 
+  /// KURAL SÜRÜMÜ 3 ADAYI (oyunda YOK): [balanced] + özellik çarpanı.
+  /// Sayılar aynı; sadece bonus oyuncu tipine göre ±%20 ölçeklenir.
+  static const v3Attributes = TacticRules(
+    startEnergy: 2,
+    energyPerRound: 1,
+    maxEnergy: 5,
+    pressCost: 3,
+    counterCost: 2,
+    wallCost: 1,
+    pressBonus: 9,
+    counterBaseBonus: 2,
+    counterVsPressBonus: 13,
+    wallDefendBonus: 6,
+    wallLeadBonus: 2,
+    attributeScaling: AttributeScaling(),
+  );
+
   int costOf(Tactic t) => switch (t) {
         Tactic.none => 0,
         Tactic.highPress => pressCost,
@@ -158,7 +235,22 @@ class TacticRules {
   /// [mine] taktiğinin, rakip [theirs] kullanırken bana verdiği bonus.
   ///
   /// [iAmLead] turu ben mi açtım? (Duvar sadece savunurken güçlü)
-  int bonus(Tactic mine, Tactic theirs, {required bool iAmLead}) {
+  ///
+  /// [affinity] kartın oyuncu tipi; sadece [attributeScaling] doluysa
+  /// (sürüm 3 adayı) kullanılır.
+  int bonus(
+    Tactic mine,
+    Tactic theirs, {
+    required bool iAmLead,
+    TacticAffinity affinity = TacticAffinity.neutral,
+  }) {
+    final temel = _temelBonus(mine, theirs, iAmLead: iAmLead);
+    final olcek = attributeScaling;
+    if (olcek == null) return temel;
+    return olcek.scale(temel, affinity.forTactic(mine));
+  }
+
+  int _temelBonus(Tactic mine, Tactic theirs, {required bool iAmLead}) {
     return switch (mine) {
       Tactic.none => 0,
 
@@ -191,7 +283,15 @@ class SimCard {
   /// Güç + kimya (gerçek oyunda masaya çıkan değer)
   final int effectivePower;
 
-  const SimCard(this.position, this.effectivePower, {this.isLegend = false});
+  /// Oyuncu tipi (sadece sürüm 3 adayında kullanılır)
+  final TacticAffinity affinity;
+
+  const SimCard(
+    this.position,
+    this.effectivePower, {
+    this.isLegend = false,
+    this.affinity = TacticAffinity.neutral,
+  });
 
   @override
   String toString() =>
@@ -216,8 +316,10 @@ int resolveRound({
 
   // 2) Güç + taktik bonusu
   final a = lead.effectivePower +
-      rules.bonus(leadTactic, responseTactic, iAmLead: true);
+      rules.bonus(leadTactic, responseTactic,
+          iAmLead: true, affinity: lead.affinity);
   final b = response.effectivePower +
-      rules.bonus(responseTactic, leadTactic, iAmLead: false);
+      rules.bonus(responseTactic, leadTactic,
+          iAmLead: false, affinity: response.affinity);
   return a.compareTo(b);
 }

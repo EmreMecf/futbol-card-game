@@ -42,6 +42,29 @@ const Map<String, int> kTierWeights = {
   'legend': 3,
 };
 
+/// Mevki profilleri: özelliğin karta göre sapması (016_card_attributes.sql)
+///                       ŞUT  HIZ  FİZİK  DEF  DRİB  HIZLANMA
+const Map<String, List<int>> kAttributeProfile = {
+  'GK': [-38, -20, 1, 2, -28, -22],
+  'DEF': [-22, -5, 6, 8, -12, -6],
+  'MID': [-3, -2, -5, -7, 6, -2],
+  'FWD': [6, 5, -6, -24, 5, 6],
+};
+
+/// Kartın oyuncu tipi: mevki profili + karta özel −4..+4 sapma
+/// (oyundaki gibi). Değer kartın gücünden BAĞIMSIZ.
+TacticAffinity randomAffinity(String position, Random rng) {
+  final p = kAttributeProfile[position]!;
+  int ozellik(int i) => p[i] + rng.nextInt(9) - 4;
+  final hiz = ozellik(1), fizik = ozellik(2), defans = ozellik(3);
+  final drib = ozellik(4), hizlanma = ozellik(5);
+  return TacticAffinity(
+    ((fizik + hizlanma) / 2).round(),
+    ((hiz + drib) / 2).round(),
+    ((defans + fizik) / 2).round(),
+  );
+}
+
 /// Kadro profili: seviye dağılımı ve (test için) her karta ek güç.
 ///
 /// Denge testleri yalnızca "iki eşit oyuncu" durumunu ölçmemeli:
@@ -52,7 +75,12 @@ class SquadProfile {
   final Map<String, int> weights;
   final int powerBonus;
 
-  const SquadProfile(this.name, this.weights, {this.powerBonus = 0});
+  /// Kartlara oyuncu tipi üretilsin mi? (sürüm 3 karşılaştırması)
+  /// Kapalıyken rastgele sayı dizisi eskisiyle BİREBİR aynı kalır.
+  final bool withAttributes;
+
+  const SquadProfile(this.name, this.weights,
+      {this.powerBonus = 0, this.withAttributes = false});
 
   /// Orta seviye oyuncu (varsayılan)
   static const standard = SquadProfile('Orta', kTierWeights);
@@ -65,10 +93,14 @@ class SquadProfile {
   static const veteran = SquadProfile(
       'Kıdemli', {'silver': 15, 'gold': 40, 'diamond': 33, 'legend': 12});
 
-  SquadProfile withBonus(int b) => SquadProfile('$name +$b', weights, powerBonus: b);
+  SquadProfile withBonus(int b) => SquadProfile('$name +$b', weights,
+      powerBonus: b, withAttributes: withAttributes);
 
-  List<SimCard> build(Random rng) =>
-      randomSquad(rng, weights: weights, powerBonus: powerBonus);
+  SquadProfile get attributed =>
+      SquadProfile(name, weights, powerBonus: powerBonus, withAttributes: true);
+
+  List<SimCard> build(Random rng) => randomSquad(rng,
+      weights: weights, powerBonus: powerBonus, withAttributes: withAttributes);
 }
 
 /// Rastgele ama gerçekçi bir kadro üretir.
@@ -76,6 +108,7 @@ List<SimCard> randomSquad(
   Random rng, {
   Map<String, int> weights = kTierWeights,
   int powerBonus = 0,
+  bool withAttributes = false,
 }) {
   final toplam = weights.values.reduce((a, b) => a + b);
   String seviye() {
@@ -94,7 +127,14 @@ List<SimCard> randomSquad(
         final (min, max) = kTierPower[s]!;
         final guc = min + rng.nextInt(max - min + 1);
         final kimya = rng.nextInt(7); // 0-6, gerçek oyundaki aralık
-        return SimCard(poz, guc + kimya + powerBonus, isLegend: s == 'legend');
+        return SimCard(
+          poz,
+          guc + kimya + powerBonus,
+          isLegend: s == 'legend',
+          affinity: withAttributes
+              ? randomAffinity(poz, rng)
+              : TacticAffinity.neutral,
+        );
       }(),
   ];
 }
@@ -109,6 +149,11 @@ List<SimCard> randomSquad(
 /// ölçtüğümüz şey gerçekten taktiklerin etkisi.
 abstract class TacticPolicy {
   String get name;
+
+  /// Turu ben açıyorum: hangi kartla? Varsayılan RASTGELE (bugünkü
+  /// simülasyonla birebir aynı rastgele çekim).
+  SimCard chooseLeadCard(List<SimCard> hand, Random rng) =>
+      hand[rng.nextInt(hand.length)];
 
   /// Turu ben açıyorum. Rakibin kartını bilmiyorum.
   Tactic chooseLead(PolicyContext c);
@@ -254,6 +299,48 @@ class AdaptivePolicy extends TacticPolicy {
 /// için tur kazanma beklentisini hesaplıyor; en iyisini seçiyor. Zaten
 /// kazanıyorsa ya da kurtuluş yoksa enerjiyi saklıyor.
 ///
+/// Oyuncu tipini bilen hesaplayan oyuncu (sürüm 3 değerlendirmesi).
+///
+/// Cevapta Akıllı ile aynı (beklenti hesabı kartın tipini zaten
+/// içeriyor). Turu açarken: kartının tipi bir taktiğe belirgin şekilde
+/// uyuyorsa (sapma ≥ 3) ve enerji yetiyorsa o taktiği kullanır.
+class TypeAwarePolicy extends SmartPolicy {
+  @override
+  String get name => 'Tip Bilen';
+
+  /// Turu açarken taktiğe EN UYGUN oyuncuyu sürer: pres/kontra tipi
+  /// belirgin (sapma ≥ 3) ve Legend olmayan kartlar arasından en uygunu;
+  /// yoksa rastgele.
+  @override
+  SimCard chooseLeadCard(List<SimCard> hand, Random rng) {
+    SimCard? enIyi;
+    var enIyiSapma = 2;
+    for (final k in hand) {
+      if (k.isLegend || k.effectivePower >= 88) continue;
+      final s = max(k.affinity.press, k.affinity.counter);
+      if (s > enIyiSapma) {
+        enIyi = k;
+        enIyiSapma = s;
+      }
+    }
+    return enIyi ?? hand[rng.nextInt(hand.length)];
+  }
+
+  @override
+  Tactic chooseLead(PolicyContext c) {
+    if (c.myCard.isLegend || c.myCard.effectivePower >= 88) return Tactic.none;
+    final a = c.myCard.affinity;
+    final adaylar = [
+      (Tactic.highPress, a.press),
+      (Tactic.counterAttack, a.counter),
+    ]..sort((x, y) => y.$2.compareTo(x.$2));
+    for (final (t, sapma) in adaylar) {
+      if (sapma >= 3 && c.rules.costOf(t) <= c.myEnergy - 1) return t;
+    }
+    return super.chooseLead(c);
+  }
+}
+
 /// TURU AÇARKEN: Rakibin kartını bilmiyor. Orta güçlü kartla, enerjisi
 /// pres + yedek için yetiyorsa ara sıra pres yapıyor.
 class SmartPolicy extends TacticPolicy {
@@ -321,6 +408,13 @@ class MatchStats {
   final Map<Tactic, int> used = {for (final t in Tactic.values) t: 0};
   final Map<Tactic, int> wonWith = {for (final t in Tactic.values) t: 0};
 
+  /// "MEVKİ|taktik" -> kullanım / o turu kazanma (sürüm 3: hiçbir
+  /// mevki-taktik çifti aşırı güçlü olmamalı)
+  final Map<String, int> usedByPos = {};
+  final Map<String, int> wonByPos = {};
+
+  void _say(Map<String, int> m, String k) => m[k] = (m[k] ?? 0) + 1;
+
   void merge(MatchStats o) {
     rounds += o.rounds;
     flips += o.flips;
@@ -329,6 +423,8 @@ class MatchStats {
       used[t] = used[t]! + o.used[t]!;
       wonWith[t] = wonWith[t]! + o.wonWith[t]!;
     }
+    o.usedByPos.forEach((k, v) => usedByPos[k] = (usedByPos[k] ?? 0) + v);
+    o.wonByPos.forEach((k, v) => wonByPos[k] = (wonByPos[k] ?? 0) + v);
   }
 }
 
@@ -346,11 +442,63 @@ class MatchOutcome {
       {this.firstLeaderIsA = true});
 }
 
+/// Sonraki turu kim açar?
+enum LeadRule {
+  /// Bugün: turu kazanan açar (beraberlikte sıra rakibe)
+  winnerLeads,
+
+  /// Sırayla: kim kazanırsa kazansın açma sırası değişir
+  alternate,
+
+  /// Turu KAYBEDEN açar
+  loserLeads,
+}
+
+/// İlk açan dezavantajı için denenen kural VARYANTLARI (oyunda YOK).
+/// [MatchVariant.live] bugünkü oyunun birebir aynısı.
+class MatchVariant {
+  final String name;
+
+  /// İlk turu açana ek başlangıç enerjisi
+  final int firstLeaderEnergyBonus;
+
+  /// Cevap veren, açanın kartının GÜCÜNÜ görmeden seçer (mevkiyi bilir)
+  final bool blindResponse;
+
+  /// Kör cevap sadece ilk turda mı?
+  final bool blindFirstRoundOnly;
+
+  final LeadRule leadRule;
+
+  const MatchVariant(
+    this.name, {
+    this.firstLeaderEnergyBonus = 0,
+    this.blindResponse = false,
+    this.blindFirstRoundOnly = false,
+    this.leadRule = LeadRule.winnerLeads,
+  });
+
+  static const live = MatchVariant('Bugün (canlı kural)');
+}
+
 class MatchSimulator {
   final TacticRules rules;
   final Random rng;
+  final MatchVariant variant;
 
-  MatchSimulator({required this.rules, required this.rng});
+  MatchSimulator({
+    required this.rules,
+    required this.rng,
+    this.variant = MatchVariant.live,
+  });
+
+  /// Kör cevap: rakibin gücünü bilmeyen oyuncu o mevkideki ORTANCA
+  /// kartını oynar (en iyisini harcamaz, en kötüsüyle de kaybetmez).
+  SimCard _korCevapKarti(List<SimCard> el, String mevki) {
+    final adaylar = el.where((k) => k.position == mevki).toList()
+      ..sort((a, b) => a.effectivePower.compareTo(b.effectivePower));
+    return adaylar[adaylar.length ~/ 2];
+  }
 
   /// Cevap veren için kart seçimi (bütün tarzlarda aynı):
   /// Kazandıran EN ZAYIF kart; yoksa EN ZAYIF kart (feda).
@@ -368,16 +516,27 @@ class MatchSimulator {
     TacticPolicy b, {
     SquadProfile squadA = SquadProfile.standard,
     SquadProfile squadB = SquadProfile.standard,
-  }) {
+  }) =>
+      playSquads(a, b, squadA.build(rng), squadB.build(rng));
+
+  /// Sabit kadrolarla maç (eşleştirme ve ekonomi simülasyonlarında her
+  /// oyuncunun kendi kalıcı kadrosu var). Kadrolar KOPYALANIR.
+  MatchOutcome playSquads(
+    TacticPolicy a,
+    TacticPolicy b,
+    List<SimCard> kadroA,
+    List<SimCard> kadroB,
+  ) {
     a.reset();
     b.reset();
-    final eller = [squadA.build(rng), squadB.build(rng)];
+    final eller = [List.of(kadroA), List.of(kadroB)];
     final oyuncular = [a, b];
     final enerji = [rules.startEnergy, rules.startEnergy];
     final toplanan = [0, 0];
     var pot = 0;
     var acan = rng.nextInt(2); // sunucu ilk açanı rastgele seçer
     final ilkAcanA = acan == 0;
+    enerji[acan] += variant.firstLeaderEnergyBonus;
     final st = MatchStats();
 
     for (var tur = 0; tur < kFormation.length; tur++) {
@@ -388,9 +547,10 @@ class MatchSimulator {
       }
       final cevap = 1 - acan;
 
-      // Turu açan: rastgele bir kartla açar (gerçek oyuncu çeşitliliği)
+      // Turu açan kartını seçer (varsayılan: rastgele)
       final acanEl = eller[acan];
-      final acanKart = acanEl.removeAt(rng.nextInt(acanEl.length));
+      final acanKart = oyuncular[acan].chooseLeadCard(acanEl, rng);
+      acanEl.remove(acanKart);
       final acanTaktik = oyuncular[acan].chooseLead(PolicyContext(
         myCard: acanKart,
         myEnergy: enerji[acan],
@@ -399,7 +559,11 @@ class MatchSimulator {
         rng: rng,
       ));
 
-      final cevapKart = _cevapKarti(eller[cevap], acanKart);
+      final kor = variant.blindResponse &&
+          (!variant.blindFirstRoundOnly || tur == 0);
+      final cevapKart = kor
+          ? _korCevapKarti(eller[cevap], acanKart.position)
+          : _cevapKarti(eller[cevap], acanKart);
       eller[cevap].remove(cevapKart);
       final cevapTaktik = oyuncular[cevap].chooseResponse(
         PolicyContext(
@@ -409,7 +573,8 @@ class MatchSimulator {
           rules: rules,
           rng: rng,
         ),
-        acanKart,
+        // Kör cevapta gücü bilmiyor: ortalama bir kart varsayar
+        kor ? SimCard(acanKart.position, 75) : acanKart,
       );
 
       enerji[acan] -= rules.costOf(acanTaktik);
@@ -434,6 +599,12 @@ class MatchSimulator {
       }
       st.used[acanTaktik] = st.used[acanTaktik]! + 1;
       st.used[cevapTaktik] = st.used[cevapTaktik]! + 1;
+      final ka = '${acanKart.position}|${acanTaktik.name}';
+      final kc = '${cevapKart.position}|${cevapTaktik.name}';
+      st._say(st.usedByPos, ka);
+      st._say(st.usedByPos, kc);
+      if (sonuc > 0) st._say(st.wonByPos, ka);
+      if (sonuc < 0) st._say(st.wonByPos, kc);
       if (sonuc > 0) st.wonWith[acanTaktik] = st.wonWith[acanTaktik]! + 1;
       if (sonuc < 0) st.wonWith[cevapTaktik] = st.wonWith[cevapTaktik]! + 1;
 
@@ -448,7 +619,11 @@ class MatchSimulator {
         final kazanan = sonuc > 0 ? acan : cevap;
         toplanan[kazanan] += pot;
         pot = 0;
-        acan = kazanan;
+        acan = switch (variant.leadRule) {
+          LeadRule.winnerLeads => kazanan,
+          LeadRule.alternate => cevap,
+          LeadRule.loserLeads => 1 - kazanan,
+        };
       }
     }
 

@@ -11,5 +11,8 @@
 library;
 
 export 'src/balance.dart';
+export 'src/comparisons.dart';
+export 'src/economy.dart';
+export 'src/matchmaking.dart';
 export 'src/simulation.dart';
 export 'src/tactics.dart';
