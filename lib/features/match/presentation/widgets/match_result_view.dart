@@ -10,6 +10,7 @@ import '../../../../shared/widgets/premium_card/premium_card.dart';
 import '../../../../shared/widgets/walkout/confetti_overlay.dart';
 import '../arena/arena_backdrop.dart';
 import '../viewmodel/match_view_model.dart';
+import 'league_change_widgets.dart';
 
 /// MAÇ SONUCU (MD bölüm 4-D, prototipteki "winpanel").
 ///
@@ -48,6 +49,9 @@ class _MatchResultViewState extends State<MatchResultView>
     with SingleTickerProviderStateMixin {
   late final AnimationController _giris;
   bool _titredi = false;
+
+  /// Lig atlama ekranı kapatıldı mı? (maç başına bir kez gösterilir)
+  bool _terfiKapandi = false;
 
   @override
   void initState() {
@@ -141,6 +145,12 @@ class _MatchResultViewState extends State<MatchResultView>
                               delta: widget.rewardDelta,
                               giris: _giris,
                             ),
+                            // Lig etkisi: sunucu kaydetmediyse (eski maç)
+                            // bölüm hiç çizilmez, uydurulmaz.
+                            if (sonuc.leagueChange != null) ...[
+                              const SizedBox(height: AppSpacing.lg),
+                              LeagueChangePanel(change: sonuc.leagueChange!),
+                            ],
                             if (sonuc.cardsLost.isNotEmpty)
                               _KartBolumu(
                                 baslik: 'Kaybettiğin kartlar',
@@ -220,6 +230,15 @@ class _MatchResultViewState extends State<MatchResultView>
             ),
           ),
 
+          // ---- LİG ATLAMA EKRANI ----
+          // Basamak atlandıysa sonucun üstünde bir kez; dokununca kapanır.
+          if (sonuc.leagueChange?.isPromoted == true && !_terfiKapandi)
+            Positioned.fill(
+              child: LeaguePromotionOverlay(
+                change: sonuc.leagueChange!,
+                onContinue: () => setState(() => _terfiKapandi = true),
+              ),
+            ),
         ],
       ),
     );

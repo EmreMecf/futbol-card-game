@@ -8,6 +8,7 @@ import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/match/domain/repositories/match_repository.dart';
 import 'package:futbol_card/features/match/presentation/viewmodel/match_view_model.dart';
+import 'package:futbol_card/features/match/presentation/widgets/league_change_widgets.dart';
 import 'package:futbol_card/features/match/presentation/widgets/match_result_view.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -204,6 +205,135 @@ void main() {
       await tester.tap(find.text('ANA SAYFA'));
       expect(yeniMac, 1);
       expect(anaSayfa, 1);
+    });
+  });
+
+  // ==================================================================
+  // FAZ 6 — LİG DEĞİŞİMİ (sunucunun 022 kaydı)
+  // ==================================================================
+  PlayerRank rank(String kod, String ad, int seviye, int tier, int mmr,
+          {double ilerleme = 0.2, String? sonrakiAd, int? sonrakiSeviye}) =>
+      PlayerRank(
+        mmr: mmr,
+        tierId: tier,
+        leagueCode: kod,
+        leagueName: ad,
+        division: seviye,
+        color: '#22D3EE',
+        progress: ilerleme,
+        nextTierMmr: mmr + 80,
+        nextLeagueName: sonrakiAd ?? ad,
+        nextDivision: sonrakiSeviye ?? seviye + 1,
+      );
+
+  MatchLeagueChange degisim(String yon) => switch (yon) {
+        'promoted' => MatchLeagueChange(
+            mmrBefore: 1290,
+            mmrAfter: 1315,
+            mmrDelta: 25,
+            rankBefore: rank('amateur', 'Amatör', 3, 3, 1290, ilerleme: 0.9),
+            rankAfter: rank('usta', 'Usta', 1, 4, 1315, ilerleme: 0.15),
+            direction: 'promoted',
+          ),
+        'demoted' => MatchLeagueChange(
+            mmrBefore: 1305,
+            mmrAfter: 1280,
+            mmrDelta: -25,
+            rankBefore: rank('usta', 'Usta', 1, 4, 1305, ilerleme: 0.05),
+            rankAfter: rank('amateur', 'Amatör', 3, 3, 1280, ilerleme: 0.8),
+            direction: 'demoted',
+          ),
+        _ => MatchLeagueChange(
+            mmrBefore: 1400,
+            mmrAfter: 1425,
+            mmrDelta: 25,
+            rankBefore: rank('usta', 'Usta', 2, 5, 1400, ilerleme: 0),
+            rankAfter: rank('usta', 'Usta', 2, 5, 1425, ilerleme: 0.25),
+          ),
+      };
+
+  group('Lig değişimi', () {
+    testWidgets('yükselme: lig atlama ekranı, Devam ile kapanır',
+        (tester) async {
+      await ac(
+        tester,
+        MatchResultView(
+          result: MatchResultSummary(
+            matchId: 'm',
+            didIWin: true,
+            leagueChange: degisim('promoted'),
+          ),
+          onClose: () {},
+        ),
+      );
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('LİG ATLADIN!'), findsOneWidget);
+      expect(find.text('USTA 1'), findsOneWidget);
+
+      await tester.tap(find.text('DEVAM'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('LİG ATLADIN!'), findsNothing,
+          reason: 'Ekran bir kez gösterilir');
+      // Panel: değişim şeridi ve yeni lig
+      expect(find.text('LİG ATLADIN'), findsOneWidget);
+      expect(find.text('Amatör 3'), findsWidgets);
+      expect(find.byIcon(Icons.arrow_forward_rounded), findsWidgets);
+      expect(find.text('1315 puan'), findsOneWidget);
+    });
+
+    testWidgets('aynı basamakta: atlama ekranı yok, hedef yazılır',
+        (tester) async {
+      await ac(
+        tester,
+        MatchResultView(
+          result: MatchResultSummary(
+            matchId: 'm',
+            didIWin: true,
+            leagueChange: degisim('same'),
+          ),
+          onClose: () {},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LeaguePromotionOverlay), findsNothing);
+      expect(find.text('Usta 2'), findsWidgets);
+      expect(find.text('Usta 3 için 4 galibiyet (80 puan).'), findsOneWidget);
+    });
+
+    testWidgets('düşüş: "SEVİYE DÜŞTÜ", kutlama yok', (tester) async {
+      await ac(
+        tester,
+        MatchResultView(
+          result: MatchResultSummary(
+            matchId: 'm',
+            myScore: 2,
+            opponentScore: 9,
+            leagueChange: degisim('demoted'),
+          ),
+          onClose: () {},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LeaguePromotionOverlay), findsNothing);
+      expect(find.text('SEVİYE DÜŞTÜ'), findsOneWidget);
+      expect(find.text('-25'), findsOneWidget);
+    });
+
+    testWidgets('sunucu kaydı yoksa lig bölümü hiç çizilmez', (tester) async {
+      await ac(
+        tester,
+        MatchResultView(
+          result: const MatchResultSummary(matchId: 'm', didIWin: true),
+          onClose: () {},
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(LeagueChangePanel), findsNothing);
     });
   });
 }

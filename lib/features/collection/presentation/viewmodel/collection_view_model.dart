@@ -10,8 +10,8 @@ import '../../domain/repositories/collection_repository.dart';
 
 /// Koleksiyonun siralama secenekleri
 enum CollectionSort {
-  powerDesc('Güce göre (yüksek → düşük)'),
-  powerAsc('Güce göre (düşük → yüksek)'),
+  powerDesc('Güce göre (yüksekten düşüğe)'),
+  powerAsc('Güce göre (düşükten yükseğe)'),
   tierDesc('Seviyeye göre'),
   nameAsc('İsme göre');
 
