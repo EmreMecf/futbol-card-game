@@ -312,6 +312,8 @@ Future<void> main() async {
 
   await Future<void>.delayed(const Duration(seconds: 1));
 
+  var ligHatasi = false;
+
   // ==================================================================
   baslik('6) MAC SONUCU');
   // ==================================================================
@@ -331,6 +333,27 @@ Future<void> main() async {
     print('    Profil : ${profil['coins']} coin, ${profil['mmr']} puan, '
         '${profil['protection_slots']} koruma hakki');
 
+    // Lig etkisi (022): sunucu mac oncesi/sonrasi puani kaydetmeli
+    final lig = sonuc['league_change'] as Map<String, dynamic>?;
+    if (lig == null) {
+      print('    !!! league_change BOS geldi');
+      ligHatasi = true;
+    } else {
+      final fark = lig['mmr_delta'] as int;
+      final beklenen = sonuc['did_i_win'] == true
+          ? 25
+          : (sonuc['is_draw'] == true ? 0 : null);
+      print('    Lig    : ${lig['mmr_before']} -> ${lig['mmr_after']} '
+          '(${lig['direction']}) '
+          '${(lig['rank_after'] as Map)['league_name']} '
+          '${(lig['rank_after'] as Map)['division']}');
+      if (lig['mmr_after'] != profil['mmr'] ||
+          (beklenen != null && fark != beklenen)) {
+        print('    !!! Lig degisimi profil ile tutarsiz');
+        ligHatasi = true;
+      }
+    }
+
     if (kaybedilen > 0) {
       for (final k in sonuc['cards_lost'] as List) {
         final kart = k as Map<String, dynamic>;
@@ -343,7 +366,7 @@ Future<void> main() async {
   // ==================================================================
   baslik('7) GERCEK ZAMANLI BILDIRIMLER');
   // ==================================================================
-  var hepsiTamam = !taktikHatasi;
+  var hepsiTamam = !taktikHatasi && !ligHatasi;
   if (taktikHatasi) print('  !!! TAKTIK KONTROLLERINDE HATA VAR (yukari bak)');
 
   for (final ad in oyuncular.keys) {

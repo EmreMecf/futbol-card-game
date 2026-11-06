@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'card_model.dart';
+import 'league_models.dart';
 import 'match_models.dart';
 import 'user_model.dart';
 
@@ -39,6 +40,10 @@ abstract class MatchResultSummary with _$MatchResultSummary {
 
     /// Mac sonrasi guncel profilim (coin, MMR ve koruma hakki degisti)
     UserModel? myProfile,
+
+    /// Bu macin lig etkisi (022_match_league_change.sql).
+    /// null: kayit yok (eski mac) — ekran lig bolumunu hic gostermez.
+    MatchLeagueChange? leagueChange,
   }) = _MatchResultSummary;
 
   factory MatchResultSummary.fromJson(Map<String, dynamic> json) =>
@@ -91,4 +96,37 @@ abstract class MatchResultSummary with _$MatchResultSummary {
       return a.power >= b.power ? a : b;
     });
   }
+}
+
+/// Bir macin lig etkisi.
+///
+/// Mac oncesi ve sonrasi puan SUNUCUDA kaydediliyor (mac kurulurken ve
+/// bitince). Istemci bu ikisini oturumdan cikarmiyor: oturum bayat
+/// olabilir ve yanlis bir "lig atladin" ekrani hic olmamasindan kotudur.
+@freezed
+abstract class MatchLeagueChange with _$MatchLeagueChange {
+  const MatchLeagueChange._();
+
+  const factory MatchLeagueChange({
+    required int mmrBefore,
+    required int mmrAfter,
+    @Default(0) int mmrDelta,
+    required PlayerRank rankBefore,
+    required PlayerRank rankAfter,
+
+    /// 'promoted' | 'demoted' | 'same'
+    @Default('same') String direction,
+  }) = _MatchLeagueChange;
+
+  factory MatchLeagueChange.fromJson(Map<String, dynamic> json) =>
+      _$MatchLeagueChangeFromJson(json);
+
+  /// Bir ust basamaga cikti mi? (ayni ligin ust seviyesi dahil)
+  bool get isPromoted => direction == 'promoted';
+
+  /// Bir alt basamaga dustu mu?
+  bool get isDemoted => direction == 'demoted';
+
+  /// Baska bir LIGE gecti mi? (Amator -> Usta gibi; seviye atlamaktan buyuk)
+  bool get changedLeague => rankBefore.leagueCode != rankAfter.leagueCode;
 }

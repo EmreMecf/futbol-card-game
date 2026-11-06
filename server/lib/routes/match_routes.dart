@@ -219,7 +219,23 @@ Router matchRoutes(Database db) {
       params: {'userId': userId, 'matchId': matchId},
     );
 
-    return jsonOk(RowMappers.matchResult(sonuc).toJson());
+    // Lig etkisi (022): mac oncesi/sonrasi puan sunucuda kayitli.
+    // Eski maclarda null doner; o zaman alan bos gider.
+    final ligDegisimi = await db.scalar(
+      'select get_match_league_change(@userId::uuid, @matchId::uuid)',
+      params: {'userId': userId, 'matchId': matchId},
+    );
+
+    final ozet = RowMappers.matchResult(sonuc);
+    return jsonOk(
+      ozet
+          .copyWith(
+            leagueChange: ligDegisimi == null
+                ? null
+                : MatchLeagueChange.fromJson(RowMappers.asMap(ligDegisimi)),
+          )
+          .toJson(),
+    );
   });
 
   // ------------------------------------------------------------------
