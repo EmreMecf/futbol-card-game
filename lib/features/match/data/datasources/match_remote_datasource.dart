@@ -1,3 +1,5 @@
+import 'package:shared_models/shared_models.dart';
+
 import '../../../../core/network/api_client.dart';
 
 /// Mac uc noktalariyla ham iletisim.
@@ -29,9 +31,15 @@ class MatchRemoteDataSource {
         'offset': '$offset',
       });
 
-  Future<Map<String, dynamic>> play(String matchId, String? userCardId) {
+  /// [tactic] "taktik yok" ise hiç gönderilmez (sunucu varsayılanı).
+  Future<Map<String, dynamic>> play(
+    String matchId,
+    String? userCardId, {
+    MatchTactic tactic = MatchTactic.none,
+  }) {
     return _api.post('/match/$matchId/play', govde: {
       'user_card_id': ?userCardId,
+      if (!tactic.isNone) 'tactic': tactic.code,
     });
   }
 

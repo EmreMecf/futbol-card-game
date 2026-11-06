@@ -65,6 +65,7 @@ void main() {
     Duration kalanSure = const Duration(seconds: 30),
     Duration cihazSaatiSapmasi = Duration.zero,
     MatchStatus status = MatchStatus.active,
+    int enerji = 2,
   }) {
     // Sunucunun "simdi"si = cihaz saati + sapma
     final sunucuSimdi = DateTime.now().add(cihazSaatiSapmasi);
@@ -79,6 +80,8 @@ void main() {
       turnDeadline: sunucuSimdi.add(kalanSure),
       myCardsLeft: 4,
       opponentCardsLeft: 4,
+      myEnergy: enerji,
+      opponentEnergy: 2,
     );
   }
 
@@ -316,6 +319,72 @@ void main() {
   // ==================================================================
   // MAC SONUCU
   // ==================================================================
+  // ==================================================================
+  // TAKTIK (021_tactics.sql) — istemci sadece SECIMI iletir
+  // ==================================================================
+  group('Taktik secimi', () {
+    test('secilen taktik kartla birlikte sunucuya gider, sonra sifirlanir',
+        () async {
+      repo.durum = durum(enerji: 3);
+      repo.el = testEli();
+      await vm.initialize();
+
+      vm.selectTactic(MatchTactic.highPress);
+      expect(vm.selectedTactic, MatchTactic.highPress);
+
+      await vm.playCard(repo.el.first);
+
+      expect(repo.oynananTaktikler, [MatchTactic.highPress]);
+      expect(vm.selectedTactic, MatchTactic.none,
+          reason: 'Taktik tek kartlik; sonraki hamlede yeniden secilir');
+    });
+
+    test('enerji yetmeyen taktik secilemez', () async {
+      repo.durum = durum(enerji: 2);
+      await vm.initialize();
+
+      expect(vm.canUseTactic(MatchTactic.highPress), isFalse);
+      vm.selectTactic(MatchTactic.highPress);
+      expect(vm.selectedTactic, MatchTactic.none);
+
+      expect(vm.canUseTactic(MatchTactic.counterAttack), isTrue);
+    });
+
+    test('ayni taktige tekrar dokunmak secimi kaldirir', () async {
+      repo.durum = durum(enerji: 5);
+      await vm.initialize();
+
+      vm.selectTactic(MatchTactic.defensiveWall);
+      vm.selectTactic(MatchTactic.defensiveWall);
+      expect(vm.selectedTactic, MatchTactic.none);
+    });
+
+    test('sira bende degilse taktik secilemez', () async {
+      repo.durum = durum(isMyTurn: false, enerji: 5);
+      await vm.initialize();
+
+      vm.selectTactic(MatchTactic.counterAttack);
+      expect(vm.selectedTactic, MatchTactic.none);
+    });
+
+    test('taktik secilmezse "taktik yok" gider', () async {
+      repo.durum = durum(enerji: 5);
+      repo.el = testEli();
+      await vm.initialize();
+
+      await vm.playCard(repo.el.first);
+      expect(repo.oynananTaktikler, [MatchTactic.none]);
+    });
+
+    test('enerji bilgisi sunucudan okunur', () async {
+      repo.durum = durum(enerji: 4);
+      await vm.initialize();
+      expect(vm.myEnergy, 4);
+      expect(vm.opponentEnergy, 2);
+      expect(vm.maxEnergy, 5);
+    });
+  });
+
   test('mac bitince sonuc otomatik cekilir ve profil guncellenir',
       () async {
     repo.durum = durum(status: MatchStatus.finished);
@@ -360,6 +429,7 @@ class _SahteRepository implements MatchRepository {
   String? hataMesaji;
 
   final List<String?> oynananKartlar = [];
+  final List<MatchTactic> oynananTaktikler = [];
 
   @override
   Future<Result<MatchState>> fetchState(String matchId) async =>
@@ -397,6 +467,7 @@ class _SahteRepository implements MatchRepository {
   Future<Result<PlayCardResult>> playCard({
     required String matchId,
     String? userCardId,
+    MatchTactic tactic = MatchTactic.none,
   }) async {
     if (hataMesaji != null) {
       // Sunucunun dondugu oyun kurali hatasini taklit ediyoruz
@@ -405,6 +476,7 @@ class _SahteRepository implements MatchRepository {
       );
     }
     oynananKartlar.add(userCardId);
+    oynananTaktikler.add(tactic);
     return const Success(PlayCardResult());
   }
 

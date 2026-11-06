@@ -119,6 +119,36 @@ class MatchViewModel extends BaseViewModel {
   bool get mustPass =>
       isMyTurn && requiredPosition != null && playableCards.isEmpty;
 
+  // ------------------------------------------------------------------
+  // TAKTİK VE ENERJİ (021_tactics.sql)
+  // ------------------------------------------------------------------
+  // İstemci sadece SEÇİMİ tutar. Enerjinin yetip yetmediğini, bonusu ve
+  // turun sonucunu sunucu belirler. Buradaki "yetiyor mu" kontrolü
+  // yalnızca düğmeyi pasif göstermek için.
+  MatchTactic _secilenTaktik = MatchTactic.none;
+
+  /// Bir sonraki kartla birlikte gönderilecek taktik
+  MatchTactic get selectedTactic {
+    // Enerji düştüyse (ör. tur çözüldü) seçim artık geçersiz olabilir
+    if (!_secilenTaktik.isAffordable(myEnergy)) return MatchTactic.none;
+    return _secilenTaktik;
+  }
+
+  int get myEnergy => _durum?.myEnergy ?? 0;
+  int get opponentEnergy => _durum?.opponentEnergy ?? 0;
+  int get maxEnergy => _durum?.maxEnergy ?? 5;
+
+  /// Taktik seçilebilir mi? (sıra bende, pas zorunlu değil, enerji yetiyor)
+  bool canUseTactic(MatchTactic t) =>
+      isMyTurn && !isOver && !mustPass && t.isAffordable(myEnergy);
+
+  /// Taktiği seçer; aynı taktiğe tekrar dokunmak seçimi kaldırır.
+  void selectTactic(MatchTactic t) {
+    if (!t.isNone && !canUseTactic(t)) return;
+    _secilenTaktik = (_secilenTaktik == t) ? MatchTactic.none : t;
+    safeNotify();
+  }
+
   /// Masadaki (henüz sonuçlanmamış) hamleler
   List<MatchMove> get tableMoves => _gecmis.currentTableMoves;
 
@@ -344,6 +374,7 @@ class MatchViewModel extends BaseViewModel {
     final sonuc = await _repository.playCard(
       matchId: matchId,
       userCardId: kart.userCardId,
+      tactic: selectedTactic,
     );
 
     _hamleGonderiliyor = false;
@@ -357,6 +388,8 @@ class MatchViewModel extends BaseViewModel {
       return false;
     }
 
+    // Taktik bu kartla kullanıldı; sonraki hamle sıfırdan seçilir
+    _secilenTaktik = MatchTactic.none;
     await _tazele();
     return true;
   }

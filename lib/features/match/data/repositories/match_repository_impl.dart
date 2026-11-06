@@ -55,10 +55,11 @@ class MatchRepositoryImpl implements MatchRepository {
   Future<Result<PlayCardResult>> playCard({
     required String matchId,
     String? userCardId,
+    MatchTactic tactic = MatchTactic.none,
   }) {
     return Result.guard(() async {
       return PlayCardResult.fromJson(
-        await _remote.play(matchId, userCardId),
+        await _remote.play(matchId, userCardId, tactic: tactic),
       );
     });
   }

@@ -59,6 +59,8 @@ class R implements MatchRepository {
         myCardsLeft: 7,
         opponentCardsLeft: 6,
         potCount: 2,
+        myEnergy: 3,
+        opponentEnergy: 4,
         opponent: const OpponentInfo(id: 'o', username: 'StormFC', mmr: 1640),
       ),
     );

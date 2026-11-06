@@ -15,9 +15,13 @@ abstract interface class MatchRepository {
 
   /// Kart oyna. [userCardId] null verilirse PAS gecilir;
   /// sunucu "gercekten o pozisyonda kartin yok mu" diye dogrular.
+  ///
+  /// [tactic] istege bagli taktik. Enerjinin yetip yetmedigini ve
+  /// bonusu SUNUCU hesaplar; istemci sadece secimi iletir.
   Future<Result<PlayCardResult>> playCard({
     required String matchId,
     String? userCardId,
+    MatchTactic tactic = MatchTactic.none,
   });
 
   /// Rakip AFK ise maci hukmen talep et

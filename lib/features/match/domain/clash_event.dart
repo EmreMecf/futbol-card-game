@@ -109,6 +109,33 @@ class ClashEvent {
     return kg < yg;
   }
 
+  /// Taktik bonusu eli çevirdi mi?
+  ///
+  /// Legend kuralı gibi bu da HESAPLAMA DEĞİL, AÇIKLAMA: kazananı sunucu
+  /// belirledi. Burada sadece "kazananın taktiksiz gücü (güç + kimya)
+  /// kaybedeninkinden yüksek DEĞİLDİ ama bonusla kazandı" durumu tespit
+  /// edilip etiketleniyor; oyuncu "83 nasıl 86'yı yendi?" diye şaşırmasın.
+  bool get wonByTactic {
+    if (outcome == ClashOutcome.draw || wonByLegendRule) return false;
+    final kazanan = outcome == ClashOutcome.win ? myMove : opponentMove;
+    final kaybeden = outcome == ClashOutcome.win ? opponentMove : myMove;
+    if (kazanan == null || kaybeden == null) return false;
+    if (kazanan.isPass || kaybeden.isPass) return false;
+    if (kazanan.tacticBonus <= 0) return false;
+
+    int taktiksiz(MatchMove m) => (m.power ?? 0) + m.chemistry;
+    return taktiksiz(kazanan) <= taktiksiz(kaybeden);
+  }
+
+  /// Taktiğim kırıldı mı? (seçtim ama karşı taktik bonusu sıfırladı)
+  bool get myTacticCountered {
+    final benim = myMove;
+    final rakip = opponentMove;
+    if (benim == null || rakip == null || benim.isPass) return false;
+    if (!benim.hasTactic || benim.tacticBonus > 0) return false;
+    return rakip.tactic != null && rakip.tactic == benim.tactic!.beatenBy;
+  }
+
   /// Sonuç bandındaki başlık
   String get headline => switch (outcome) {
         ClashOutcome.win => 'ELİ KAZANDIN!',
@@ -129,6 +156,17 @@ class ClashEvent {
     }
     if (wonByLegendRule) {
       return 'Legend kuralı: Legend kart alttaki seviyeleri yener.';
+    }
+    if (wonByTactic) {
+      final kazanan = outcome == ClashOutcome.win ? myMove! : opponentMove!;
+      final ad = kazanan.tactic!.label;
+      return outcome == ClashOutcome.win
+          ? '$ad eli çevirdi! (+${kazanan.tacticBonus})'
+          : 'Rakibin $ad taktiği eli çevirdi (+${kazanan.tacticBonus}).';
+    }
+    if (myTacticCountered) {
+      return '${myMove!.tactic!.label} boşa gitti: rakip '
+          '${opponentMove!.tactic!.label} oynadı.';
     }
     if (outcome == ClashOutcome.win && cardsCollected > 0) {
       return 'Masadan $cardsCollected kart topladın.';

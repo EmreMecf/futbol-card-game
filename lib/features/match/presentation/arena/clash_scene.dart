@@ -11,6 +11,7 @@ import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/premium_card/premium_card.dart';
 import '../../domain/clash_event.dart';
 import 'arena_backdrop.dart';
+import '../widgets/tactic_widgets.dart';
 
 /// ÇATIŞMA SAHNESİ — sonuçlanmış bir turu sahada oynatır (MD bölüm 6).
 ///
@@ -351,8 +352,12 @@ class _KartPlakasi extends StatelessWidget {
           interactive: false,
         ),
         const SizedBox(height: AppSpacing.xs),
-        // Gerçek güç: kart gücü + kimya (sunucunun kullandığı değer)
+        // Gerçek güç: kart gücü + kimya + taktik (sunucunun değeri)
         _GucEtiketi(move: m, color: renk),
+        if (m.hasTactic) ...[
+          const SizedBox(height: AppSpacing.xxs),
+          TacticBadge(move: m),
+        ],
       ],
     );
   }
@@ -383,9 +388,11 @@ class _GucEtiketi extends StatelessWidget {
               text: '${move.effectivePower ?? 0}',
               style: AppTypography.display(size: 18, weight: FontWeight.w900),
             ),
-            if (move.hasChemistry)
+            if (move.hasChemistry || move.tacticBonus > 0)
               TextSpan(
-                text: '  (${move.power} +${move.chemistry} kimya)',
+                text: '  (${move.power}'
+                    '${move.hasChemistry ? ' +${move.chemistry} kimya' : ''}'
+                    '${move.tacticBonus > 0 ? ' +${move.tacticBonus} taktik' : ''})',
                 style: AppTypography.body(
                   size: 10.5,
                   weight: FontWeight.w800,

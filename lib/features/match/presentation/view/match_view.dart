@@ -16,6 +16,7 @@ import '../arena/arena_backdrop.dart';
 import '../arena/clash_scene.dart';
 import '../widgets/match_result_view.dart';
 import '../widgets/match_widgets.dart';
+import '../widgets/tactic_widgets.dart';
 
 /// Maç ekranı — oyunun kalbi.
 ///
@@ -220,8 +221,10 @@ class _DarMasa extends StatelessWidget {
               // yüzden ölçüler ekrana uyduruluyor, ekran ölçülere değil.
               final yukseklik = kisitlar.maxHeight;
 
-              // Üst bant + tur şeridi + aksiyon çubuğu için ayrılan pay
-              const sabitler = 64.0 + 10 + 44 + 68 + 8;
+              // Üst bant + tur şeridi + taktik çubuğu + aksiyon çubuğu
+              // için ayrılan pay
+              const sabitler =
+                  64.0 + 10 + 44 + (TacticBar.height + 6) + 68 + 8;
               final kalan = (yukseklik - sabitler).clamp(240.0, 2000.0);
 
               // Kalanın yarısı ele, yarısı masaya
@@ -287,6 +290,10 @@ class _DarMasa extends StatelessWidget {
                     state: state,
                     viewModel: viewModel,
                     cardWidth: elKartGenisligi,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                    child: _TaktikCubugu(viewModel: viewModel),
                   ),
                   _AksiyonCubugu(state: state, viewModel: viewModel),
                   const SizedBox(height: 8),
@@ -448,9 +455,14 @@ class _UstBant extends StatelessWidget {
         children: [
           _OyuncuRozeti(
             name: rakip?.username ?? 'Rakip',
-            detail:
-                '${durum.opponentCardsLeft} kart · '
-                '${rakip?.mmr ?? 0} puan',
+            // Rakibin enerjisi gizli taktiğini ele vermez: sunucu
+            // enerjiyi yalnızca tur çözülürken düşüyor.
+            detail: compact
+                ? '${durum.opponentCardsLeft} kart · '
+                      '${durum.opponentEnergy} enerji'
+                : '${durum.opponentCardsLeft} kart · '
+                      '${durum.opponentEnergy} enerji · '
+                      '${rakip?.mmr ?? 0} puan',
             color: AppColors.danger,
           ),
           const Spacer(),
@@ -502,7 +514,7 @@ class _UstBant extends StatelessWidget {
             const Spacer(),
             _OyuncuRozeti(
               name: 'Sen',
-              detail: '${durum.myCardsLeft} kart',
+              detail: '${durum.myCardsLeft} kart · ${durum.myEnergy} enerji',
               color: AppColors.primary,
               reversed: true,
             ),
@@ -711,14 +723,21 @@ class _RakipYuvasi extends StatelessWidget {
       return FaceDownCard(width: width, label: 'Bekleniyor');
     }
 
-    return PlayedMoveCard(
+    // Rakip turu açtıysa taktiği tur çözülene kadar GİZLİ ("TAKTİK ?").
+    // Sunucu taktiği hiç göndermiyor; burada sadece bu belirtiliyor.
+    return _TaktikliKart(
       move: hamle,
-      width: width,
-      isWinner:
-          tur != null &&
-          tur.roundNumber == hamle.roundNumber &&
-          tur.winnerId != null &&
-          tur.winnerId != viewModel.myUserId,
+      cardWidth: width,
+      badgeOnLeft: true,
+      child: PlayedMoveCard(
+        move: hamle,
+        width: width,
+        isWinner:
+            tur != null &&
+            tur.roundNumber == hamle.roundNumber &&
+            tur.winnerId != null &&
+            tur.winnerId != viewModel.myUserId,
+      ),
     );
   }
 }
@@ -740,13 +759,18 @@ class _BenimYuvam extends StatelessWidget {
     final tur = viewModel.lastResolvedRound;
 
     if (hamle != null) {
-      return PlayedMoveCard(
+      return _TaktikliKart(
         move: hamle,
-        width: width,
-        isWinner:
-            tur != null &&
-            tur.roundNumber == hamle.roundNumber &&
-            tur.winnerId == viewModel.myUserId,
+        cardWidth: width,
+        badgeOnLeft: false,
+        child: PlayedMoveCard(
+          move: hamle,
+          width: width,
+          isWinner:
+              tur != null &&
+              tur.roundNumber == hamle.roundNumber &&
+              tur.winnerId == viewModel.myUserId,
+        ),
       );
     }
 
@@ -763,6 +787,49 @@ class _BenimYuvam extends StatelessWidget {
       width: width,
       message: mesaj,
       isActive: viewModel.isMyTurn && !viewModel.mustPass,
+    );
+  }
+}
+
+/// Masadaki kartın YANINA taktik rozeti iliştirir.
+///
+/// Rozet yerleşime katılmaz (Stack, taşmaya izin verilir): masanın
+/// yükseklik hesabını değiştirmesin. Kartın üstüne değil yanına konur;
+/// küçük ekranda kart 64px'e kadar küçülüyor ve üstteki rozet kartın
+/// gücünü kapatıyordu.
+///
+/// Rakibin rozeti solda, benimki sağda: masaüstünde kartlar ortadaki
+/// sayacın iki yanında durduğu için rozet sayaca doğru değil, dışa
+/// doğru açılıyor.
+class _TaktikliKart extends StatelessWidget {
+  final MatchMove move;
+  final double cardWidth;
+  final bool badgeOnLeft;
+  final Widget child;
+
+  const _TaktikliKart({
+    required this.move,
+    required this.cardWidth,
+    required this.badgeOnLeft,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Taktik yok ve biliniyor: rozet gereksiz
+    if (move.tactic != null && !move.hasTactic) return child;
+    const bosluk = 6.0;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        Positioned(
+          top: 6,
+          left: badgeOnLeft ? null : cardWidth + bosluk,
+          right: badgeOnLeft ? cardWidth + bosluk : null,
+          child: TacticBadge(move: move, resolved: false),
+        ),
+      ],
     );
   }
 }
@@ -959,6 +1026,33 @@ class _Elim extends StatelessWidget {
 }
 
 // ====================================================================
+// TAKTİK ÇUBUĞU (021_tactics.sql)
+// ====================================================================
+/// Enerji + üç taktik. Sadece SEÇİM tutulur; kart oynandığında taktik
+/// onunla birlikte gider ve sunucu doğrular.
+///
+/// Sıra bende değilken de görünür (pasif): yerleşim zıplamasın ve
+/// oyuncu bir sonraki hamlesini planlayabilsin.
+class _TaktikCubugu extends StatelessWidget {
+  final MatchViewModel viewModel;
+
+  const _TaktikCubugu({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    final kilitli =
+        viewModel.isSubmittingMove || viewModel.myTableMove != null;
+    return TacticBar(
+      energy: viewModel.myEnergy,
+      maxEnergy: viewModel.maxEnergy,
+      selected: viewModel.selectedTactic,
+      isEnabled: (t) => !kilitli && viewModel.canUseTactic(t),
+      onSelect: viewModel.selectTactic,
+    );
+  }
+}
+
+// ====================================================================
 // AKSİYON ÇUBUĞU (telefon)
 // ====================================================================
 class _AksiyonCubugu extends StatelessWidget {
@@ -1011,7 +1105,8 @@ class _AksiyonCubugu extends StatelessWidget {
                       secili == null
                           ? 'BİR KART SEÇ'
                           : '${secili.fullName.toUpperCase()} · '
-                                '${secili.effectivePower}',
+                                '${secili.effectivePower}'
+                                '${viewModel.selectedTactic.isNone ? '' : ' + ${viewModel.selectedTactic.shortLabel.toUpperTr()}'}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1075,6 +1170,18 @@ class _YanPanel extends StatelessWidget {
           const SizedBox(height: 10),
           _DurumPaneli(state: durum, viewModel: viewModel),
 
+          const SizedBox(height: 16),
+          Text('TAKTİK', style: AppTypography.label),
+          const SizedBox(height: 10),
+          _TaktikCubugu(viewModel: viewModel),
+          if (!viewModel.selectedTactic.isNone) ...[
+            const SizedBox(height: 8),
+            Text(
+              viewModel.selectedTactic.hint,
+              style: AppTypography.bodyS,
+            ),
+          ],
+
           const Spacer(),
 
           if (viewModel.mustPass && viewModel.isMyTurn)
@@ -1100,7 +1207,12 @@ class _YanPanel extends StatelessWidget {
                         color: AppColors.textPrimary,
                       ),
                     )
-                  : const Text('KARTI OYNA'),
+                  : Text(
+                      viewModel.selectedTactic.isNone
+                          ? 'KARTI OYNA'
+                          : 'KARTI OYNA + '
+                                '${viewModel.selectedTactic.shortLabel.toUpperTr()}',
+                    ),
             ),
 
           const SizedBox(height: 10),
