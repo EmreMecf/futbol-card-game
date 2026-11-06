@@ -1,15 +1,19 @@
+import 'dart:async';
+
 import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
+import '../../../../core/storage/favorites_store.dart';
+import '../../../../core/utils/turkish_text.dart';
 import '../../domain/repositories/collection_repository.dart';
 
 /// Koleksiyonun siralama secenekleri
 enum CollectionSort {
-  powerDesc('Guce gore (yuksek -> dusuk)'),
-  powerAsc('Guce gore (dusuk -> yuksek)'),
-  tierDesc('Seviyeye gore'),
-  nameAsc('Isme gore');
+  powerDesc('Güce göre (yüksek → düşük)'),
+  powerAsc('Güce göre (düşük → yüksek)'),
+  tierDesc('Seviyeye göre'),
+  nameAsc('İsme göre');
 
   final String label;
   const CollectionSort(this.label);
@@ -28,7 +32,11 @@ enum CollectionSort {
 class CollectionViewModel extends BaseViewModel {
   final CollectionRepository _repository;
 
-  CollectionViewModel(this._repository);
+  /// Favoriler bu cihazda saklanıyor. Bkz. [FavoritesStore].
+  final FavoritesStore _favoriler;
+
+  CollectionViewModel(this._repository, [FavoritesStore? favoriler])
+      : _favoriler = favoriler ?? FavoritesStore();
 
   List<InventoryCard> _tumKartlar = [];
 
@@ -40,6 +48,10 @@ class CollectionViewModel extends BaseViewModel {
   CardPosition? _pozisyonFiltresi;
   String _arama = '';
   CollectionSort _siralama = CollectionSort.powerDesc;
+  bool _sadeceFavoriler = false;
+
+  /// Sadece favoriler mi gösteriliyor?
+  bool get favoritesOnly => _sadeceFavoriler;
 
   CardTier? get tierFilter => _seviyeFiltresi;
   CardPosition? get positionFilter => _pozisyonFiltresi;
@@ -48,21 +60,29 @@ class CollectionViewModel extends BaseViewModel {
 
   /// Herhangi bir filtre aktif mi?
   bool get hasActiveFilter =>
-      _seviyeFiltresi != null || _pozisyonFiltresi != null || _arama.isNotEmpty;
+      _seviyeFiltresi != null ||
+      _pozisyonFiltresi != null ||
+      _arama.isNotEmpty ||
+      _sadeceFavoriler;
 
   // ------------------------------------------------------------------
   // FILTRELENMIS LISTE
   // ------------------------------------------------------------------
   List<InventoryCard> get filteredCards {
+    // Arama Türkçe küçük harfe çevrilerek yapılıyor: 'İsmail' araması
+    // toLowerCase() ile 'i̇smail' (birleşik nokta) olup eşleşmiyordu.
+    final aranan = _arama.toLowerTr();
+
     final liste = _tumKartlar.where((k) {
+      if (_sadeceFavoriler && !_favoriler.isFavorite(k.cardId)) return false;
       if (_seviyeFiltresi != null && k.tier != _seviyeFiltresi) return false;
       if (_pozisyonFiltresi != null && k.position != _pozisyonFiltresi) {
         return false;
       }
       if (_arama.isNotEmpty) {
         final metin = '${k.fullName} ${k.club ?? ''} ${k.nationality ?? ''}'
-            .toLowerCase();
-        if (!metin.contains(_arama.toLowerCase())) return false;
+            .toLowerTr();
+        if (!metin.contains(aranan)) return false;
       }
       return true;
     }).toList();
@@ -105,6 +125,35 @@ class CollectionViewModel extends BaseViewModel {
     return sayim;
   }
 
+  // ------------------------------------------------------------------
+  // FAVORİLER
+  // ------------------------------------------------------------------
+  bool isFavorite(InventoryCard kart) => _favoriler.isFavorite(kart.cardId);
+
+  /// Koleksiyonda şu an bulunan favori kart sayısı.
+  ///
+  /// Depodaki toplamdan farklı olabilir: favori bir oyuncuyu maçta
+  /// kaptırdıysan işaret durur ama kart koleksiyonda yoktur.
+  int get favoriteCount =>
+      _tumKartlar.where((k) => _favoriler.isFavorite(k.cardId)).length;
+
+  /// Favoriyi açar/kapatır.
+  ///
+  /// `false` dönerse sınıra ([FavoritesStore.maxFavorites]) ulaşıldı ve
+  /// favori EKLENMEDİ; ekran oyuncuya söylemeli.
+  Future<bool> toggleFavorite(InventoryCard kart) async {
+    final onceden = _favoriler.isFavorite(kart.cardId);
+    final simdi = await _favoriler.toggle(kart.cardId);
+    safeNotify();
+    // Kaldırma her zaman başarılı; ekleme sınıra takılabilir
+    return onceden || simdi;
+  }
+
+  void setFavoritesOnly(bool acik) {
+    _sadeceFavoriler = acik;
+    safeNotify();
+  }
+
   /// Koleksiyondaki en guclu kart
   InventoryCard? get bestCard {
     if (_tumKartlar.isEmpty) return null;
@@ -125,6 +174,11 @@ class CollectionViewModel extends BaseViewModel {
   // VERI YUKLEME
   // ------------------------------------------------------------------
   Future<void> load({bool showLoading = true}) async {
+    // Favoriler kartları BEKLETMEZ: cihaz deposu yavaşsa oyuncu
+    // kalpler yüzünden koleksiyonunu göremezdi. Kartlar hemen gelir,
+    // favori işaretleri yüklenince ekran tazelenir.
+    unawaited(_favoriler.load().then((_) => safeNotify()));
+
     final kartlar = await run(
       () => _repository.fetchInventory(),
       showLoading: showLoading,
@@ -174,6 +228,7 @@ class CollectionViewModel extends BaseViewModel {
     _seviyeFiltresi = null;
     _pozisyonFiltresi = null;
     _arama = '';
+    _sadeceFavoriler = false;
     safeNotify();
   }
 }

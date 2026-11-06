@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/feedback/game_feedback.dart';
+import '../../../../shared/widgets/game/tier_badge.dart';
 import '../../../../shared/widgets/premium_card/premium_card.dart';
 
 /// Karta dokununca acilan detay penceresi.
@@ -13,15 +17,40 @@ import '../../../../shared/widgets/premium_card/premium_card.dart';
 class CardDetailSheet extends StatelessWidget {
   final InventoryCard card;
 
-  const CardDetailSheet({super.key, required this.card});
+  /// Pencere açıldığında kart favori mi?
+  final bool isFavorite;
+
+  /// Favori butonuna basılınca çağrılır. Null ise buton gösterilmez.
+  ///
+  /// NEDEN GERİ ÇAĞIRMA, NEDEN ViewModel DEĞİL?
+  /// Pencere ayrı bir rota olarak açılıyor; koleksiyon ekranının
+  /// Provider'ına buradan erişilemez. Ekran, favori işlemini bu
+  /// fonksiyonla içeri veriyor. `true` dönerse işlem başarılı.
+  final Future<bool> Function()? onToggleFavorite;
+
+  const CardDetailSheet({
+    super.key,
+    required this.card,
+    this.isFavorite = false,
+    this.onToggleFavorite,
+  });
 
   /// Alttan acilan pencereyi gosterir
-  static Future<void> show(BuildContext context, InventoryCard card) {
+  static Future<void> show(
+    BuildContext context,
+    InventoryCard card, {
+    bool isFavorite = false,
+    Future<bool> Function()? onToggleFavorite,
+  }) {
     return showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => CardDetailSheet(card: card),
+      builder: (_) => CardDetailSheet(
+        card: card,
+        isFavorite: isFavorite,
+        onToggleFavorite: onToggleFavorite,
+      ),
     );
   }
 
@@ -54,7 +83,16 @@ class CardDetailSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 24),
+              if (onToggleFavorite != null)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: _FavoriButonu(
+                    baslangic: isFavorite,
+                    onToggle: onToggleFavorite!,
+                  ),
+                )
+              else
+                const SizedBox(height: 24),
 
               // ---- KART (tum efektler acik) ----
               PremiumPlayerCard.fromInventory(
@@ -67,7 +105,7 @@ class CardDetailSheet extends StatelessWidget {
               const SizedBox(height: 20),
 
               Text(
-                'Karti tut ve hareket ettir',
+                'Kartı tut ve hareket ettir',
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary.withValues(alpha: 0.7),
@@ -77,9 +115,9 @@ class CardDetailSheet extends StatelessWidget {
               const SizedBox(height: 20),
 
               // ---- BILGILER ----
-              _bilgiSatiri('Seviye', card.tier.label),
+              _bilgiSatiri('Seviye', card.tier.displayName),
               _bilgiSatiri('Pozisyon', card.position.label),
-              _bilgiSatiri('Guc', '${card.power}'),
+              _bilgiSatiri('Güç', '${card.power}'),
 
               // ---- OZELLIKLER ----
               // Guc "kart turu kazanir mi?" sorusunu yanitliyor;
@@ -101,16 +139,16 @@ class CardDetailSheet extends StatelessWidget {
               ],
 
               if (card.nationality != null)
-                _bilgiSatiri('Ulke', card.nationality!),
-              if (card.club != null) _bilgiSatiri('Kulup', card.club!),
+                _bilgiSatiri('Ülke', card.nationality!),
+              if (card.club != null) _bilgiSatiri('Kulüp', card.club!),
 
               if (card.isLocked) ...[
                 const SizedBox(height: 16),
                 _uyari(
                   Icons.lock,
                   AppColors.warning,
-                  'Bu kart devam eden bir macta kilitli. '
-                  'Mac bitene kadar kadrondan cikaramazsin.',
+                  'Bu kart devam eden bir maçta kilitli. '
+                  'Maç bitene kadar kadrondan çıkaramazsın.',
                 ),
               ],
 
@@ -119,8 +157,8 @@ class CardDetailSheet extends StatelessWidget {
                 _uyari(
                   Icons.auto_awesome,
                   AppColors.tierLegend,
-                  'Legend kart: Gucu ne olursa olsun alttaki 4 seviyeyi yener. '
-                  'Sadece gucu daha yuksek bir Legend yenebilir.',
+                  'Legend kart: Gücü ne olursa olsun alttaki 4 seviyeyi yener. '
+                  'Sadece gücü daha yüksek bir Legend yenebilir.',
                 ),
               ],
             ],
@@ -180,6 +218,60 @@ class CardDetailSheet extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Detay penceresindeki favori (kalp) butonu.
+///
+/// Kendi durumunu tutuyor: basınca HEMEN dolup boşalıyor, disk yazımı
+/// arkada yapılıyor. Sınıra takılırsa eski haline dönüp nedenini söylüyor.
+class _FavoriButonu extends StatefulWidget {
+  final bool baslangic;
+  final Future<bool> Function() onToggle;
+
+  const _FavoriButonu({required this.baslangic, required this.onToggle});
+
+  @override
+  State<_FavoriButonu> createState() => _FavoriButonuState();
+}
+
+class _FavoriButonuState extends State<_FavoriButonu> {
+  late bool _favori = widget.baslangic;
+
+  Future<void> _bas() async {
+    final onceki = _favori;
+    setState(() => _favori = !onceki);
+    unawaited(GameFeedback.haptic(HapticStrength.selection));
+
+    final basarili = await widget.onToggle();
+    if (!mounted) return;
+
+    if (!basarili) {
+      setState(() => _favori = onceki);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(
+          content: Text('En fazla 50 favori kartın olabilir.'),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: _favori ? 'Favorilerden çıkar' : 'Favorilere ekle',
+      onPressed: _bas,
+      icon: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
+        child: Icon(
+          _favori ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+          key: ValueKey(_favori),
+          color: _favori ? AppColors.danger : AppColors.textSecondary,
+          size: 26,
+        ),
       ),
     );
   }

@@ -115,12 +115,12 @@ class _CollectionBody extends StatelessWidget {
 
   /// "101 kart · 63 farkli futbolcu · en iyi 99"
   String _altBaslik(CollectionViewModel vm) {
-    if (vm.allCards.isEmpty) return 'Kartlarini incele';
+    if (vm.allCards.isEmpty) return 'Kartlarını incele';
     final farkli = vm.allCards.map((k) => k.cardId).toSet().length;
     final enIyi = vm.bestCard;
     final parcalar = [
       '${vm.totalCards} kart',
-      '$farkli farkli futbolcu',
+      '$farkli farklı futbolcu',
       if (enIyi != null) 'en iyi ${enIyi.power}',
     ];
     return parcalar.join(' · ');
@@ -175,18 +175,35 @@ class _CollectionBody extends StatelessWidget {
 
           return LayoutBuilder(
             builder: (context, kisitlar) {
-              return PremiumPlayerCard.fromInventory(
-                kart,
-                // Kartin kendi anahtari: liste siralaninca Flutter
-                // dogru widget'i dogru yerde tutar.
-                key: ValueKey(kart.userCardId),
-                width: kisitlar.maxWidth,
-                // PERFORMANS: Listede egilme ve holografik animasyon
-                // KAPALI. 100+ kart ayni anda animasyon calistirsaydi
-                // arayuz takilirdi. Tum efektler karta dokununca
-                // acilan detay penceresinde acik.
-                interactive: false,
-                onTap: () => CardDetailSheet.show(context, kart),
+              final favori = vm.isFavorite(kart);
+
+              return Stack(
+                children: [
+                  PremiumPlayerCard.fromInventory(
+                    kart,
+                    // Kartin kendi anahtari: liste siralaninca Flutter
+                    // dogru widget'i dogru yerde tutar.
+                    key: ValueKey(kart.userCardId),
+                    width: kisitlar.maxWidth,
+                    // PERFORMANS: Listede egilme ve holografik animasyon
+                    // KAPALI. 100+ kart ayni anda animasyon calistirsaydi
+                    // arayuz takilirdi. Tum efektler karta dokununca
+                    // acilan detay penceresinde acik.
+                    interactive: false,
+                    onTap: () => CardDetailSheet.show(
+                      context,
+                      kart,
+                      isFavorite: favori,
+                      onToggleFavorite: () => vm.toggleFavorite(kart),
+                    ),
+                  ),
+                  if (favori)
+                    const Positioned(
+                      top: 6,
+                      right: 6,
+                      child: IgnorePointer(child: _FavoriIsareti()),
+                    ),
+                ],
               );
             },
           );
@@ -260,7 +277,7 @@ class _OzetBant extends StatelessWidget {
           _ayirac(),
           _kutu(
             'Kadro',
-            viewModel.canBuildSquad ? 'Hazir' : 'Eksik',
+            viewModel.canBuildSquad ? 'Hazır' : 'Eksik',
             viewModel.canBuildSquad
                 ? Icons.check_circle_outline
                 : Icons.error_outline,
@@ -327,7 +344,7 @@ class _BosKoleksiyon extends StatelessWidget {
                 size: 56, color: AppColors.textSecondary),
             const SizedBox(height: 16),
             const Text(
-              'Koleksiyonun bos',
+              'Koleksiyonun boş',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -336,7 +353,7 @@ class _BosKoleksiyon extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Magazadan paket acarak kart kazanabilirsin.',
+              'Mağazadan paket açarak kart kazanabilirsin.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textSecondary),
             ),
@@ -394,7 +411,7 @@ class _HataDurumu extends StatelessWidget {
             const Icon(Icons.cloud_off, size: 48, color: AppColors.danger),
             const SizedBox(height: 16),
             Text(
-              viewModel.errorMessage ?? 'Kartlar yuklenemedi.',
+              viewModel.errorMessage ?? 'Kartlar yüklenemedi.',
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppColors.textPrimary),
             ),
@@ -432,7 +449,7 @@ class _TestButonu extends StatelessWidget {
               if (basarili) {
                 AppSnackBar.showSuccess(
                   context,
-                  'Katalogdaki tum kartlar eklendi.',
+                  'Katalogdaki tüm kartlar eklendi.',
                 );
               } else if (viewModel.errorMessage != null) {
                 AppSnackBar.showError(context, viewModel.errorMessage!);
@@ -440,7 +457,29 @@ class _TestButonu extends StatelessWidget {
               }
             },
       icon: const Icon(Icons.science_outlined, size: 18),
-      label: const Text('TEST: Tum kartlari ekle'),
+      label: const Text('TEST: Tüm kartları ekle'),
+    );
+  }
+}
+
+/// Izgaradaki kartın köşesindeki küçük kalp.
+class _FavoriIsareti extends StatelessWidget {
+  const _FavoriIsareti();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.favorite_rounded,
+        size: 13,
+        color: AppColors.danger,
+        semanticLabel: 'Favori',
+      ),
     );
   }
 }

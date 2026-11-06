@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../shared/widgets/game/tier_badge.dart';
 import '../../../../core/utils/turkish_text.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -44,7 +45,7 @@ class CollectionFilterPanel extends StatelessWidget {
           ),
           for (final seviye in CardTier.values.reversed)
             _SeviyeSatiri(
-              label: seviye.label,
+              label: seviye.displayName,
               color: CardTierTheme.of(seviye).frameGradient[1],
               count: viewModel.tierCounts[seviye] ?? 0,
               selected: viewModel.tierFilter == seviye,
@@ -52,6 +53,24 @@ class CollectionFilterPanel extends StatelessWidget {
                 viewModel.tierFilter == seviye ? null : seviye,
               ),
             ),
+
+          const SizedBox(height: 22),
+
+          // ---- FAVORİLER ----
+          const SectionTitle('Favoriler'),
+          const SizedBox(height: 10),
+          _SeviyeSatiri(
+            label: 'Sadece favoriler',
+            color: AppColors.danger,
+            count: viewModel.favoriteCount,
+            selected: viewModel.favoritesOnly,
+            onTap: () => viewModel.setFavoritesOnly(!viewModel.favoritesOnly),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Favoriler bu cihazda saklanır.',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+          ),
 
           const SizedBox(height: 22),
 

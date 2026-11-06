@@ -34,6 +34,7 @@ import '../auth/session_manager.dart';
 import '../network/api_client.dart';
 import '../network/websocket_service.dart';
 import '../router/app_router.dart';
+import '../storage/favorites_store.dart';
 import '../storage/token_storage.dart';
 import '../utils/logger.dart';
 import '../../features/home/presentation/viewmodel/home_view_model.dart';
@@ -60,6 +61,9 @@ Future<void> configureDependencies() async {
   // ---------------- 1. DEPOLAMA VE OTURUM ----------------
   getIt
     ..registerLazySingleton<TokenStorage>(TokenStorage.new)
+    // Favoriler tek örnek: koleksiyon ekranı her açıldığında diskten
+    // yeniden okunmasın, ekranlar arası tutarlı kalsın.
+    ..registerLazySingleton<FavoritesStore>(FavoritesStore.new)
     ..registerLazySingleton<SessionManager>(
       () => SessionManager(getIt<TokenStorage>()),
     );
@@ -148,7 +152,10 @@ Future<void> configureDependencies() async {
       () => AuthViewModel(getIt<AuthRepository>()),
     )
     ..registerFactory<CollectionViewModel>(
-      () => CollectionViewModel(getIt<CollectionRepository>()),
+      () => CollectionViewModel(
+        getIt<CollectionRepository>(),
+        getIt<FavoritesStore>(),
+      ),
     )
     ..registerFactory<DeckViewModel>(
       () => DeckViewModel(getIt<DeckRepository>()),

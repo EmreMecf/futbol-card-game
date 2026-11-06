@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../shared/widgets/game/tier_badge.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/premium_card/card_tier_theme.dart';
 import '../viewmodel/collection_view_model.dart';
@@ -28,7 +29,7 @@ class CollectionFilterBar extends StatelessWidget {
             onChanged: viewModel.setSearch,
             style: const TextStyle(color: AppColors.textPrimary),
             decoration: InputDecoration(
-              hintText: 'Futbolcu, kulup veya ulke ara...',
+              hintText: 'Futbolcu, kulüp veya ülke ara…',
               prefixIcon: const Icon(Icons.search, size: 20),
               isDense: true,
               suffixIcon: viewModel.search.isEmpty
@@ -68,6 +69,51 @@ class CollectionFilterBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
+              // ---- FAVORİLER ----
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Tooltip(
+                  message: 'Sadece favoriler (bu cihazda saklanır)',
+                  child: Material(
+                    color: viewModel.favoritesOnly
+                        ? AppColors.danger.withValues(alpha: 0.22)
+                        : AppColors.surface,
+                    borderRadius: BorderRadius.circular(10),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () =>
+                          viewModel.setFavoritesOnly(!viewModel.favoritesOnly),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9, vertical: 6),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              viewModel.favoritesOnly
+                                  ? Icons.favorite_rounded
+                                  : Icons.favorite_border_rounded,
+                              size: 16,
+                              color: AppColors.danger,
+                            ),
+                            if (viewModel.favoriteCount > 0) ...[
+                              const SizedBox(width: 4),
+                              Text(
+                                '${viewModel.favoriteCount}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               for (final pozisyon in CardPosition.values)
                 _PozisyonRozeti(
                   position: pozisyon,
@@ -80,7 +126,7 @@ class CollectionFilterBar extends StatelessWidget {
 
               // ---- SIRALAMA ----
               PopupMenuButton<CollectionSort>(
-                tooltip: 'Sirala',
+                tooltip: 'Sırala',
                 icon: const Icon(Icons.sort, color: AppColors.textSecondary),
                 color: AppColors.surface,
                 onSelected: viewModel.setSort,
@@ -177,7 +223,7 @@ class _SeviyeRozeti extends StatelessWidget {
                 ),
                 const SizedBox(width: 7),
                 Text(
-                  tier.label,
+                  tier.displayName,
                   style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: secili ? FontWeight.w800 : FontWeight.w600,
