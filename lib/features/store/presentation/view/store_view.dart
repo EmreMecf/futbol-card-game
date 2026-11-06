@@ -42,9 +42,12 @@ class _StoreBody extends StatelessWidget {
     // Paket açıldıysa açılış ekranını göster
     final acilis = vm.lastOpening;
     if (acilis != null) {
+      // Mühürlü kutu, açılan paketin kendi renginde çizilsin
+      final tur = vm.packs.where((p) => p.slug == acilis.packSlug);
       return PackRevealView(
         result: acilis,
         onClose: vm.clearOpening,
+        packTier: tur.isEmpty ? CardTier.gold : tur.first.signatureTier,
       );
     }
 

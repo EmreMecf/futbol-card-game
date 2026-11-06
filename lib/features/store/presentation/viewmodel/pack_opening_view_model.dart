@@ -33,6 +33,12 @@ class PackOpeningViewModel extends ChangeNotifier {
 
   int _acilan = 0;
 
+  /// Paket henüz MÜHÜRLÜ mü? (FAZ 6: "dokunarak açma")
+  ///
+  /// Kartlar sunucuda ZATEN belirlendi; mühür sadece bir sahne. Oyuncu
+  /// dokununca kalkar ve kartlar sırayla açılmaya başlar.
+  bool _muhurlu = true;
+
   /// Walkout paket başına SADECE BİR KEZ oynar.
   ///
   /// Pakette iki Legend çıkarsa ikisi için de 4.5 saniyelik sahneyi
@@ -52,6 +58,16 @@ class PackOpeningViewModel extends ChangeNotifier {
   int get totalCount => _sira.length;
 
   bool get isFinished => _acilan >= _sira.length;
+
+  /// Mühürlü paket sahnesi gösterilmeli mi? Boş pakette sahne yok.
+  bool get isSealed => _muhurlu && _sira.isNotEmpty && !isFinished;
+
+  /// Mühür kırıldı: kartlar açılmaya başlasın.
+  void unseal() {
+    if (!_muhurlu) return;
+    _muhurlu = false;
+    notifyListeners();
+  }
 
   /// Şu an ekranda olan kart (hepsi açıldıysa null)
   InventoryCard? get currentCard =>
@@ -128,6 +144,7 @@ class PackOpeningViewModel extends ChangeNotifier {
   /// Kalanları atla, doğrudan özet ekranına git
   void revealAll() {
     if (isFinished) return;
+    _muhurlu = false;
     _acilan = _sira.length;
     notifyListeners();
   }

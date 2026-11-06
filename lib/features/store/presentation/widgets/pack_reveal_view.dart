@@ -3,11 +3,15 @@ import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../shared/widgets/app_button.dart';
+import '../../../../core/theme/app_tokens.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/turkish_text.dart';
+import '../../../../shared/widgets/game/game_ui.dart';
 import '../../../../shared/widgets/premium_card/premium_card.dart';
 import '../../../../shared/widgets/walkout/walkout.dart';
 import '../../domain/reveal_style.dart';
 import '../viewmodel/pack_opening_view_model.dart';
+import 'pack_seal_scene.dart';
 
 /// Paket açılış ekranı — kartlar tek tek, KADEMELİ olarak açılır.
 ///
@@ -34,10 +38,14 @@ class PackRevealView extends StatelessWidget {
   final PackOpenResult result;
   final VoidCallback onClose;
 
+  /// Mühürlü kutunun rengi (paketin imza seviyesi)
+  final CardTier packTier;
+
   const PackRevealView({
     super.key,
     required this.result,
     required this.onClose,
+    this.packTier = CardTier.gold,
   });
 
   @override
@@ -46,22 +54,33 @@ class PackRevealView extends StatelessWidget {
       // Paket sonucu değiştiğinde ViewModel de yenilensin
       key: ValueKey(result.packSlug + result.cards.length.toString()),
       create: (_) => PackOpeningViewModel(result),
-      child: _PackRevealBody(onClose: onClose),
+      child: _PackRevealBody(onClose: onClose, packTier: packTier),
     );
   }
 }
 
 class _PackRevealBody extends StatelessWidget {
   final VoidCallback onClose;
+  final CardTier packTier;
 
-  const _PackRevealBody({required this.onClose});
+  const _PackRevealBody({required this.onClose, required this.packTier});
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<PackOpeningViewModel>();
 
     if (vm.isFinished) {
-      return _OzetEkrani(result: vm.result, onClose: onClose);
+      return PackSummaryView(result: vm.result, onClose: onClose);
+    }
+
+    // ---- MÜHÜRLÜ PAKET (dokunarak açma) ----
+    if (vm.isSealed) {
+      return PackSealScene(
+        result: vm.result,
+        packTier: packTier,
+        onOpened: vm.unseal,
+        onSkipAll: vm.revealAll,
+      );
     }
 
     final kart = vm.currentCard!;
@@ -119,9 +138,10 @@ class _FlipEkrani extends StatelessWidget {
                   children: [
                     Text(
                       viewModel.progressText,
-                      style: const TextStyle(
+                      style: AppTypography.display(
+                        size: 16,
+                        weight: FontWeight.w800,
                         color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const Spacer(),
@@ -151,14 +171,15 @@ class _FlipEkrani extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              card.tier == CardTier.legend
-                                  ? 'BİR TANE DAHA LEGEND!'
-                                  : 'BİR TANE DAHA ${card.tier.label.toUpperCase()}!',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
+                              // Diamond / Legend yabancı özel ad olduğu için
+                              // toUpperTr değil toUpperCase (bkz. turkish_text)
+                              'BİR TANE DAHA '
+                              '${card.tier.displayName.toUpperCase()}!',
+                              style: AppTypography.display(
+                                size: 14,
+                                weight: FontWeight.w900,
                                 letterSpacing: 1.5,
-                                fontSize: 12,
+                                color: Colors.white,
                               ),
                             ),
                           ),
@@ -176,12 +197,11 @@ class _FlipEkrani extends StatelessWidget {
                 ),
               ),
 
-              const Padding(
-                padding: EdgeInsets.only(bottom: 28),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 28),
                 child: Text(
                   'Devam etmek için dokun',
-                  style: TextStyle(
-                      color: AppColors.textSecondary, fontSize: 12.5),
+                  style: AppTypography.bodyS,
                 ),
               ),
             ],
@@ -193,91 +213,182 @@ class _FlipEkrani extends StatelessWidget {
 }
 
 // ====================================================================
-// ÖZET
+// PAKET SONUCU (MD bölüm 4-G: "Paket sonucu ekranı")
 // ====================================================================
-class _OzetEkrani extends StatelessWidget {
+/// Paketin özeti: en iyi kart öne çıkar, altında seviye dağılımı ve
+/// diğer kartlar. Kartlar sunucunun sırasıyla (en iyiden kötüye) dizilir.
+class PackSummaryView extends StatelessWidget {
   final PackOpenResult result;
   final VoidCallback onClose;
 
-  const _OzetEkrani({required this.result, required this.onClose});
+  const PackSummaryView({
+    super.key,
+    required this.result,
+    required this.onClose,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final enIyi = result.bestCard;
+    final digerleri =
+        result.cards.where((k) => k.userCardId != enIyi?.userCardId).toList();
+
+    // Seviye dağılımı (en yüksekten)
+    final dagilim = <CardTier, int>{};
+    for (final k in result.cards) {
+      dagilim[k.tier] = (dagilim[k.tier] ?? 0) + 1;
+    }
+    final seviyeler = dagilim.keys.toList()
+      ..sort((a, b) => b.rank.compareTo(a.rank));
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-              child: Column(
-                children: [
-                  Icon(
-                    result.hasRareCard
-                        ? Icons.auto_awesome
-                        : Icons.card_giftcard,
-                    size: 40,
-                    color: result.hasRareCard
-                        ? AppColors.tierLegend
-                        : AppColors.accent,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              children: [
+                Expanded(
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.screenEdge,
+                          AppSpacing.xxl,
+                          AppSpacing.screenEdge,
+                          AppSpacing.md,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: Column(
+                            children: [
+                              Text('PAKET AÇILDI', style: AppTypography.label),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                result.packName.toUpperTr(),
+                                textAlign: TextAlign.center,
+                                style: AppTypography.display(
+                                  size: 28,
+                                  weight: FontWeight.w900,
+                                  color: result.hasRareCard
+                                      ? AppColors.victoryGold
+                                      : AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.lg),
+                              if (enIyi != null) ...[
+                                PremiumPlayerCard.fromInventory(
+                                  enIyi,
+                                  key: ValueKey('enIyi-${enIyi.userCardId}'),
+                                  width: 168,
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                Text('EN İYİ KART', style: AppTypography.label),
+                                const SizedBox(height: AppSpacing.lg),
+                              ],
+                              Wrap(
+                                alignment: WrapAlignment.center,
+                                spacing: AppSpacing.md,
+                                runSpacing: AppSpacing.sm,
+                                children: [
+                                  for (final t in seviyeler)
+                                    _SeviyeSayaci(tier: t, count: dagilim[t]!),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (digerleri.isNotEmpty)
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.screenEdge,
+                            AppSpacing.sm,
+                            AppSpacing.screenEdge,
+                            AppSpacing.lg,
+                          ),
+                          sliver: SliverGrid(
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 120,
+                              childAspectRatio: 0.66,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 12,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final kart = digerleri[index];
+                                return LayoutBuilder(
+                                  builder: (context, kisitlar) =>
+                                      PremiumPlayerCard.fromInventory(
+                                    kart,
+                                    key: ValueKey(kart.userCardId),
+                                    width: kisitlar.maxWidth,
+                                    interactive: false,
+                                  ),
+                                );
+                              },
+                              childCount: digerleri.length,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    result.packName,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 20,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${result.cards.length} kart kazandın · '
-                    'kalan ${result.coinsLeft} coin',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 130,
-                  childAspectRatio: 0.66,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 12,
                 ),
-                itemCount: result.cards.length,
-                itemBuilder: (context, index) {
-                  final kart = result.cards[index];
-                  return LayoutBuilder(
-                    builder: (context, kisitlar) {
-                      return PremiumPlayerCard.fromInventory(
-                        kart,
-                        key: ValueKey(kart.userCardId),
-                        width: kisitlar.maxWidth,
-                        interactive: false,
-                      );
-                    },
-                  );
-                },
-              ),
+
+                // ---- ALT BANT ----
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.screenEdge,
+                    AppSpacing.sm,
+                    AppSpacing.screenEdge,
+                    AppSpacing.lg,
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '${result.cards.length} kart koleksiyonuna eklendi · '
+                        'kalan ${result.coinsLeft} coin',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.bodyS,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      GameButton(
+                        label: 'Tamam',
+                        icon: Icons.check_rounded,
+                        onPressed: onClose,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: AppButton(
-                label: 'TAMAM',
-                icon: Icons.check,
-                onPressed: onClose,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// "3 ×  [ALTIN]" sayacı
+class _SeviyeSayaci extends StatelessWidget {
+  final CardTier tier;
+  final int count;
+
+  const _SeviyeSayaci({required this.tier, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$count ×',
+          style: AppTypography.display(size: 16, weight: FontWeight.w900),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        TierBadge(tier, compact: true),
+      ],
     );
   }
 }

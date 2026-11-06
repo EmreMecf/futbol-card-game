@@ -3,6 +3,7 @@ import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/premium_card/premium_card.dart';
 
 /// Mağazadaki paketin 3B görünümlü kutusu.
@@ -19,20 +20,39 @@ import '../../../../shared/widgets/premium_card/premium_card.dart';
 /// Yeni bir paket eklendiğinde tek yapılacak veritabanına satır
 /// eklemek; kutusu kendiliğinden doğru renkte çıkıyor.
 class PackBox extends StatelessWidget {
-  final PackType pack;
+  /// Kutunun rengini belirleyen seviye (paketin en çok çıkan seviyesi)
+  final CardTier tier;
+
+  /// Kutunun üstündeki kısa ad: "KADRO"
+  final String label;
   final double width;
 
-  const PackBox({super.key, required this.pack, required this.width});
+  /// Eğim (radyan). Açılış sahnesi kendi hareketini verdiği için 0 geçer.
+  final double tilt;
+
+  PackBox({super.key, required PackType pack, required this.width})
+      : tier = pack.signatureTier,
+        label = boxLabel(pack.name, pack.slug),
+        tilt = -0.09;
+
+  /// Paket türü elde yoksa (ör. açılış ekranı) seviye ve adla çizer.
+  const PackBox.visual({
+    super.key,
+    required this.tier,
+    required this.label,
+    required this.width,
+    this.tilt = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final tema = CardTierTheme.of(pack.signatureTier);
+    final tema = CardTierTheme.of(tier);
     final yukseklik = width * 1.38;
 
     return Transform.rotate(
       // Hafif eğim kutuyu düz bir dikdörtgen olmaktan çıkarıp
       // elle tutulabilir bir nesneye çeviriyor.
-      angle: -0.09,
+      angle: tilt,
       child: Container(
         width: width,
         height: yukseklik,
@@ -92,7 +112,7 @@ class PackBox extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: width * 0.08),
                       child: Text(
-                        _kutuEtiketi(),
+                        label,
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -116,9 +136,10 @@ class PackBox extends StatelessWidget {
   }
 
   /// Paket adının ilk kelimesi: "Kadro Paketi" -> "KADRO"
-  String _kutuEtiketi() {
-    final parcalar = pack.name.trim().split(RegExp(r'\s+'));
-    return (parcalar.isEmpty ? pack.slug : parcalar.first).toUpperCase();
+  static String boxLabel(String name, String slug) {
+    final parcalar = name.trim().split(RegExp(r'\s+'));
+    return (parcalar.isEmpty || parcalar.first.isEmpty ? slug : parcalar.first)
+        .toUpperTr();
   }
 }
 
