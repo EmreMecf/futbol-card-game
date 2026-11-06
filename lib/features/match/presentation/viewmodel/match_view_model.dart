@@ -7,6 +7,7 @@ import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
 import '../../../../core/network/websocket_service.dart';
 import '../../../../core/utils/logger.dart';
+import '../../domain/clash_event.dart';
 import '../../domain/repositories/match_repository.dart';
 
 /// Maç ekranının beyni.
@@ -129,6 +130,50 @@ class MatchViewModel extends BaseViewModel {
       _gecmis.rounds.isEmpty ? null : _gecmis.rounds.last;
 
   // ------------------------------------------------------------------
+  // ÇATIŞMA SAHNESİ KUYRUĞU
+  // ------------------------------------------------------------------
+  // Sunucu bir turu sonuçlandırdığında o tur geçmişe eklenir. Daha önce
+  // gösterilmemiş her tur için bir çatışma sahnesi KUYRUĞA alınır.
+  //
+  // NEDEN KUYRUK? İki tur art arda sonuçlanabilir (oyuncu bir an
+  // bağlantıyı kaybetti, döndüğünde iki tur ilerlemiş). Tek bir alan
+  // olsaydı ilk sahne ikincinin üstüne yazılıp kaybolurdu.
+  final Set<int> _gosterilenTurlar = {};
+  bool _turlarIsaretlendi = false;
+  final List<ClashEvent> _cakismaKuyrugu = [];
+
+  /// Şu an oynatılması gereken çatışma sahnesi (yoksa null)
+  ClashEvent? get currentClash =>
+      _cakismaKuyrugu.isEmpty ? null : _cakismaKuyrugu.first;
+
+  /// Sahne bitti ya da oyuncu atladı: sıradakine geç
+  void finishCurrentClash() {
+    if (_cakismaKuyrugu.isEmpty) return;
+    _cakismaKuyrugu.removeAt(0);
+    safeNotify();
+  }
+
+  void _yeniTurlariKuyrugaAl(MatchHistory gecmis) {
+    // İLK YÜKLEME: maça geri dönüldüğünde eski turlar tekrar
+    // oynatılmasın (7 turu art arda izlemek zorunda kalınırdı).
+    if (!_turlarIsaretlendi) {
+      _gosterilenTurlar.addAll(gecmis.rounds.map((r) => r.roundNumber));
+      _turlarIsaretlendi = true;
+      return;
+    }
+
+    final yeniler = findNewClashes(
+      history: gecmis,
+      alreadyShown: _gosterilenTurlar,
+      myUserId: myUserId,
+    );
+    for (final c in yeniler) {
+      _gosterilenTurlar.add(c.roundNumber);
+      _cakismaKuyrugu.add(c);
+    }
+  }
+
+  // ------------------------------------------------------------------
   // SAYAÇ
   // ------------------------------------------------------------------
   /// Hamle için kalan süre. Cihaz saatinden BAĞIMSIZ.
@@ -234,7 +279,10 @@ class MatchViewModel extends BaseViewModel {
     if (el != null) _el = el;
 
     final gecmis = (await gecmisIstegi).dataOrNull;
-    if (gecmis != null) _gecmis = gecmis;
+    if (gecmis != null) {
+      _gecmis = gecmis;
+      _yeniTurlariKuyrugaAl(gecmis);
+    }
 
     if (yeniDurum.isOver && _sonuc == null) {
       await _sonucuGetir();

@@ -12,6 +12,8 @@ import '../../../../core/theme/app_breakpoints.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
 import '../viewmodel/match_view_model.dart';
+import '../arena/arena_backdrop.dart';
+import '../arena/clash_scene.dart';
 import '../widgets/match_result_view.dart';
 import '../widgets/match_widgets.dart';
 
@@ -90,7 +92,10 @@ class _MatchBodyState extends State<_MatchBody> {
       return _HataEkrani(viewModel: vm);
     }
 
-    if (vm.isOver) {
+    // Maç bittiyse sonuç sayfası — AMA son turun çatışma sahnesi
+    // oynamadan değil. Maçı belirleyen tur en heyecanlı tur; sahneyi
+    // atlayıp doğrudan sonuca geçmek o anı oyuncunun elinden alırdı.
+    if (vm.isOver && vm.currentClash == null) {
       return MatchResultView(
         result: vm.result,
         onClose: () => context.go(AppRoutes.home),
@@ -189,7 +194,9 @@ class _DarMasa extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const Positioned.fill(child: _SahaZemini()),
+        // 2.5B gece stadyumu. Biraz sönük: üstündeki kartlar ve
+        // sayaç okunabilir kalsın.
+        const Positioned.fill(child: ArenaBackdrop(intensity: 0.55)),
         SafeArea(
           child: LayoutBuilder(
             builder: (context, kisitlar) {
@@ -274,6 +281,7 @@ class _DarMasa extends StatelessWidget {
             },
           ),
         ),
+        _CatismaKatmani(viewModel: viewModel),
       ],
     );
   }
@@ -292,7 +300,9 @@ class _GenisMasa extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const Positioned.fill(child: _SahaZemini()),
+        // 2.5B gece stadyumu. Biraz sönük: üstündeki kartlar ve
+        // sayaç okunabilir kalsın.
+        const Positioned.fill(child: ArenaBackdrop(intensity: 0.55)),
         SafeArea(
           child: Column(
             children: [
@@ -361,63 +371,38 @@ class _GenisMasa extends StatelessWidget {
             ],
           ),
         ),
+        _CatismaKatmani(viewModel: viewModel),
       ],
     );
   }
 }
 
 // ====================================================================
-// SAHA ZEMİNİ
+// ÇATIŞMA KATMANI
 // ====================================================================
-class _SahaZemini extends StatelessWidget {
-  const _SahaZemini();
+/// Sunucu bir turu sonuçlandırdığında masanın üstünde oynayan sahne.
+///
+/// Kuyrukta sahne yoksa hiçbir şey çizmez. Anahtar tur numarası:
+/// art arda iki tur gelirse ikinci sahne sıfırdan başlar, birincinin
+/// animasyon durumunu devralmaz.
+class _CatismaKatmani extends StatelessWidget {
+  final MatchViewModel viewModel;
+
+  const _CatismaKatmani({required this.viewModel});
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0, -0.05),
-          radius: 0.9,
-          colors: [
-            AppColors.primaryDark.withValues(alpha: 0.42),
-            AppColors.background,
-          ],
-        ),
-      ),
-      child: const CustomPaint(
-        painter: _MasaCizgileriPainter(),
-        child: SizedBox.expand(),
+    final olay = viewModel.currentClash;
+    if (olay == null) return const SizedBox.shrink();
+
+    return Positioned.fill(
+      child: ClashScene(
+        key: ValueKey('catisma-${olay.roundNumber}'),
+        event: olay,
+        onFinished: viewModel.finishCurrentClash,
       ),
     );
   }
-}
-
-class _MasaCizgileriPainter extends CustomPainter {
-  const _MasaCizgileriPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final firca = Paint()
-      ..color = AppColors.textPrimary.withValues(alpha: 0.07)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    // Orta çizgi ve santra: masanın iki yarısı görsel olarak ayrılsın
-    canvas.drawLine(
-      Offset(size.width * 0.06, size.height / 2),
-      Offset(size.width * 0.94, size.height / 2),
-      firca,
-    );
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      size.shortestSide * 0.16,
-      firca,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_MasaCizgileriPainter oldDelegate) => false;
 }
 
 // ====================================================================
