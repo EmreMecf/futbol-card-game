@@ -264,23 +264,61 @@ class _DarMasa extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _RakipYuvasi(
-                            viewModel: viewModel,
-                            width: masaKartGenisligi,
-                          ),
-                          _MasaOrtasi(
-                            viewModel: viewModel,
-                            ringSize: sayacBoyutu,
-                          ),
-                          _BenimYuvam(
-                            state: state,
-                            viewModel: viewModel,
-                            width: masaKartGenisligi,
-                          ),
-                        ],
+                      child: LayoutBuilder(
+                        builder: (context, masaKisiti) {
+                          final parcalar = [
+                            _RakipYuvasi(
+                              viewModel: viewModel,
+                              width: masaKartGenisligi,
+                            ),
+                            _MasaOrtasi(
+                              viewModel: viewModel,
+                              ringSize: sayacBoyutu,
+                            ),
+                            _BenimYuvam(
+                              state: state,
+                              viewModel: viewModel,
+                              width: masaKartGenisligi,
+                            ),
+                          ];
+
+                          // ÇOK KÜÇÜK EKRAN (320x568 gibi): kartlar en
+                          // küçük boyutlarında bile sığmıyor. Bu durumda
+                          // masa, oranı korunarak küçültülüyor (taşma
+                          // yerine). Sığan ekranlarda bu dal HİÇ
+                          // çalışmıyor; yerleşim aynen kalıyor.
+                          // (FAZ 7 cihaz taramasında bulundu: 33 px taşma)
+                          // (12 px dikey dolgu bu kısıtın DIŞINDA, eklenmez)
+                          final gereken = masaKartYuksekligi * 2 +
+                              sayacBoyutu +
+                              etiketPayi;
+                          if (gereken <= masaKisiti.maxHeight + 0.5) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: parcalar,
+                            );
+                          }
+                          return Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              // Genişlik sabitleniyor: ortadaki satır
+                              // (sayaç + pot) sınırlı genişlik ister
+                              child: SizedBox(
+                                width: masaKisiti.maxWidth,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    parcalar[0],
+                                    const SizedBox(height: 6),
+                                    parcalar[1],
+                                    const SizedBox(height: 6),
+                                    parcalar[2],
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

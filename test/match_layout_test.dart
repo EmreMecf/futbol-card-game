@@ -142,11 +142,15 @@ void main() {
     await f('Nunito', ['assets/fonts/Nunito-Variable.ttf']);
   });
 
-  for (final (ad, boyut) in [
-    ('iPhone SE', const Size(375, 667)),
-    ('küçük Android', const Size(360, 640)),
-    ('yaygın telefon', const Size(390, 844)),
-    ('büyük Android', const Size(412, 915)),
+  for (final (ad, boyut, yazi) in [
+    // FAZ 7: en küçük yaygın ekran ve erişilebilirlik yazı boyutu
+    ('en küçük ekran', const Size(320, 568), 1.0),
+    ('yazı %130', const Size(390, 844), 1.3),
+    ('küçük ekran + yazı %130', const Size(360, 640), 1.3),
+    ('iPhone SE', const Size(375, 667), 1.0),
+    ('küçük Android', const Size(360, 640), 1.0),
+    ('yaygın telefon', const Size(390, 844), 1.0),
+    ('büyük Android', const Size(412, 915), 1.0),
   ]) {
     testWidgets(
       'maç ekranı $ad (${boyut.width.toInt()}x${boyut.height.toInt()}) taşmaz',
@@ -159,7 +163,9 @@ void main() {
         );
         tester.view.physicalSize = boyut;
         tester.view.devicePixelRatio = 1;
+        tester.platformDispatcher.textScaleFactorTestValue = yazi;
         addTearDown(tester.view.reset);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
         await tester.pumpWidget(
           MaterialApp(
