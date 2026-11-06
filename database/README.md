@@ -74,7 +74,7 @@ noktası bir katman yukarı taşındı.
 | `008_realtime_notify.sql` | `pg_notify` trigger'ları (gerçek zamanlı bildirim) |
 | `009_starter_pack.sql` | Yeni oyuncuya 17 kart + hazır kadro |
 | `010_seed_cards.sql` | 35 örnek kart |
-| … | (011-020: paketler, kimya, SBC, özellikler, ligler, kart satışı) |
+| … | (011-019: paketler, kimya, SBC, özellikler, ligler) |
 | `021_tactics.sql` | **Taktik ve enerji sistemi**: `tactic_bonus`, `tactic_cost`, enerji |
 
 Testler `database/tests/` klasöründe; her biri tek işlem içinde çalışıp
