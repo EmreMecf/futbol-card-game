@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -28,6 +29,13 @@ Future<void> main() async {
 
   try {
     await dotenv.load(fileName: '.env');
+
+    // Yayin paketi yanlis adrese (http / localhost) bagliysa sessizce
+    // "baglanilamadi" demek yerine acilista acik bir mesaj goster.
+    if (kReleaseMode) {
+      final sorun = AppConfig.releaseConfigProblem(AppConfig.apiBaseUrl);
+      if (sorun != null) throw StateError(sorun);
+    }
     await configureDependencies();
 
     // Cihaz tercihleri (titreşim, animasyon, süre uyarısı) İLK ekrandan

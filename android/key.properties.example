@@ -1,0 +1,18 @@
+# =====================================================================
+# YAYIN ANAHTARI AYARLARI (ORNEK)
+# =====================================================================
+# 1) Anahtar olustur (bir kez; sifreleri GUVENLI bir yerde sakla,
+#    kaybedersen uygulamayi bir daha guncelleyemezsin):
+#
+#    keytool -genkey -v -keystore C:/Users/<sen>/futbolcard-upload.jks ^
+#            -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+# 2) Bu dosyayi "key.properties" adiyla kopyala ve degerleri doldur.
+#    key.properties ve .jks dosyasi .gitignore'da; depoya girmez.
+#
+# 3) flutter build appbundle --release
+# =====================================================================
+storePassword=BURAYA_ANAHTAR_DEPOSU_SIFRESI
+keyPassword=BURAYA_ANAHTAR_SIFRESI
+keyAlias=upload
+storeFile=C:/Users/<sen>/futbolcard-upload.jks

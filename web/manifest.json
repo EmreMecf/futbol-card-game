@@ -1,11 +1,11 @@
 {
-    "name": "futbol_card",
-    "short_name": "futbol_card",
+    "name": "Futbol Card",
+    "short_name": "Futbol Card",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Futbol Card: gercek zamanli futbol kart strateji oyunu.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

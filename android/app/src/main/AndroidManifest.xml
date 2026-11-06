@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Oyun tamamen sunucuyla calisiyor (giris, mac, paket).
+         Bu izin eskiden SADECE debug manifestinde vardi: yayin (release)
+         APK'si sunucuya hic baglanamiyordu. (FAZ 7'de bulundu) -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
-        android:label="futbol_card"
+        android:label="Futbol Card"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
