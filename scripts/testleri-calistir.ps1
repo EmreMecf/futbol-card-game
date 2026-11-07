@@ -48,6 +48,7 @@ Adim "Flutter analyze"      $Proje { flutter analyze }
 Adim "Flutter testleri"     $Proje { flutter test }
 Adim "Ortak modeller"       "$Proje\packages\shared_models" { dart test }
 Adim "Taktik prototipi"     "$Proje\packages\tactics_prototype" { dart test }
+Adim "Icerik uretim hatti"  "$Proje\packages\content_pipeline" { dart test }
 Adim "Sunucu analyze"       "$Proje\server" { dart analyze }
 Adim "Sunucu testleri"      "$Proje\server" { dart test }
 

@@ -182,6 +182,35 @@ class _SettingsBody extends StatelessWidget {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    SurfaceCard(
+                      radius: 14,
+                      padding: const EdgeInsets.fromLTRB(15, 14, 10, 14),
+                      onTap: () => context.push(AppRoutes.characterPreview),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.person_pin_rounded,
+                            size: 19,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 13),
+                          Expanded(
+                            child: Text(
+                              'Karakter prototipi',
+                              style: AppTypography.body(
+                                size: 13.5,
+                                weight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.chevron_right_rounded,
+                            color: AppColors.textSecondary,
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
 
                   const SizedBox(height: 26),

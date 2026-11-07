@@ -596,19 +596,23 @@ class _PremiumPlayerCardState extends State<PremiumPlayerCard>
                   color: tema.mutedTextColor.withValues(alpha: 0.35),
                 ),
                 SizedBox(height: olcek * 0.04),
-                Text(
-                  widget.fullName.toUpperCase(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: olcek * 0.095,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                    color: tema.textColor,
-                    shadows: const [
-                      Shadow(color: Colors.black45, blurRadius: 3),
-                    ],
+                // Uzun ad SIĞMAZSA küçülür (sığan adlar aynen kalır);
+                // eskiden "KAELEN BRISV..." diye kesiliyordu.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    widget.fullName.toUpperCase(),
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: olcek * 0.095,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                      color: tema.textColor,
+                      shadows: const [
+                        Shadow(color: Colors.black45, blurRadius: 3),
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: olcek * 0.02),

@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../features/characters/data/character_repository.dart';
+import '../../features/characters/presentation/character_preview_view_model.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
@@ -144,6 +146,12 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<SbcRepository>(
       () => SbcRepositoryImpl(getIt<SbcRemoteDataSource>()),
+    )
+    ..registerLazySingleton<CharacterRepository>(
+      () => CharacterRepositoryImpl(getIt<ApiClient>()),
+    )
+    ..registerFactory<CharacterPreviewViewModel>(
+      () => CharacterPreviewViewModel(getIt<CharacterRepository>()),
     );
 
   // ---------------- 6. VIEWMODEL'LER ----------------

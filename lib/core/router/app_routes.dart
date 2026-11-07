@@ -18,6 +18,9 @@ class AppRoutes {
 
   /// Tasarim sistemi vitrini. SADECE gelistirme surumunde baglanti var.
   static const String designSystem = '/ayarlar/tasarim';
+
+  /// Geliştirici: tek karakter prototipi (Aşama A1)
+  static const String characterPreview = '/ayarlar/karakter-onizleme';
   static const String leaderboard = '/liderlik';
   static const String leagueTiers = '/ligler';
   static const String store = '/magaza';
