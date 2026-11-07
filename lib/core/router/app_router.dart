@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../../features/characters/presentation/character_preview_view.dart';
+import '../../features/characters/presentation/style_prototype_view.dart';
 import '../../features/auth/presentation/view/login_view.dart';
 import '../../features/auth/presentation/view/register_view.dart';
 import '../../features/auth/presentation/view/splash_view.dart';
@@ -96,6 +97,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.characterPreview,
         builder: (context, state) => const CharacterPreviewView(),
+      ),
+      GoRoute(
+        path: AppRoutes.stylePrototype,
+        builder: (context, state) => const StylePrototypeView(),
       ),
       GoRoute(
         path: AppRoutes.store,

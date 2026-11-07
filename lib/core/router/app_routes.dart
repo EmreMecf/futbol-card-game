@@ -21,6 +21,7 @@ class AppRoutes {
 
   /// Geliştirici: tek karakter prototipi (Aşama A1)
   static const String characterPreview = '/ayarlar/karakter-onizleme';
+  static const String stylePrototype = '/ayarlar/stil-prototipi';
   static const String leaderboard = '/liderlik';
   static const String leagueTiers = '/ligler';
   static const String store = '/magaza';

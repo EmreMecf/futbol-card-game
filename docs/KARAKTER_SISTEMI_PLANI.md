@@ -1,5 +1,10 @@
 # Özgün Karakter Evreni — Geçiş ve Geliştirme Planı
 
+> **GÜNCELLEME (7 Kasım 2026):** Görsel yön değişti: gerçekçi/yarı gerçekçi
+> 3B karakter yerine **stilize 2D** (kodla çizilen). 3B model, iskelet ve
+> ücretli görsel üretimi bölümleri artık varsayılan yol değil. Ayrıntı:
+> [GORSEL_YON_2D.md](GORSEL_YON_2D.md).
+
 **Durum:** PLAN. Onay verilmeden hiçbir kod, veri veya varlık
 değiştirilmeyecek. **Tarih:** 6 Kasım 2026
 
