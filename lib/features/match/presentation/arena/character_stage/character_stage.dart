@@ -93,6 +93,7 @@ Choreography choreographFor(ClashEvent e) {
 // ÇİZİCİLER
 // ---------------------------------------------------------------------
 enum RendererKind {
+  vector2d('2D vektör karakter (kodla çizilir, dosya gerekmez)'),
   gltf3d('Gerçek zamanlı 3B (glTF iskelet animasyonu)'),
   sprite('Sprite sayfası (3B modelden önceden işlenmiş)'),
   fallback25d('2.5B yedek arena (ArenaBackdrop / ClashScene)');
@@ -150,6 +151,23 @@ class SpriteRenderer implements CharacterRenderer {
     return null;
   }
 }
+
+/// 2D vektör karakter (yeni görsel yön, docs/GORSEL_YON_2D.md).
+///
+/// Yüz ve figür [AvatarSpec]'ten kodla çizilir; onaylı dosya varlığı
+/// GEREKMEZ. Bu yüzden karakter kaydı olan her özgün karakter için
+/// kullanılabilir. 3B ve sprite katmanları kaldırılmadı ama artık
+/// varsayılan zincirde değil ([kRenderers2d]).
+class Vector2dRenderer implements CharacterRenderer {
+  const Vector2dRenderer();
+  @override
+  RendererKind get kind => RendererKind.vector2d;
+  @override
+  String? unavailableReason(CharacterPresentation p) => null;
+}
+
+/// Yeni görsel yönün çizici zinciri: 2D vektör, yoksa 2.5B yedek.
+const List<CharacterRenderer> kRenderers2d = [Vector2dRenderer(), Fallback25dRenderer()];
 
 /// 2.5B yedek: her zaman kullanılabilir.
 class Fallback25dRenderer implements CharacterRenderer {
