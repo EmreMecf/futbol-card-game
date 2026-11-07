@@ -66,3 +66,6 @@ server/*.log
 # (gitlink) olarak ekleniyor ve GitHub'da bos/kirik bir klasor
 # gorunuyor. Silinmesinde sakinca yok.
 /futbol_card/
+
+# Yerel test hesabi bilgileri (git disi)
+*.local.txt
