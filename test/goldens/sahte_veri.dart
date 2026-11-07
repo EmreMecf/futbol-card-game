@@ -98,12 +98,52 @@ class GoldenMatchRepo implements MatchRepository {
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
 
+/// Referans kadro ekranındaki güçler (slot -> güç, mevki):
+/// ST 91 88 · MID 85 89 86 84 · DEF 82 87 85 83 · GK 93
+final Map<int, InventoryCard> kGoldenSquad = {
+  for (final (slot, guc, mevki, kulup, uyruk) in const [
+    (9, 91, CardPosition.forward, 'Mavi Şimşek', 'TUR'),
+    (10, 88, CardPosition.forward, 'Mavi Şimşek', 'BRA'),
+    (5, 85, CardPosition.midfielder, 'Kızıl Fırtına', 'TUR'),
+    (6, 89, CardPosition.midfielder, 'Mavi Şimşek', 'TUR'),
+    (7, 86, CardPosition.midfielder, 'Liman Rüzgârı', 'ESP'),
+    (8, 84, CardPosition.midfielder, 'Kızıl Fırtına', 'ESP'),
+    (1, 82, CardPosition.defender, 'Kızıl Fırtına', 'TUR'),
+    (2, 87, CardPosition.defender, 'Liman Rüzgârı', 'ESP'),
+    (3, 85, CardPosition.defender, 'Liman Rüzgârı', 'FRA'),
+    (4, 83, CardPosition.defender, 'Kızıl Fırtına', 'FRA'),
+    (0, 93, CardPosition.goalkeeper, 'Liman Rüzgârı', 'TUR'),
+  ])
+    slot: InventoryCard(
+      userCardId: 'sq-$slot',
+      cardId: 'golden-sq-$slot',
+      fullName: 'Kadro Oyuncusu $slot',
+      position: mevki,
+      tier: guc >= 93 ? CardTier.diamond : CardTier.gold,
+      power: guc,
+      club: kulup,
+      nationality: uyruk,
+      league: 'Kurgu Ligi',
+    ),
+};
+
 class GoldenDeckRepo implements DeckRepository {
+  /// Kaydedilmiş kadro (null = boş kadro)
+  final Map<int, InventoryCard> slots;
+  GoldenDeckRepo([Map<int, InventoryCard>? s]) : slots = s ?? kGoldenSquad;
+
   @override
   Future<Result<List<DeckSummary>>> fetchDecks() async =>
-      const Success([DeckSummary(id: 'd1', name: 'Ana kadro', isActive: true, cardCount: 11)]);
+      Success([DeckSummary(id: 'd1', name: 'Ana kadro', isActive: true, cardCount: slots.length)]);
   @override
-  Future<Result<List<InventoryCard>>> fetchInventory() async => Success(kGoldenCards);
+  Future<Result<Map<int, InventoryCard>>> fetchDeckSlots(String deckId) async => Success(slots);
+  @override
+  Future<Result<List<InventoryCard>>> fetchDeckCards(String deckId) async => Success(slots.values.toList());
+  @override
+  Future<Result<DeckChemistry>> fetchChemistry(String deckId) async => const Success(DeckChemistry());
+  @override
+  Future<Result<List<InventoryCard>>> fetchInventory() async =>
+      Success([...slots.values, ...kGoldenCards]);
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }

@@ -7,7 +7,6 @@ import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/deck/domain/repositories/deck_repository.dart';
 import 'package:futbol_card/features/deck/presentation/view/deck_view.dart';
 import 'package:futbol_card/features/deck/presentation/viewmodel/deck_view_model.dart';
-import 'package:futbol_card/shared/widgets/premium_card/premium_card.dart';
 import 'package:shared_models/shared_models.dart';
 
 /// FAZ 3 — Kadro ekranında sürükle-bırak (MD bölüm 4-E).
@@ -66,7 +65,7 @@ void main() {
   Offset kartMerkezi(WidgetTester tester, String userCardId) {
     final bul = find.byWidgetPredicate(
       (w) =>
-          w is PremiumPlayerCard &&
+          w is SquadSlotTile &&
           w.key is ValueKey<String> &&
           (w.key! as ValueKey<String>).value.endsWith('-$userCardId'),
     );

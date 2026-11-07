@@ -171,9 +171,11 @@ class RefSecondaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
   final RefGlyph? trailing;
+  final IconData? leadingIcon;
   final bool expand;
 
-  const RefSecondaryButton(this.label, {super.key, this.onTap, this.trailing, this.expand = true});
+  const RefSecondaryButton(this.label,
+      {super.key, this.onTap, this.trailing, this.leadingIcon, this.expand = true});
 
   @override
   Widget build(BuildContext context) => _Basilabilir(
@@ -192,6 +194,10 @@ class RefSecondaryButton extends StatelessWidget {
             mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              if (leadingIcon != null) ...[
+                Icon(leadingIcon, size: 14, color: Ref.secondaryText),
+                const SizedBox(width: 5),
+              ],
               Flexible(
                 child: Text(label,
                     maxLines: 1,

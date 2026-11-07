@@ -7,8 +7,11 @@ import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/features/collection/presentation/view/collection_view.dart';
 import 'package:futbol_card/features/collection/presentation/viewmodel/collection_view_model.dart';
 import 'package:futbol_card/features/collection/presentation/widgets/card_detail_sheet.dart';
+import 'package:futbol_card/features/deck/presentation/view/deck_view.dart';
+import 'package:futbol_card/features/deck/presentation/viewmodel/deck_view_model.dart';
 import 'package:futbol_card/features/home/presentation/view/home_view.dart';
 import 'package:futbol_card/features/home/presentation/viewmodel/home_view_model.dart';
+import 'package:futbol_card/features/deck/presentation/widgets/formation_pitch.dart';
 import 'package:futbol_card/shared/widgets/ref_card/ref_player_card.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,7 +40,8 @@ void main() {
     getIt
       ..registerFactory<HomeViewModel>(
           () => HomeViewModel(GoldenLeaderboardRepo(), GoldenMatchRepo(), GoldenDeckRepo()))
-      ..registerFactory<CollectionViewModel>(() => CollectionViewModel(GoldenCollectionRepo()));
+      ..registerFactory<CollectionViewModel>(() => CollectionViewModel(GoldenCollectionRepo()))
+      ..registerFactory<DeckViewModel>(() => DeckViewModel(GoldenDeckRepo()));
     oturum = await goldenSession();
   });
 
@@ -71,6 +75,21 @@ void main() {
       await esle(t, '01_ana_sayfa_${sizeName(boyut)}');
     }, skip: atla != null);
 
+    testWidgets('kadro ${sizeName(boyut)}', (t) async {
+      await ac(t, const DeckView(), boyut);
+      expect(t.takeException(), isNull, reason: 'taşma veya çizim hatası');
+      // Bütün oyuncu kutuları sahanın İÇİNDE (kullanıcının bildirdiği
+      // "sahadan taşan kartlar" hatası)
+      final saha = t.getRect(find.byWidgetPredicate((w) => w is CustomPaint && w.painter is RefFieldPainter));
+      for (final e in find.byType(SquadSlotTile).evaluate()) {
+        final r = t.getRect(find.byWidget(e.widget));
+        expect(saha.inflate(8).contains(r.topLeft) && saha.inflate(8).contains(r.bottomRight), isTrue,
+            reason: 'kutu sahadan taşıyor: $r / $saha');
+      }
+      expect(find.byType(SquadSlotTile), findsNWidgets(11));
+      await esle(t, '04_kadro_${sizeName(boyut)}');
+    }, skip: atla != null);
+
     testWidgets('koleksiyon ${sizeName(boyut)}', (t) async {
       await ac(t, const CollectionView(), boyut);
       expect(t.takeException(), isNull, reason: 'taşma veya çizim hatası');
@@ -84,6 +103,27 @@ void main() {
     await t.pump(const Duration(milliseconds: 300));
     await esle(t, '01b_ana_sayfa_alt_390x844');
   }, skip: atla != null);
+
+  testWidgets('kadro alt kısım 390x844', (t) async {
+    await ac(t, const DeckView(), const Size(390, 844));
+    await t.drag(find.byType(Scrollable).first, const Offset(0, -700));
+    await t.pump(const Duration(milliseconds: 300));
+    await esle(t, '04b_kadro_alt_390x844');
+  }, skip: atla != null);
+
+  for (final boyut in [const Size(390, 844), const Size(320, 568)]) {
+    testWidgets('kadro kart seçimi ${sizeName(boyut)}', (t) async {
+      await ac(t, const DeckView(), boyut);
+      // Kaleci yuvasına dokun → o mevkiye uygun kartlar
+      await t.tap(find.byType(SquadSlotTile).last);
+      for (var i = 0; i < 8; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.text('KALECİ SEÇ'), findsOneWidget);
+      expect(t.takeException(), isNull, reason: 'seçim penceresi taşmamalı');
+      await expectLater(find.byType(MaterialApp), matchesGoldenFile('ekranlar/04c_kadro_kart_secimi_${sizeName(boyut)}.png'));
+    }, skip: atla != null);
+  }
 
   testWidgets('koleksiyon alt kısım 390x844', (t) async {
     await ac(t, const CollectionView(), const Size(390, 844));

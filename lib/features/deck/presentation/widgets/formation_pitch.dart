@@ -23,24 +23,25 @@ class ChemistryColors {
 
 /// Formasyondaki slotların ekran üzerindeki konumları (0.0 - 1.0 arası).
 ///
-/// Oran olarak tutuluyor ki saha ne kadar büyük olursa olsun dizilim
-/// bozulmasın. y=0 üstte (forvetler), y=1 altta (kaleci).
+/// Değerler referans HTML'deki `formations['4-4-2']` dizisinden birebir
+/// (x%, y%): ST 36/14, 64/14; MID 15/38, 38/39, 62/39, 85/38;
+/// DEF 14/69, 38/69, 62/69, 86/69; GK 50/90. y=0 üst (forvetler).
 const Map<int, Offset> kSlotPositions = {
   // Forvetler
-  9: Offset(0.34, 0.10),
-  10: Offset(0.66, 0.10),
+  9: Offset(0.36, 0.14),
+  10: Offset(0.64, 0.14),
   // Orta saha
-  5: Offset(0.13, 0.38),
-  6: Offset(0.38, 0.38),
-  7: Offset(0.62, 0.38),
-  8: Offset(0.87, 0.38),
+  5: Offset(0.15, 0.38),
+  6: Offset(0.38, 0.39),
+  7: Offset(0.62, 0.39),
+  8: Offset(0.85, 0.38),
   // Defans
-  1: Offset(0.13, 0.66),
-  2: Offset(0.38, 0.66),
-  3: Offset(0.62, 0.66),
-  4: Offset(0.87, 0.66),
+  1: Offset(0.14, 0.69),
+  2: Offset(0.38, 0.69),
+  3: Offset(0.62, 0.69),
+  4: Offset(0.86, 0.69),
   // Kaleci
-  0: Offset(0.50, 0.92),
+  0: Offset(0.50, 0.90),
 };
 
 /// Kimya bağlarını çizen ressam.
@@ -187,4 +188,56 @@ class _PitchPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_PitchPainter oldDelegate) => false;
+}
+
+
+/// Referans `.field` sahası.
+///
+/// .field { height:353px; border:2px solid #9bd7b991; border-radius:7px;
+///   background:repeating-linear-gradient(0deg,#154b35 0 28px,#1c5940 28px 56px);
+///   box-shadow: inset 0 0 60px #0005 }
+/// :before çizgi çerçevesi %4 içeride, :after orta çizgi, .center-circle 75px,
+/// .field-box üst/alt: left 27%, width 46%, height 65px. Çizgiler #d5ffe68a.
+/// [k] = saha genişliği / 362 (referans telefonundaki saha genişliği).
+class RefFieldPainter extends CustomPainter {
+  final double k;
+  const RefFieldPainter(this.k);
+
+  static const Color _cizgiRengi = Color(0x8AD5FFE6);
+
+  @override
+  void paint(Canvas c, Size s) {
+    // Çim şeritleri: alttan yukarı 28px
+    final a = Paint()..color = const Color(0xFF154B35);
+    final b = Paint()..color = const Color(0xFF1C5940);
+    final serit = 28 * k;
+    var i = 0;
+    for (var y = s.height; y > -serit; y -= serit) {
+      c.drawRect(Rect.fromLTRB(0, y - serit, s.width, y), i.isEven ? a : b);
+      i++;
+    }
+    // inset 0 0 60px #0005
+    c.drawRect(
+        Offset.zero & s,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 40 * k
+          ..color = const Color(0x55000000)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 30 * k));
+
+    final cizgi = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = _cizgiRengi;
+    final ic = Rect.fromLTRB(s.width * 0.04, s.height * 0.04, s.width * 0.96, s.height * 0.96);
+    c.drawRect(ic, cizgi);
+    c.drawLine(Offset(ic.left, s.height / 2), Offset(ic.right, s.height / 2), cizgi);
+    c.drawCircle(s.center(Offset.zero), 37.5 * k, cizgi);
+    final kutuG = s.width * 0.46, kutuH = 65 * k, kutuX = s.width * 0.27;
+    c.drawRect(Rect.fromLTWH(kutuX, ic.top, kutuG, kutuH), cizgi);
+    c.drawRect(Rect.fromLTWH(kutuX, ic.bottom - kutuH, kutuG, kutuH), cizgi);
+  }
+
+  @override
+  bool shouldRepaint(RefFieldPainter old) => old.k != k;
 }

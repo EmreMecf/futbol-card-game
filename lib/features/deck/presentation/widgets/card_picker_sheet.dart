@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../shared/widgets/premium_card/premium_card.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../core/utils/turkish_text.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 import 'formation_pitch.dart';
 
 /// Bir yuvaya kart seçmek için açılan pencere.
@@ -87,131 +89,95 @@ class CardPickerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ekranYuksekligi = MediaQuery.sizeOf(context).height;
+    final kartlar = _siraliKartlar;
 
+    // Referans .modal dili: #0f1a2e zemin, #786c8b çerçeve, üstte mor ışık
     return Container(
-      height: ekranYuksekligi * 0.72,
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      height: ekranYuksekligi * 0.78,
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.topCenter,
+          radius: 1.2,
+          colors: [Color.alphaBlend(Ref.modalGlow, Ref.modalBg), Ref.modalBg],
+          stops: const [0, 0.7],
+        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(21)),
+        border: const Border(top: BorderSide(color: Ref.modalBorder)),
       ),
       child: SafeArea(
         top: false,
         child: Column(
           children: [
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Container(
               width: 44,
               height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
+              decoration: BoxDecoration(color: Ref.pillBorder, borderRadius: BorderRadius.circular(2)),
             ),
-            const SizedBox(height: 16),
-
-            // ---- BAŞLIK ----
+            const SizedBox(height: 14),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      position.shortLabel,
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      '${position.label} seç',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 17,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '${cards.length} kart',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 12.5,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: RefSectionHead(
+                '${position.label.toUpperTr()} SEÇ',
+                kicker: 'YUVA: ${position.code}',
+                trailing: RefPill('${cards.length} KART'),
               ),
             ),
-
-            const SizedBox(height: 4),
-
             if (current != null)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, size: 16),
-                    label: Text(
-                      'Şu an: ${current!.fullName} (${current!.power})',
-                      style: const TextStyle(fontSize: 12.5),
-                    ),
+                  child: RefNeutralButton(
+                    onTap: () => Navigator.pop(context),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.close_rounded, size: 14, color: Ref.neutralText),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text('Şu an: ${current!.fullName} (${current!.power}) · değiştirme',
+                            overflow: TextOverflow.ellipsis,
+                            style: Ref.bodyText(11, color: Ref.neutralText, weight: FontWeight.w800)),
+                      ),
+                    ]),
                   ),
                 ),
               ),
-
-            const SizedBox(height: 8),
-
-            // ---- KARTLAR ----
+            const SizedBox(height: 12),
             Expanded(
               child: cards.isEmpty
                   ? _bosDurum()
                   : GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 130,
-                        childAspectRatio: 0.66,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 12,
+                      padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 190,
+                        childAspectRatio: RefCardLayout.grid.aspectRatio,
+                        crossAxisSpacing: 9,
+                        mainAxisSpacing: 9,
                       ),
-                      itemCount: _siraliKartlar.length,
+                      itemCount: kartlar.length,
                       itemBuilder: (context, index) {
-                        final kart = _siraliKartlar[index];
+                        final kart = kartlar[index];
                         final kimya = chemistryPreview?.call(kart);
-
                         return LayoutBuilder(
-                          builder: (context, kisitlar) {
-                            return Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                PremiumPlayerCard.fromInventory(
-                                  kart,
-                                  key: ValueKey(kart.userCardId),
-                                  width: kisitlar.maxWidth,
-                                  // Listede animasyon kapalı (performans)
-                                  interactive: false,
-                                  onTap: () => Navigator.pop(context, kart),
-                                ),
-                                if (kimya != null)
-                                  Positioned(
-                                    top: -4,
-                                    left: -4,
-                                    child: _KimyaRozeti(chemistry: kimya),
-                                  ),
-                              ],
-                            );
-                          },
+                          builder: (context, k) => Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              RefPlayerCard(
+                                key: ValueKey(kart.userCardId),
+                                name: kart.fullName,
+                                position: kart.position,
+                                tier: kart.tier,
+                                power: kart.power,
+                                seed: kart.cardId,
+                                kitSeed: kart.club ?? kart.nationality,
+                                imageUrl: kart.imageUrl,
+                                width: k.maxWidth,
+                                onTap: () => Navigator.pop(context, kart),
+                              ),
+                              if (kimya != null)
+                                Positioned(top: -4, right: -4, child: _KimyaRozeti(chemistry: kimya)),
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -222,38 +188,17 @@ class CardPickerSheet extends StatelessWidget {
     );
   }
 
-  Widget _bosDurum() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.style_outlined,
-                size: 48, color: AppColors.textSecondary),
-            const SizedBox(height: 16),
-            Text(
-              '${position.label} pozisyonunda uygun kartın yok',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Mağazadan paket açarak yeni kartlar kazanabilirsin.\n'
-              'Devam eden bir maçta kilitli kartlar burada görünmez.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
-            ),
-          ],
+  Widget _bosDurum() => Padding(
+        padding: const EdgeInsets.all(14),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: RefNote(
+            'Mağazadan paket açarak yeni kartlar kazanabilirsin. Devam eden bir maçta kilitli kartlar burada görünmez.',
+            title: '${position.label} mevkisinde uygun kartın yok',
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
-
 
 /// Kart seçim listesinde gösterilen kimya önizleme rozeti
 class _KimyaRozeti extends StatelessWidget {
@@ -276,14 +221,7 @@ class _KimyaRozeti extends StatelessWidget {
           BoxShadow(color: renk.withValues(alpha: 0.5), blurRadius: 5),
         ],
       ),
-      child: Text(
-        '+$chemistry',
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w900,
-          fontSize: 10,
-        ),
-      ),
+      child: Text('+$chemistry', style: Ref.bodyText(10, weight: FontWeight.w900, color: const Color(0xFF0A2033))),
     );
   }
 }

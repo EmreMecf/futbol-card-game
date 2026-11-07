@@ -52,16 +52,54 @@ FAZ 4–8 henüz yapılmadı (bkz. "Sıradaki fazlar").
 | Koleksiyon | ✅ Referansa geçirildi | `03_koleksiyon`, `03b_alt`, `03d_filtre` |
 | Kart detayı | ✅ Referans modalı | `03c_kart_detay` |
 | Gezinme (üst başlık + alt çubuk + masaüstü kenar çubuğu) | ✅ | bütün görüntülerde |
-| Kadro / formasyon | ⏳ FAZ 4 | yalnızca referans görüntüsü var |
+| Kadro / formasyon | ✅ FAZ 4 | `04_kadro`, `04b_kadro_alt`; golden'da kart seçimi `04c` |
 | Maç hazırlığı + arena | ⏳ FAZ 5 | yalnızca referans görüntüsü var |
 | Mağaza + paket açma | ⏳ FAZ 6 | yalnızca referans görüntüsü var |
 | Ligler, liderlik, profil, görevler, maç sonucu | ⏳ FAZ 7 | yalnızca referans görüntüsü var |
 
-**Önemli:** Kadro, mağaza ve maç ekranlarında da yeni kart artık
-görünüyor, çünkü `PremiumPlayerCard` ortak karta bağlandı. Ama bu
-ekranların düzeni henüz referansa geçirilmedi. Kullanıcının bildirdiği
-taşmalar (mağazada 18 px, premium pakette 35 px, kadroda sahadan taşan
-kartlar) **bu turda düzeltilmedi**; FAZ 4 ve FAZ 6'nın işi.
+**Önemli:** Mağaza ve maç ekranlarında da yeni kart artık görünüyor,
+çünkü `PremiumPlayerCard` ortak karta bağlandı. Ama bu ekranların düzeni
+henüz referansa geçirilmedi. Kadroda sahadan taşan kartlar FAZ 4'te
+düzeltildi. Mağazadaki 18 px ve premium paketteki 35 px taşma FAZ 6'nın
+işi.
+
+## FAZ 4 — Kadro (yapıldı)
+
+- **Referans düzeni:**
+  - `TAKIMIM` + "11 / 11" hapı
+  - FORMASYON SEÇİMİ · KİMYA BONUSU AKTİF
+  - 3 formasyon karosu
+  - 353 px saha (362 px genişlikte; diğer genişliklerde orantılı)
+  - 47×55 oyuncu kutuları (`.squad-slot`, altın-lacivert degrade, #e1bd63
+    çerçeve)
+  - TAKIM GÜCÜ / KİMYA / KADRO
+  - Kimya paneli, KADROYU KAYDET
+- **Konumlar** referanstaki `formations['4-4-2']` dizisinden birebir (x%, y%).
+- **4-3-3 ve 3-5-2** referanstaki gibi görünür ama PASİF (`button:disabled`
+  opaklığı). Oyunun aynı mevki kuralı 4-4-2'ye bağlı. Basılınca "Oyunda
+  şimdilik yalnızca 4-4-2 geçerli" yazar.
+- **Sahadan taşma düzeltildi.** Eski ekran sahaya tam kart (FIFA oranında)
+  sığdırmaya çalışıyordu. Yeni ekranda referanstaki küçük kutular var ve
+  saha genişlikle orantılı ölçekleniyor. Golden testi 6 boyutta her
+  kutunun sahanın içinde kaldığını ÖLÇEREK denetliyor.
+- **Referansta olmayan ama oyunda gerçek işlevler**, aynı bileşen diliyle:
+  - Kimya çizgileri (kutuların altında)
+  - Kart başına kimya rozeti
+  - Basılı tut → bağlar vurgulanır
+  - Sürükle-bırak (yalnızca aynı mevki)
+  - Otomatik dizme (3 nötr düğme)
+  - Eksik mevki uyarısı
+  - Kaydedilmemiş değişiklikle çıkış onayı
+- **Kart seçme penceresi** referans modal diliyle. Kartlar ortak kart
+  bileşeninden, her birinin yanında "bu yuvaya konursa kimya" rozeti.
+- **Referanstan bilinçli farklar:**
+  - Mevki ST yerine FWD.
+  - Kimya açıklaması oyunun gerçek kuralını yazıyor.
+  - Güçlü / Orta / Zayıf haplarında gerçek bağ sayıları var.
+  - Kimya paneline otomatik dizme düğmeleri eklendi.
+  - Değişiklik yokken kaydet düğmesi "KADRO GÜNCEL" yazar ve pasiftir.
+- **Oyun mantığı (DeckViewModel) değişmedi.** Sürükle-bırak testleri yeni
+  kutularla yine geçiyor: aynı mevki kuralı arayüzden de korunuyor.
 
 ## 3. Bilinçli farklar (referanstan sapılan yerler ve sebepleri)
 
