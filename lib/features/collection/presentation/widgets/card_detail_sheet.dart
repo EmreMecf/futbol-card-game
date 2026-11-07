@@ -1,236 +1,194 @@
 import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/feedback/game_feedback.dart';
-import '../../../../shared/widgets/game/tier_badge.dart';
-import '../../../../shared/widgets/premium_card/premium_card.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 
-/// Karta dokununca acilan detay penceresi.
+/// Kart detayı — referans `showCard()` modalı.
 ///
-/// BURASI KARTIN VITRINI:
-/// Listede kartlar `interactive: false` ile ciziliyor (performans icin).
-/// Burada ise tek bir kart var, dolayisiyla tum efektleri aciyoruz:
-/// 3B egilme, jiroskop, holografik parlama ve kayan yuzey yansimasi.
+/// .modalback { background:#020810ca; backdrop-filter:blur(8px) }
+/// .modal { max-width:385px; border:1px solid #786c8b; border-radius:21px;
+///   background: radial-gradient(ellipse at center top,#3f31577b,transparent 70%),#0f1a2e;
+///   padding:25px; gap:16px; text-align:center }
+/// İçerik: .revealcard (205x295, .anim-pop) + .statrow + .cta "KOLEKSİYONA DÖN"
+///
+/// Referansta olmayan ama oyunda GERÇEK olan bilgiler (özellikler,
+/// kulüp, kilit, Efsane kuralı, favori) aynı bileşen diliyle altta.
 class CardDetailSheet extends StatelessWidget {
   final InventoryCard card;
-
-  /// Pencere açıldığında kart favori mi?
   final bool isFavorite;
 
-  /// Favori butonuna basılınca çağrılır. Null ise buton gösterilmez.
-  ///
-  /// NEDEN GERİ ÇAĞIRMA, NEDEN ViewModel DEĞİL?
-  /// Pencere ayrı bir rota olarak açılıyor; koleksiyon ekranının
-  /// Provider'ına buradan erişilemez. Ekran, favori işlemini bu
-  /// fonksiyonla içeri veriyor. `true` dönerse işlem başarılı.
+  /// Favori butonuna basılınca. `true` dönerse işlem başarılı.
   final Future<bool> Function()? onToggleFavorite;
 
-  const CardDetailSheet({
-    super.key,
-    required this.card,
-    this.isFavorite = false,
-    this.onToggleFavorite,
-  });
+  const CardDetailSheet({super.key, required this.card, this.isFavorite = false, this.onToggleFavorite});
 
-  /// Alttan acilan pencereyi gosterir
   static Future<void> show(
     BuildContext context,
     InventoryCard card, {
     bool isFavorite = false,
     Future<bool> Function()? onToggleFavorite,
   }) {
-    return showModalBottomSheet<void>(
+    return showGeneralDialog<void>(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => CardDetailSheet(
-        card: card,
-        isFavorite: isFavorite,
-        onToggleFavorite: onToggleFavorite,
+      barrierDismissible: true,
+      barrierLabel: 'Kapat',
+      barrierColor: Ref.modalBack,
+      transitionDuration: const Duration(milliseconds: 220),
+      pageBuilder: (_, _, _) => BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: CardDetailSheet(card: card, isFavorite: isFavorite, onToggleFavorite: onToggleFavorite),
       ),
+      transitionBuilder: (_, a, _, c) => FadeTransition(opacity: a, child: c),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final ekranGenisligi = MediaQuery.sizeOf(context).width;
-    // Kart ekranin %62'si kadar genis olsun ama 280 pikseli gecmesin
-    final kartGenisligi = (ekranGenisligi * 0.62).clamp(180.0, 280.0);
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-      child: SafeArea(
-        top: false,
-        // Ozellik paneli eklendikten sonra icerik kucuk ekranlarda
-        // tasabiliyor; kaydirilabilir olmasi sart.
+    final a = card.attributes;
+    return SafeArea(
+      child: Center(
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Tutamac
-              Container(
-                width: 44,
-                height: 4,
+          // Gölge kaydırma alanında kesilmesin (sert kenarlı kutu oluşuyordu)
+          clipBehavior: Clip.none,
+          // .modalback { padding:20px }
+          padding: const EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 385),
+            child: Material(
+              type: MaterialType.transparency,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(25),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              if (onToggleFavorite != null)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: _FavoriButonu(
-                    baslangic: isFavorite,
-                    onToggle: onToggleFavorite!,
+                  // Işık, düz zeminin ÜSTÜNE karıştırılır (BoxDecoration'da
+                  // degrade varken renk yok sayılır)
+                  gradient: RadialGradient(
+                    center: Alignment.topCenter,
+                    radius: 1.1,
+                    colors: [Color.alphaBlend(Ref.modalGlow, Ref.modalBg), Ref.modalBg],
+                    stops: const [0, 0.7],
                   ),
-                )
-              else
-                const SizedBox(height: 24),
-
-              // ---- KART (tum efektler acik) ----
-              PremiumPlayerCard.fromInventory(
-                card,
-                width: kartGenisligi,
-                interactive: true,
-                useGyroscope: true,
+                  borderRadius: BorderRadius.circular(21),
+                  border: Border.all(color: Ref.modalBorder),
+                  boxShadow: const [BoxShadow(color: Color(0xEE000000), blurRadius: 90, offset: Offset(0, 22))],
+                ),
+                child: LayoutBuilder(builder: (context, k) {
+                  final kartGenislik = math.min(205.0, k.maxWidth);
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _Pop(
+                        child: RefPlayerCard(
+                          name: card.fullName,
+                          position: card.position,
+                          tier: card.tier,
+                          power: card.power,
+                          seed: card.cardId,
+                          kitSeed: card.club ?? card.nationality,
+                          imageUrl: card.imageUrl,
+                          width: kartGenislik,
+                          layout: RefCardLayout.reveal,
+                          isLocked: card.isLocked,
+                          animate: true,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      RefStatRow([
+                        RefStat('${card.power}', 'GÜÇ'),
+                        RefStat(RefRarity.of(card.tier).name.toUpperCase(), 'NADİRLİK', valueSize: 20),
+                        RefStat(card.position.code, 'MEVKİ'),
+                      ]),
+                      if (a != null && a.isNotEmpty) ...[
+                        const SizedBox(height: 7),
+                        RefStatRow([
+                          RefStat('${a.shooting}', 'ŞUT', valueSize: 20),
+                          RefStat('${a.pace}', 'HIZ', valueSize: 20),
+                          RefStat('${a.dribbling}', 'DRİBLİNG', valueSize: 20),
+                        ]),
+                        const SizedBox(height: 7),
+                        RefStatRow([
+                          RefStat('${a.acceleration}', 'HIZLANMA', valueSize: 20),
+                          RefStat('${a.defending}', 'DEFANS', valueSize: 20),
+                          RefStat('${a.physical}', 'FİZİK', valueSize: 20),
+                        ]),
+                      ],
+                      if (card.club != null || card.nationality != null) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          [?card.club, ?card.nationality].join(' · '),
+                          textAlign: TextAlign.center,
+                          style: Ref.bodyText(11, color: Ref.muted),
+                        ),
+                      ],
+                      if (card.isLocked) ...[
+                        const SizedBox(height: 12),
+                        const RefNote('Bu kart devam eden bir maçta kilitli. Maç bitene kadar kadrondan çıkaramazsın.',
+                            title: 'Kilitli kart'),
+                      ],
+                      if (card.isLegend) ...[
+                        const SizedBox(height: 12),
+                        const RefNote(
+                            'Gücü ne olursa olsun alttaki 4 nadirliği yener. Sadece gücü daha yüksek bir Efsane yenebilir.',
+                            title: 'Efsane kart'),
+                      ],
+                      if (onToggleFavorite != null) ...[
+                        const SizedBox(height: 16),
+                        _FavoriButonu(baslangic: isFavorite, onToggle: onToggleFavorite!),
+                      ],
+                      const SizedBox(height: 16),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 290),
+                        child: RefCta('KOLEKSİYONA DÖN', onTap: () => Navigator.of(context).maybePop()),
+                      ),
+                    ],
+                  );
+                }),
               ),
-
-              const SizedBox(height: 20),
-
-              Text(
-                'Kartı tut ve hareket ettir',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary.withValues(alpha: 0.7),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // ---- BILGILER ----
-              _bilgiSatiri('Seviye', card.tier.displayName),
-              _bilgiSatiri('Pozisyon', card.position.label),
-              _bilgiSatiri('Güç', '${card.power}'),
-
-              // ---- OZELLIKLER ----
-              // Guc "kart turu kazanir mi?" sorusunu yanitliyor;
-              // asagidaki panel "bu oyuncu nasil bir oyuncu?" sorusunu.
-              if (card.attributes?.isNotEmpty ?? false) ...[
-                const SizedBox(height: 18),
-                CardAttributesPanel(attributes: card.attributes!),
-                const SizedBox(height: 6),
-                const Text(
-                  'Özellikler kartın karakterini gösterir; '
-                  'turu kazanan hâlâ güç + kimyadır.',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 11,
-                    height: 1.35,
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
-
-              if (card.nationality != null)
-                _bilgiSatiri('Ülke', card.nationality!),
-              if (card.club != null) _bilgiSatiri('Kulüp', card.club!),
-
-              if (card.isLocked) ...[
-                const SizedBox(height: 16),
-                _uyari(
-                  Icons.lock,
-                  AppColors.warning,
-                  'Bu kart devam eden bir maçta kilitli. '
-                  'Maç bitene kadar kadrondan çıkaramazsın.',
-                ),
-              ],
-
-              if (card.isLegend) ...[
-                const SizedBox(height: 16),
-                _uyari(
-                  Icons.auto_awesome,
-                  AppColors.tierLegend,
-                  'Legend kart: Gücü ne olursa olsun alttaki 4 seviyeyi yener. '
-                  'Sadece gücü daha yüksek bir Legend yenebilir.',
-                ),
-              ],
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _bilgiSatiri(String etiket, String deger) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            etiket,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 13,
-            ),
-          ),
-          Text(
-            deger,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+/// .anim-pop: from { opacity:.3; scale(.65) rotate(-4deg) } .55s
+/// cubic-bezier(.18,1.4,.3,1). Animasyonlar kapalıysa beklemeden görünür.
+class _Pop extends StatelessWidget {
+  final Widget child;
+  const _Pop({required this.child});
 
-  Widget _uyari(IconData ikon, Color renk, String metin) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: renk.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: renk.withValues(alpha: 0.35)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(ikon, color: renk, size: 18),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              metin,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 12.5,
-                height: 1.4,
-              ),
-            ),
-          ),
-        ],
+  @override
+  Widget build(BuildContext context) {
+    if (!GameFeedback.cardAnimationsEnabled) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Ref.pop,
+      curve: Ref.popCurve,
+      child: child,
+      builder: (_, t, c) => Opacity(
+        opacity: (0.3 + 0.7 * t).clamp(0.0, 1.0),
+        child: Transform.rotate(
+          angle: -4 * math.pi / 180 * (1 - t),
+          child: Transform.scale(scale: 0.65 + 0.35 * t, child: c),
+        ),
       ),
     );
   }
 }
 
-/// Detay penceresindeki favori (kalp) butonu.
-///
-/// Kendi durumunu tutuyor: basınca HEMEN dolup boşalıyor, disk yazımı
-/// arkada yapılıyor. Sınıra takılırsa eski haline dönüp nedenini söylüyor.
+/// Favori düğmesi (.neutral-button). Basınca hemen değişir; sınıra
+/// takılırsa geri döner ve nedenini söyler.
 class _FavoriButonu extends StatefulWidget {
   final bool baslangic;
   final Future<bool> Function() onToggle;
-
   const _FavoriButonu({required this.baslangic, required this.onToggle});
 
   @override
@@ -244,35 +202,28 @@ class _FavoriButonuState extends State<_FavoriButonu> {
     final onceki = _favori;
     setState(() => _favori = !onceki);
     unawaited(GameFeedback.haptic(HapticStrength.selection));
-
     final basarili = await widget.onToggle();
     if (!mounted) return;
-
     if (!basarili) {
       setState(() => _favori = onceki);
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        const SnackBar(
-          content: Text('En fazla 50 favori kartın olabilir.'),
-        ),
-      );
+      ScaffoldMessenger.maybeOf(context)
+          ?.showSnackBar(const SnackBar(content: Text('En fazla 50 favori kartın olabilir.')));
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: _favori ? 'Favorilerden çıkar' : 'Favorilere ekle',
-      onPressed: _bas,
-      icon: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
-        child: Icon(
-          _favori ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-          key: ValueKey(_favori),
-          color: _favori ? AppColors.danger : AppColors.textSecondary,
-          size: 26,
+  Widget build(BuildContext context) => RefNeutralButton(
+        onTap: _bas,
+        semanticLabel: _favori ? 'Favorilerden çıkar' : 'Favorilere ekle',
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(_favori ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                size: 15, color: _favori ? Ref.red : Ref.neutralText),
+            const SizedBox(width: 6),
+            Text(_favori ? 'FAVORİLERDEN ÇIKAR' : 'FAVORİLERE EKLE',
+                style: Ref.bodyText(11, color: Ref.neutralText, weight: FontWeight.w800)),
+          ],
         ),
-      ),
-    );
-  }
+      );
 }

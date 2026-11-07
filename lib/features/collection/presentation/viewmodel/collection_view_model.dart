@@ -224,6 +224,19 @@ class CollectionViewModel extends BaseViewModel {
     safeNotify();
   }
 
+  /// "Tümü" çipi: mevki, nadirlik ve favori filtrelerini kaldırır;
+  /// arama metnine dokunmaz (referanstaki filtre davranışı).
+  void clearCategoryFilters() {
+    _seviyeFiltresi = null;
+    _pozisyonFiltresi = null;
+    _sadeceFavoriler = false;
+    safeNotify();
+  }
+
+  /// Herhangi bir kategori filtresi (mevki / nadirlik / favori) aktif mi?
+  bool get hasCategoryFilter =>
+      _seviyeFiltresi != null || _pozisyonFiltresi != null || _sadeceFavoriler;
+
   void clearFilters() {
     _seviyeFiltresi = null;
     _pozisyonFiltresi = null;
