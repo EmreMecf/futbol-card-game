@@ -1,6 +1,7 @@
 import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/base/base_view_model.dart';
+import '../../../deck/domain/repositories/deck_repository.dart';
 import '../../../leaderboard/domain/repositories/leaderboard_repository.dart';
 import '../../../match/domain/repositories/match_repository.dart';
 
@@ -30,7 +31,21 @@ class HomeViewModel extends BaseViewModel {
   final LeaderboardRepository _leaderboardRepository;
   final MatchRepository _matchRepository;
 
-  HomeViewModel(this._leaderboardRepository, this._matchRepository);
+  /// Kadro ve kart sayıları için (karolarda "11 / 11", "100 kart").
+  /// Verilmezse karolar sayı yerine kısa açıklama gösterir.
+  final DeckRepository? _deckRepository;
+
+  HomeViewModel(this._leaderboardRepository, this._matchRepository, [this._deckRepository]);
+
+  int? _kadroKartSayisi;
+
+  /// Etkin destedeki kart sayısı (sunucudan). Bilinmiyorsa null.
+  int? get activeDeckCardCount => _kadroKartSayisi;
+
+  int? _kartSayisi;
+
+  /// Koleksiyondaki kart sayısı (sunucudan). Bilinmiyorsa null.
+  int? get inventoryCount => _kartSayisi;
 
   /// Ana sayfada gösterilen son maç sayısı
   static const int recentMatchCount = 3;
@@ -75,7 +90,7 @@ class HomeViewModel extends BaseViewModel {
   ///
   /// İki istek paralel: biri yavaşsa diğerini bekletmesin.
   Future<void> load() async {
-    await Future.wait([_rutbeYukle(), _gecmisYukle()]);
+    await Future.wait([_rutbeYukle(), _gecmisYukle(), _sayilariYukle()]);
     _yuklendi = true;
     safeNotify();
   }
@@ -86,6 +101,18 @@ class HomeViewModel extends BaseViewModel {
       showLoading: false,
     );
     if (sonuc != null) _rutbe = sonuc;
+  }
+
+  Future<void> _sayilariYukle() async {
+    final depo = _deckRepository;
+    if (depo == null) return;
+    final desteler = await run(() => depo.fetchDecks(), showLoading: false);
+    if (desteler != null && desteler.isNotEmpty) {
+      final etkin = desteler.where((d) => d.isActive).firstOrNull ?? desteler.first;
+      _kadroKartSayisi = etkin.cardCount;
+    }
+    final kartlar = await run(() => depo.fetchInventory(), showLoading: false);
+    if (kartlar != null) _kartSayisi = kartlar.length;
   }
 
   Future<void> _gecmisYukle() async {

@@ -69,3 +69,6 @@ server/*.log
 
 # Yerel test hesabi bilgileri (git disi)
 *.local.txt
+
+# Referans ekran cekme araci gecici dosyalari
+design-reference/.gecici/

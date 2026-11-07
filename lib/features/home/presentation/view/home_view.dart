@@ -3,37 +3,26 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/utils/turkish_text.dart';
 import '../../../../core/auth/session_manager.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_breakpoints.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/app_shell.dart';
-import '../../../../shared/widgets/game/game_ui.dart';
-import '../../../../shared/widgets/stat_chip.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../auth/presentation/viewmodel/auth_view_model.dart';
 import '../viewmodel/home_view_model.dart';
-import '../widgets/home_panels.dart';
 
-/// Ana sayfa — oyunun giriş noktası (MD bölüm 4-C).
+/// ANA SAYFA — referans `home()` ekranı.
 ///
-/// ===================================================================
-/// HİYERARŞİ
-/// ===================================================================
-/// Ekranın tamamı tek bir karara hizmet ediyor: "maça gir". Bu yüzden
-/// ARENA paneli ve altın "MAÇA BAŞLA" butonu en büyük, en parlak ve en
-/// üstteki öğe. Kısayollar, son maçlar ve "yakında" bölümü görünür
-/// biçimde ondan daha sönük.
+///   .hero        lig hapı, 🛡️, "ARENA SENİ BEKLİYOR", kupa + seri, MAÇA BAŞLA
+///   .tilegrid    KADROM · KARTLARIM · PAKETLER
+///   GÜNLÜK GÖREVLER  (sunucuda yok → "YAKINDA"; kart görevlerine yönlendirir)
+///   LİG İLERLEMESİ   (referanstaki "SEZON ÖDÜLÜ" bloğu; sezon sistemi yok,
+///                     yerine GERÇEK lig ilerlemesi)
 ///
-/// ===================================================================
-/// İKİ YERLEŞİM, TEK VERİ
-/// ===================================================================
-/// Telefonda tek sütun + alt sekme çubuğu; masaüstünde kenar çubuğu +
-/// iki sütun. İkisi de aynı [HomeViewModel] ve [SessionManager]
-/// verisini okuyor.
+/// Bütün sayılar sunucudan: puan (MMR), lig, seri, kadro ve kart sayısı.
+/// Referanstaki örnek sayılar (1.825, 4 galibiyet, 2/3 görev) KULLANILMAZ.
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
@@ -41,7 +30,7 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeViewModel>(
       create: (_) => getIt<HomeViewModel>()..load(),
-      child: const _HomeBody(),
+      child: const AppShell(currentRoute: AppRoutes.home, child: _HomeBody()),
     );
   }
 }
@@ -57,79 +46,165 @@ class _HomeBodyState extends State<_HomeBody> {
   @override
   void initState() {
     super.initState();
-    // Coin, MMR ve koruma hakkı maç sonrası değişmiş olabilir;
-    // ayrıca devam eden maç varsa oraya dönebilmek için tazeliyoruz.
+    // Coin, puan ve devam eden maç bilgisi maç sonrası değişmiş olabilir
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<AuthViewModel>().refreshProfile();
+      if (!mounted) return;
+      try {
+        context.read<AuthViewModel>().refreshProfile();
+      } on ProviderNotFoundException {
+        // Testlerde oturum modeli olmayabilir
+      }
     });
   }
 
   Future<void> _yenile() async {
-    await Future.wait([
-      context.read<AuthViewModel>().refreshProfile(),
-      context.read<HomeViewModel>().load(),
-    ]);
+    final isler = <Future<void>>[context.read<HomeViewModel>().load()];
+    try {
+      isler.add(context.read<AuthViewModel>().refreshProfile());
+    } on ProviderNotFoundException {
+      // test
+    }
+    await Future.wait(isler);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AppShell(
-      currentRoute: AppRoutes.home,
-      child: ResponsiveBuilder(
-        builder: (context, boyut) => RefreshIndicator(
-          color: AppColors.primary,
-          backgroundColor: AppColors.surface,
-          onRefresh: _yenile,
-          child: boyut.usesSidebar
-              ? _GenisYerlesim(size: boyut)
-              : _DarYerlesim(size: boyut),
+    return LayoutBuilder(builder: (context, k) {
+      final genis = k.maxWidth >= 900;
+      final icerik = genis ? const _GenisYerlesim() : const _DarYerlesim();
+      return RefreshIndicator(
+        color: Ref.accent,
+        backgroundColor: Ref.panel,
+        onRefresh: _yenile,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: Ref.pagePadding,
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: genis ? 1180 : 620),
+                child: RefPageEnter(child: icerik),
+              ),
+            ),
+          ],
         ),
-      ),
-    );
+      );
+    });
+  }
+}
+
+/// Telefon ve tablet: referansla aynı tek sütun (.page gap:13px)
+class _DarYerlesim extends StatelessWidget {
+  const _DarYerlesim();
+
+  @override
+  Widget build(BuildContext context) => const Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _DevamEdenMac(),
+          _ArenaHero(),
+          SizedBox(height: Ref.pageGap),
+          _Karolar(),
+          SizedBox(height: Ref.pageGap),
+          _Gorevler(),
+          SizedBox(height: Ref.pageGap),
+          _LigIlerlemesi(),
+        ],
+      );
+}
+
+/// Masaüstü: aynı bileşenler iki sütunda (boş alan bırakmadan)
+class _GenisYerlesim extends StatelessWidget {
+  const _GenisYerlesim();
+
+  @override
+  Widget build(BuildContext context) => const Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _DevamEdenMac(),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 6,
+                child: Column(children: [_ArenaHero(), SizedBox(height: Ref.pageGap), _Karolar()]),
+              ),
+              SizedBox(width: 20),
+              Expanded(
+                flex: 5,
+                child: Column(children: [_Gorevler(), SizedBox(height: Ref.pageGap), _LigIlerlemesi()]),
+              ),
+            ],
+          ),
+        ],
+      );
+}
+
+UserModel? _kullanici(BuildContext c) {
+  try {
+    return Provider.of<SessionManager>(c).user;
+  } on ProviderNotFoundException {
+    return null;
   }
 }
 
 // ====================================================================
-// TELEFON / TABLET
+// .hero
 // ====================================================================
-class _DarYerlesim extends StatelessWidget {
-  final ScreenSize size;
-
-  const _DarYerlesim({required this.size});
+class _ArenaHero extends StatelessWidget {
+  const _ArenaHero();
 
   @override
   Widget build(BuildContext context) {
-    final kenar = AppBreakpoints.pagePadding(size);
     final vm = context.watch<HomeViewModel>();
-    final kullanici = context.watch<SessionManager>().user;
+    final kullanici = _kullanici(context);
+    final rutbe = vm.rank;
+    final seri = vm.winStreak;
 
-    return SafeArea(
-      bottom: false,
-      child: ListView(
-        // Alt boşluk: alt sekme çubuğunun ve ortadaki maç butonunun
-        // altında içerik kalmasın
-        padding: EdgeInsets.fromLTRB(kenar, AppSpacing.lg, kenar, 110),
+    return RefHero(
+      crest: '🛡️',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _OyuncuSeridi(),
-          const SizedBox(height: AppSpacing.lg),
-          const _DevamEdenMac(),
-          ArenaHeroPanel(
-            user: kullanici,
-            rank: vm.rank,
-            winStreak: vm.winStreak,
-            isStreakCapped: vm.isStreakCapped,
+          // <span class="pill">🏆 ALTIN LİG III</span> — gerçek lig
+          RefPill(rutbe == null ? 'LİG YÜKLENİYOR' : rutbe.label.toUpperTr(), emoji: '🏆'),
+          // h2 { font-size:36px; line-height:.94; margin:13px 0 5px;
+          //   text-shadow:0 3px 18px #0009 }
+          const SizedBox(height: 13),
+          Text(
+            'ARENA\nSENİ BEKLİYOR',
+            style: Ref.heading(RefHero.isNarrow(context) ? 32 : 36, height: 0.94).copyWith(
+              shadows: const [Shadow(color: Color(0x99000000), offset: Offset(0, 3), blurRadius: 18)],
+            ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          const HomeShortcutGrid(columns: 2),
-          const SizedBox(height: AppSpacing.xl),
-          RecentMatchesPanel(
-            matches: vm.recentMatches,
-            isLoaded: vm.isLoaded,
+          const SizedBox(height: 5),
+          Text('Kartlarını hazırla. Taktiklerini konuştur.', style: Ref.bodyText(12, color: Ref.muted)),
+          // .row { margin:18px 0 14px }
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 9,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text.rich(
+                TextSpan(children: [
+                  const WidgetSpan(alignment: PlaceholderAlignment.middle, child: Em('🏆', size: 27)),
+                  TextSpan(text: ' ${trThousands(kullanici?.mmr ?? 0)}'),
+                ]),
+                style: Ref.heading(27, color: Ref.gold, height: 1.2),
+                semanticsLabel: '${kullanici?.mmr ?? 0} puan',
+              ),
+              if (seri > 0)
+                RefPill('${vm.isStreakCapped ? '$seri+' : '$seri'} galibiyet serisi', emoji: '🔥'),
+            ],
           ),
-          const SizedBox(height: AppSpacing.xl),
-          const HomeSectionHeader(title: 'Yakında'),
-          const SizedBox(height: AppSpacing.sm),
-          const ComingSoonPanel(),
+          const SizedBox(height: 14),
+          RefCta(
+            'MAÇA BAŞLA',
+            leading: RefGlyph.swords,
+            trailing: RefGlyph.play,
+            onTap: () => context.go(AppRoutes.matchmaking),
+          ),
         ],
       ),
     );
@@ -137,285 +212,171 @@ class _DarYerlesim extends StatelessWidget {
 }
 
 // ====================================================================
-// MASAÜSTÜ
+// .tilegrid { grid-template-columns:repeat(3,1fr); gap:8px }
 // ====================================================================
-class _GenisYerlesim extends StatelessWidget {
-  final ScreenSize size;
-
-  const _GenisYerlesim({required this.size});
+class _Karolar extends StatelessWidget {
+  const _Karolar();
 
   @override
   Widget build(BuildContext context) {
-    final kenar = AppBreakpoints.pagePadding(size);
     final vm = context.watch<HomeViewModel>();
-    final kullanici = context.watch<SessionManager>().user;
+    final kadro = vm.activeDeckCardCount;
+    final kart = vm.inventoryCount;
+    final karolar = [
+      RefTile(
+        emoji: '♟️',
+        title: 'KADROM',
+        subtitle: kadro == null ? '4-4-2' : '$kadro / ${GameRules.squadSize}',
+        onTap: () => context.go(AppRoutes.deck),
+      ),
+      RefTile(
+        emoji: '🃏',
+        title: 'KARTLARIM',
+        subtitle: kart == null ? 'Koleksiyon' : '$kart kart',
+        onTap: () => context.go(AppRoutes.collection),
+      ),
+      RefTile(
+        emoji: '🎁',
+        title: 'PAKETLER',
+        subtitle: 'Mağaza',
+        onTap: () => context.go(AppRoutes.store),
+      ),
+    ];
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < karolar.length; i++) ...[
+            if (i > 0) const SizedBox(width: 8),
+            Expanded(child: karolar[i]),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
-    return SafeArea(
-      child: ContentWidth(
-        child: ListView(
-          padding: EdgeInsets.fromLTRB(kenar, AppSpacing.xxxl, kenar, 40),
-          children: [
-            const _MasaustuBasligi(),
-            const SizedBox(height: AppSpacing.xxl),
-            const _DevamEdenMac(),
-            // Arena solda geniş, son maçlar sağda dar. 3:2 oranı hangi
-            // öğenin asıl olduğunu tek bakışta anlatıyor.
+// ====================================================================
+// GÜNLÜK GÖREVLER — sunucuda günlük görev YOK
+// ====================================================================
+class _Gorevler extends StatelessWidget {
+  const _Gorevler();
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          RefSectionHead('GÜNLÜK GÖREVLER', trailing: Text('YAKINDA', style: Ref.tiny(Ref.accent))),
+          const SizedBox(height: Ref.pageGap),
+          RefCardPanel(children: [
+            // .task { gap:10px } .em 23px, strong 11px, small muted
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Em('🎯', size: 23),
+                const SizedBox(width: 10),
                 Expanded(
-                  flex: 3,
-                  child: Column(
-                    children: [
-                      ArenaHeroPanel(
-                        user: kullanici,
-                        rank: vm.rank,
-                        winStreak: vm.winStreak,
-                        isStreakCapped: vm.isStreakCapped,
-                        large: true,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      HomeShortcutGrid(
-                        columns: AppBreakpoints.gridColumns(size),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.xl),
-                Expanded(
-                  flex: 2,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RecentMatchesPanel(
-                        matches: vm.recentMatches,
-                        isLoaded: vm.isLoaded,
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      const HomeSectionHeader(title: 'Yakında'),
-                      const SizedBox(height: AppSpacing.sm),
-                      const ComingSoonPanel(),
+                      Text('Günlük görevler yakında', style: Ref.bodyText(11, weight: FontWeight.w700)),
+                      Text('Şimdilik kart görevleri açık: kartlarını birleştir, ödül kazan.',
+                          style: Ref.bodyText(10, color: Ref.muted)),
                     ],
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
+            RefSecondaryButton('KART GÖREVLERİNE GİT', trailing: RefGlyph.arrowRight, onTap: () => context.go(AppRoutes.sbc)),
+          ]),
+        ],
+      );
 }
 
 // ====================================================================
-// ÜST ŞERİTLER
+// LİG İLERLEMESİ — referans "SEZON ÖDÜLÜ" bloğu, gerçek lig verisiyle
 // ====================================================================
-
-/// Telefon üst şeridi: avatar, ad, coin ve kupa hapları.
-class _OyuncuSeridi extends StatelessWidget {
-  const _OyuncuSeridi();
+class _LigIlerlemesi extends StatelessWidget {
+  const _LigIlerlemesi();
 
   @override
   Widget build(BuildContext context) {
-    final kullanici = context.watch<SessionManager>().user;
-
-    return Row(
+    final r = context.watch<HomeViewModel>().rank;
+    final String alt;
+    if (r == null) {
+      alt = 'Yükleniyor';
+    } else if (r.isTopTier || r.nextLabel == null) {
+      alt = 'En üst ligdesin';
+    } else {
+      alt = '${r.pointsToNext} puan sonra ${r.nextLabel}';
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _Avatar(username: kullanici?.username),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        RefSectionHead('LİG İLERLEMESİ', trailing: r == null ? null : RefPill(r.label.toUpperTr())),
+        const SizedBox(height: Ref.pageGap),
+        RefCardPanel(children: [
+          Row(
             children: [
-              Text(
-                kullanici?.username ?? 'Oyuncu',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.name,
-              ),
-              const SizedBox(height: AppSpacing.xxs),
-              _MacOzeti(user: kullanici),
-            ],
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        StatChip.coins(
-          kullanici?.coins ?? 0,
-          onTap: () => context.go(AppRoutes.store),
-        ),
-      ],
-    );
-  }
-}
-
-/// Masaüstü başlığı: karşılama ve sayaç hapları.
-class _MasaustuBasligi extends StatelessWidget {
-  const _MasaustuBasligi();
-
-  @override
-  Widget build(BuildContext context) {
-    final session = context.watch<SessionManager>();
-    final kullanici = session.user;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Hoş geldin, ${kullanici?.username ?? 'Oyuncu'}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.display(
-                  size: 36,
-                  weight: FontWeight.w900,
-                  height: 1.0,
-                  letterSpacing: 0.5,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(r == null ? 'LİG' : '${r.leagueName.toUpperTr()} LİGİ',
+                        style: Ref.bodyText(14, color: Ref.gold, weight: FontWeight.w700)),
+                    Text(alt, style: Ref.tiny(Ref.muted)),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xs),
-              _MacOzeti(user: kullanici, dense: false),
+              const Em('🏆', size: 31),
             ],
           ),
-        ),
-        StatChip.coins(
-          kullanici?.coins ?? 0,
-          onTap: () => context.go(AppRoutes.store),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        StatChip.protection(
-          session.protectionSlots,
-          GameRules.maxProtectionSlots,
-        ),
+          RefBar(r == null ? 0 : (r.isTopTier ? 1 : r.progress)),
+          RefSecondaryButton('LİG YOLUNU GÖR', trailing: RefGlyph.arrowRight, onTap: () => context.go(AppRoutes.leagueTiers)),
+        ]),
       ],
     );
   }
 }
 
-/// "12 galibiyet · 4 mağlubiyet · 2 beraberlik"
-class _MacOzeti extends StatelessWidget {
-  final UserModel? user;
-  final bool dense;
-
-  const _MacOzeti({required this.user, this.dense = true});
-
-  @override
-  Widget build(BuildContext context) {
-    final g = user?.wins ?? 0;
-    final m = user?.losses ?? 0;
-    final b = user?.draws ?? 0;
-
-    final metin = g + m + b == 0
-        ? 'Henüz maç oynamadın'
-        : '$g galibiyet · $m mağlubiyet · $b beraberlik';
-
-    return Text(
-      metin,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: AppTypography.body(
-        size: dense ? 12 : 14,
-        color: AppColors.textSecondary,
-      ),
-    );
-  }
-}
-
-class _Avatar extends StatelessWidget {
-  final String? username;
-
-  const _Avatar({this.username});
-
-  @override
-  Widget build(BuildContext context) {
-    final harf = (username?.trim().isNotEmpty ?? false)
-        ? username!.trim()[0].toUpperTr()
-        : '?';
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      onTap: () => context.go(AppRoutes.profile),
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.primary, AppColors.primaryDark],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          boxShadow: AppShadows.glow(AppColors.primary, siddet: 0.6),
-        ),
-        child: Center(
-          child: Text(
-            harf,
-            style: AppTypography.display(
-              size: 20,
-              weight: FontWeight.w900,
-              color: AppColors.onPrimary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 // ====================================================================
-// DEVAM EDEN MAÇ UYARISI
+// Devam eden maç (oyunda gerçek; referansta yok)
 // ====================================================================
 class _DevamEdenMac extends StatelessWidget {
   const _DevamEdenMac();
 
   @override
   Widget build(BuildContext context) {
-    final macId = context.watch<AuthViewModel>().activeMatchId;
+    String? macId;
+    try {
+      macId = context.watch<AuthViewModel>().activeMatchId;
+    } on ProviderNotFoundException {
+      macId = null;
+    }
     if (macId == null) return const SizedBox.shrink();
-
+    final id = macId;
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: GlassPanel(
-        accentColor: AppColors.warning,
-        glow: true,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        onTap: () => context.push(AppRoutes.matchWithId(macId)),
-        child: Row(
-          children: [
-            const Icon(Icons.sports_soccer, color: AppColors.warning, size: 22),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Devam eden maçın var',
-                    style: AppTypography.body(
-                      size: 13.5,
-                      weight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    'Sıra sende olabilir. Süren dolarsa hükmen yenik '
-                    'sayılırsın.',
-                    style: AppTypography.bodyXS,
-                  ),
-                ],
+      padding: const EdgeInsets.only(bottom: Ref.pageGap),
+      child: RefCardPanel(
+        onTap: () => context.push(AppRoutes.matchWithId(id)),
+        children: [
+          Row(
+            children: [
+              const Em('⚽', size: 23),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Devam eden maçın var', style: Ref.bodyText(11, weight: FontWeight.w700)),
+                    Text('Sıra sende olabilir. Süren dolarsa hükmen yenik sayılırsın.',
+                        style: Ref.bodyText(10, color: Ref.muted)),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            const Icon(
-              Icons.arrow_forward_rounded,
-              color: AppColors.warning,
-              size: 20,
-            ),
-          ],
-        ),
+            ],
+          ),
+          RefSecondaryButton('MAÇA DÖN', trailing: RefGlyph.arrowRight, onTap: () => context.push(AppRoutes.matchWithId(id))),
+        ],
       ),
     );
   }

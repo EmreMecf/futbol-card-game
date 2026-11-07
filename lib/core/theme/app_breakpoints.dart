@@ -42,7 +42,7 @@ class AppBreakpoints {
   static const double maxContentWidth = 1320;
 
   /// Masaustu kenar cubugu genisligi
-  static const double sidebarWidth = 248;
+  static const double sidebarWidth = 228; // referans .shell 228px
 
   static ScreenSize of(BuildContext context) =>
       fromWidth(MediaQuery.sizeOf(context).width);

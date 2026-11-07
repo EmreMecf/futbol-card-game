@@ -58,8 +58,8 @@ void main() {
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
       expect(scaffold.bottomNavigationBar, isNull);
 
-      // Kenar çubuğundaki logo yazısı görünmeli
-      expect(find.text('FUTBOL\nKART'), findsOneWidget);
+      // Kenar çubuğundaki referans marka yazısı (.brandname) görünmeli
+      expect(find.textContaining('CARD ARENA', findRichText: true), findsOneWidget);
     });
 
     testWidgets('tablette alt çubuk kullanılır', (tester) async {
@@ -86,7 +86,8 @@ void main() {
 
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
       expect(scaffold.bottomNavigationBar, isNull);
-      expect(find.text('FUTBOL\nKART'), findsNothing);
+      expect(find.textContaining('CARD ARENA', findRichText: true), findsNothing);
+      expect(find.byType(RefBottomNav), findsNothing);
     });
   });
 
@@ -160,14 +161,8 @@ void main() {
         sar(kabuk(rota: AppRoutes.collection), ekran: const Size(1440, 900)),
       );
 
-      // Etkin maddede kenarlık var; kenarlıklı madde sayısı tam 1 olmalı.
-      final kenarlikli = find.byWidgetPredicate((w) =>
-          w is Container &&
-          w.decoration is BoxDecoration &&
-          (w.decoration as BoxDecoration).border != null &&
-          w.constraints?.maxHeight == 46);
-
-      expect(kenarlikli, findsOneWidget);
+      // Referans .navbtn.active: tam olarak bir madde etkin
+      expect(find.byKey(const ValueKey('kenar-etkin')), findsOneWidget);
     });
   });
 

@@ -1,102 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/auth/session_manager.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/theme/app_breakpoints.dart';
-import '../../core/theme/app_typography.dart';
+import '../../core/theme/ref_tokens.dart';
+import 'ref/ref_ui.dart';
 
 /// Ana gezinme hedefi.
 class NavDestination {
   final String label;
-  final IconData icon;
+
+  /// Referanstaki sembol (⌂ ▣ ♟ ⚔ ▤)
+  final RefGlyph glyph;
+
+  /// Masaüstü kenar çubuğundaki emoji/sembol (referans .navbtn .ico)
+  final String sideIcon;
   final String route;
 
-  /// Sadece masaüstü kenar çubuğunda görünür.
-  ///
-  /// Telefonda alt çubuk 5 maddeyi geçmemeli; fazlası dokunma
-  /// hedeflerini 44px'in altına düşürür.
+  /// Sadece masaüstü kenar çubuğunda görünür (telefonda 5 madde sınırı)
   final bool sidebarOnly;
 
   const NavDestination({
     required this.label,
-    required this.icon,
+    required this.glyph,
+    required this.sideIcon,
     required this.route,
     this.sidebarOnly = false,
   });
 }
 
+/// Referans .bottom-nav sırası: Ana Sayfa, Kartlar, Kadrom, Arena, Mağaza.
+/// Profil telefonda üst başlıktaki ☻ düğmesinden açılır (referanstaki gibi).
 const kNavDestinations = <NavDestination>[
+  NavDestination(label: 'Ana Sayfa', glyph: RefGlyph.home, sideIcon: '⌂', route: AppRoutes.home),
+  NavDestination(label: 'Kartlar', glyph: RefGlyph.cards, sideIcon: '▣', route: AppRoutes.collection),
+  NavDestination(label: 'Kadrom', glyph: RefGlyph.pawn, sideIcon: '♟', route: AppRoutes.deck),
+  NavDestination(label: 'Arena', glyph: RefGlyph.swords, sideIcon: '⚔', route: AppRoutes.matchmaking),
+  NavDestination(label: 'Mağaza', glyph: RefGlyph.shop, sideIcon: '▤', route: AppRoutes.store),
   NavDestination(
-    label: 'Ana Sayfa',
-    icon: Icons.home_rounded,
-    route: AppRoutes.home,
-  ),
-  NavDestination(
-    label: 'Kadrom',
-    icon: Icons.grid_view_rounded,
-    route: AppRoutes.deck,
-  ),
-  NavDestination(
-    label: 'Maç',
-    icon: Icons.sports_soccer_rounded,
-    route: AppRoutes.matchmaking,
-  ),
-  NavDestination(
-    label: 'Mağaza',
-    icon: Icons.storefront_rounded,
-    route: AppRoutes.store,
-  ),
-  NavDestination(
-    label: 'Profil',
-    icon: Icons.person_rounded,
-    route: AppRoutes.profile,
-  ),
-  NavDestination(
-    label: 'Koleksiyon',
-    icon: Icons.style_rounded,
-    route: AppRoutes.collection,
-    sidebarOnly: true,
-  ),
-  NavDestination(
-    label: 'Görevler',
-    icon: Icons.checklist_rounded,
-    route: AppRoutes.sbc,
-    sidebarOnly: true,
-  ),
-  NavDestination(
-    label: 'Liderlik',
-    icon: Icons.emoji_events_rounded,
-    route: AppRoutes.leaderboard,
-    sidebarOnly: true,
-  ),
+      label: 'Ligler / Sıralama', glyph: RefGlyph.sparkle, sideIcon: '♛', route: AppRoutes.leaderboard, sidebarOnly: true),
+  NavDestination(label: 'Görevler', glyph: RefGlyph.sparkle, sideIcon: '✓', route: AppRoutes.sbc, sidebarOnly: true),
+  NavDestination(label: 'Profil', glyph: RefGlyph.smile, sideIcon: '♙', route: AppRoutes.profile, sidebarOnly: true),
 ];
 
-/// Ana ekranların ortak çerçevesi.
+/// Ana ekranların ortak çerçevesi — referans telefon kabuğu.
 ///
-/// ===================================================================
-/// TEK WIDGET, İKİ YERLEŞİM
-/// ===================================================================
-/// Telefonda ALT SEKME ÇUBUĞU çizilir: beş madde, ortadaki maç butonu
-/// yukarı taşar. Baş parmağın rahat ulaştığı bölge ekranın altıdır;
-/// en çok basılan buton oraya konulmalı.
+/// TELEFON / TABLET (referans .phone):
+///   .phone-header  logo + para birimi + profil düğmesi
+///   .screen        sayfa (dikey kaydırılır)
+///   .bottom-nav    5 eşit sütun, etkin madde yeşil zeminli
 ///
-/// Masaüstünde SOL KENAR ÇUBUĞU çizilir: alt çubuk 1440px genişlikte
-/// ekranın tamamına yayılıp absürt görünürdü. Kenar çubuğunda ayrıca
-/// telefona sığmayan Koleksiyon ve Görevler de yer buluyor.
-///
-/// Tablet ikisinin arasında: alt çubuk, ama geniş içerik.
+/// MASAÜSTÜ: referans tasarım stüdyosunun sol kenar çubuğu (.sidebar,
+/// .navbtn) + aynı üst başlık. Telefon çerçevesi ÇİZİLMEZ (kullanıcının
+/// kuralı: çerçeve sadece önizleme aracı).
 class AppShell extends StatelessWidget {
-  /// Şu an açık olan rota. Hangi maddenin vurgulanacağını belirler.
   final String currentRoute;
-
   final Widget child;
-
-  /// Üstte sabit duracak başlık şeridi (isteğe bağlı)
   final PreferredSizeWidget? appBar;
 
-  /// Gezinme çubuğu gizlensin mi?
-  /// İç ekranlarda (paket açılışı, maç) tam ekran gerekiyor.
+  /// İç ekranlarda (paket açılışı, maç) tam ekran gerekiyor
   final bool showNavigation;
 
   const AppShell({
@@ -112,19 +76,27 @@ class AppShell extends StatelessWidget {
     final boyut = AppBreakpoints.of(context);
 
     if (!showNavigation) {
-      return Scaffold(appBar: appBar, body: child);
+      return Scaffold(backgroundColor: Ref.phoneBg, appBar: appBar, body: child);
     }
+
+    final govde = Column(
+      children: [
+        ?appBar,
+        Expanded(child: child),
+      ],
+    );
 
     if (boyut.usesSidebar) {
       return Scaffold(
+        backgroundColor: Ref.workspaceBg,
         body: Row(
           children: [
-            _KenarCubugu(currentRoute: currentRoute),
+            RefSidebar(currentRoute: currentRoute),
             Expanded(
               child: Column(
                 children: [
-                  ?appBar,
-                  Expanded(child: child),
+                  RefPhoneHeader(currentRoute: currentRoute, showLogo: false),
+                  Expanded(child: govde),
                 ],
               ),
             ),
@@ -134,153 +106,104 @@ class AppShell extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: appBar,
-      // extendBody: alt çubuk yuvarlak ve kenarlardan boşluklu olduğu
-      // için arkasındaki içerik görünsün; kart listesi çubuğun altına
-      // doğru kayarken kesilmiş gibi durmasın.
-      extendBody: true,
-      body: child,
-      bottomNavigationBar: _AltCubuk(currentRoute: currentRoute),
+      backgroundColor: Ref.phoneBg,
+      body: Column(
+        children: [
+          RefPhoneHeader(currentRoute: currentRoute),
+          Expanded(child: govde),
+        ],
+      ),
+      bottomNavigationBar: RefBottomNav(currentRoute: currentRoute),
     );
   }
 }
 
-// ====================================================================
-// MASAÜSTÜ: SOL KENAR ÇUBUĞU
-// ====================================================================
-class _KenarCubugu extends StatelessWidget {
-  final String currentRoute;
+/// Oturum yoksa (testler, giriş öncesi) null
+SessionManager? _oturum(BuildContext c) {
+  try {
+    return Provider.of<SessionManager>(c);
+  } on ProviderNotFoundException {
+    return null;
+  }
+}
 
-  const _KenarCubugu({required this.currentRoute});
+// ====================================================================
+// .phone-header { padding:10px 15px; background:linear-gradient(#101f31,#0b1728) }
+// ====================================================================
+class RefPhoneHeader extends StatelessWidget {
+  final String currentRoute;
+  final bool showLogo;
+
+  const RefPhoneHeader({super.key, required this.currentRoute, this.showLogo = true});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: AppBreakpoints.sidebarWidth,
-      decoration: const BoxDecoration(
-        color: AppColors.sidebar,
-        border: Border(right: BorderSide(color: AppColors.surfaceLight)),
-      ),
+    final kullanici = _oturum(context)?.user;
+    return DecoratedBox(
+      decoration: const BoxDecoration(gradient: Ref.headerGradient),
       child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ---- LOGO ----
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.primary, AppColors.primaryDark],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(11),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.35),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: Row(
+            children: [
+              if (showLogo)
+                // .logo-small { font: italic 900 20px Barlow; line-height:1 }
+                Expanded(
+                  child: GestureDetector(
+                    onTap: currentRoute == AppRoutes.home ? null : () => context.go(AppRoutes.home),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Em('⚽', size: 20),
+                        const SizedBox(width: 5),
+                        Flexible(
+                          child: Text(
+                            'FUTBOL CARD',
+                            maxLines: 1,
+                            overflow: TextOverflow.clip,
+                            style: Ref.heading(20, weight: FontWeight.w900, height: 1)
+                                .copyWith(fontStyle: FontStyle.italic, letterSpacing: 0.3),
+                          ),
                         ),
                       ],
                     ),
-                    child: const Icon(
-                      Icons.sports_soccer,
-                      size: 20,
-                      color: AppColors.textPrimary,
-                    ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'FUTBOL\nKART',
-                      style: AppTypography.display(
-                        size: 18,
-                        weight: FontWeight.w900,
-                        letterSpacing: 1.0,
-                        height: 0.95,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // ---- MADDELER ----
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  for (final hedef in kNavDestinations)
-                    _KenarMaddesi(
-                      destination: hedef,
-                      isActive: currentRoute == hedef.route,
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _KenarMaddesi extends StatelessWidget {
-  final NavDestination destination;
-  final bool isActive;
-
-  const _KenarMaddesi({required this.destination, required this.isActive});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Material(
-        color: isActive
-            ? AppColors.primary.withValues(alpha: 0.14)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: isActive ? null : () => context.go(destination.route),
-          child: Container(
-            height: 46,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: isActive
-                  ? Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.35),
-                    )
-                  : null,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  destination.icon,
-                  size: 20,
-                  color: isActive ? AppColors.primary : AppColors.textSecondary,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    destination.label,
-                    style: AppTypography.body(
-                      size: 14,
-                      weight: isActive ? FontWeight.w800 : FontWeight.w700,
-                      color: isActive
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
+              if (!showLogo) const Spacer(),
+              // .currencies { gap:5px }
+              Semantics(
+                label: 'Altın: ${kullanici?.coins ?? 0}',
+                child: GestureDetector(
+                  onTap: () => context.go(AppRoutes.store),
+                  child: Container(
+                    // .currency { padding:5px 7px; border-radius:8px }
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Ref.currencyBg,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Ref.currencyBorder),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CoinGlyph(size: 11),
+                        const SizedBox(width: 4),
+                        Text(trThousands(kullanici?.coins ?? 0),
+                            style: Ref.bodyText(10, color: Ref.gold, weight: FontWeight.w900)),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 5),
+              RefNeutralButton(
+                padding: const EdgeInsets.all(5),
+                semanticLabel: 'Profil',
+                onTap: currentRoute == AppRoutes.profile ? null : () => context.go(AppRoutes.profile),
+                child: const RefGlyphIcon(RefGlyph.smile, size: 12, color: Ref.neutralText),
+              ),
+            ],
           ),
         ),
       ),
@@ -289,52 +212,31 @@ class _KenarMaddesi extends StatelessWidget {
 }
 
 // ====================================================================
-// TELEFON: ALT SEKME ÇUBUĞU
+// .bottom-nav { background:#091523; border-top:1px solid #334258;
+//   padding:7px 7px 11px; grid 5 sütun; gap:2px }
 // ====================================================================
-class _AltCubuk extends StatelessWidget {
+class RefBottomNav extends StatelessWidget {
   final String currentRoute;
-
-  const _AltCubuk({required this.currentRoute});
+  const RefBottomNav({super.key, required this.currentRoute});
 
   @override
   Widget build(BuildContext context) {
     final maddeler = kNavDestinations.where((h) => !h.sidebarOnly).toList();
-
-    // Ortadaki madde yükselen maç butonu olur.
-    final ortaIndex = maddeler.length ~/ 2;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+    return Container(
+      decoration: const BoxDecoration(
+        color: Ref.navBg,
+        border: Border(top: BorderSide(color: Ref.navBorder)),
+      ),
       child: SafeArea(
         top: false,
-        child: Container(
-          height: 68,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: AppColors.surfaceLight),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.35),
-                blurRadius: 30,
-                offset: const Offset(0, -8),
-              ),
-            ],
-          ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(7, 7, 7, 11),
           child: Row(
             children: [
-              for (var i = 0; i < maddeler.length; i++)
-                Expanded(
-                  child: i == ortaIndex
-                      ? _OrtaButon(
-                          destination: maddeler[i],
-                          isActive: currentRoute == maddeler[i].route,
-                        )
-                      : _AltMadde(
-                          destination: maddeler[i],
-                          isActive: currentRoute == maddeler[i].route,
-                        ),
-                ),
+              for (var i = 0; i < maddeler.length; i++) ...[
+                if (i > 0) const SizedBox(width: 2),
+                Expanded(child: _AltMadde(hedef: maddeler[i], etkin: currentRoute == maddeler[i].route)),
+              ],
             ],
           ),
         ),
@@ -344,95 +246,168 @@ class _AltCubuk extends StatelessWidget {
 }
 
 class _AltMadde extends StatelessWidget {
-  final NavDestination destination;
-  final bool isActive;
-
-  const _AltMadde({required this.destination, required this.isActive});
+  final NavDestination hedef;
+  final bool etkin;
+  const _AltMadde({required this.hedef, required this.etkin});
 
   @override
   Widget build(BuildContext context) {
-    final renk = isActive ? AppColors.primary : AppColors.textSecondary;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: isActive ? null : () => context.go(destination.route),
-      // 68px yükseklik + eşit genişlik: dokunma hedefi 44px'in üzerinde.
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(destination.icon, size: 22, color: renk),
-          const SizedBox(height: 4),
-          Text(
-            destination.label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.body(
-              size: 10,
-              weight: isActive ? FontWeight.w800 : FontWeight.w700,
-              color: renk,
-            ),
+    // .bottom-nav button { border-radius:9px; color:#8194ad; padding:5px 1px;
+    //   gap:3px; font-size:9px; font-weight:800 } .navicon { font-size:19px }
+    // .current { background:#164539; color:#5ff5c3 }
+    final renk = etkin ? Ref.navCurrentText : Ref.navText;
+    return Semantics(
+      button: true,
+      selected: etkin,
+      label: hedef.label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: etkin ? null : () => context.go(hedef.route),
+        child: AnimatedContainer(
+          duration: Ref.cardHover,
+          padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 5),
+          decoration: BoxDecoration(
+            color: etkin ? Ref.navCurrentBg : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
           ),
-        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 26, child: Center(child: RefGlyphIcon(hedef.glyph, size: 19, color: renk))),
+              const SizedBox(height: 3),
+              Text(hedef.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textScaler: TextScaler.noScaling,
+                  style: Ref.bodyText(9, color: renk, weight: FontWeight.w800, height: 1.36)),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Ortadaki yükselen maç butonu.
-///
-/// Çubuğun dışına taştığı için [Stack] ile `clipBehavior: Clip.none`
-/// kullanılıyor; aksi halde taşan yarım daire kesilirdi.
-class _OrtaButon extends StatelessWidget {
-  final NavDestination destination;
-  final bool isActive;
-
-  const _OrtaButon({required this.destination, required this.isActive});
+// ====================================================================
+// .sidebar { border-right:1px solid #28364c; background:linear-gradient(#0e192b,#080e19);
+//   padding:25px 15px; gap:20px } (masaüstü)
+// ====================================================================
+class RefSidebar extends StatelessWidget {
+  final String currentRoute;
+  const RefSidebar({super.key, required this.currentRoute});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: isActive ? null : () => context.go(destination.route),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            top: -22,
-            child: Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.background, width: 4),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.5),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
+    return Container(
+      width: AppBreakpoints.sidebarWidth,
+      decoration: const BoxDecoration(
+        gradient: Ref.sidebarGradient,
+        border: Border(right: BorderSide(color: Ref.sidebarBorder)),
+      ),
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(15, 25, 15, 25),
+          children: [
+            // .brandmark { padding:10px 9px 18px; gap:4px }
+            Padding(
+              padding: const EdgeInsets.fromLTRB(9, 10, 9, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Em('🏆', size: 36),
+                  const SizedBox(height: 4),
+                  Text.rich(
+                    TextSpan(children: [
+                      const TextSpan(text: 'FUTBOL\n'),
+                      TextSpan(text: 'CARD ARENA', style: Ref.heading(27, color: Ref.gold, weight: FontWeight.w900)),
+                    ]),
+                    style: Ref.heading(27, weight: FontWeight.w900, height: 0.94).copyWith(fontStyle: FontStyle.italic),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.sports_soccer,
-                size: 26,
-                color: AppColors.textPrimary,
-              ),
+            ),
+            const SizedBox(height: 20),
+            // .sectionlabel { font-size:10px; color:#6c829b; font-weight:900;
+            //   letter-spacing:.16em; padding:0 11px }
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 11),
+              child: Text('EKRANLAR',
+                  style: Ref.bodyText(10, color: Ref.sectionLabel, weight: FontWeight.w900)
+                      .copyWith(letterSpacing: 1.6)),
+            ),
+            const SizedBox(height: 20),
+            for (final h in kNavDestinations) ...[
+              _KenarMaddesi(hedef: h, etkin: currentRoute == h.route),
+              const SizedBox(height: 5),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _KenarMaddesi extends StatefulWidget {
+  final NavDestination hedef;
+  final bool etkin;
+  const _KenarMaddesi({required this.hedef, required this.etkin});
+
+  @override
+  State<_KenarMaddesi> createState() => _KenarMaddesiState();
+}
+
+class _KenarMaddesiState extends State<_KenarMaddesi> {
+  bool _uzerinde = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final etkin = widget.etkin;
+    // .navbtn { padding:11px 12px; border-radius:10px; font-size:12px;
+    //   font-weight:800; gap:11px; color:#adc0d7 } .ico { 17px; width:23px }
+    // :hover { background:#1e3046; color:white }
+    // .active { background:linear-gradient(90deg,#11604788,#12392f);
+    //   color:#9af7d7; border-color:#25e4ad77; box-shadow:0 0 18px #0fcf8f25 }
+    final renk = etkin ? Ref.sideNavActiveText : (_uzerinde ? Colors.white : Ref.sideNavText);
+    return MouseRegion(
+      onEnter: (_) => setState(() => _uzerinde = true),
+      onExit: (_) => setState(() => _uzerinde = false),
+      cursor: SystemMouseCursors.click,
+      child: Semantics(
+        button: true,
+        selected: etkin,
+        label: widget.hedef.label,
+        excludeSemantics: true,
+        child: GestureDetector(
+          onTap: etkin ? null : () => context.go(widget.hedef.route),
+          child: AnimatedContainer(
+            key: etkin ? const ValueKey('kenar-etkin') : null,
+            duration: Ref.cardHover,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            decoration: BoxDecoration(
+              gradient: etkin ? Ref.sideNavActive : null,
+              color: etkin ? null : (_uzerinde ? Ref.sideNavHover : Colors.transparent),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: etkin ? Ref.sideNavActiveBorder : Colors.transparent),
+              boxShadow: etkin ? const [BoxShadow(color: Color(0x250FCF8F), blurRadius: 18)] : null,
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 23,
+                  child: Center(child: RefGlyphIcon(widget.hedef.glyph, size: 17, color: renk)),
+                ),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Text(widget.hedef.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Ref.bodyText(12, color: renk, weight: FontWeight.w800)),
+                ),
+              ],
             ),
           ),
-          Positioned(
-            bottom: 10,
-            child: Text(
-              destination.label,
-              style: AppTypography.body(size: 10, weight: FontWeight.w800),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

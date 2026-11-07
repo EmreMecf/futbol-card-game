@@ -191,6 +191,7 @@ Future<void> configureDependencies() async {
       () => HomeViewModel(
         getIt<LeaderboardRepository>(),
         getIt<MatchRepository>(),
+        getIt<DeckRepository>(),
       ),
     )
     ..registerFactory<ProfileViewModel>(
