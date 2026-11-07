@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:futbol_card/shared/widgets/avatar2d/avatar_painter.dart';
 import 'package:futbol_card/shared/widgets/premium_card/premium_card.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -43,8 +44,11 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.byType(PremiumPlayerCard), findsOneWidget);
         expect(find.text('85'), findsOneWidget);
-        expect(find.text('TEST OYUNCU'), findsOneWidget);
-        expect(find.text('OS'), findsOneWidget, reason: 'Pozisyon rozeti');
+        // Referans kart: ad olduğu gibi, altında mevki kodu
+        expect(find.text('Test Oyuncu'), findsOneWidget);
+        expect(find.text('MID'), findsOneWidget, reason: 'Mevki');
+        // Karaktere özel 2D yüz (siluet değil)
+        expect(find.byType(AvatarPortrait), findsWidgets);
       });
     }
 
@@ -122,7 +126,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('gorsel yoksa siluet gosterilir, cokmez', (tester) async {
+    testWidgets('gorsel yoksa karaktere ozel yuz cizilir, cokmez', (tester) async {
       await tester.pumpWidget(
         sarmala(
           const PremiumPlayerCard(
@@ -139,8 +143,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(tester.takeException(), isNull);
-      expect(find.byIcon(Icons.person), findsOneWidget,
-          reason: 'Gorsel yuklenemeyince siluet gosterilmeli');
+      expect(find.byIcon(Icons.person), findsNothing, reason: 'Artik jenerik siluet yok');
+      expect(find.byType(AvatarPortrait), findsWidgets,
+          reason: 'Gorsel yoksa karttan uretilen 2D yuz');
     });
 
     testWidgets('cok kucuk boyutta da tasma olmaz', (tester) async {
@@ -182,7 +187,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.text('98'), findsOneWidget);
-      expect(find.text('PELE'), findsOneWidget);
+      expect(find.text('Pele'), findsOneWidget);
       expect(find.byIcon(Icons.shield), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -312,16 +317,15 @@ void main() {
       );
     }
 
-    testWidgets('genis kartta alti ozellik de gorunur', (tester) async {
+    testWidgets('referans kartta ozellik izgarasi YOK (detay penceresinde)', (tester) async {
+      // Referans .collectible kartı güç, mevki, yüz, ad ve nadirlik
+      // gösterir; özellikler kart detayındaki istatistik satırlarında.
       await tester.pumpWidget(sarmala(kart(genislik: 220, ozel: ozellikler)));
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(tester.takeException(), isNull);
-      for (final etiket in ['SUT', 'HIZ', 'DRP', 'HZL', 'DEF', 'FIZ']) {
-        expect(find.text(etiket), findsOneWidget, reason: '$etiket etiketi');
-      }
-      expect(find.text('88'), findsOneWidget, reason: 'Sut degeri');
-      expect(find.text('44'), findsOneWidget, reason: 'Defans degeri');
+      expect(find.text('SUT'), findsNothing);
+      expect(find.text('84'), findsOneWidget);
     });
 
     testWidgets('dar kartta ozellikler GIZLENIR', (tester) async {
@@ -368,7 +372,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 300));
 
         expect(tester.takeException(), isNull, reason: 'genislik $genislik');
-        expect(find.text('SUT'), findsOneWidget, reason: 'genislik $genislik');
+        expect(find.text('84'), findsOneWidget, reason: 'genislik $genislik');
       }
     });
 

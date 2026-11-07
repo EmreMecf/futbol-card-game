@@ -471,20 +471,28 @@ class AvatarBustPainter extends CustomPainter {
   final AvatarSpec spec;
   final MouthStyle? mouth;
 
-  const AvatarBustPainter(this.spec, {this.mouth});
+  /// true: baş ve omuz kadrajı (kartlarda yüz ana öğe olsun diye
+  /// 100 birimlik kutunun 8..92 x 10..94 bölümü gösterilir)
+  final bool headshot;
+
+  const AvatarBustPainter(this.spec, {this.mouth, this.headshot = false});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final k = math.min(size.width, size.height) / 100;
+    final pencere = headshot ? const Rect.fromLTWH(8, 10, 84, 84) : const Rect.fromLTWH(0, 0, 100, 100);
+    final k = math.min(size.width, size.height) / pencere.width;
     canvas.save();
-    canvas.translate((size.width - 100 * k) / 2, size.height - 100 * k);
+    canvas.translate((size.width - pencere.width * k) / 2, size.height - pencere.height * k);
     canvas.scale(k);
+    canvas.translate(-pencere.left, -pencere.top);
+    if (headshot) canvas.clipRect(pencere);
     AvatarDraw.bust(canvas, spec, mouth: mouth);
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(AvatarBustPainter old) => old.spec != spec || old.mouth != mouth;
+  bool shouldRepaint(AvatarBustPainter old) =>
+      old.spec != spec || old.mouth != mouth || old.headshot != headshot;
 }
 
 /// Kare kutuda göğüs portresi
@@ -493,10 +501,14 @@ class AvatarPortrait extends StatelessWidget {
   final double size;
   final MouthStyle? mouth;
 
-  const AvatarPortrait({super.key, required this.spec, this.size = 120, this.mouth});
+  /// Baş ve omuz kadrajı (kartlarda)
+  final bool headshot;
+
+  const AvatarPortrait({super.key, required this.spec, this.size = 120, this.mouth, this.headshot = false});
 
   @override
   Widget build(BuildContext context) => RepaintBoundary(
-        child: CustomPaint(size: Size.square(size), painter: AvatarBustPainter(spec, mouth: mouth)),
+        child: CustomPaint(
+            size: Size.square(size), painter: AvatarBustPainter(spec, mouth: mouth, headshot: headshot)),
       );
 }

@@ -8,6 +8,7 @@ import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/characters/data/character_repository.dart';
 import 'package:futbol_card/features/characters/presentation/character_preview_view.dart';
 import 'package:futbol_card/features/characters/presentation/character_preview_view_model.dart';
+import 'package:futbol_card/shared/widgets/avatar2d/avatar_painter.dart';
 import 'package:futbol_card/shared/widgets/premium_card/premium_card.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -105,8 +106,12 @@ void main() {
     expect(find.text('PROTOTİP'), findsOneWidget);
     // Ana kart + 5 seviye çerçevesi (+ çatışma sahnesinin kendi kartları)
     expect(find.byType(PremiumPlayerCard), findsAtLeastNWidgets(1 + CardTier.values.length));
-    expect(find.text('PORTRE YOK'), findsWidgets);
-    expect(find.text('Hızlı Kanat'), findsWidgets);
+    // Yeni kart sistemi: portre dosyası yoksa karakterin kendi 2D yüzü
+    // çizilir (siluet + "PORTRE YOK" yerine). Eksik varlıklar aşağıdaki
+    // listede yine açıkça "YOK" yazar.
+    expect(find.text('PORTRE YOK'), findsNothing);
+    expect(find.byType(AvatarPortrait), findsWidgets);
+    // (Oyun tarzı rozeti eski kartın parçasıydı; referans kartta yok)
     expect(find.textContaining('Kullanılan katman: 2.5B yedek'), findsOneWidget);
     expect(find.textContaining('Onaylı 3B varlık eksik'), findsOneWidget);
     expect(find.textContaining('Eksik animasyon klipleri (9)'), findsOneWidget);
@@ -131,9 +136,9 @@ void main() {
       ),
     ));
     expect(find.text('83'), findsOneWidget);
-    expect(find.text('KAELEN BRISVOY'), findsOneWidget);
-    expect(find.text('Hızlı Kanat'), findsOneWidget);
-    expect(find.text('PORTRE YOK'), findsOneWidget);
+    expect(find.text('Kaelen Brisvoy'), findsOneWidget);
+    expect(find.text('FWD'), findsOneWidget);
+    expect(find.byType(AvatarPortrait), findsWidgets);
   });
 
   testWidgets('eski kartlar etkilenmedi: rozet ve PORTRE YOK çıkmaz', (t) async {

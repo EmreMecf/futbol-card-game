@@ -280,6 +280,79 @@ class AvatarSpec {
     );
   }
 
+  /// Görünüş kaydı OLMAYAN kartlar için DETERMİNİSTİK yüz.
+  ///
+  /// [seed] kartın kalıcı kimliği (`cardId`): aynı futbolcu her
+  /// cihazda, her oturumda ve her ekranda aynı yüzle görünür. İki farklı
+  /// kart neredeyse her zaman farklı yüz alır (10 saç x 6 ten x 4 kafa x
+  /// 3 göz x 4 ağız x ... birleşimi). [kitSeed] (kulüp adı) aynı
+  /// kulübün oyuncularına aynı formayı giydirir.
+  ///
+  /// Gerçek bir kişiye benzetme AMACI YOKTUR: özellikler sadece kimlik
+  /// metninin özetinden (hash) seçilir.
+  factory AvatarSpec.generate(String seed, {String? kitSeed, int? shirtNumber}) {
+    int sec(int akis, int n) => _fnv1a('$seed#$akis') % n;
+    T agirlikli<T>(int akis, List<(T, int)> secenekler) {
+      final toplam = secenekler.fold(0, (a, e) => a + e.$2);
+      var x = sec(akis, toplam);
+      for (final (deger, agirlik) in secenekler) {
+        if (x < agirlik) return deger;
+        x -= agirlik;
+      }
+      return secenekler.last.$1;
+    }
+
+    const sacRenkleri = [
+      Color(0xFF16110F), Color(0xFF2B1D16), Color(0xFF4A2E1C), Color(0xFF6B4423),
+      Color(0xFFC0622B), Color(0xFFE8C26A), Color(0xFFB4441F), Color(0xFF9AA1A8),
+    ];
+    const gozRenkleri = [Color(0xFF3B2A20), Color(0xFF3E8F5A), Color(0xFF4A7FB5), Color(0xFF6B4423)];
+    final forma = _formalar[_fnv1a('kit:${kitSeed ?? seed}') % _formalar.length];
+
+    return AvatarSpec(
+      skin: SkinTone.values[sec(1, SkinTone.values.length)],
+      head: HeadShape.values[sec(2, HeadShape.values.length)],
+      hair: agirlikli(3, [
+        (HairStyle.crop, 14), (HairStyle.sidePart, 12), (HairStyle.buzz, 12), (HairStyle.curlyTop, 11),
+        (HairStyle.afro, 7), (HairStyle.mohawk, 5), (HairStyle.bun, 6), (HairStyle.bald, 5),
+        (HairStyle.longWavy, 7), (HairStyle.cornrows, 6),
+      ]),
+      hairColor: sacRenkleri[agirlikli(4, [(0, 22), (1, 22), (2, 16), (3, 12), (4, 6), (5, 8), (6, 6), (7, 3)])],
+      eyes: EyeStyle.values[sec(5, EyeStyle.values.length)],
+      eyeColor: gozRenkleri[sec(6, gozRenkleri.length)],
+      brows: BrowStyle.values[sec(7, BrowStyle.values.length)],
+      mouth: MouthStyle.values[sec(8, MouthStyle.values.length)],
+      facialHair: agirlikli(9, [
+        (FacialHair.none, 55), (FacialHair.stubble, 20), (FacialHair.beard, 15), (FacialHair.mustache, 10),
+      ]),
+      freckles: sec(10, 100) < 15,
+      headAccessory: agirlikli(11, [
+        (HeadAccessory.none, 70), (HeadAccessory.headband, 12), (HeadAccessory.earring, 10),
+        (HeadAccessory.eyeBlack, 8),
+      ]),
+      build: BodyBuild.values[sec(12, BodyBuild.values.length)],
+      jersey: forma.$1,
+      jerseyTrim: forma.$2,
+      shirtNumber: shirtNumber ?? (sec(13, 98) + 1),
+    );
+  }
+
+  /// Forma paleti (ana renk, şerit)
+  static const List<(Color, Color)> _formalar = [
+    (Color(0xFF2E6BD8), Color(0xFFFFFFFF)),
+    (Color(0xFFD6334A), Color(0xFFFFFFFF)),
+    (Color(0xFF1FB5A8), Color(0xFF0E2A47)),
+    (Color(0xFFF08A24), Color(0xFF14213D)),
+    (Color(0xFF8B5CF6), Color(0xFFF2E3C6)),
+    (Color(0xFF1B2230), Color(0xFFF2C94C)),
+    (Color(0xFFF7F3EE), Color(0xFFD6334A)),
+    (Color(0xFF2A8048), Color(0xFFFFFFFF)),
+    (Color(0xFFF2C94C), Color(0xFF1B2230)),
+    (Color(0xFF7A1F3D), Color(0xFF8FD3FF)),
+    (Color(0xFF0E2A47), Color(0xFFF08A24)),
+    (Color(0xFF5CE1F5), Color(0xFF0E2A47)),
+  ];
+
   @override
   bool operator ==(Object other) =>
       other is AvatarSpec && _mapEq(other.toJson(), toJson());

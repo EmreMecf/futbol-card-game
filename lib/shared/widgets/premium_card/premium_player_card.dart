@@ -1,28 +1,22 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../core/feedback/game_feedback.dart';
-import 'card_attributes_grid.dart';
-import 'card_frame_painter.dart';
-import 'card_tier_theme.dart';
-import 'card_tilt.dart';
-import 'holographic_shine.dart';
+import '../avatar2d/avatar_spec.dart';
+import '../avatar2d/concept_characters.dart';
+import '../ref_card/ref_player_card.dart';
 
-/// FIFA/EA FC Ultimate Team seviyesinde futbolcu karti.
+/// Uygulamanın oyuncu kartı — ARTIK referans tasarımın ortak kartıdır.
 ///
-/// KATMAN SIRASI (arkadan one):
-///   1. Dis isik (glow)          - seviyeye gore renkli golge
-///   2. Cerceve (CustomPaint)    - metalik degrade + pahli silue
-///   3. Oyuncu gorseli           - seffaf arka planli, paralaks kayar
-///   4. Bilgi katmani            - guc, pozisyon, isim, kulup
-///   5. Holografik parlama       - uzerinden gecen isik (Altin ve ustu)
-///   6. Yuzey yansimasi          - egilmeye gore kayan parlaklik
-///   7. Rozetler                 - koruma kalkani, kilit
+/// Bu sınıf geriye uyumluluk için duruyor: maç eli, kadro, paket ve
+/// koleksiyon onu `PremiumPlayerCard.fromInventory(...)` gibi çağırıyor.
+/// Çizimin TAMAMI [RefPlayerCard]'da (referans `.revealcard` oranı, 0.70'e
+/// yakın: 205 x 295). Eski FIFA tarzı çerçeve, eğilme ve holografik
+/// katmanlar kaldırıldı; yerine referanstaki koyu lacivert kart ve
+/// karaktere özel 2D yüz geldi.
 ///
-/// Tum bu yigin [CardTilt] icine sarilir; boylece dokunma veya
-/// jiroskop ile 3B egilir.
-class PremiumPlayerCard extends StatefulWidget {
+/// Görsel yoksa artık siluet ÇİZİLMEZ: kartın kalıcı kimliğinden
+/// deterministik bir 2D yüz üretilir ([AvatarSpec.generate]).
+class PremiumPlayerCard extends StatelessWidget {
   final String fullName;
   final CardPosition position;
   final CardTier tier;
@@ -31,48 +25,35 @@ class PremiumPlayerCard extends StatefulWidget {
   final String? nationality;
   final String? club;
 
-  /// SUT / HIZ / FIZIK / DEFANS / DRIBLING / HIZLANMA.
-  ///
-  /// Null ise ya da kart 150 pikselden darsa izgara cizilmez;
-  /// kucuk kartta alti sayi okunmaz hale gelir.
+  /// Eski arayüzden kalan alan; yeni kart özellik ızgarası çizmez
+  /// (referans kartında yok). Detay penceresi özellikleri ayrıca gösterir.
   final CardAttributes? attributes;
 
-  /// Kartin genisligi. Yukseklik oran ile hesaplanir (FIFA orani ~0.70).
   final double width;
-
-  /// Kart korumaya alindi mi? (kalkan rozeti gosterilir)
   final bool isProtected;
-
-  /// Kart baska bir macta kilitli mi? (soluk gosterilir)
   final bool isLocked;
-
-  /// Kart oynandi mi? (maç ekraninda gri gosterilir)
   final bool isPlayed;
-
-  /// Secili mi? (kadro kurarken)
   final bool isSelected;
+  final bool isFavorite;
 
-  /// Etkilesim acik mi?
-  ///
-  /// LISTE PERFORMANSI: Koleksiyon ekraninda yuzlerce kart olabilir.
-  /// Orada `interactive: false` verip egilme ve holografik animasyonu
-  /// kapatmak gerekir; yoksa her kart kendi AnimationController'ini
-  /// calistirir ve arayuz takilir.
+  /// Hareketli nadirlik ışıkları (listelerde kapalı tutulmalı)
   final bool interactive;
 
-  /// Jiroskop ile egilme (sadece tekil, buyuk gosterimlerde acilmali)
+  /// Eski arayüzden; yeni kartta jiroskop eğilmesi yok
   final bool useGyroscope;
-
   final VoidCallback? onTap;
 
-  /// Özgün karakterin oyun tarzı ("Hızlı Kanat"). Null ise rozet yok.
+  /// Özgün karakterin oyun tarzı (eski arayüzden; kart göstermiyor)
   final String? playstyleLabel;
 
-  /// Görsel yokken siluetin üstüne "PORTRE YOK" yazılsın mı?
-  ///
-  /// Özgün karakter kartlarında açık: portre henüz üretilmemişse bu
-  /// AÇIKÇA görünmeli; siluet tamamlanmış bir görsel gibi durmamalı.
+  /// Eski arayüzden; artık eksik portre yerine üretilmiş yüz çizilir
   final bool flagMissingPortrait;
+
+  /// Yüz kimliği. Null ise ad + mevki kullanılır.
+  final String? avatarSeed;
+
+  /// Hazır karakter tanımı (özgün karakterler)
+  final AvatarSpec? avatar;
 
   const PremiumPlayerCard({
     super.key,
@@ -89,19 +70,17 @@ class PremiumPlayerCard extends StatefulWidget {
     this.isLocked = false,
     this.isPlayed = false,
     this.isSelected = false,
+    this.isFavorite = false,
     this.interactive = true,
     this.useGyroscope = false,
     this.onTap,
     this.playstyleLabel,
     this.flagMissingPortrait = false,
+    this.avatarSeed,
+    this.avatar,
   });
 
   /// Özgün karakterden (025) ve Denge Motoru önerisinden kart.
-  ///
-  /// Kimlik [Character]'dan, oyun değerleri [CharacterCardProposal]'dan
-  /// gelir; ikisi ayrı tutulur (yapay zekâ güç belirleyemez).
-  /// [portraitUri] sunucunun onaylı portresi (`character_presentation`);
-  /// yoksa siluet + "PORTRE YOK".
   factory PremiumPlayerCard.fromCharacter(
     Character karakter,
     CharacterCardProposal oneri, {
@@ -125,19 +104,20 @@ class PremiumPlayerCard extends StatefulWidget {
       attributes: oneri.attributes,
       width: width,
       interactive: interactive,
-      useGyroscope: useGyroscope,
       onTap: onTap,
       playstyleLabel: karakter.playstyle.label,
-      flagMissingPortrait: true,
+      avatarSeed: karakter.slug,
+      avatar: resolveAvatar(karakter).$1,
     );
   }
 
-  /// Envanterdeki bir karttan olustur
+  /// Envanterdeki bir karttan
   factory PremiumPlayerCard.fromInventory(
     InventoryCard kart, {
     Key? key,
     double width = 200,
     bool isSelected = false,
+    bool isFavorite = false,
     bool interactive = true,
     bool useGyroscope = false,
     VoidCallback? onTap,
@@ -155,13 +135,14 @@ class PremiumPlayerCard extends StatefulWidget {
       width: width,
       isLocked: kart.isLocked,
       isSelected: isSelected,
+      isFavorite: isFavorite,
       interactive: interactive,
-      useGyroscope: useGyroscope,
       onTap: onTap,
+      avatarSeed: kart.cardId,
     );
   }
 
-  /// Mactaki elden bir karttan olustur
+  /// Maçtaki elden bir karttan
   factory PremiumPlayerCard.fromHand(
     HandCard kart, {
     Key? key,
@@ -184,595 +165,31 @@ class PremiumPlayerCard extends StatefulWidget {
       isPlayed: kart.isPlayed,
       interactive: interactive,
       onTap: onTap,
+      avatarSeed: kart.cardId,
     );
   }
 
-  @override
-  State<PremiumPlayerCard> createState() => _PremiumPlayerCardState();
-}
-
-class _PremiumPlayerCardState extends State<PremiumPlayerCard>
-    with SingleTickerProviderStateMixin {
-  late final CardTiltController _egim;
-
-  /// FIFA kartlarinin en/boy orani
-  static const double _enBoyOrani = 0.70;
+  /// Kartın en/boy oranı (referans .revealcard 205 x 295)
+  static double get aspectRatio => RefCardLayout.reveal.aspectRatio;
 
   @override
-  void initState() {
-    super.initState();
-    _egim = CardTiltController();
-
-    if (_efektler && widget.useGyroscope) {
-      _egim.enableGyroscope();
-    }
-  }
-
-  @override
-  void dispose() {
-    _egim.dispose();
-    super.dispose();
-  }
-
-  double get _yukseklik => widget.width / _enBoyOrani;
-
-  /// Eğilme, holografik parlama ve dönen çerçeve açık mı?
-  ///
-  /// İki şartın İKİSİ de gerekiyor:
-  ///   1. Çağıran taraf istemiş olmalı (`interactive: true`),
-  ///   2. Oyuncu ayarlardan "Kart animasyonları"nı kapatmamış olmalı.
-  ///
-  /// Kapalıyken dokunma (onTap) çalışmaya devam ediyor; sadece görsel
-  /// efektler duruyor. Bkz. [GameFeedback.cardAnimationsEnabled].
-  bool get _efektler =>
-      widget.interactive && GameFeedback.cardAnimationsEnabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final tema = CardTierTheme.of(widget.tier);
-    final boyut = Size(widget.width, _yukseklik);
-
-    Widget kart = _kartYigini(tema, boyut);
-
-    // Egilme sadece etkilesimli modda
-    if (_efektler) {
-      kart = CardTilt(controller: _egim, child: kart);
-
-      kart = GestureDetector(
-        onTap: widget.onTap,
-        onPanStart: (d) => _egim.updateFromPointer(d.localPosition, boyut),
-        onPanUpdate: (d) => _egim.updateFromPointer(d.localPosition, boyut),
-        onPanEnd: (_) => _egim.reset(vsync: this),
-        onPanCancel: () => _egim.reset(vsync: this),
-        child: kart,
+  Widget build(BuildContext context) => RefPlayerCard(
+        name: fullName,
+        position: position,
+        tier: tier,
+        power: power,
+        seed: avatarSeed ?? '$fullName|${position.code}',
+        kitSeed: club ?? nationality,
+        spec: avatar,
+        imageUrl: imageUrl,
+        width: width,
+        layout: RefCardLayout.reveal,
+        isFavorite: isFavorite,
+        isProtected: isProtected,
+        isLocked: isLocked,
+        isPlayed: isPlayed,
+        isSelected: isSelected,
+        animate: interactive,
+        onTap: onTap,
       );
-    } else if (widget.onTap != null) {
-      kart = GestureDetector(onTap: widget.onTap, child: kart);
-    }
-
-    // RepaintBoundary: kartin kendi cizim katmani olur. Egilme
-    // animasyonu ekranin geri kalanini yeniden cizmeye zorlamaz.
-    return RepaintBoundary(child: kart);
-  }
-
-  // ==================================================================
-  // KATMANLARIN BIRLESIMI
-  // ==================================================================
-  Widget _kartYigini(CardTierTheme tema, Size boyut) {
-    final soluk = widget.isLocked || widget.isPlayed;
-
-    return AnimatedBorderGlow(
-      theme: tema,
-      enabled: _efektler,
-      builder: (context, aci) {
-        return SizedBox(
-          width: boyut.width,
-          height: boyut.height,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // ---- 1) DIS ISIK ----
-              _disIsik(tema),
-
-              // ---- 2) CERCEVE ----
-              CustomPaint(
-                painter: CardFramePainter(
-                  theme: tema,
-                  gradientRotation: aci,
-                  cornerRadius: boyut.width * 0.09,
-                  bevel: boyut.width * 0.13,
-                ),
-              ),
-
-              // ---- 3+4) GORSEL VE BILGILER (kart siluetine kirpilir) ----
-              ClipPath(
-                clipper: _KartSiluetiKirpici(
-                  cornerRadius: boyut.width * 0.09,
-                  bevel: boyut.width * 0.13,
-                ),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    _oyuncuGorseli(tema, boyut),
-                    _bilgiKatmani(tema, boyut),
-
-                    // ---- 5) HOLOGRAFIK PARLAMA ----
-                    HolographicShine(theme: tema, enabled: _efektler),
-
-                    // ---- 6) YUZEY YANSIMASI ----
-                    if (_efektler)
-                      SpecularHighlight(
-                        controller: _egim,
-                        color: tema.specularColor,
-                        borderRadius: BorderRadius.circular(boyut.width * 0.09),
-                      ),
-                  ],
-                ),
-              ),
-
-              // ---- 7) ROZETLER ----
-              if (widget.isProtected) _korumaRozeti(boyut),
-              if (widget.isLocked) _kilitRozeti(boyut),
-
-              // ---- SOLUKLASTIRMA ----
-              if (soluk)
-                IgnorePointer(
-                  child: ClipPath(
-                    clipper: _KartSiluetiKirpici(
-                      cornerRadius: boyut.width * 0.09,
-                      bevel: boyut.width * 0.13,
-                    ),
-                    child: ColoredBox(
-                      color: Colors.black.withValues(alpha: 0.55),
-                    ),
-                  ),
-                ),
-
-              // ---- SECIM CERCEVESI ----
-              if (widget.isSelected) _secimCercevesi(boyut),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // ==================================================================
-  // 1) DIS ISIK
-  // ==================================================================
-  Widget _disIsik(CardTierTheme tema) {
-    return IgnorePointer(
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: tema.glowColor,
-              blurRadius: tema.glowRadius,
-              spreadRadius: tema.glowRadius * 0.15,
-            ),
-            // Zemine oturma golgesi
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.45),
-              blurRadius: 14,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ==================================================================
-  // 3) OYUNCU GORSELI
-  // ==================================================================
-  // PARALAKS: Gorsel, egilmenin TERSI yonde hafifce kayar. Bu, oyuncunun
-  // cercevenin arkasinda derinlikte durdugu hissini verir - kartin
-  // "duz bir resim" degil, katmanli bir nesne gibi gorunmesini saglar.
-  Widget _oyuncuGorseli(CardTierTheme tema, Size boyut) {
-    final gorsel = _gorselWidget(tema, boyut);
-
-    if (!_efektler) {
-      return Align(
-        alignment: Alignment.topCenter,
-        child: Padding(
-          padding: EdgeInsets.only(top: boyut.height * 0.10),
-          child: gorsel,
-        ),
-      );
-    }
-
-    return AnimatedBuilder(
-      animation: _egim,
-      child: gorsel,
-      builder: (context, cachedChild) {
-        final egim = _egim.value;
-        return Align(
-          alignment: Alignment.topCenter,
-          child: Padding(
-            padding: EdgeInsets.only(top: boyut.height * 0.10),
-            child: Transform.translate(
-              offset: Offset(-egim.dx * 8, -egim.dy * 6),
-              child: cachedChild,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  /// Gorseli yukler; yoksa ya da yuklenemezse siluet gosterir.
-  ///
-  /// NOT: Kart gorselleri yapay zeka ile uretilmis 3D Pixar tarzi,
-  /// ARKA PLANI SEFFAF (PNG) karakterler olacak. Seffaf olmasi sart;
-  /// aksi halde gorselin dikdortgen kenari cercevenin uzerinde
-  /// gorunur ve kartin butunlugu bozulur.
-  Widget _gorselWidget(CardTierTheme tema, Size boyut) {
-    final yol = widget.imageUrl;
-    final gorselYuksekligi = boyut.height * 0.52;
-
-    if (yol == null || yol.isEmpty) {
-      return _siluet(tema, gorselYuksekligi);
-    }
-
-    if (yol.startsWith('http://') || yol.startsWith('https://')) {
-      return CachedNetworkImage(
-        imageUrl: yol,
-        height: gorselYuksekligi,
-        fit: BoxFit.contain,
-        fadeInDuration: const Duration(milliseconds: 250),
-        placeholder: (_, _) => _siluet(tema, gorselYuksekligi),
-        errorWidget: (_, _, _) => _siluet(tema, gorselYuksekligi),
-      );
-    }
-
-    if (yol.startsWith('assets/')) {
-      return Image.asset(
-        yol,
-        height: gorselYuksekligi,
-        fit: BoxFit.contain,
-        errorBuilder: (_, _, _) => _siluet(tema, gorselYuksekligi),
-      );
-    }
-
-    // Sunucudan gelen goreli yol (ornek: 'cards/mid_legend_1.png').
-    // Gercek gorseller hazirlanana kadar siluet gosteriyoruz.
-    return _siluet(tema, gorselYuksekligi);
-  }
-
-  /// Gorsel yokken gosterilen stilize siluet.
-  /// Bos bir kutu yerine kartin kimligini koruyan bir yer tutucu.
-  Widget _siluet(CardTierTheme tema, double yukseklik) {
-    final siluet = SizedBox(
-      height: yukseklik,
-      child: ShaderMask(
-        blendMode: BlendMode.srcIn,
-        shaderCallback: (rect) => LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            tema.textColor.withValues(alpha: 0.35),
-            tema.textColor.withValues(alpha: 0.08),
-          ],
-        ).createShader(rect),
-        child: Icon(Icons.person, size: yukseklik, color: Colors.white),
-      ),
-    );
-    if (!widget.flagMissingPortrait) return siluet;
-
-    // Eksik görsel AÇIKÇA belirtilir (tamamlanmış gibi gösterilmez)
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        siluet,
-        Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: widget.width * 0.04,
-            vertical: widget.width * 0.012,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.55),
-            borderRadius: BorderRadius.circular(widget.width * 0.03),
-          ),
-          child: Text(
-            'PORTRE YOK',
-            style: TextStyle(
-              fontSize: widget.width * 0.052,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1,
-              color: tema.textColor.withValues(alpha: 0.85),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ==================================================================
-  // 4) BILGI KATMANI
-  // ==================================================================
-  Widget _bilgiKatmani(CardTierTheme tema, Size boyut) {
-    // Tum yazi boyutlari kart genisligine oranli. Boylece ayni widget
-    // hem 90 piksellik liste kucugunde hem 300 piksellik vitrinde
-    // dogru gorunur.
-    final olcek = boyut.width;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: olcek * 0.09,
-        vertical: olcek * 0.08,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ---- UST SOL: GUC VE POZISYON ----
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    '${widget.power}',
-                    style: TextStyle(
-                      fontSize: olcek * 0.20,
-                      height: 1.0,
-                      fontWeight: FontWeight.w900,
-                      color: tema.textColor,
-                      shadows: const [
-                        Shadow(color: Colors.black54, blurRadius: 4),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    widget.position.shortLabel,
-                    style: TextStyle(
-                      fontSize: olcek * 0.095,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.0,
-                      color: tema.mutedTextColor,
-                    ),
-                  ),
-                  SizedBox(height: olcek * 0.03),
-                  Container(
-                    width: olcek * 0.14,
-                    height: 1.5,
-                    color: tema.mutedTextColor.withValues(alpha: 0.5),
-                  ),
-                  SizedBox(height: olcek * 0.03),
-                  if (widget.nationality != null)
-                    Text(
-                      widget.nationality!,
-                      style: TextStyle(
-                        fontSize: olcek * 0.065,
-                        fontWeight: FontWeight.w600,
-                        color: tema.mutedTextColor,
-                      ),
-                    ),
-                ],
-              ),
-              // ---- UST SAG: OYUN TARZI (özgün karakter) ----
-              if (widget.playstyleLabel != null) ...[
-                const Spacer(),
-                Flexible(
-                  flex: 4,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: olcek * 0.035,
-                      vertical: olcek * 0.012,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(olcek * 0.04),
-                      border: Border.all(
-                        color: tema.mutedTextColor.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    child: Text(
-                      widget.playstyleLabel!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: olcek * 0.052,
-                        fontWeight: FontWeight.w800,
-                        color: tema.textColor,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-
-          const Spacer(),
-
-          // ---- ALT: ISIM VE KULUP ----
-          Center(
-            child: Column(
-              children: [
-                Container(
-                  height: 1,
-                  width: olcek * 0.55,
-                  color: tema.mutedTextColor.withValues(alpha: 0.35),
-                ),
-                SizedBox(height: olcek * 0.04),
-                // Uzun ad SIĞMAZSA küçülür (sığan adlar aynen kalır);
-                // eskiden "KAELEN BRISV..." diye kesiliyordu.
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    widget.fullName.toUpperCase(),
-                    maxLines: 1,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: olcek * 0.095,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
-                      color: tema.textColor,
-                      shadows: const [
-                        Shadow(color: Colors.black45, blurRadius: 3),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: olcek * 0.02),
-                Text(
-                  widget.club ?? widget.tier.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: olcek * 0.062,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.8,
-                    color: tema.mutedTextColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ---- OZELLIKLER (SUT / HIZ / DRP / HZL / DEF / FIZ) ----
-          if (_ozellikleriGoster) ...[
-            SizedBox(height: olcek * 0.05),
-            CardAttributesGrid(
-              attributes: widget.attributes!,
-              theme: tema,
-              scale: olcek,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  /// Ozellik izgarasi bu genisligin ALTINDA cizilmez.
-  ///
-  /// 150 piksel deneyerek bulundu: bunun altinda etiket yazilari
-  /// (0.058 x genislik) 8 pikselin altina duser ve telefonda
-  /// okunamaz hale gelir. Koleksiyon izgarasindaki kartlar bu esigin
-  /// altinda kaldigi icin liste sade kalmaya devam ediyor.
-  static const double _ozellikEsigi = 150;
-
-  bool get _ozellikleriGoster =>
-      widget.width >= _ozellikEsigi && (widget.attributes?.isNotEmpty ?? false);
-
-  // ==================================================================
-  // 7) ROZETLER
-  // ==================================================================
-  Widget _korumaRozeti(Size boyut) {
-    return Positioned(
-      top: boyut.width * 0.06,
-      right: boyut.width * 0.06,
-      child: Tooltip(
-        message: 'Bu kart korumada. Maci kaybetsen bile senden alinmaz.',
-        child: Container(
-          padding: EdgeInsets.all(boyut.width * 0.035),
-          decoration: BoxDecoration(
-            color: const Color(0xFF29CC7A),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF29CC7A).withValues(alpha: 0.6),
-                blurRadius: 8,
-              ),
-            ],
-          ),
-          child: Icon(
-            Icons.shield,
-            size: boyut.width * 0.09,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _kilitRozeti(Size boyut) {
-    return Positioned(
-      top: boyut.width * 0.06,
-      left: boyut.width * 0.06,
-      child: Tooltip(
-        message: 'Bu kart devam eden bir macta kilitli.',
-        child: Icon(
-          Icons.lock,
-          size: boyut.width * 0.11,
-          color: Colors.white.withValues(alpha: 0.9),
-        ),
-      ),
-    );
-  }
-
-  Widget _secimCercevesi(Size boyut) {
-    return IgnorePointer(
-      child: CustomPaint(
-        painter: _SecimCercevesiRessami(
-          cornerRadius: boyut.width * 0.09,
-          bevel: boyut.width * 0.13,
-        ),
-      ),
-    );
-  }
-}
-
-// ====================================================================
-// YARDIMCI SINIFLAR
-// ====================================================================
-
-/// Icerigi kart siluetine kirpar
-class _KartSiluetiKirpici extends CustomClipper<Path> {
-  final double cornerRadius;
-  final double bevel;
-
-  const _KartSiluetiKirpici({required this.cornerRadius, required this.bevel});
-
-  @override
-  Path getClip(Size size) => CardFramePainter.buildCardPath(
-    size,
-    cornerRadius: cornerRadius,
-    bevel: bevel,
-  );
-
-  @override
-  bool shouldReclip(_KartSiluetiKirpici oldClipper) =>
-      oldClipper.cornerRadius != cornerRadius || oldClipper.bevel != bevel;
-}
-
-/// Kadro kurarken secili kartin etrafina cizilen parlak cerceve
-class _SecimCercevesiRessami extends CustomPainter {
-  final double cornerRadius;
-  final double bevel;
-
-  const _SecimCercevesiRessami({
-    required this.cornerRadius,
-    required this.bevel,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final yol = CardFramePainter.buildCardPath(
-      size,
-      cornerRadius: cornerRadius,
-      bevel: bevel,
-    );
-
-    canvas.drawPath(
-      yol,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3.5
-        ..color = const Color(0xFF29CC7A),
-    );
-
-    canvas.drawPath(
-      yol,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 8
-        ..color = const Color(0xFF29CC7A).withValues(alpha: 0.35)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_SecimCercevesiRessami oldDelegate) => false;
 }
