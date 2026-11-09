@@ -3,27 +3,26 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_breakpoints.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/app_shell.dart';
-import '../../../../shared/widgets/screen_header.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../viewmodel/leaderboard_view_model.dart';
-import '../widgets/rank_badge.dart';
 
-/// Liderlik tablosu.
+/// LİGLER / SIRALAMA — referans `leagues()` ekranı.
 ///
-/// ===================================================================
-/// SIRA SUNUCUDAN GELİYOR
-/// ===================================================================
-/// Ekran listeyi sayıp sıra numarası üretmiyor. İlk 50'yi çeken bir
-/// oyuncu 340. sırada olsaydı kendini bulamazdı; sunucu hem listeyi
-/// hem oyuncunun sırasını ayrı ayrı veriyor.
+///   .hero         ŞAMPİYONLUK YOLU, 🏆, lig + puan, ilerleme çubuğu
+///   LİG KADEMELERİ  rozet paneli
+///   LİDERLİK TABLOSU  .card-panel satırları (🥇🥈🥉 + ad + 🏆 puan)
+///   .secondary-button  ⚔ DERECELİ MAÇ OYNA
 ///
-/// Oyuncu listede yoksa altta sabit bir "sen buradasın" satırı
-/// çiziliyor: ekran hiçbir zaman "sıran belli değil" demiyor.
+/// GERÇEK VERİ: sıralama ve puanlar /api/leaderboard'dan, lig ve
+/// ilerleme /api/leaderboard/rank'tan. Oyunda 4 lig var (Amatör, Usta,
+/// Master, Master Class; her biri 3 basamak); referanstaki 5 örnek
+/// rozet yerine bu 4 gerçek lig gösterilir. Sezon sistemi olmadığı için
+/// "SEZON 01" yerine "LİG YOLU" yazar. Liste haftalık değil, genel.
 class LeaderboardView extends StatelessWidget {
   const LeaderboardView({super.key});
 
@@ -31,390 +30,256 @@ class LeaderboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<LeaderboardViewModel>(
       create: (_) => getIt<LeaderboardViewModel>()..initialize(),
-      child: const _LeaderboardBody(),
+      child: const AppShell(currentRoute: AppRoutes.leaderboard, child: _Govde()),
     );
   }
 }
 
-class _LeaderboardBody extends StatelessWidget {
-  const _LeaderboardBody();
+/// Gerçek liglerin rozetleri (sırayla)
+const kLigRozetleri = <(String, String, String)>[
+  ('amateur', '🛡️', 'Amatör'),
+  ('usta', '🥈', 'Usta'),
+  ('master', '🥇', 'Master'),
+  ('master_class', '👑', 'Master Class'),
+];
+
+class _Govde extends StatelessWidget {
+  const _Govde();
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<LeaderboardViewModel>();
-
-    return AppShell(
-      currentRoute: AppRoutes.leaderboard,
-      child: ResponsiveBuilder(
-        builder: (context, boyut) {
-          final kenar = AppBreakpoints.pagePadding(boyut);
-
-          return SafeArea(
-            bottom: false,
-            child: ContentWidth(
-              maxWidth: 820,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      kenar,
-                      boyut.usesSidebar ? 32 : 16,
-                      kenar,
-                      0,
-                    ),
-                    child: ScreenHeader(
-                      title: 'Liderlik',
-                      subtitle: 'Puana göre sıralama',
-                      actions: [_LiglerButonu()],
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Expanded(child: _icerik(context, vm, kenar, boyut)),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _icerik(
-    BuildContext context,
-    LeaderboardViewModel vm,
-    double kenar,
-    ScreenSize boyut,
-  ) {
-    if (vm.isBusy && vm.entries.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      );
-    }
-
-    if (vm.hasError && vm.entries.isEmpty) {
-      return _HataDurumu(viewModel: vm);
-    }
-
-    final rutbe = vm.myRank;
-
-    return RefreshIndicator(
-      color: AppColors.primary,
-      backgroundColor: AppColors.surface,
-      onRefresh: vm.refresh,
-      child: ListView(
-        padding: EdgeInsets.fromLTRB(
-          kenar,
-          0,
-          kenar,
-          boyut.usesSidebar ? 32 : 110,
-        ),
-        children: [
-          // ---- KENDİ RÜTBEN ----
-          if (rutbe != null) ...[
-            RankProgressCard(rank: rutbe, position: vm.myPosition),
-            const SizedBox(height: 22),
-          ],
-
-          const SectionTitle('Sıralama'),
-          const SizedBox(height: 10),
-
-          if (vm.entries.isEmpty)
-            const _BosTablo()
-          else
-            for (final kayit in vm.entries)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: _SiraSatiri(
-                  entry: kayit,
-                  isMe: kayit.userId == vm.myUserId,
-                ),
-              ),
-
-          // ---- LİSTEDE DEĞİLSEN ----
-          // Oyuncu ilk 50'de değilse kendi satırı altta ayrıca
-          // gösteriliyor. "Sıran 340" demek yerine satırı çizmek
-          // oyuncuya nerede olduğunu somut gösteriyor.
-          if (!vm.amIInList && vm.myPosition != null && rutbe != null) ...[
-            const SizedBox(height: 14),
-            const _Ayirac(),
-            const SizedBox(height: 14),
-            _SiraSatiri(
-              entry: LeaderboardEntry(
-                rankPosition: vm.myPosition!,
-                userId: vm.myUserId ?? '',
-                username: 'Sen',
-                mmr: rutbe.mmr,
-                leagueName: rutbe.leagueName,
-                division: rutbe.division,
-                color: rutbe.color,
-              ),
-              isMe: true,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// Başlıktaki "Ligler" butonu.
-///
-/// Oyuncu rütbesini gördüğü yerden "kaç lig var, en tepede ne var"
-/// sorusuna gidebilmeli. Ayrı bir gezinme maddesi açmak yerine
-/// liderlik ekranının içinden ulaşılıyor.
-class _LiglerButonu extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => context.push(AppRoutes.leagueTiers),
-        child: Container(
-          height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.surfaceLight),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.military_tech_rounded,
-                size: 17,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: 7),
-              Text(
-                'LİGLER',
-                style: AppTypography.display(
-                  size: 14,
-                  weight: FontWeight.w800,
-                  color: AppColors.textSecondary,
-                  letterSpacing: 0.6,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ====================================================================
-// SIRA SATIRI
-// ====================================================================
-class _SiraSatiri extends StatelessWidget {
-  final LeaderboardEntry entry;
-  final bool isMe;
-
-  const _SiraSatiri({required this.entry, required this.isMe});
-
-  @override
-  Widget build(BuildContext context) {
-    final renk = leagueColor(entry.color);
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
-      decoration: BoxDecoration(
-        // Kendi satırın vurgulu: uzun bir listede kendini aramak
-        // zorunda kalmıyorsun.
-        color: isMe
-            ? AppColors.primary.withValues(alpha: 0.12)
-            : AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isMe
-              ? AppColors.primary.withValues(alpha: 0.45)
-              : AppColors.surfaceLight,
-        ),
-      ),
-      child: Row(
-        children: [
-          SizedBox(width: 38, child: _Sira(entry: entry)),
-          const SizedBox(width: 6),
-          RankBadge.fromEntry(entry, size: 32),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entry.username,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.body(
-                    size: 13.5,
-                    weight: FontWeight.w800,
-                    color: isMe ? AppColors.primary : AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  '${entry.rankLabel} · ${entry.wins}G ${entry.losses}M',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodyXS,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${entry.mmr}',
-                style: AppTypography.display(
-                  size: 18,
-                  weight: FontWeight.w900,
-                  color: renk,
-                  height: 1.0,
-                ),
-              ),
-              Text('PUAN', style: AppTypography.label),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Sıra numarası. İlk üç madalya rengiyle çiziliyor.
-class _Sira extends StatelessWidget {
-  final LeaderboardEntry entry;
-
-  const _Sira({required this.entry});
-
-  @override
-  Widget build(BuildContext context) {
-    final madalya = entry.medal;
-
-    if (madalya == null) {
-      return Text(
-        '${entry.rankPosition}',
-        textAlign: TextAlign.center,
-        style: AppTypography.display(
-          size: 16,
-          weight: FontWeight.w800,
-          color: AppColors.textSecondary,
-        ),
-      );
-    }
-
-    // Madalya renkleri kart seviyelerinden farklı bir bağlamda:
-    // burada altın/gümüş/bronz "birincilik" demek, kart gücü değil.
-    final renk = switch (madalya) {
-      1 => const Color(0xFFFFD24A),
-      2 => const Color(0xFFCBD5E1),
-      _ => const Color(0xFFD08A5A),
-    };
-
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: renk.withValues(alpha: 0.16),
-        shape: BoxShape.circle,
-        border: Border.all(color: renk.withValues(alpha: 0.6)),
-      ),
-      child: Center(
-        child: Text(
-          '$madalya',
-          style: AppTypography.display(
-            size: 15,
-            weight: FontWeight.w900,
-            color: renk,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Ayirac extends StatelessWidget {
-  const _Ayirac();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Expanded(child: Divider(color: AppColors.surfaceLight)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text('SENİN SIRAN', style: AppTypography.label),
-        ),
-        const Expanded(child: Divider(color: AppColors.surfaceLight)),
-      ],
-    );
-  }
-}
-
-// ====================================================================
-// BOŞ VE HATA DURUMLARI
-// ====================================================================
-class _BosTablo extends StatelessWidget {
-  const _BosTablo();
-
-  @override
-  Widget build(BuildContext context) {
-    return SurfaceCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 28),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.emoji_events_outlined,
-            size: 32,
-            color: AppColors.textSecondary,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Sıralama henüz oluşmadı',
-            style: AppTypography.body(size: 14, weight: FontWeight.w800),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'İlk maçlar oynandığında burası dolacak.',
-            textAlign: TextAlign.center,
-            style: AppTypography.bodyS,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HataDurumu extends StatelessWidget {
-  final LeaderboardViewModel viewModel;
-
-  const _HataDurumu({required this.viewModel});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return LayoutBuilder(builder: (context, k) {
+      final genis = k.maxWidth >= 900;
+      final sol = [
+        _LigHero(rank: vm.myRank),
+        const SizedBox(height: Ref.pageGap),
+        RefSectionHead('LİG KADEMELERİ',
+            trailing: RefNeutralButton(label: 'Tüm basamaklar', onTap: () => context.push(AppRoutes.leagueTiers))),
+        const SizedBox(height: Ref.pageGap),
+        _Rozetler(aktifKod: vm.myRank?.leagueCode),
+      ];
+      final sag = [
+        const RefSectionHead('LİDERLİK TABLOSU', trailing: RefPill('GENEL')),
+        const SizedBox(height: Ref.pageGap),
+        _Tablo(viewModel: vm),
+        const SizedBox(height: Ref.pageGap),
+        RefSecondaryButton('DERECELİ MAÇ OYNA',
+            leadingGlyph: RefGlyph.swords, onTap: () => context.go(AppRoutes.matchmaking)),
+      ];
+      return RefreshIndicator(
+        color: Ref.accent,
+        backgroundColor: Ref.panel,
+        onRefresh: vm.refresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: Ref.pagePadding,
           children: [
-            const Icon(Icons.cloud_off, size: 44, color: AppColors.danger),
-            const SizedBox(height: 16),
-            Text(
-              viewModel.errorMessage ?? 'Sıralama yüklenemedi.',
-              textAlign: TextAlign.center,
-              style: AppTypography.bodyM,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: viewModel.refresh,
-              icon: const Icon(Icons.refresh),
-              label: const Text('TEKRAR DENE'),
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: genis ? 1100 : 620),
+                child: RefPageEnter(
+                  child: genis
+                      ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: sol)),
+                          const SizedBox(width: 20),
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: sag)),
+                        ])
+                      : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                          ...sol,
+                          const SizedBox(height: Ref.pageGap),
+                          ...sag,
+                        ]),
+                ),
+              ),
             ),
           ],
         ),
+      );
+    });
+  }
+}
+
+/// .hero — caps "LİG YOLU", h2 "ŞAMPİYONLUK YOLU", 🏆 60px,
+/// satır: lig + puan, .bar, tiny "N puan sonra ..."
+class _LigHero extends StatelessWidget {
+  final PlayerRank? rank;
+  const _LigHero({required this.rank});
+
+  @override
+  Widget build(BuildContext context) {
+    final r = rank;
+    final String alt;
+    if (r == null) {
+      alt = 'Lig bilgisi yükleniyor';
+    } else if (r.isTopTier || r.nextLabel == null) {
+      alt = 'En üst basamaktasın';
+    } else {
+      alt = '${r.pointsToNext} puan sonra ${r.nextLabel} (${r.winsToNext} galibiyet)';
+    }
+    return RefHero(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('LİG YOLU', style: Ref.caps(Ref.accent)),
+          const SizedBox(height: 13),
+          Text('ŞAMPİYONLUK YOLU',
+              style: Ref.heading(36, height: 0.94).copyWith(
+                shadows: const [Shadow(color: Color(0x99000000), offset: Offset(0, 3), blurRadius: 18)],
+              )),
+          const Padding(padding: EdgeInsets.all(7), child: Center(child: Em('🏆', size: 60))),
+          Row(children: [
+            Expanded(
+              child: Text(r == null ? '—' : r.label.toUpperTr(),
+                  style: Ref.bodyText(14, weight: FontWeight.w700)),
+            ),
+            Text('${trThousands(r?.mmr ?? 0)} PUAN', style: Ref.bodyText(14, color: Ref.gold, weight: FontWeight.w700)),
+          ]),
+          const SizedBox(height: 8),
+          RefBar(r == null ? 0 : (r.isTopTier ? 1 : r.progress)),
+          const SizedBox(height: 6),
+          Text(alt, style: Ref.tiny(Ref.muted)),
+        ],
+      ),
+    );
+  }
+}
+
+/// .league-badges { justify-content:space-between } span 35px · small 9px 900
+class _Rozetler extends StatelessWidget {
+  final String? aktifKod;
+  const _Rozetler({required this.aktifKod});
+
+  @override
+  Widget build(BuildContext context) => RefCardPanel(children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            for (final (kod, emoji, ad) in kLigRozetleri)
+              Expanded(
+                child: Semantics(
+                  label: aktifKod == kod ? '$ad ligi, şu an buradasın' : '$ad ligi',
+                  excludeSemantics: true,
+                  child: Opacity(
+                    opacity: aktifKod == null || aktifKod == kod ? 1 : 0.55,
+                    child: Column(children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: aktifKod == kod
+                            ? BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: const [BoxShadow(color: Color(0x5521DFAA), blurRadius: 18)],
+                                border: Border.all(color: Ref.accent, width: 1.5),
+                              )
+                            : null,
+                        // filter: drop-shadow(0 4px 8px #000)
+                        child: RefDropShadow(
+                          color: const Color(0xFF000000),
+                          offset: const Offset(0, 4),
+                          blur: 8,
+                          child: Em(emoji, size: 35, height: 1.1),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(ad,
+                            maxLines: 1,
+                            style: Ref.bodyText(9, weight: FontWeight.w900, color: aktifKod == kod ? Ref.accent : Ref.text)),
+                      ),
+                    ]),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ]);
+}
+
+/// Liderlik satırları: referans .card-panel (flex, space-between):
+/// madalya / sıra · ad · 🏆 puan
+class _Tablo extends StatelessWidget {
+  final LeaderboardViewModel viewModel;
+  const _Tablo({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = viewModel;
+    if (vm.isLoading && vm.entries.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(24),
+        child: Center(child: CircularProgressIndicator(color: Ref.accent)),
+      );
+    }
+    if (vm.entries.isEmpty) {
+      return RefCardPanel(children: [
+        Text(vm.errorMessage ?? 'Henüz sıralamada oyuncu yok.', style: Ref.bodyText(12, color: Ref.muted)),
+        if (vm.hasError) RefNeutralButton(label: 'TEKRAR DENE', onTap: vm.refresh),
+      ]);
+    }
+    final ben = vm.myUserId;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      for (final e in vm.entries) ...[
+        _Satir(sira: e.rankPosition, ad: e.username, puan: e.mmr, lig: e.rankLabel, benim: e.userId == ben),
+        const SizedBox(height: 8),
+      ],
+      // Oyuncu listede değilse altta kendi satırı
+      if (!vm.amIInList && vm.myPosition != null && vm.myRank != null)
+        _Satir(sira: vm.myPosition!, ad: 'Sen', puan: vm.myRank!.mmr, lig: vm.myRank!.label, benim: true),
+    ]);
+  }
+}
+
+class _Satir extends StatelessWidget {
+  final int sira;
+  final String ad;
+  final int puan;
+  final String lig;
+  final bool benim;
+
+  const _Satir({required this.sira, required this.ad, required this.puan, required this.lig, required this.benim});
+
+  @override
+  Widget build(BuildContext context) {
+    final madalya = switch (sira) {
+      1 => '🥇',
+      2 => '🥈',
+      3 => '🥉',
+      _ => null,
+    };
+    return Semantics(
+      label: '$sira. sıra, $ad, $puan puan${benim ? ', sen' : ''}',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.all(13),
+        decoration: BoxDecoration(
+          gradient: Ref.cardPanelGradient,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: benim ? Ref.accent : Ref.cardPanelBorder),
+          boxShadow: benim ? const [BoxShadow(color: Color(0x3321DFAA), blurRadius: 14)] : null,
+        ),
+        child: Row(children: [
+          SizedBox(
+            width: 38,
+            child: madalya != null
+                ? Em(madalya, size: 22)
+                : FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text('$sira', style: Ref.bodyText(22, color: benim ? Ref.accent : Ref.text)),
+                  ),
+          ),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(benim && ad != 'Sen' ? '$ad (sen)' : ad,
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: Ref.bodyText(14, weight: FontWeight.w700)),
+              Text(lig, style: Ref.tiny(Ref.muted)),
+            ]),
+          ),
+          const Em('🏆', size: 13),
+          const SizedBox(width: 4),
+          Text(trThousands(puan), style: Ref.bodyText(14, color: Ref.gold, weight: FontWeight.w700)),
+        ]),
       ),
     );
   }

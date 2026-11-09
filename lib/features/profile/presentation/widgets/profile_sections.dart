@@ -1,69 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/widgets/game/game_ui.dart';
-import '../../../../shared/widgets/premium_card/premium_card.dart';
-import '../../../../shared/widgets/screen_header.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 import '../../domain/achievements.dart';
 import '../viewmodel/profile_view_model.dart';
 
-// ====================================================================
-// BAŞARIMLAR
-// ====================================================================
-/// Gerçek sayaçlardan hesaplanan, ödülsüz başarım rozetleri.
+/// Başarım → referans .tile emojisi
+String achievementEmoji(Achievement a) => switch (a.id) {
+      'ilk_mac' => '⚽',
+      'ilk_galibiyet' => '🏆',
+      'on_galibiyet' => '🔥',
+      'elli_mac' => '🏟️',
+      'usta_ligi' => '🛡️',
+      'master_ligi' => '👑',
+      _ => '🎖️',
+    };
+
+/// BAŞARIMLAR — referans .tilegrid (3 sütun). Başarımlar GERÇEK
+/// sayaçlardan hesaplanır ve ödülsüzdür (bkz. [Achievement]).
 class AchievementsSection extends StatelessWidget {
   final ProfileViewModel viewModel;
-
-  /// Izgaradaki sütun sayısı (telefonda 2, masaüstünde 3)
   final int columns;
 
-  const AchievementsSection({
-    super.key,
-    required this.viewModel,
-    this.columns = 2,
-  });
+  const AchievementsSection({super.key, required this.viewModel, this.columns = 3});
 
   @override
   Widget build(BuildContext context) {
     final liste = viewModel.achievements;
-
+    final satirlar = <List<Achievement>>[];
+    for (var i = 0; i < liste.length; i += columns) {
+      satirlar.add(liste.sublist(i, i + columns > liste.length ? liste.length : i + columns));
+    }
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionTitle(
-          'Başarımlar',
-          trailing: Text(
-            '${viewModel.unlockedAchievementCount} / ${liste.length}',
-            style: AppTypography.body(
-              size: 12,
-              weight: FontWeight.w800,
-              color: AppColors.emerald,
-            ),
+        RefSectionHead('BAŞARIMLAR',
+            trailing: Text('${viewModel.unlockedAchievementCount} / ${liste.length} AÇIK', style: Ref.tiny(Ref.accent))),
+        const SizedBox(height: Ref.pageGap),
+        for (var r = 0; r < satirlar.length; r++) ...[
+          if (r > 0) const SizedBox(height: 8),
+          IntrinsicHeight(
+            child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              for (var i = 0; i < columns; i++) ...[
+                if (i > 0) const SizedBox(width: 8),
+                Expanded(
+                  child: i < satirlar[r].length
+                      ? AchievementTile(achievement: satirlar[r][i])
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ]),
           ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            crossAxisSpacing: AppSpacing.sm,
-            mainAxisSpacing: AppSpacing.sm,
-            mainAxisExtent: 112,
-          ),
-          itemCount: liste.length,
-          itemBuilder: (context, i) => AchievementTile(achievement: liste[i]),
-        ),
+        ],
       ],
     );
   }
 }
 
+/// Referans .tile: emoji 27px, strong 11px, small #9eb0c8.
+/// Kilitli başarım soluk görünür; sağ üstte kilit / onay işareti.
 class AchievementTile extends StatelessWidget {
   final Achievement achievement;
 
@@ -73,60 +72,59 @@ class AchievementTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final a = achievement;
     final acik = a.isUnlocked;
-    final renk = acik ? a.color : AppColors.textSecondary;
-
     return Semantics(
-      label:
-          '${a.title}: ${a.description}. '
-          '${acik ? 'Açıldı' : 'Kilitli, ${a.progressText}'}',
+      label: '${a.title}: ${a.description}. ${acik ? 'Açıldı' : 'Kilitli, ${a.progressText}'}',
       excludeSemantics: true,
-      child: GlassPanel(
-        accentColor: acik ? a.color : null,
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: Ref.tileGradient,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: acik ? Ref.accent.withValues(alpha: 0.6) : Ref.tileBorder),
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.xs + 2),
-                  decoration: BoxDecoration(
-                    color: renk.withValues(alpha: acik ? 0.18 : 0.08),
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                  ),
-                  child: Icon(a.icon, size: 20, color: renk),
-                ),
-                const Spacer(),
-                Icon(
-                  acik ? Icons.check_circle_rounded : Icons.lock_rounded,
-                  size: 16,
-                  color: acik ? a.color : AppColors.textSecondary,
-                ),
-              ],
-            ),
-            const Spacer(),
-            Text(
-              a.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.body(
+            Positioned(
+              top: -6,
+              right: -1,
+              child: Icon(
+                acik ? Icons.check_circle_rounded : Icons.lock_rounded,
                 size: 13,
-                weight: FontWeight.w900,
-                color: acik ? AppColors.textPrimary : AppColors.textSecondary,
+                color: acik ? Ref.accent : Ref.tileSmall,
               ),
             ),
-            Text(
-              a.description,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.bodyXS,
+            Opacity(
+              opacity: acik ? 1 : 0.55,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Center(child: Em(achievementEmoji(a), size: 27, height: 1.36)),
+                  ),
+                  Text(a.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: Ref.bodyText(11, color: Ref.tileText, weight: FontWeight.w700)),
+                  Text(
+                    acik ? a.description : a.progressText,
+                    // .tile small: tek satır (tam metin Semantics etiketinde)
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: Ref.bodyText(10, color: Ref.tileSmall),
+                  ),
+                  // Çok adımlı hedeflerde ilerleme çubuğu
+                  if (!acik && a.target > 1) ...[
+                    const SizedBox(height: 6),
+                    RefBar(a.progress, height: 4),
+                  ],
+                ],
+              ),
             ),
-            // Tek adımlık hedeflerde ("Usta ligine yüksel") çubuk
-            // anlamsız; sadece birden fazla adımlıklarda gösteriliyor.
-            if (!acik && a.target > 1) ...[
-              const SizedBox(height: AppSpacing.xs),
-              GameProgressBar(value: a.progress, height: 5),
-            ],
           ],
         ),
       ),
@@ -134,9 +132,8 @@ class AchievementTile extends StatelessWidget {
   }
 }
 
-// ====================================================================
-// FAVORİ KARTLAR
-// ====================================================================
+/// Favori kartlar — referans "★ Favori futbolcu" paneli; oyunda birden
+/// fazla favori olabildiği için kart şeridi.
 class FavoriteCardsSection extends StatelessWidget {
   final ProfileViewModel viewModel;
 
@@ -146,60 +143,45 @@ class FavoriteCardsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!viewModel.supportsFavorites) return const SizedBox.shrink();
     final kartlar = viewModel.favoriteCards;
+    const genislik = 92.0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SectionTitle(
-          'Favori kartlar',
-          trailing: TextButton(
-            onPressed: () => context.go(AppRoutes.collection),
-            child: Text(
-              'Koleksiyon',
-              style: AppTypography.body(
-                size: 12,
-                weight: FontWeight.w800,
-                color: AppColors.emerald,
-              ),
-            ),
+    return RefCardPanel(children: [
+      Row(children: [
+        const Icon(Icons.star_rounded, size: 16, color: Ref.gold),
+        const SizedBox(width: 6),
+        Expanded(child: Text('Favori kartlar', style: Ref.bodyText(14, weight: FontWeight.w700))),
+        GestureDetector(
+          onTap: () => context.go(AppRoutes.collection),
+          child: Text('KOLEKSİYON', style: Ref.caps(Ref.accent)),
+        ),
+      ]),
+      if (kartlar.isEmpty)
+        Text('Koleksiyonda bir karta dokunup "Favorilere ekle"ye basarak favorilerine ekleyebilirsin.',
+            style: Ref.bodyText(11, color: Ref.muted))
+      else
+        SizedBox(
+          height: genislik / RefCardLayout.grid.aspectRatio,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: kartlar.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            itemBuilder: (context, i) {
+              final InventoryCard k = kartlar[i];
+              return RefPlayerCard(
+                key: ValueKey('favori-${k.cardId}'),
+                name: k.fullName,
+                position: k.position,
+                tier: k.tier,
+                power: k.power,
+                seed: k.cardId,
+                kitSeed: k.club ?? k.nationality,
+                imageUrl: k.imageUrl,
+                width: genislik,
+                isFavorite: true,
+              );
+            },
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        if (kartlar.isEmpty)
-          GlassPanel(
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.favorite_border_rounded,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    'Koleksiyonda bir karta dokunup kalbe basarak '
-                    'favorilerine ekleyebilirsin.',
-                    style: AppTypography.bodyS,
-                  ),
-                ),
-              ],
-            ),
-          )
-        else
-          SizedBox(
-            height: 128,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: kartlar.length,
-              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-              itemBuilder: (context, i) => PremiumPlayerCard.fromInventory(
-                kartlar[i],
-                key: ValueKey('favori-${kartlar[i].cardId}'),
-                width: 88,
-                interactive: false,
-              ),
-            ),
-          ),
-      ],
-    );
+    ]);
   }
 }

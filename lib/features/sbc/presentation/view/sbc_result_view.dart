@@ -1,167 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../shared/widgets/app_button.dart';
-import '../../../../shared/widgets/premium_card/premium_card.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../core/utils/turkish_text.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 
-/// Görev tamamlandıktan sonraki ödül ekranı.
+/// Görev tamamlandı — referans .winpanel / paket özeti dili:
+/// caps "GÖREV TAMAMLANDI", görev adı, eritilen kart + altın ödülü,
+/// kazanılan kartlar (ortak ızgara kartı), .cta TAMAM.
 class SbcResultView extends StatelessWidget {
   final SbcSubmitResult result;
   final VoidCallback onClose;
 
-  const SbcResultView({
-    super.key,
-    required this.result,
-    required this.onClose,
-  });
+  const SbcResultView({super.key, required this.result, required this.onClose});
 
   @override
   Widget build(BuildContext context) {
     final kartlar = result.rewardCards;
-
     return Scaffold(
+      backgroundColor: Ref.phoneBg,
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.success.withValues(alpha: 0.15),
-                        border: Border.all(
-                          color: AppColors.success.withValues(alpha: 0.5),
-                          width: 2,
+        child: Column(children: [
+          Expanded(
+            child: LayoutBuilder(builder: (context, k) {
+              final sutun = k.maxWidth < 520 ? 3 : 5;
+              return ListView(
+                padding: Ref.pagePadding,
+                children: [
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 620),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                        RefHero(
+                          child: Column(children: [
+                            Text('GÖREV TAMAMLANDI', style: Ref.caps(Ref.accent)),
+                            const SizedBox(height: 10),
+                            const Em('✅', size: 64),
+                            const SizedBox(height: 8),
+                            Text(result.challengeName.toUpperTr(),
+                                textAlign: TextAlign.center, style: Ref.heading(30, height: 1)),
+                            const SizedBox(height: 14),
+                            RefStatRow([
+                              RefStat('${result.burnedCount}', 'ERİTİLEN KART', valueSize: 22),
+                              RefStat(result.rewardCoins > 0 ? '+${result.rewardCoins}' : '—', 'ALTIN', valueSize: 22),
+                              RefStat('${kartlar.length}', 'ÖDÜL KARTI', valueSize: 22),
+                            ]),
+                          ]),
                         ),
-                      ),
-                      child: const Icon(Icons.verified,
-                          size: 44, color: AppColors.success),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Görev Tamamlandı!',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.success,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      result.challengeName,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 14,
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // ---- ERİTİLEN ----
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.local_fire_department,
-                              color: AppColors.danger, size: 20),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              '${result.burnedCount} kart eritildi',
-                              style: const TextStyle(
-                                color: AppColors.textPrimary,
-                                fontSize: 13,
-                              ),
+                        if (kartlar.isNotEmpty) ...[
+                          const SizedBox(height: Ref.pageGap),
+                          RefSectionHead('Kazandığın kartlar (${kartlar.length})'.toUpperTr()),
+                          const SizedBox(height: Ref.pageGap),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: sutun,
+                              crossAxisSpacing: 7,
+                              mainAxisSpacing: 7,
+                              childAspectRatio: RefCardLayout.grid.aspectRatio,
                             ),
-                          ),
-                          if (result.rewardCoins > 0)
-                            Row(
-                              children: [
-                                const Icon(Icons.monetization_on,
-                                    color: AppColors.accent, size: 17),
-                                const SizedBox(width: 5),
-                                Text(
-                                  '+${result.rewardCoins}',
-                                  style: const TextStyle(
-                                    color: AppColors.accent,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 14,
-                                  ),
+                            itemCount: kartlar.length,
+                            itemBuilder: (context, i) {
+                              final kk = kartlar[i];
+                              return LayoutBuilder(
+                                builder: (context, c) => RefPlayerCard(
+                                  key: ValueKey(kk.userCardId),
+                                  name: kk.fullName,
+                                  position: kk.position,
+                                  tier: kk.tier,
+                                  power: kk.power,
+                                  seed: kk.cardId,
+                                  kitSeed: kk.club ?? kk.nationality,
+                                  imageUrl: kk.imageUrl,
+                                  width: c.maxWidth,
                                 ),
-                              ],
-                            ),
-                        ],
-                      ),
-                    ),
-
-                    // ---- KAZANILAN KARTLAR ----
-                    if (kartlar.isNotEmpty) ...[
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          const Icon(Icons.card_giftcard,
-                              color: AppColors.accent, size: 18),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Kazandığın kartlar (${kartlar.length})',
-                            style: const TextStyle(
-                              color: AppColors.accent,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 130,
-                          childAspectRatio: 0.66,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 12,
-                        ),
-                        itemCount: kartlar.length,
-                        itemBuilder: (context, index) {
-                          return LayoutBuilder(
-                            builder: (context, kisitlar) {
-                              return PremiumPlayerCard.fromInventory(
-                                kartlar[index],
-                                key: ValueKey(kartlar[index].userCardId),
-                                width: kisitlar.maxWidth,
-                                interactive: false,
                               );
                             },
-                          );
-                        },
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+                          ),
+                        ],
+                      ]),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 14),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 620),
+              child: RefCta('TAMAM', fontSize: 21, onTap: onClose),
             ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: AppButton(
-                label: 'TAMAM',
-                icon: Icons.check,
-                onPressed: onClose,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ]),
       ),
     );
   }

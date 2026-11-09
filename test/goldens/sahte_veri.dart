@@ -1,4 +1,7 @@
 import 'package:futbol_card/core/auth/session_manager.dart';
+import 'package:futbol_card/core/error/app_exception.dart';
+import 'package:futbol_card/features/auth/domain/repositories/auth_repository.dart';
+import 'package:futbol_card/features/sbc/domain/repositories/sbc_repository.dart';
 import 'package:futbol_card/core/storage/token_storage.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/collection/domain/repositories/collection_repository.dart';
@@ -58,18 +61,19 @@ const kGoldenUser = UserModel(
   draws: 2,
 );
 
+/// Gerçek basamaklarla tutarlı ([kGoldenTiers]): 1.825 puan = Master 2
 const kGoldenRank = PlayerRank(
   mmr: 1825,
   tierId: 8,
-  leagueCode: 'usta',
-  leagueName: 'Usta',
-  division: 3,
-  color: '#F8C665',
-  tierMinMmr: 1700,
-  nextTierMmr: 2000,
+  leagueCode: 'master',
+  leagueName: 'Master',
+  division: 2,
+  color: '#F97316',
+  tierMinMmr: 1750,
+  nextTierMmr: 1875,
   nextLeagueName: 'Master',
-  nextDivision: 1,
-  progress: 0.42,
+  nextDivision: 3,
+  progress: 0.6,
 );
 
 class GoldenCollectionRepo implements CollectionRepository {
@@ -81,9 +85,47 @@ class GoldenCollectionRepo implements CollectionRepository {
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
 
+/// league_tiers tablosunun birebiri (yerel veritabanı)
+const kGoldenTiers = [
+  LeagueTier(tierId: 1, leagueCode: 'amateur', leagueName: 'Amatör', division: 1, minMmr: 1000, color: '#7C8DA6'),
+  LeagueTier(tierId: 2, leagueCode: 'amateur', leagueName: 'Amatör', division: 2, minMmr: 1100, color: '#7C8DA6'),
+  LeagueTier(tierId: 3, leagueCode: 'amateur', leagueName: 'Amatör', division: 3, minMmr: 1200, color: '#7C8DA6'),
+  LeagueTier(tierId: 4, leagueCode: 'usta', leagueName: 'Usta', division: 1, minMmr: 1300, color: '#2DD4BF'),
+  LeagueTier(tierId: 5, leagueCode: 'usta', leagueName: 'Usta', division: 2, minMmr: 1400, color: '#2DD4BF'),
+  LeagueTier(tierId: 6, leagueCode: 'usta', leagueName: 'Usta', division: 3, minMmr: 1500, color: '#2DD4BF'),
+  LeagueTier(tierId: 7, leagueCode: 'master', leagueName: 'Master', division: 1, minMmr: 1625, color: '#F97316'),
+  LeagueTier(tierId: 8, leagueCode: 'master', leagueName: 'Master', division: 2, minMmr: 1750, color: '#F97316'),
+  LeagueTier(tierId: 9, leagueCode: 'master', leagueName: 'Master', division: 3, minMmr: 1875, color: '#F97316'),
+  LeagueTier(tierId: 10, leagueCode: 'master_class', leagueName: 'Master Class', division: 1, minMmr: 2025, color: '#F43F5E'),
+  LeagueTier(tierId: 11, leagueCode: 'master_class', leagueName: 'Master Class', division: 2, minMmr: 2225, color: '#F43F5E'),
+  LeagueTier(tierId: 12, leagueCode: 'master_class', leagueName: 'Master Class', division: 3, minMmr: 2475, color: '#F43F5E'),
+];
+
+/// Liderlik (referanstaki örnek adlarla, yalnız test verisi). Oyuncu 9. sırada,
+/// gösterilen listenin dışında → altta kendi satırı.
+final Leaderboard kGoldenLeaderboard = Leaderboard(
+  entries: [
+    for (final (i, ad, puan, lig, sev) in const [
+      (1, 'ArenaMaster', 2510, 'Master Class', 3),
+      (2, 'StormFC', 2260, 'Master Class', 2),
+      (3, 'TaktikKralı', 2040, 'Master Class', 1),
+      (4, 'KuzeyRüzgarı', 1990, 'Master', 3),
+      (5, 'BeyazGelincik', 1920, 'Master', 3),
+      (6, 'OrtaSahaUstası', 1880, 'Master', 3),
+    ])
+      LeaderboardEntry(
+          rankPosition: i, userId: 'rakip-$i', username: ad, mmr: puan, leagueName: lig, division: sev, color: '#F43F5E'),
+  ],
+  myPosition: 9,
+);
+
 class GoldenLeaderboardRepo implements LeaderboardRepository {
   @override
   Future<Result<PlayerRank>> fetchMyRank() async => const Success(kGoldenRank);
+  @override
+  Future<Result<Leaderboard>> fetchLeaderboard({int limit = 50, int offset = 0}) async => Success(kGoldenLeaderboard);
+  @override
+  Future<Result<List<LeagueTier>>> fetchTiers() async => const Success(kGoldenTiers);
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
@@ -91,11 +133,16 @@ class GoldenLeaderboardRepo implements LeaderboardRepository {
 class GoldenMatchRepo implements MatchRepository {
   @override
   Future<Result<List<MatchHistoryEntry>>> fetchMatchHistoryList({int limit = 20, int offset = 0}) async => Success([
-        for (var i = 0; i < 4; i++)
+        // Sıra korunur: ilk 4 galibiyet (ana sayfadaki "4 galibiyet" serisi)
+        for (final (i, ad, ben, o, sonuc) in const [
+          (0, 'StormFC', 7, 4, MatchOutcome.win),
+          (1, 'TaktikKralı', 6, 5, MatchOutcome.win),
+          (2, 'KuzeyRüzgarı', 8, 3, MatchOutcome.win),
+          (3, 'BeyazGelincik', 5, 4, MatchOutcome.win),
+          (9, 'OrtaSahaUstası', 3, 6, MatchOutcome.loss),
+        ])
           MatchHistoryEntry(
-              matchId: 'm$i', opponentId: 'o', opponentUsername: 'Rakip', outcome: MatchOutcome.win),
-        const MatchHistoryEntry(
-            matchId: 'm9', opponentId: 'o', opponentUsername: 'Rakip', outcome: MatchOutcome.loss),
+              matchId: 'm$i', opponentId: 'o$i', opponentUsername: ad, myScore: ben, opponentScore: o, outcome: sonuc),
       ]);
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
@@ -311,6 +358,39 @@ class GoldenStoreRepo implements StoreRepository {
   Future<Result<List<PackType>>> fetchPacks() async => Success(kGoldenPacks);
   @override
   Future<Result<PackOpenResult>> openPack(String slug) async => Success(kGoldenOpening);
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}
+
+
+// ====================================================================
+// FAZ 7: görevler (sbc_challenges tablosundaki tanımlar), profil
+// ====================================================================
+final List<SbcChallenge> kGoldenChallenges = [
+  for (final j in [
+    {'id': 'c1', 'slug': 'bronz-temizligi', 'name': 'Bronz Temizliği', 'category': 'baslangic',
+     'description': '11 bronz kartı erit, altın kazan.',
+     'requirements': [{'tier': 'bronze', 'type': 'max_tier'}], 'rewards': [{'type': 'coins', 'amount': 750}]},
+    {'id': 'c2', 'slug': 'gumus-yukseltme', 'name': 'Gümüş Yükseltme', 'category': 'baslangic',
+     'requirements': [{'tier': 'silver', 'type': 'exact_tier'}, {'type': 'min_chemistry', 'value': 12}],
+     'rewards': [{'type': 'pack', 'pack_slug': 'standard'}], 'max_completions': 1, 'completed_count': 1, 'is_completed': true},
+    {'id': 'c3', 'slug': 'uluslararasi-kadro', 'name': 'Uluslararası Kadro', 'category': 'genel',
+     'requirements': [{'tier': 'silver', 'type': 'min_tier'}, {'type': 'min_distinct_nations', 'value': 6}, {'type': 'min_chemistry', 'value': 18}],
+     'rewards': [{'type': 'pack', 'pack_slug': 'sbc_gold'}, {'type': 'coins', 'amount': 500}]},
+  ])
+    SbcChallenge.fromJson(j),
+];
+
+class GoldenSbcRepo implements SbcRepository {
+  @override
+  Future<Result<List<SbcChallenge>>> fetchChallenges() async => Success(kGoldenChallenges);
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}
+
+class GoldenAuthRepo implements AuthRepository {
+  @override
+  Future<Result<MeResponse>> fetchProfile() async => const Failure(AppException(message: 'test'));
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }

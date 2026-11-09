@@ -149,7 +149,8 @@ void main() {
         ),
       );
 
-      expect(find.text('MAĞLUBİYET'), findsOneWidget);
+      // Referans: mağlubiyet başlığı "MÜCADELE BİTTİ"
+      expect(find.text('MÜCADELE BİTTİ'), findsOneWidget);
       expect(find.text('3 kartını kalıcı olarak kaptırdın.'), findsOneWidget);
       expect(find.text('-25'), findsOneWidget);
       expect(find.text('Kaybettiğin kartlar (3)'), findsOneWidget);
@@ -202,7 +203,7 @@ void main() {
         ),
       );
       await tester.tap(find.text('YENİ MAÇ'));
-      await tester.tap(find.text('ANA SAYFA'));
+      await tester.tap(find.text('ANA MENÜYE DÖN'));
       expect(yeniMac, 1);
       expect(anaSayfa, 1);
     });

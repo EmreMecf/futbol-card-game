@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_breakpoints.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/app_shell.dart';
-import '../../../../shared/widgets/screen_header.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../viewmodel/league_tiers_view_model.dart';
-import '../widgets/rank_badge.dart';
+import 'leaderboard_view.dart' show kLigRozetleri;
 
-/// Ligler — bütün basamakların tanıtımı.
+/// LİGLER — bütün basamaklar (4 lig x 3 seviye).
 ///
-/// ===================================================================
-/// NEDEN AYRI BİR EKRAN?
-/// ===================================================================
-/// Liderlik ekranı "kim önde" sorusunu cevaplıyor. Bu ekran farklı
-/// bir soruyu cevaplıyor: "kaç lig var, sıradaki ne, en tepede ne?"
-///
-/// İkisini tek ekrana sıkıştırmak sıralamayı 12 basamaklık bir
-/// tablonun altına gömerdi. Oyuncu her açılışta sıralamayı görmek
-/// istiyor; basamak listesine ise merak ettiğinde bakıyor.
+/// Referansta ayrı bir ekranı yok; "Ligler / Sıralama" ekranının dili
+/// kullanıldı: .sectionhead, .card-panel, lig rozetleri, .bar. Basamak
+/// eşikleri sunucudan (league_tiers); oyuncunun basamağı vurgulanır.
 class LeagueTiersView extends StatelessWidget {
   const LeagueTiersView({super.key});
 
@@ -30,99 +24,70 @@ class LeagueTiersView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<LeagueTiersViewModel>(
       create: (_) => getIt<LeagueTiersViewModel>()..initialize(),
-      child: const _LeagueTiersBody(),
+      child: const AppShell(currentRoute: AppRoutes.leaderboard, child: _Govde()),
     );
   }
 }
 
-class _LeagueTiersBody extends StatelessWidget {
-  const _LeagueTiersBody();
+class _Govde extends StatelessWidget {
+  const _Govde();
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<LeagueTiersViewModel>();
-
-    return AppShell(
-      currentRoute: AppRoutes.leaderboard,
-      child: ResponsiveBuilder(
-        builder: (context, boyut) {
-          final kenar = AppBreakpoints.pagePadding(boyut);
-
-          return SafeArea(
-            bottom: false,
-            child: ContentWidth(
-              maxWidth: 900,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      kenar,
-                      boyut.usesSidebar ? 32 : 16,
-                      kenar,
-                      0,
-                    ),
-                    child: const ScreenHeader(
-                      title: 'Ligler',
-                      subtitle: '4 lig, her birinde 3 seviye',
-                      showBack: true,
-                      breadcrumb: 'Liderlik',
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Expanded(child: _icerik(context, vm, kenar, boyut)),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _icerik(
-    BuildContext context,
-    LeagueTiersViewModel vm,
-    double kenar,
-    ScreenSize boyut,
-  ) {
+    final Widget icerik;
     if (vm.isBusy && vm.tiers.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+      icerik = const Padding(
+        padding: EdgeInsets.all(40),
+        child: Center(child: CircularProgressIndicator(color: Ref.accent)),
       );
-    }
-
-    if (vm.hasError && vm.tiers.isEmpty) {
-      return _HataDurumu(viewModel: vm);
+    } else if (vm.hasError && vm.tiers.isEmpty) {
+      icerik = RefCardPanel(children: [
+        Text(vm.errorMessage ?? 'Ligler yüklenemedi.', style: Ref.bodyText(12)),
+        RefSecondaryButton('TEKRAR DENE', onTap: vm.refresh),
+      ]);
+    } else {
+      icerik = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        for (final g in vm.groups) ...[
+          _LigGrubu(group: g, myTierId: vm.myTierId),
+          const SizedBox(height: Ref.pageGap),
+        ],
+        const RefNote(
+          'Amatör\'de bir seviye atlamak 4 net galibiyet isterken Master Class 2\'ye geçmek 10 net galibiyet '
+          'istiyor. Üst ligler böylece gerçekten seyrek kalıyor. Ligden düşme yok: en alt basamak zemin.',
+          title: 'Bantlar yukarı çıkıldıkça genişliyor',
+        ),
+      ]);
     }
 
     return RefreshIndicator(
-      color: AppColors.primary,
-      backgroundColor: AppColors.surface,
+      color: Ref.accent,
+      backgroundColor: Ref.panel,
       onRefresh: vm.refresh,
       child: ListView(
-        padding: EdgeInsets.fromLTRB(
-          kenar,
-          0,
-          kenar,
-          boyut.usesSidebar ? 32 : 110,
-        ),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: Ref.pagePadding,
         children: [
-          for (final grup in vm.groups)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 22),
-              child: _LigGrubu(
-                group: grup,
-                myTierId: vm.myTierId,
-                genis: boyut.usesWideLayout,
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: RefPageEnter(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Row(children: [
+                    RefNeutralButton(
+                      padding: const EdgeInsets.all(7),
+                      semanticLabel: 'Geri',
+                      onTap: () => context.canPop() ? context.pop() : context.go(AppRoutes.leaderboard),
+                      child: const Icon(Icons.arrow_back_rounded, size: 16, color: Ref.neutralText),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(child: RefSectionHead('LİGLER', size: 27, kicker: '4 LİG · HER BİRİNDE 3 SEVİYE')),
+                  ]),
+                  const SizedBox(height: Ref.pageGap),
+                  icerik,
+                ]),
               ),
             ),
-
-          NoticeBar.info(
-            'Amatör\'de bir seviye atlamak 4 net galibiyet isterken '
-            'Master Class 2\'ye geçmek 10 net galibiyet istiyor. Üst '
-            'ligler böylece gerçekten seyrek kalıyor. Ligden düşme yok: '
-            'en alt basamak zemin.',
-            title: 'Bantlar yukarı çıkıldıkça genişliyor',
           ),
         ],
       ),
@@ -130,228 +95,70 @@ class _LeagueTiersBody extends StatelessWidget {
   }
 }
 
-// ====================================================================
-// BİR LİG VE ÜÇ SEVİYESİ
-// ====================================================================
 class _LigGrubu extends StatelessWidget {
   final LeagueGroup group;
   final int? myTierId;
-  final bool genis;
-
-  const _LigGrubu({
-    required this.group,
-    required this.myTierId,
-    required this.genis,
-  });
+  const _LigGrubu({required this.group, required this.myTierId});
 
   @override
   Widget build(BuildContext context) {
-    final renk = leagueColor(group.color);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // ---- LİG BAŞLIĞI ----
-        Row(
-          children: [
-            Container(
-              width: 4,
-              height: 22,
-              decoration: BoxDecoration(
-                color: renk,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              group.name,
-              style: AppTypography.display(
-                size: genis ? 24 : 21,
-                weight: FontWeight.w900,
-                color: renk,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Flexible(
-              child: Text(
-                '${_binlik(group.minMmr)} puandan itibaren',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodyXS,
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 12),
-
-        // ---- ÜÇ SEVİYE ----
-        // Telefonda da yan yana: üç kısa kart dar ekranda da sığıyor
-        // ve bir ligin üç seviyesini birlikte görmek bütünü anlatıyor.
-        Row(
-          children: [
-            for (var i = 0; i < group.tiers.length; i++) ...[
-              if (i > 0) const SizedBox(width: 10),
-              Expanded(
-                child: _SeviyeKarti(
-                  tier: group.tiers[i],
-                  isMine: group.tiers[i].tierId == myTierId,
-                  genis: genis,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ],
-    );
-  }
-
-  static String _binlik(int sayi) {
-    final metin = sayi.toString();
-    final tampon = StringBuffer();
-    for (var i = 0; i < metin.length; i++) {
-      if (i > 0 && (metin.length - i) % 3 == 0) tampon.write('.');
-      tampon.write(metin[i]);
-    }
-    return tampon.toString();
-  }
-}
-
-class _SeviyeKarti extends StatelessWidget {
-  final LeagueTier tier;
-
-  /// Oyuncunun şu an bulunduğu basamak mı?
-  final bool isMine;
-
-  final bool genis;
-
-  const _SeviyeKarti({
-    required this.tier,
-    required this.isMine,
-    required this.genis,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final renk = leagueColor(tier.color);
-
+    final emoji = kLigRozetleri.where((r) => r.$1 == group.code).firstOrNull?.$2 ?? '🏅';
+    final buradayim = group.tiers.any((t) => t.tierId == myTierId);
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: genis ? 14 : 8,
-        vertical: genis ? 16 : 13,
-      ),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        // Oyuncunun basamağı vurgulu: 12 kartlık bir listede kendini
-        // aramak zorunda kalmıyor.
-        color: isMine ? renk.withValues(alpha: 0.14) : AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isMine ? renk : AppColors.surfaceLight,
-          width: isMine ? 1.5 : 1,
-        ),
+        gradient: Ref.cardPanelGradient,
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: buradayim ? Ref.accent : Ref.cardPanelBorder),
       ),
-      child: Column(
-        children: [
-          RankBadge(
-            leagueName: tier.leagueName,
-            division: tier.division,
-            colorHex: tier.color,
-            size: genis ? 46 : 38,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          Em(emoji, size: 30),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(group.name.toUpperTr(), style: Ref.h3()),
+              Text('${trThousands(group.minMmr)} puandan başlar', style: Ref.tiny(Ref.muted)),
+            ]),
           ),
-          SizedBox(height: genis ? 10 : 8),
-          FittedBox(
-            child: Text(
-              tier.label,
-              style: AppTypography.display(
-                size: genis ? 17 : 15,
-                weight: FontWeight.w900,
-                height: 1.0,
-              ),
-            ),
-          ),
-          const SizedBox(height: 3),
-          FittedBox(
-            child: Text(
-              '${_binlik(tier.minMmr)}+ puan',
-              style: AppTypography.body(
-                size: genis ? 11.5 : 10.5,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          if (isMine) ...[
-            SizedBox(height: genis ? 8 : 6),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 3,
-              ),
-              decoration: BoxDecoration(
-                color: renk,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: FittedBox(
-                child: Text(
-                  'BURADASIN',
-                  style: AppTypography.body(
-                    size: 9,
-                    weight: FontWeight.w900,
-                    color: AppColors.background,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ),
+          if (buradayim) const RefPill('BURADASIN', dot: true),
+        ]),
+        const SizedBox(height: 10),
+        Row(children: [
+          for (var i = 0; i < group.tiers.length; i++) ...[
+            if (i > 0) const SizedBox(width: 7),
+            Expanded(child: _Basamak(tier: group.tiers[i], benim: group.tiers[i].tierId == myTierId)),
           ],
-        ],
-      ),
+        ]),
+      ]),
     );
-  }
-
-  static String _binlik(int sayi) {
-    final metin = sayi.toString();
-    final tampon = StringBuffer();
-    for (var i = 0; i < metin.length; i++) {
-      if (i > 0 && (metin.length - i) % 3 == 0) tampon.write('.');
-      tampon.write(metin[i]);
-    }
-    return tampon.toString();
   }
 }
 
-// ====================================================================
-// HATA
-// ====================================================================
-class _HataDurumu extends StatelessWidget {
-  final LeagueTiersViewModel viewModel;
-
-  const _HataDurumu({required this.viewModel});
+class _Basamak extends StatelessWidget {
+  final LeagueTier tier;
+  final bool benim;
+  const _Basamak({required this.tier, required this.benim});
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.cloud_off, size: 44, color: AppColors.danger),
-            const SizedBox(height: 16),
-            Text(
-              viewModel.errorMessage ?? 'Ligler yüklenemedi.',
-              textAlign: TextAlign.center,
-              style: AppTypography.bodyM,
+  Widget build(BuildContext context) => Semantics(
+        label: '${tier.label}, ${tier.minMmr} puan${benim ? ', şu an buradasın' : ''}',
+        excludeSemantics: true,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 9),
+          decoration: BoxDecoration(
+            color: benim ? Ref.filterActiveBg : Ref.statBg,
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: benim ? Ref.filterActiveBorder : Ref.statBorder),
+          ),
+          child: Column(children: [
+            Text('Seviye ${tier.division}', style: Ref.bodyText(10, color: Ref.statLabel)),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(trThousands(tier.minMmr), style: Ref.heading(22, color: Ref.statValue, height: 1.2)),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: viewModel.refresh,
-              icon: const Icon(Icons.refresh),
-              label: const Text('TEKRAR DENE'),
-            ),
-          ],
+            Text('puan', style: Ref.bodyText(10, color: Ref.statLabel)),
+          ]),
         ),
-      ),
-    );
-  }
+      );
 }

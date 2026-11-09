@@ -3,17 +3,21 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/utils/turkish_text.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../core/utils/turkish_text.dart';
+import '../../../../shared/widgets/app_shell.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../viewmodel/sbc_list_view_model.dart';
 import '../widgets/requirement_checklist.dart';
-import '../../../../core/theme/app_breakpoints.dart';
-import '../../../../shared/widgets/app_shell.dart';
-import '../../../../shared/widgets/screen_header.dart';
 
-/// Kadro kurma gorevleri listesi.
+/// GÖREVLER (kart görevleri) — referansın görev dili:
+/// .sectionhead + "N / M TAMAMLANDI", .card-panel içinde .task satırı
+/// (🎯 + başlık + ödül), .note uyarısı.
+///
+/// Referansta ayrı bir görev ekranı yok; ana sayfadaki "GÜNLÜK GÖREVLER"
+/// panelinin dili kullanıldı. Görevler ve ödüller sunucudan.
 class SbcListView extends StatelessWidget {
   const SbcListView({super.key});
 
@@ -21,137 +25,76 @@ class SbcListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<SbcListViewModel>(
       create: (_) => getIt<SbcListViewModel>()..load(),
-      child: const _SbcListBody(),
+      child: const AppShell(currentRoute: AppRoutes.sbc, child: _Govde()),
     );
   }
 }
 
-class _SbcListBody extends StatelessWidget {
-  const _SbcListBody();
+class _Govde extends StatelessWidget {
+  const _Govde();
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SbcListViewModel>();
+    final toplam = vm.challenges.length;
 
-    return AppShell(
-      currentRoute: AppRoutes.sbc,
-      child: SafeArea(
-        bottom: false,
-        child: ResponsiveBuilder(
-          builder: (context, boyut) {
-            final kenar = AppBreakpoints.pagePadding(boyut);
-            return Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    kenar,
-                    boyut.usesSidebar ? 32 : 16,
-                    kenar,
-                    0,
-                  ),
-                  child: ScreenHeader(
-                    title: 'Görevler',
-                    subtitle: 'Kart erit, ödül kazan',
-                    actions: [
-                      _YenileButonu(onTap: vm.load),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Expanded(child: _icerik(context, vm)),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _icerik(BuildContext context, SbcListViewModel vm) {
+    final List<Widget> icerik;
     if (vm.isLoading && vm.challenges.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      );
-    }
-
-    if (vm.challenges.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.assignment_outlined,
-                  size: 48, color: AppColors.textSecondary),
-              const SizedBox(height: 16),
-              Text(
-                vm.errorMessage ?? 'Şu an aktif görev yok.',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: vm.load,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Tekrar dene'),
-              ),
-            ],
-          ),
+      icerik = [
+        const Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator(color: Ref.accent))),
+      ];
+    } else if (vm.challenges.isEmpty) {
+      icerik = [
+        RefCardPanel(children: [
+          Text(vm.errorMessage ?? 'Şu an aktif görev yok.', style: Ref.bodyText(12)),
+          RefSecondaryButton('TEKRAR DENE', onTap: vm.load),
+        ]),
+      ];
+    } else {
+      icerik = [
+        const RefNote(
+          'Kullanmadığın kartları eritip daha değerli ödüllere çevir. Eritilen kartlar KALICI olarak silinir.',
+          title: 'Kart görevleri',
         ),
-      );
+        for (final grup in vm.grouped.entries) ...[
+          const SizedBox(height: Ref.pageGap),
+          Text(grup.key.toUpperTr(), style: Ref.caps(Ref.muted)),
+          const SizedBox(height: 8),
+          for (final g in grup.value) ...[
+            _GorevKarti(challenge: g),
+            const SizedBox(height: 9),
+          ],
+        ],
+      ];
     }
 
     return RefreshIndicator(
+      color: Ref.accent,
+      backgroundColor: Ref.panel,
       onRefresh: vm.load,
-      color: AppColors.primary,
-      backgroundColor: AppColors.surface,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: Ref.pagePadding,
         children: [
-          // ---- ACIKLAMA ----
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.local_fire_department,
-                    color: AppColors.warning, size: 20),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Kullanmadığın kartları eritip daha değerli ödüllere '
-                    'çevir. Eritilen kartlar KALICI olarak silinir.',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 12.5,
-                      height: 1.4,
-                    ),
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: RefPageEnter(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  RefSectionHead(
+                    'GÖREVLER',
+                    size: 27,
+                    kicker: 'KART ERİT, ÖDÜL KAZAN',
+                    trailing: toplam == 0
+                        ? null
+                        : Text('${vm.completedCount} / $toplam TAMAMLANDI', style: Ref.tiny(Ref.accent)),
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          for (final grup in vm.grouped.entries) ...[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10, top: 6),
-              child: Text(
-                grup.key.toUpperTr(),
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                ),
+                  const SizedBox(height: Ref.pageGap),
+                  ...icerik,
+                ]),
               ),
             ),
-            for (final gorev in grup.value) _GorevKarti(challenge: gorev),
-          ],
+          ),
         ],
       ),
     );
@@ -160,160 +103,45 @@ class _SbcListBody extends StatelessWidget {
 
 class _GorevKarti extends StatelessWidget {
   final SbcChallenge challenge;
-
   const _GorevKarti({required this.challenge});
 
   @override
   Widget build(BuildContext context) {
-    final tamamlandi = challenge.isCompleted;
+    final bitti = challenge.isCompleted;
+    void ac() => context.push(AppRoutes.sbcBuilderWithId(challenge.id), extra: challenge);
 
     return Opacity(
-      opacity: tamamlandi ? 0.55 : 1.0,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: tamamlandi
-                ? AppColors.success.withValues(alpha: 0.4)
-                : AppColors.surfaceLight,
-          ),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: tamamlandi
-                ? null
-                : () => context.push(
-                      AppRoutes.sbcBuilderWithId(challenge.id),
-                      extra: challenge,
-                    ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          challenge.name,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                      if (tamamlandi)
-                        const Icon(Icons.check_circle,
-                            color: AppColors.success, size: 20)
-                      else if (challenge.isRepeatable)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.18),
-                            borderRadius: BorderRadius.circular(7),
-                          ),
-                          child: const Text(
-                            'Tekrarlanabilir',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-
-                  if (challenge.description != null) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      challenge.description!,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 12.5,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-
-                  const SizedBox(height: 12),
-                  RequirementSummary(requirements: challenge.requirements),
-
-                  const SizedBox(height: 12),
-                  const Divider(height: 1, color: AppColors.surfaceLight),
-                  const SizedBox(height: 10),
-
-                  Row(
-                    children: [
-                      const Icon(Icons.card_giftcard,
-                          size: 15, color: AppColors.accent),
-                      const SizedBox(width: 7),
-                      Expanded(
-                        child: Text(
-                          challenge.rewardSummary,
-                          style: const TextStyle(
-                            color: AppColors.accent,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      if (challenge.completedCount > 0)
-                        Text(
-                          '${challenge.completedCount} kez yapıldı',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 11,
-                          ),
-                        ),
-                      if (!tamamlandi)
-                        const Icon(Icons.chevron_right,
-                            color: AppColors.textSecondary, size: 20),
-                    ],
-                  ),
-                ],
-              ),
+      opacity: bitti ? 0.55 : 1,
+      child: RefCardPanel(
+        onTap: bitti ? null : ac,
+        children: [
+          // .task { gap:10px } .em 23px · strong 11px · small muted
+          Row(children: [
+            Em(bitti ? '✅' : '🎯', size: 23),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(challenge.name, style: Ref.bodyText(13, weight: FontWeight.w700)),
+                if (challenge.description != null)
+                  Text(challenge.description!, style: Ref.bodyText(10, color: Ref.muted)),
+              ]),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Başlıktaki yenileme butonu
-class _YenileButonu extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _YenileButonu({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.surfaceLight),
-          ),
-          child: const Icon(
-            Icons.refresh_rounded,
-            size: 19,
-            color: AppColors.textSecondary,
-          ),
-        ),
+            if (!bitti && challenge.isRepeatable) const RefPill('TEKRARLANABİLİR'),
+          ]),
+          RequirementSummary(requirements: challenge.requirements),
+          Container(height: 1, color: Ref.cardPanelBorder),
+          Row(children: [
+            const Em('🎁', size: 13),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text('Ödül: ${challenge.rewardSummary}',
+                  style: Ref.bodyText(11, color: Ref.gold, weight: FontWeight.w800)),
+            ),
+            if (challenge.completedCount > 0)
+              Text('${challenge.completedCount} kez yapıldı', style: Ref.tiny(Ref.muted)),
+          ]),
+          if (!bitti) RefSecondaryButton('GÖREVE BAŞLA', trailing: RefGlyph.arrowRight, onTap: ac),
+        ],
       ),
     );
   }

@@ -55,7 +55,10 @@ FAZ 4–8 henüz yapılmadı (bkz. "Sıradaki fazlar").
 | Kadro / formasyon | ✅ FAZ 4 | `04_kadro`, `04b_kadro_alt`; golden'da kart seçimi `04c` |
 | Maç hazırlığı + arena | ✅ FAZ 5 | `02_arena`, `02b_arena_alt`, `02d_duello_kareler` |
 | Mağaza + paket açma | ✅ FAZ 6 | `05_magaza`, `05b_magaza_alt`, `05c_paket_acma`; golden'da mühür ve özet |
-| Ligler, liderlik, profil, görevler, maç sonucu | ⏳ FAZ 7 | yalnızca referans görüntüsü var |
+| Ligler + liderlik, lig basamakları | ✅ FAZ 7 | `06_ligler`, `06b_ligler_alt`; golden'da `06l_lig_basamaklari` |
+| Profil | ✅ FAZ 7 | `07_profil`, `07b_profil_alt` |
+| Maç sonucu | ✅ FAZ 7 | `08_mac_sonucu`; golden'da `08m_mac_sonucu_maglubiyet` |
+| Görevler (kart görevleri) | ✅ FAZ 7 | referansta ayrı ekran yok; golden'da `10_gorevler`, `10s_gorev_sonucu` |
 
 **Önemli:** Mağaza ve maç ekranlarında da yeni kart artık görünüyor,
 çünkü `PremiumPlayerCard` ortak karta bağlandı. Ama bu ekranların düzeni
@@ -372,6 +375,70 @@ Akış korundu, görünüm referans diline geçti.
 - `pack_flow_test` yeni metinlere göre güncellendi: "altın", "MAĞAZAYA
   DÖN".
 
+## FAZ 7 — Ligler, profil, görevler, maç sonucu (yapıldı)
+
+### Ligler ve liderlik
+- Üst kart referanstaki kupa yolu kartı: büyük başlık, 🏆, oyuncunun
+  **gerçek** ligi ve puanı, ilerleme çubuğu ve "N puan sonra …" satırı.
+- "LİG KADEMELERİ": referansta 5 rozet (Bronz…Efsane) var, oyunda ise
+  4 lig var (Amatör, Usta, Master, Master Class). 4 rozet gösteriliyor;
+  oyuncunun ligi halkayla vurgulanıyor.
+- Liderlik satırları referanstaki gibi: 🥇🥈🥉 ya da sıra numarası, ad,
+  🏆 puan. Oyuncu listede değilse altta ayrı "Sen" satırı var.
+- "Tüm basamaklar" düğmesi lig basamakları ekranını açıyor: her lig bir
+  panel, 3 seviye kutusu, oyuncunun seviyesi vurgulu ("BURADASIN").
+  Değerler veritabanından.
+
+### Profil
+- Referanstaki emoji yüz yerine oyuncunun kodla çizilen 2D yüzü.
+- 6 gerçek istatistik kutusu: kazanılan maç, kazanma oranı, puan, altın,
+  koruma, maç.
+- Başarımlar referanstaki 3 sütunlu karo düzeninde. Gerçek sayaçlardan
+  hesaplanıyor, kilitli olanlarda ilerleme çubuğu var.
+- Favori kartlar (referansta tek "Favori futbolcu" satırı), son maçlar,
+  LİG SIRALAMASINI GÖR ve AYARLAR düğmeleri.
+
+### Maç sonucu
+- Referanstaki altın çerçeveli panel: MAÇ SONUCU, 92 px 🏆, ZAFER!,
+  büyük skor, ödül kutuları, YENİ MAÇ, ANA MENÜYE DÖN.
+- Yenilgide 🛡️ ve kırmızı "MÜCADELE BİTTİ", beraberlikte 🤝.
+- Ödül kutuları yalnızca sunucudan gelen gerçek değişimi gösteriyor
+  (altın, puan, koruma). Referanstaki "+500 XP" gösterilmiyor; oyunda XP
+  yok.
+- Kazanılan veya kaptırılan kartlar, lig değişikliği paneli ve konfeti
+  korunuyor.
+
+### Görevler
+- Referansta ayrı görev ekranı yok. Ana sayfadaki "GÜNLÜK GÖREVLER"
+  panelinin dili kullanıldı: 🎯 ya da ✅, başlık, şart etiketleri,
+  🎁 ödül, GÖREVE BAŞLA.
+- Görev kadrosu ekranı kadro ekranının sahasını kullanıyor.
+- Kartları eritmeden önce onay isteniyor. Bu işlem geri alınamaz.
+
+### Bulunup düzeltilenler (yalnızca test verisi)
+- Test liderlik listesinin 1. sırası test kullanıcısıyla aynı kimliği
+  taşıyordu; ekran onu "(sen)" diye işaretledi. Kimlikler ayrıldı.
+- Test rütbesi ("Usta 3, 1.825") veritabanındaki basamaklarla
+  uyuşmuyordu; doğrusu Master 2. Düzeltildi; ana sayfa, ligler ve profil
+  artık aynı ligi gösteriyor.
+- Test maç geçmişinde rakip adı ve skor yoktu. Eklendi; galibiyet serisi
+  aynı kaldı.
+
+### Testler
+- 7 ekran × 6 boyut = 42 golden testi + 2 kaydırılmış görüntü. Hepsinde
+  taşma denetimi var.
+- Ekranlar: ligler, lig basamakları, profil, maç sonucu (zafer ve
+  yenilgi), görevler, görev sonucu.
+- Tüm test paketi: 549/549 geçti. Yerel sunucu açıktı, API testleri de
+  koştu.
+
+### Hâlâ eski renklerde (FAZ 8'e kaldı)
+- Ayarlar ekranı
+- Tasarım sistemi sayfası
+- Lig atlama/düşme paneli ve tam ekran kutlaması
+  (`league_change_widgets.dart`)
+- Kart kazanma gösterisi (`walkout_screen`)
+
 ## 6. Sıradaki fazlar
 
 | Faz | Kapsam | Referansta görülenler |
@@ -379,5 +446,5 @@ Akış korundu, görünüm referans diline geçti.
 | FAZ 4 | Kadro | 353 px yükseklikte saha, 47×55 oyuncu kutuları (`.squad-slot`), formasyon karoları (yalnız 4-4-2 etkin olacak), TAKIM GÜCÜ / KİMYA / KADRO istatistikleri, kimya açıklaması, KADROYU KAYDET. Sahadan taşan kartlar düzeltilecek. |
 | FAZ 5 | Arena | Perspektifli saha (`.pitch3d` rotateX 43°), mavi/kırmızı oyuncu noktaları, top, skor ve tur, SENİN KARTIN / RAKİP KARTI, enerji çubuğu, 3 taktik karosu, KARTI OYNA. Kart seçilince sahaya geçiş ve 2D karakter animasyonu (`DuelStage`). Sonucu sunucu belirler. |
 | FAZ 6 | Mağaza | PAKETLER / TEKLİFLER / KOZMETİK sekmeleri, günün paketi, 3 paket karosu, paket açma modalı. Taşmalar giderilecek. Fiyat ve olasılıklar sunucudan gelecek. |
-| FAZ 7 | Diğer ekranlar | Ligler (kupa yolu, 5 rozet, liderlik satırları), profil, maç sonucu (ZAFER!, skor, ödül kutuları), görevler |
-| FAZ 8 | Bütün ekranlar | 6 boyutta golden, performans |
+| FAZ 7 | ✅ Yapıldı | Ligler, lig basamakları, profil, maç sonucu, görevler |
+| FAZ 8 | Bütün ekranlar | 6 boyutta golden, performans; eski renklerde kalan ekranlar (ayarlar, lig değişikliği paneli, walkout, tasarım sistemi) |

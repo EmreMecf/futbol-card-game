@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
-import '../../../../shared/widgets/app_button.dart';
+import '../../../../core/router/app_routes.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
-import '../../../../shared/widgets/premium_card/premium_card.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../deck/presentation/view/deck_view.dart' show SquadSlotTile;
 import '../../../deck/presentation/widgets/card_picker_sheet.dart';
 import '../../../deck/presentation/widgets/formation_pitch.dart';
 import '../viewmodel/sbc_builder_view_model.dart';
 import '../widgets/requirement_checklist.dart';
 import 'sbc_result_view.dart';
-import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_breakpoints.dart';
-import '../../../../shared/widgets/app_shell.dart';
-import '../../../../shared/widgets/screen_header.dart';
 
-/// Görev kadrosu kurma ekranı.
+/// Görev kadrosu kurma ekranı — kadro ekranının referans sahası
+/// (.field + .squad-slot) ve aynı panel dili. Görev şartları, eritilecek
+/// güç ve gönderme (onaylı, geri alınamaz) korunur.
 class SbcBuilderView extends StatelessWidget {
   final SbcChallenge challenge;
 
@@ -26,28 +27,26 @@ class SbcBuilderView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<SbcBuilderViewModel>(
-      create: (_) =>
-          getIt<SbcBuilderViewModel>(param1: challenge)..load(),
-      child: const _SbcBuilderBody(),
+      create: (_) => getIt<SbcBuilderViewModel>(param1: challenge)..load(),
+      child: const _Govde(),
     );
   }
 }
 
-class _SbcBuilderBody extends StatefulWidget {
-  const _SbcBuilderBody();
+class _Govde extends StatefulWidget {
+  const _Govde();
 
   @override
-  State<_SbcBuilderBody> createState() => _SbcBuilderBodyState();
+  State<_Govde> createState() => _GovdeState();
 }
 
-class _SbcBuilderBodyState extends State<_SbcBuilderBody> {
-  int? _vurgulananSlot;
+class _GovdeState extends State<_Govde> {
+  int? _vurgulanan;
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SbcBuilderViewModel>();
 
-    // Görev tamamlandıysa ödül ekranı
     final sonuc = vm.result;
     if (sonuc != null) {
       return SbcResultView(
@@ -61,120 +60,67 @@ class _SbcBuilderBodyState extends State<_SbcBuilderBody> {
 
     return AppShell(
       currentRoute: AppRoutes.sbc,
-      child: SafeArea(
-        bottom: false,
-        child: vm.isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              )
-            : ResponsiveBuilder(
-                builder: (context, boyut) => _yerlesim(context, vm, boyut),
-              ),
-      ),
-    );
-  }
-
-  Widget _yerlesim(
-    BuildContext context,
-    SbcBuilderViewModel vm,
-    ScreenSize boyut,
-  ) {
-    final kenar = AppBreakpoints.pagePadding(boyut);
-
-    final baslik = Padding(
-      padding: EdgeInsets.fromLTRB(
-        kenar,
-        boyut.usesSidebar ? 30 : 16,
-        kenar,
-        0,
-      ),
-      child: ScreenHeader(
-        title: vm.challenge.name,
-        showBack: true,
-        breadcrumb: 'Görevler',
-        actions: [_OtomatikMenu(viewModel: vm)],
-      ),
-    );
-
-    final saha = _Saha(
-      viewModel: vm,
-      vurgulananSlot: _vurgulananSlot,
-      onSlotBasildi: (s) => setState(() => _vurgulananSlot = s),
-      onSlotSecildi: (s) => _kartSec(context, vm, s),
-    );
-
-    // ----------------------------------------------------------------
-    // MASAÜSTÜ: solda saha, sağda şartlar ve gönderme
-    // ----------------------------------------------------------------
-    // Şart listesi bu ekranın asıl bilgisi: oyuncu kart yerleştirirken
-    // hangi şartın tuttuğunu görmek zorunda. Telefonda üstteki dar
-    // bantta duruyordu; geniş ekranda sağ panelde tamamı okunuyor.
-    if (boyut.usesSidebar) {
-      return Column(
-        children: [
-          baslik,
-          const SizedBox(height: 14),
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 12, 24),
-                    child: saha,
-                  ),
-                ),
-                SizedBox(
-                  width: 330,
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        left: BorderSide(color: AppColors.surfaceLight),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: SingleChildScrollView(
-                              child: _SartBandi(viewModel: vm),
+      child: vm.isLoading
+          ? const Center(child: CircularProgressIndicator(color: Ref.accent))
+          : LayoutBuilder(builder: (context, k) {
+              final genis = k.maxWidth >= 900;
+              final saha = _Saha(
+                viewModel: vm,
+                vurgulanan: _vurgulanan,
+                onBasildi: (s) => setState(() => _vurgulanan = s),
+                onSec: (s) => _kartSec(context, vm, s),
+              );
+              final panel = [
+                _Sartlar(viewModel: vm),
+                const SizedBox(height: Ref.pageGap),
+                _Gonder(viewModel: vm),
+              ];
+              return ListView(
+                padding: Ref.pagePadding,
+                children: [
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: genis ? 1100 : 620),
+                      child: RefPageEnter(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                          Row(children: [
+                            RefNeutralButton(
+                              padding: const EdgeInsets.all(7),
+                              semanticLabel: 'Geri',
+                              onTap: () => context.canPop() ? context.pop() : context.go(AppRoutes.sbc),
+                              child: const Icon(Icons.arrow_back_rounded, size: 16, color: Ref.neutralText),
                             ),
-                          ),
-                          const SizedBox(height: 14),
-                          _GonderBandi(viewModel: vm),
-                        ],
+                            const SizedBox(width: 10),
+                            Expanded(child: RefSectionHead(vm.challenge.name, kicker: 'GÖREV')),
+                          ]),
+                          const SizedBox(height: Ref.pageGap),
+                          if (genis)
+                            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              Expanded(flex: 6, child: saha),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                flex: 5,
+                                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: panel),
+                              ),
+                            ])
+                          else ...[
+                            _Sartlar(viewModel: vm),
+                            const SizedBox(height: Ref.pageGap),
+                            saha,
+                            const SizedBox(height: Ref.pageGap),
+                            _Gonder(viewModel: vm),
+                          ],
+                        ]),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-    }
-
-    // ----------------------------------------------------------------
-    // TELEFON: tek sütun
-    // ----------------------------------------------------------------
-    return Column(
-      children: [
-        baslik,
-        _SartBandi(viewModel: vm),
-        Expanded(child: saha),
-        _GonderBandi(viewModel: vm),
-        // Alt gezinme çubuğunun altına kaymasın
-        const SizedBox(height: 92),
-      ],
+                ],
+              );
+            }),
     );
   }
 
-  Future<void> _kartSec(
-    BuildContext context,
-    SbcBuilderViewModel vm,
-    int slot,
-  ) async {
+  Future<void> _kartSec(BuildContext context, SbcBuilderViewModel vm, int slot) async {
     final secilen = await CardPickerSheet.show(
       context,
       position: formationSlotPosition(slot),
@@ -182,404 +128,149 @@ class _SbcBuilderBodyState extends State<_SbcBuilderBody> {
       current: vm.cardAt(slot),
       chemistryPreview: (kart) => vm.chemistryIfPlaced(slot, kart),
     );
-
     if (secilen == null) return;
     vm.placeCard(slot, secilen);
   }
 }
 
-// ====================================================================
-// ŞART BANDI
-// ====================================================================
-class _SartBandi extends StatelessWidget {
+/// Şartlar: .statrow (kart · kimya · eritilecek güç) + şart listesi
+class _Sartlar extends StatelessWidget {
   final SbcBuilderViewModel viewModel;
-
-  const _SartBandi({required this.viewModel});
+  const _Sartlar({required this.viewModel});
 
   @override
   Widget build(BuildContext context) {
-    final degerlendirme = viewModel.evaluation;
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        children: [
-          // ---- ÜST SATIR: kart sayısı ve kimya ----
-          Row(
-            children: [
-              _olcum(
-                '${viewModel.totalSelected}/${GameRules.squadSize}',
-                'kart',
-                viewModel.isComplete
-                    ? AppColors.success
-                    : AppColors.warning,
-              ),
-              const SizedBox(width: 16),
-              _olcum(
-                '${viewModel.chemistry.total}',
-                'kimya',
-                AppColors.accent,
-              ),
-              const Spacer(),
-              if (viewModel.totalSelected > 0)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '${viewModel.burnValue}',
-                      style: const TextStyle(
-                        color: AppColors.danger,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                      ),
-                    ),
-                    const Text(
-                      'eritilecek güç',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-          const Divider(height: 1, color: AppColors.surfaceLight),
-          const SizedBox(height: 12),
-
-          RequirementChecklist(
-            evaluation: degerlendirme,
-            isSquadComplete: viewModel.isComplete,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _olcum(String deger, String etiket, Color renk) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          deger,
-          style: TextStyle(
-            color: renk,
-            fontWeight: FontWeight.w900,
-            fontSize: 17,
-          ),
-        ),
-        Text(
-          etiket,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 10,
-          ),
-        ),
-      ],
-    );
+    final vm = viewModel;
+    return RefCardPanel(children: [
+      RefStatRow([
+        RefStat('${vm.totalSelected}/${GameRules.squadSize}', 'KART', valueSize: 20),
+        RefStat('${vm.chemistry.total}', 'KİMYA', valueSize: 20),
+        RefStat('${vm.burnValue}', 'ERİTİLECEK GÜÇ', valueSize: 20),
+      ]),
+      RequirementChecklist(evaluation: vm.evaluation, isSquadComplete: vm.isComplete),
+      Wrap(spacing: 6, runSpacing: 6, children: [
+        RefNeutralButton(label: 'Kimyaya göre doldur', onTap: vm.autoFillByChemistry),
+        RefNeutralButton(label: 'En düşük kartlarla doldur', onTap: vm.autoFill),
+        RefNeutralButton(label: 'Boşalt', onTap: vm.clearAll),
+      ]),
+    ]);
   }
 }
 
-// ====================================================================
-// SAHA
-// ====================================================================
+/// Kadro ekranıyla aynı referans saha (taşmasız, genişlikle ölçeklenir)
 class _Saha extends StatelessWidget {
   final SbcBuilderViewModel viewModel;
-  final int? vurgulananSlot;
-  final ValueChanged<int?> onSlotBasildi;
-  final ValueChanged<int> onSlotSecildi;
+  final int? vurgulanan;
+  final ValueChanged<int?> onBasildi;
+  final ValueChanged<int> onSec;
 
-  const _Saha({
-    required this.viewModel,
-    required this.vurgulananSlot,
-    required this.onSlotBasildi,
-    required this.onSlotSecildi,
-  });
+  const _Saha({required this.viewModel, required this.vurgulanan, required this.onBasildi, required this.onSec});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.surfaceLight),
-      ),
-      child: LayoutBuilder(
-        builder: (context, kisitlar) {
-          final genislik = kisitlar.maxWidth;
-          final yukseklik = kisitlar.maxHeight;
-          final kartGenisligi = (genislik * 0.19).clamp(50.0, 84.0);
-
-          return Stack(
-            children: [
-              const Positioned.fill(child: PitchBackground()),
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: ChemistryLinksPainter(
-                    links: viewModel.chemistry.links,
-                    highlightedSlot: vurgulananSlot,
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, kisit) {
+        final w = kisit.maxWidth.clamp(0.0, 560.0);
+        final k = w / 362;
+        final h = 353 * k;
+        return Center(
+          child: Container(
+            width: w,
+            height: h,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(7),
+              border: Border.all(color: const Color(0x919BD7B9), width: 2),
+            ),
+            child: LayoutBuilder(builder: (context, ic) {
+              final iw = ic.maxWidth, ih = ic.maxHeight;
+              return Stack(clipBehavior: Clip.none, children: [
+                Positioned.fill(child: CustomPaint(painter: RefFieldPainter(k))),
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: ChemistryLinksPainter(links: viewModel.chemistry.links, highlightedSlot: vurgulanan),
                   ),
                 ),
-              ),
-              for (final giris in kSlotPositions.entries)
-                _slot(
-                  slot: giris.key,
-                  konum: giris.value,
-                  genislik: genislik,
-                  yukseklik: yukseklik,
-                  kartGenisligi: kartGenisligi,
-                ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _slot({
-    required int slot,
-    required Offset konum,
-    required double genislik,
-    required double yukseklik,
-    required double kartGenisligi,
-  }) {
-    final kart = viewModel.cardAt(slot);
-    final kartYuksekligi = kartGenisligi / 0.70;
-    final kimya = viewModel.chemistry.chemistryAt(slot);
-
-    return Positioned(
-      left: konum.dx * genislik - kartGenisligi / 2,
-      top: konum.dy * yukseklik - kartYuksekligi / 2,
-      width: kartGenisligi,
-      height: kartYuksekligi + 16,
-      child: GestureDetector(
-        onTap: () => onSlotSecildi(slot),
-        onLongPressStart: (_) => onSlotBasildi(slot),
-        onLongPressEnd: (_) => onSlotBasildi(null),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (kart == null)
-              Container(
-                width: kartGenisligi,
-                height: kartYuksekligi,
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(9),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.25),
-                    width: 1.4,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add,
-                        size: kartGenisligi * 0.3,
-                        color: Colors.white.withValues(alpha: 0.5)),
-                    Text(
-                      formationSlotPosition(slot).shortLabel,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        fontWeight: FontWeight.w700,
-                        fontSize: kartGenisligi * 0.14,
+                for (final g in kSlotPositions.entries)
+                  Positioned(
+                    left: g.value.dx * iw - 47 * k / 2,
+                    top: g.value.dy * ih - 55 * k / 2,
+                    width: 47 * k,
+                    height: 55 * k,
+                    child: GestureDetector(
+                      onTap: () => onSec(g.key),
+                      onLongPressStart: (_) => onBasildi(g.key),
+                      onLongPressEnd: (_) => onBasildi(null),
+                      child: SquadSlotTile(
+                        key: viewModel.cardAt(g.key) == null
+                            ? null
+                            : ValueKey('sbc-${g.key}-${viewModel.cardAt(g.key)!.userCardId}'),
+                        slot: g.key,
+                        card: viewModel.cardAt(g.key),
+                        chemistry: viewModel.cardAt(g.key) == null ? null : viewModel.chemistry.chemistryAt(g.key),
+                        k: k,
+                        highlighted: vurgulanan == g.key,
                       ),
                     ),
-                  ],
-                ),
-              )
-            else
-              SizedBox(
-                width: kartGenisligi,
-                height: kartYuksekligi,
-                child: PremiumPlayerCard.fromInventory(
-                  kart,
-                  key: ValueKey('sbc-$slot-${kart.userCardId}'),
-                  width: kartGenisligi,
-                  interactive: false,
-                ),
-              ),
-            if (kart != null)
-              Transform.translate(
-                offset: const Offset(0, -6),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: kimya >= 5
-                        ? ChemistryColors.strong
-                        : (kimya >= 2
-                            ? ChemistryColors.weak
-                            : ChemistryColors.none),
-                    borderRadius: BorderRadius.circular(9),
                   ),
-                  child: Text(
-                    '+$kimya',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 9.5,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+              ]);
+            }),
+          ),
+        );
+      });
 }
 
-// ====================================================================
-// GÖNDER BANDI
-// ====================================================================
-class _GonderBandi extends StatelessWidget {
+class _Gonder extends StatelessWidget {
   final SbcBuilderViewModel viewModel;
-
-  const _GonderBandi({required this.viewModel});
+  const _Gonder({required this.viewModel});
 
   @override
   Widget build(BuildContext context) {
-    final degerlendirme = viewModel.evaluation;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+    final vm = viewModel;
+    final hata = vm.evaluation.blockingError;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      if (hata != null) ...[
+        Text(hata, textAlign: TextAlign.center, style: Ref.bodyText(12, color: Ref.red, weight: FontWeight.w700)),
+        const SizedBox(height: 8),
+      ],
+      RefSecondaryButton(
+        vm.isSubmitting
+            ? 'GÖNDERİLİYOR...'
+            : (vm.canSubmit ? 'KARTLARI ERİT VE ÖDÜLÜ AL' : 'ŞARTLAR TAMAMLANMADI'),
+        leadingIcon: vm.canSubmit ? Icons.local_fire_department_rounded : Icons.lock_outline_rounded,
+        onTap: vm.canSubmit && !vm.isSubmitting ? () => _onayAl(context) : null,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (degerlendirme.blockingError != null) ...[
-            Text(
-              degerlendirme.blockingError!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.warning,
-                fontSize: 12.5,
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-          AppButton(
-            label: viewModel.canSubmit
-                ? 'KARTLARI ERİT VE ÖDÜLÜ AL'
-                : 'ŞARTLAR TAMAMLANMADI',
-            icon: viewModel.canSubmit
-                ? Icons.local_fire_department
-                : Icons.lock_outline,
-            isLoading: viewModel.isSubmitting,
-            color: viewModel.canSubmit ? AppColors.danger : null,
-            onPressed:
-                viewModel.canSubmit ? () => _onayAl(context) : null,
-          ),
-        ],
-      ),
-    );
+    ]);
   }
 
-  /// GERİ ALINAMAZ bir işlem: onay almadan yapılmamalı.
+  /// GERİ ALINAMAZ bir işlem: onay almadan yapılmaz
   Future<void> _onayAl(BuildContext context) async {
     final onay = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('Kartlar kalıcı olarak silinecek'),
+        backgroundColor: Ref.modalBg,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(21),
+          side: const BorderSide(color: Ref.modalBorder),
+        ),
+        title: Text('Kartlar kalıcı olarak silinecek', style: Ref.h3()),
         content: Text(
-          '${viewModel.totalSelected} kart eritilecek ve GERİ ALINAMAZ.\n\n'
-          'Ödül: ${viewModel.challenge.rewardSummary}',
-          style: const TextStyle(color: AppColors.textSecondary),
+          '${viewModel.totalSelected} kart eritilecek ve GERİ ALINAMAZ.\n\nÖdül: ${viewModel.challenge.rewardSummary}',
+          style: Ref.bodyText(13, color: Ref.muted),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Vazgeç'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              'Erit',
-              style: TextStyle(color: AppColors.danger),
-            ),
+          RefNeutralButton(label: 'VAZGEÇ', onTap: () => Navigator.pop(ctx, false)),
+          RefNeutralButton(
+            onTap: () => Navigator.pop(ctx, true),
+            child: Text('ERİT', style: Ref.bodyText(11, color: Ref.red, weight: FontWeight.w800)),
           ),
         ],
       ),
     );
-
     if (onay != true || !context.mounted) return;
-
-    final basarili = await viewModel.submit();
+    final ok = await viewModel.submit();
     if (!context.mounted) return;
-
-    if (!basarili && viewModel.errorMessage != null) {
+    if (!ok && viewModel.errorMessage != null) {
       AppSnackBar.showError(context, viewModel.errorMessage!);
       viewModel.clearError();
     }
-  }
-}
-
-// ====================================================================
-// OTOMATİK DOLDURMA MENÜSÜ
-// ====================================================================
-class _OtomatikMenu extends StatelessWidget {
-  final SbcBuilderViewModel viewModel;
-
-  const _OtomatikMenu({required this.viewModel});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.surfaceLight),
-      ),
-      child: PopupMenuButton<String>(
-        icon: const Icon(
-          Icons.auto_fix_high_rounded,
-          size: 19,
-          color: AppColors.textSecondary,
-        ),
-        tooltip: 'Otomatik doldur',
-        color: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: AppColors.surfaceLight),
-        ),
-        onSelected: (secim) {
-          switch (secim) {
-            case 'kimya':
-              viewModel.autoFillByChemistry();
-            case 'doldur':
-              viewModel.autoFill();
-            case 'temizle':
-              viewModel.clearAll();
-          }
-        },
-        itemBuilder: (context) => const [
-          PopupMenuItem<String>(
-            value: 'kimya',
-            child: Text('Kimyaya göre doldur'),
-          ),
-          PopupMenuItem<String>(
-            value: 'doldur',
-            child: Text('En düşük kartlarla doldur'),
-          ),
-          PopupMenuItem<String>(
-            value: 'temizle',
-            child: Text('Kadroyu boşalt'),
-          ),
-        ],
-      ),
-    );
   }
 }

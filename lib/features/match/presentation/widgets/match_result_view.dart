@@ -1,36 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/feedback/game_feedback.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/widgets/game/game_ui.dart';
-import '../../../../shared/widgets/premium_card/premium_card.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 import '../../../../shared/widgets/walkout/confetti_overlay.dart';
-import '../arena/arena_backdrop.dart';
 import '../viewmodel/match_view_model.dart';
 import 'league_change_widgets.dart';
 
-/// MAÇ SONUCU (MD bölüm 4-D, prototipteki "winpanel").
+/// MAÇ SONUCU — referans `result()` ekranı.
 ///
-/// ===================================================================
-/// EN ÖNEMLİ KISIM: KART TRANSFERLERİ
-/// ===================================================================
-/// Yüksek Risk Modu bu oyunun kalbi. Kaybeden oyuncu korumaya almadığı
-/// 3 kartını KALICI olarak kaptırır. Oyuncu hangi kartları kaybettiğini
-/// burada görmeli; envanterine girip tek tek aramak zorunda kalmamalı.
+///   .winpanel   caps "MAÇ SONUCU", 🏆 / 🛡️ / 🤝 (92px), h1 50px
+///               ZAFER! / MÜCADELE BİTTİ / BERABERLİK, skor 49px,
+///               "SEN · RAKİP", .rewardrow (altın · puan · koruma), YENİ MAÇ ▶
+///   .neutral-button  ANA MENÜYE DÖN
 ///
-/// Gösterilen her şey sunucudan: skor, el değiştiren kartlar ve maç
-/// sonrası profil. Ödül farkları ([MatchRewardDelta]) maç öncesi ile
-/// sunucunun gönderdiği yeni profil arasındaki fark; bilinmiyorsa ödül
-/// kutuları hiç çizilmiyor.
+/// GERÇEK VERİ: skor, rakip ve el değiştiren kartlar sunucunun maç
+/// özetinden; ödül kutuları oyuncunun maç öncesi/sonrası sayaç farkından
+/// ([MatchRewardDelta]). Fark bilinmiyorsa kutular hiç çizilmez
+/// (referanstaki "+500 XP" gibi oyunda olmayan bir değer gösterilmez).
+/// Lig değişimi paneli ve lig atlama kutlaması (oyunda gerçek) korunur.
 class MatchResultView extends StatefulWidget {
   final MatchResultSummary? result;
   final MatchRewardDelta? rewardDelta;
   final VoidCallback onClose;
 
-  /// "Yeni maç" butonu. Null ise buton gösterilmez.
+  /// Verilmezse "YENİ MAÇ" butonu gösterilmez
   final VoidCallback? onNewMatch;
 
   const MatchResultView({
@@ -45,21 +41,16 @@ class MatchResultView extends StatefulWidget {
   State<MatchResultView> createState() => _MatchResultViewState();
 }
 
-class _MatchResultViewState extends State<MatchResultView>
-    with SingleTickerProviderStateMixin {
+class _MatchResultViewState extends State<MatchResultView> with SingleTickerProviderStateMixin {
   late final AnimationController _giris;
   bool _titredi = false;
-
-  /// Lig atlama ekranı kapatıldı mı? (maç başına bir kez gösterilir)
   bool _terfiKapandi = false;
 
   @override
   void initState() {
     super.initState();
-    _giris = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 650),
-    );
+    // Galibiyet vurgusu 500-800 ms
+    _giris = AnimationController(vsync: this, duration: const Duration(milliseconds: 650));
     if (GameFeedback.cardAnimationsEnabled) {
       _giris.forward();
     } else {
@@ -70,7 +61,6 @@ class _MatchResultViewState extends State<MatchResultView>
   @override
   void didUpdateWidget(MatchResultView eski) {
     super.didUpdateWidget(eski);
-    // Sonuç sunucudan geç gelebilir: geldiği anda bir kez titret
     _titret();
   }
 
@@ -79,9 +69,7 @@ class _MatchResultViewState extends State<MatchResultView>
     if (_titredi || s == null) return;
     _titredi = true;
     GameFeedback.haptic(
-      s.didIWin
-          ? HapticStrength.heavy
-          : (s.isDraw ? HapticStrength.light : HapticStrength.medium),
+      s.didIWin ? HapticStrength.heavy : (s.isDraw ? HapticStrength.light : HapticStrength.medium),
     );
   }
 
@@ -94,134 +82,75 @@ class _MatchResultViewState extends State<MatchResultView>
   @override
   Widget build(BuildContext context) {
     final sonuc = widget.result;
-
     if (sonuc == null) {
       return const Scaffold(
-        backgroundColor: AppColors.background,
-        body: Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
-        ),
+        backgroundColor: Ref.phoneBg,
+        body: Center(child: CircularProgressIndicator(color: Ref.accent)),
       );
     }
     _titret();
 
-    final g = _Gorunum.of(sonuc);
-
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Ref.phoneBg,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const ArenaBackdrop(intensity: 0.35),
-
-          // Zaferde konfeti — panelin ARKASINDA.
-          // Önde olduğunda skoru ve "+25 puan"ı kapatıyordu; oyuncu en
-          // çok merak ettiği anda sayıları okuyamıyordu. Arkada, panelin
-          // etrafından fışkırıyor.
           if (sonuc.didIWin)
             ConfettiOverlay(
               active: GameFeedback.cardAnimationsEnabled,
-              colors: const [
-                AppColors.victoryGold,
-                AppColors.emerald,
-                AppColors.cyan,
-                Colors.white,
-              ],
+              colors: const [Ref.gold, Ref.accent, Ref.blue, Colors.white],
             ),
           SafeArea(
-            child: Column(
+            child: ListView(
+              padding: Ref.pagePadding,
               children: [
-                Expanded(
-                  child: Center(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(AppSpacing.screenEdge),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 460),
-                        child: Column(
-                          children: [
-                            _ZaferPaneli(
-                              sonuc: sonuc,
-                              gorunum: g,
-                              delta: widget.rewardDelta,
-                              giris: _giris,
-                            ),
-                            // Lig etkisi: sunucu kaydetmediyse (eski maç)
-                            // bölüm hiç çizilmez, uydurulmaz.
-                            if (sonuc.leagueChange != null) ...[
-                              const SizedBox(height: AppSpacing.lg),
-                              LeagueChangePanel(change: sonuc.leagueChange!),
-                            ],
-                            if (sonuc.cardsLost.isNotEmpty)
-                              _KartBolumu(
-                                baslik: 'Kaybettiğin kartlar',
-                                aciklama:
-                                    'Bu kartlar KALICI olarak rakibine geçti.',
-                                kartlar: sonuc.cardsLost,
-                                renk: AppColors.danger,
-                                ikon: Icons.trending_down_rounded,
-                              ),
-                            if (sonuc.cardsWon.isNotEmpty)
-                              _KartBolumu(
-                                baslik: 'Kazandığın kartlar',
-                                aciklama:
-                                    'Bu kartlar artık senin; koleksiyonunda.',
-                                kartlar: sonuc.cardsWon,
-                                renk: AppColors.emerald,
-                                ikon: Icons.trending_up_rounded,
-                              ),
-                            if (!sonuc.hasCardTransfers) ...[
-                              const SizedBox(height: AppSpacing.lg),
-                              GlassPanel(
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.shield_rounded,
-                                        color: AppColors.emerald, size: 20),
-                                    const SizedBox(width: AppSpacing.md),
-                                    Expanded(
-                                      child: Text(
-                                        sonuc.isDraw
-                                            ? 'Beraberlikte kimse kart kaybetmez.'
-                                            : 'Hiçbir kart el değiştirmedi.',
-                                        style: AppTypography.bodyM,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // ---- BUTONLAR ----
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.screenEdge,
-                    AppSpacing.sm,
-                    AppSpacing.screenEdge,
-                    AppSpacing.lg,
-                  ),
+                Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 460),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (widget.onNewMatch != null) ...[
-                          GameButton(
-                            label: 'Yeni maç',
-                            icon: Icons.sports_soccer_rounded,
-                            trailingIcon: Icons.play_arrow_rounded,
-                            onPressed: widget.onNewMatch,
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                        ],
-                        GameButton.neutral(
-                          label: 'Ana sayfa',
-                          icon: Icons.home_rounded,
-                          onPressed: widget.onClose,
+                        _ZaferPaneli(
+                          sonuc: sonuc,
+                          delta: widget.rewardDelta,
+                          giris: _giris,
+                          onNewMatch: widget.onNewMatch,
                         ),
+                        const SizedBox(height: Ref.pageGap),
+                        RefNeutralButton(label: 'ANA MENÜYE DÖN', onTap: widget.onClose),
+                        if (sonuc.leagueChange != null) ...[
+                          const SizedBox(height: Ref.pageGap),
+                          LeagueChangePanel(change: sonuc.leagueChange!),
+                        ],
+                        if (sonuc.cardsLost.isNotEmpty)
+                          _KartBolumu(
+                            baslik: 'Kaybettiğin kartlar',
+                            aciklama: 'Bu kartlar KALICI olarak rakibine geçti.',
+                            kartlar: sonuc.cardsLost,
+                            renk: Ref.red,
+                          ),
+                        if (sonuc.cardsWon.isNotEmpty)
+                          _KartBolumu(
+                            baslik: 'Kazandığın kartlar',
+                            aciklama: 'Bu kartlar artık senin; koleksiyonunda.',
+                            kartlar: sonuc.cardsWon,
+                            renk: Ref.accent,
+                          ),
+                        if (!sonuc.hasCardTransfers) ...[
+                          const SizedBox(height: Ref.pageGap),
+                          RefCardPanel(children: [
+                            Row(children: [
+                              const Em('🛡️', size: 18),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  sonuc.isDraw ? 'Beraberlikte kimse kart kaybetmez.' : 'Hiçbir kart el değiştirmedi.',
+                                  style: Ref.bodyText(12, weight: FontWeight.w700),
+                                ),
+                              ),
+                            ]),
+                          ]),
+                        ],
                       ],
                     ),
                   ),
@@ -229,9 +158,6 @@ class _MatchResultViewState extends State<MatchResultView>
               ],
             ),
           ),
-
-          // ---- LİG ATLAMA EKRANI ----
-          // Basamak atlandıysa sonucun üstünde bir kez; dokununca kapanır.
           if (sonuc.leagueChange?.isPromoted == true && !_terfiKapandi)
             Positioned.fill(
               child: LeaguePromotionOverlay(
@@ -245,281 +171,219 @@ class _MatchResultViewState extends State<MatchResultView>
   }
 }
 
-/// Sonuca göre renk, simge ve başlık
-class _Gorunum {
-  final Color renk;
-  final IconData ikon;
-  final String baslik;
-  final String alt;
-
-  const _Gorunum(this.renk, this.ikon, this.baslik, this.alt);
-
-  static _Gorunum of(MatchResultSummary s) {
-    if (s.isDraw) {
-      return const _Gorunum(
-        AppColors.textSecondary,
-        Icons.handshake_rounded,
-        'BERABERLİK',
-        'Skor eşit bitti. Kimse kart kaybetmedi.',
-      );
-    }
-    if (s.didIWin) {
-      final n = s.cardsWon.length;
-      return _Gorunum(
-        AppColors.victoryGold,
-        Icons.emoji_events_rounded,
-        'ZAFER!',
-        n > 0
-            ? 'Rakibinden $n kart aldın.'
-            : 'Rakibinin korumasız kartı kalmamıştı.',
-      );
-    }
-    final n = s.cardsLost.length;
-    return _Gorunum(
-      AppColors.danger,
-      Icons.shield_rounded,
-      'MAĞLUBİYET',
-      n > 0
-          ? '$n kartını kalıcı olarak kaptırdın.'
-          : 'Korumadaki kartların sayesinde hiç kart kaybetmedin.',
-    );
-  }
-}
-
-// ====================================================================
-// ZAFER PANELİ
-// ====================================================================
+/// .winpanel { background:radial-gradient(ellipse at center,#5e51315e,transparent 68%),
+///   linear-gradient(#142c43,#0d1425); border:1px solid #caa358; border-radius:17px;
+///   padding:22px 14px; gap:15px; text-align:center }
+/// h1 { color:gold; font-size:50px; text-shadow:0 0 24px #e6b44e77 } .trophy { 92px }
 class _ZaferPaneli extends StatelessWidget {
   final MatchResultSummary sonuc;
-  final _Gorunum gorunum;
   final MatchRewardDelta? delta;
   final Animation<double> giris;
+  final VoidCallback? onNewMatch;
 
-  const _ZaferPaneli({
-    required this.sonuc,
-    required this.gorunum,
-    required this.delta,
-    required this.giris,
-  });
+  const _ZaferPaneli({required this.sonuc, required this.delta, required this.giris, required this.onNewMatch});
 
   @override
   Widget build(BuildContext context) {
-    final g = gorunum;
+    final (emoji, baslik, renk, alt) = _gorunum();
     final d = delta;
+    final ust = Column(
+      children: [
+        Text('MAÇ SONUCU', style: Ref.caps(Ref.gold)),
+        const SizedBox(height: 15),
+        AnimatedBuilder(
+          animation: giris,
+          builder: (context, c) => Transform.scale(
+            scale: 0.6 + 0.4 * Curves.easeOutBack.transform(giris.value),
+            child: Opacity(opacity: giris.value.clamp(0.0, 1.0), child: c),
+          ),
+          child: Em(emoji, size: 92),
+        ),
+        const SizedBox(height: 15),
+        Text(
+          baslik,
+          textAlign: TextAlign.center,
+          style: Ref.heading(50, color: renk, height: 1).copyWith(
+            shadows: [Shadow(color: renk.withValues(alpha: 0.47), blurRadius: 24)],
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(alt, textAlign: TextAlign.center, style: Ref.bodyText(12, color: Ref.muted)),
+        const SizedBox(height: 15),
+        Text('${sonuc.myScore} – ${sonuc.opponentScore}', style: Ref.heading(49, height: 1.1)),
+        const SizedBox(height: 4),
+        Text(
+          'SEN · ${(sonuc.opponent?.username ?? 'RAKİP').toUpperCase()}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Ref.caps(Ref.muted),
+        ),
+        if (d != null) ...[
+          const SizedBox(height: 15),
+          Row(children: [
+            Expanded(child: _OdulKutusu(simge: const CoinGlyph(size: 13), deger: d.coins, etiket: 'Altın')),
+            const SizedBox(width: 6),
+            Expanded(child: _OdulKutusu(simge: const Em('🏆', size: 13), deger: d.rating, etiket: 'Puan')),
+            const SizedBox(width: 6),
+            Expanded(child: _OdulKutusu(simge: const Em('🛡️', size: 13), deger: d.protectionSlots, etiket: 'Koruma')),
+          ]),
+        ],
+        if (onNewMatch != null) ...[
+          const SizedBox(height: 15),
+          RefCta('YENİ MAÇ', trailing: RefGlyph.play, onTap: onNewMatch),
+        ],
+      ],
+    );
 
-    return GlassPanel(
-      accentColor: g.renk,
-      glow: sonuc.didIWin,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xl,
-        vertical: AppSpacing.xxl,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: const Color(0xFFCAA358)),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF142C43), Color(0xFF0D1425)],
+        ),
       ),
-      child: Column(
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Text('MAÇ SONUCU', style: AppTypography.label),
-          const SizedBox(height: AppSpacing.md),
-
-          // ---- Kupa: büyüyerek gelir ----
-          AnimatedBuilder(
-            animation: giris,
-            builder: (context, cocuk) => Transform.scale(
-              scale: 0.6 + 0.4 * Curves.easeOutBack.transform(giris.value),
-              child: Opacity(opacity: giris.value, child: cocuk),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [
-                  g.renk.withValues(alpha: 0.30),
-                  g.renk.withValues(alpha: 0),
-                ]),
-              ),
-              child: Icon(g.ikon, size: 88, color: g.renk),
-            ),
-          ),
-
-          Text(
-            g.baslik,
-            textAlign: TextAlign.center,
-            style: AppTypography.display(
-              size: 52,
-              weight: FontWeight.w900,
-              color: g.renk,
-              height: 1,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(g.alt, textAlign: TextAlign.center, style: AppTypography.bodyS),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // ---- Skor ----
-          Text(
-            '${sonuc.myScore} – ${sonuc.opponentScore}',
-            style: AppTypography.display(size: 48, weight: FontWeight.w900),
-          ),
-          Text(
-            'SEN · ${(sonuc.opponent?.username ?? 'RAKİP').toUpperCase()}',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.label,
-          ),
-
-          // ---- Ödüller (sadece gerçek fark biliniyorsa) ----
-          if (d != null) ...[
-            const SizedBox(height: AppSpacing.xl),
-            Row(
-              children: [
-                Expanded(
-                  child: _OdulKutusu(
-                    ikon: Icons.monetization_on_rounded,
-                    renk: AppColors.victoryGold,
-                    deger: d.coins,
-                    etiket: 'Coin',
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: _OdulKutusu(
-                    ikon: Icons.emoji_events_rounded,
-                    renk: AppColors.cyan,
-                    deger: d.rating,
-                    etiket: 'Puan',
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: _OdulKutusu(
-                    ikon: Icons.shield_rounded,
-                    renk: AppColors.emerald,
-                    deger: d.protectionSlots,
-                    etiket: 'Koruma',
-                  ),
-                ),
-              ],
-            ),
-          ],
+          // radial-gradient(ellipse at center, #5e51315e, transparent 68%)
+          const Positioned.fill(child: CustomPaint(painter: _PanelIsigi())),
+          ust,
         ],
       ),
     );
   }
+
+  (String, String, Color, String) _gorunum() {
+    if (sonuc.isDraw) {
+      return ('🤝', 'BERABERLİK', Ref.gold, 'Skor eşit bitti. Kimse kart kaybetmedi.');
+    }
+    if (sonuc.didIWin) {
+      final n = sonuc.cardsWon.length;
+      return ('🏆', 'ZAFER!', Ref.gold, n > 0 ? 'Rakibinden $n kart aldın.' : 'Rakibinin korumasız kartı kalmamıştı.');
+    }
+    final n = sonuc.cardsLost.length;
+    return (
+      '🛡️',
+      'MÜCADELE BİTTİ',
+      Ref.red,
+      n > 0 ? '$n kartını kalıcı olarak kaptırdın.' : 'Korumadaki kartların sayesinde hiç kart kaybetmedin.',
+    );
+  }
 }
 
+class _PanelIsigi extends CustomPainter {
+  const _PanelIsigi();
+
+  @override
+  void paint(Canvas c, Size s) {
+    final m = s.center(Offset.zero);
+    c.save();
+    c.translate(m.dx, m.dy);
+    c.scale(s.width / s.height, 1);
+    final yr = s.height / 2 * 1.41 * 0.68;
+    c.drawCircle(
+        Offset.zero,
+        yr,
+        Paint()
+          ..shader = const RadialGradient(colors: [Color(0x5E5E5131), Color(0x005E5131)])
+              .createShader(Rect.fromCircle(center: Offset.zero, radius: yr)));
+    c.restore();
+  }
+
+  @override
+  bool shouldRepaint(_PanelIsigi old) => false;
+}
+
+/// .rewardbox { background:#112039; border:1px solid #334964; border-radius:10px;
+///   padding:10px 4px; font-size:11px; font-weight:900 }
 class _OdulKutusu extends StatelessWidget {
-  final IconData ikon;
-  final Color renk;
+  final Widget simge;
   final int deger;
   final String etiket;
 
-  const _OdulKutusu({
-    required this.ikon,
-    required this.renk,
-    required this.deger,
-    required this.etiket,
-  });
+  const _OdulKutusu({required this.simge, required this.deger, required this.etiket});
 
   @override
   Widget build(BuildContext context) {
-    // İşaret her zaman yazılır: "+25", "-25", "0"
     final metin = deger > 0 ? '+$deger' : '$deger';
-    final yaziRengi = deger < 0
-        ? AppColors.danger
-        : (deger == 0 ? AppColors.textSecondary : AppColors.textPrimary);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.obsidian.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.surfaceLight),
-      ),
-      child: Column(
-        children: [
-          Icon(ikon, color: renk, size: 22),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            metin,
-            style: AppTypography.display(
-              size: 22,
-              weight: FontWeight.w900,
-              color: yaziRengi,
-            ),
-          ),
-          Text(etiket, style: AppTypography.bodyXS),
-        ],
+    final renk = deger < 0 ? Ref.red : (deger == 0 ? Ref.muted : Ref.text);
+    return Semantics(
+      label: '$etiket $metin',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF112039),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFF334964)),
+        ),
+        child: Column(children: [
+          simge,
+          const SizedBox(height: 3),
+          Text(metin, style: Ref.bodyText(11, color: renk, weight: FontWeight.w900)),
+          Text(etiket, style: Ref.tiny(Ref.muted)),
+        ]),
       ),
     );
   }
 }
 
-// ====================================================================
-// KART TRANSFERLERİ
-// ====================================================================
+/// El değiştiren kartlar: .card-panel + ortak ızgara kartları
 class _KartBolumu extends StatelessWidget {
   final String baslik;
   final String aciklama;
   final List<InventoryCard> kartlar;
   final Color renk;
-  final IconData ikon;
 
-  const _KartBolumu({
-    required this.baslik,
-    required this.aciklama,
-    required this.kartlar,
-    required this.renk,
-    required this.ikon,
-  });
+  const _KartBolumu({required this.baslik, required this.aciklama, required this.kartlar, required this.renk});
 
   @override
   Widget build(BuildContext context) {
+    const genislik = 96.0;
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.xl),
-      child: GlassPanel(
-        accentColor: renk,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(ikon, color: renk, size: 20),
-                const SizedBox(width: AppSpacing.sm),
-                // Expanded: büyük yazı boyutu ayarında taşmasın
-                Expanded(
-                  child: Text(
-                    '$baslik (${kartlar.length})',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.body(
-                      size: 15,
-                      weight: FontWeight.w900,
-                      color: renk,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Text(aciklama, style: AppTypography.bodyS),
-            const SizedBox(height: AppSpacing.md),
-            SizedBox(
-              height: 152,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: kartlar.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(width: AppSpacing.sm),
-                itemBuilder: (context, index) =>
-                    PremiumPlayerCard.fromInventory(
-                  kartlar[index],
-                  key: ValueKey(kartlar[index].userCardId),
-                  width: 104,
-                  interactive: false,
-                ),
-              ),
-            ),
-          ],
+      padding: const EdgeInsets.only(top: Ref.pageGap),
+      child: Container(
+        padding: const EdgeInsets.all(13),
+        decoration: BoxDecoration(
+          gradient: Ref.cardPanelGradient,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: renk.withValues(alpha: 0.7)),
         ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('$baslik (${kartlar.length})',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Ref.bodyText(14, color: renk, weight: FontWeight.w900)),
+          const SizedBox(height: 2),
+          Text(aciklama, style: Ref.bodyText(11, color: Ref.muted)),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: genislik / RefCardLayout.grid.aspectRatio,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: kartlar.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
+              itemBuilder: (context, i) {
+                final k = kartlar[i];
+                return RefPlayerCard(
+                  key: ValueKey(k.userCardId),
+                  name: k.fullName,
+                  position: k.position,
+                  tier: k.tier,
+                  power: k.power,
+                  seed: k.cardId,
+                  kitSeed: k.club ?? k.nationality,
+                  imageUrl: k.imageUrl,
+                  width: genislik,
+                );
+              },
+            ),
+          ),
+        ]),
       ),
     );
   }

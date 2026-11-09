@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/theme/ref_tokens.dart';
 
 /// Görev şartlarının canlı kontrol listesi.
 ///
@@ -36,14 +36,14 @@ class RequirementChecklist extends StatelessWidget {
               evaluation.isValid ? Icons.verified : Icons.rule,
               size: 16,
               color: evaluation.isValid
-                  ? AppColors.success
-                  : AppColors.textSecondary,
+                  ? Ref.accent
+                  : Ref.muted,
             ),
             const SizedBox(width: 7),
             const Text(
               'Şartlar',
               style: TextStyle(
-                color: AppColors.textSecondary,
+                color: Ref.muted,
                 fontSize: 11.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.4,
@@ -54,8 +54,8 @@ class RequirementChecklist extends StatelessWidget {
               evaluation.progressText,
               style: TextStyle(
                 color: evaluation.isValid
-                    ? AppColors.success
-                    : AppColors.warning,
+                    ? Ref.accent
+                    : Ref.gold,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
               ),
@@ -82,7 +82,7 @@ class _SartSatiri extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final karsilandi = result.isMet;
-    final renk = karsilandi ? AppColors.success : AppColors.danger;
+    final renk = karsilandi ? Ref.accent : Ref.red;
 
     return Opacity(
       opacity: soluk ? 0.55 : 1.0,
@@ -114,8 +114,8 @@ class _SartSatiri extends StatelessWidget {
                 result.label,
                 style: TextStyle(
                   color: karsilandi
-                      ? AppColors.textPrimary
-                      : AppColors.textSecondary,
+                      ? Ref.text
+                      : Ref.muted,
                   fontSize: 12.5,
                   fontWeight: karsilandi ? FontWeight.w600 : FontWeight.w400,
                 ),
@@ -157,13 +157,13 @@ class RequirementSummary extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.surfaceLight,
+              color: Ref.pillBorder,
               borderRadius: BorderRadius.circular(7),
             ),
             child: Text(
               sart.label,
               style: const TextStyle(
-                color: AppColors.textSecondary,
+                color: Ref.muted,
                 fontSize: 11,
               ),
             ),

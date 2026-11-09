@@ -4,32 +4,28 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../../core/utils/turkish_text.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_breakpoints.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/app_shell.dart';
-import '../../../../shared/widgets/screen_header.dart';
-import '../../../leaderboard/presentation/widgets/rank_badge.dart';
+import '../../../../shared/widgets/avatar2d/avatar_painter.dart';
+import '../../../../shared/widgets/avatar2d/avatar_spec.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../viewmodel/profile_view_model.dart';
 import '../widgets/profile_sections.dart';
 
-/// Profil — oyuncunun karnesi ve maç geçmişi.
+/// PROFİL — referans `profile()` ekranı.
 ///
-/// ===================================================================
-/// SADECE GERÇEK VERİ
-/// ===================================================================
-/// Gösterilenlerin hepsi veritabanında duran gerçek alanlar:
-/// galibiyet, mağlubiyet, beraberlik, coin, puan, koruma hakkı,
-/// kayıt tarihi ve bitmiş maçların listesi.
+///   .hero (ortalı)  avatar, ad, lig hapı, alt satır
+///   .statrow        KAZANILAN MAÇ · KAZANMA ORANI · PUAN
+///   BAŞARIMLAR      .tilegrid
+///   .card-panel     ★ Favori kartlar
+///   .secondary-button  LİG SIRALAMASINI GÖR
 ///
-/// BAŞARIMLAR bu sayaçlardan hesaplanıyor ve ödül vermiyor; sunucuda
-/// ayrı bir başarım sistemi YOK. Eksik veriye dayanacak başarımlar
-/// (ör. "5 galibiyet serisi") bilerek eklenmedi — bkz. [Achievement].
-///
-/// FAVORİ KARTLAR bu cihazda saklanıyor (bkz. FavoritesStore).
+/// Referansta olmayan ama oyunda gerçek olanlar aynı dilde altta:
+/// altın / koruma / maç sayısı satırı, son maçlar, ayarlar.
+/// Avatar: oyuncuya özel 2D yüz (kullanıcı kimliğinden deterministik).
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
@@ -37,521 +33,135 @@ class ProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ProfileViewModel>(
       create: (_) => getIt<ProfileViewModel>()..initialize(),
-      child: const _ProfileBody(),
+      child: const AppShell(currentRoute: AppRoutes.profile, child: _Govde()),
     );
   }
 }
 
-class _ProfileBody extends StatelessWidget {
-  const _ProfileBody();
+class _Govde extends StatelessWidget {
+  const _Govde();
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ProfileViewModel>();
+    final k = vm.user;
+    final oran = vm.totalMatches > 0 ? '%${(vm.winRate * 100).round()}' : '—';
 
-    return AppShell(
-      currentRoute: AppRoutes.profile,
-      child: ResponsiveBuilder(
-        builder: (context, boyut) {
-          final kenar = AppBreakpoints.pagePadding(boyut);
-
-          return RefreshIndicator(
-            color: AppColors.primary,
-            backgroundColor: AppColors.surface,
-            onRefresh: vm.refresh,
-            child: SafeArea(
-              bottom: false,
-              child: ContentWidth(
-                maxWidth: 900,
-                child: ListView(
-                  padding: EdgeInsets.fromLTRB(
-                    kenar,
-                    boyut.usesSidebar ? 32 : 16,
-                    kenar,
-                    boyut.usesSidebar ? 40 : 110,
-                  ),
-                  children: [
-                    ScreenHeader(
-                      title: 'Profil',
-                      actions: [_AyarlarButonu()],
-                    ),
-                    const SizedBox(height: 20),
-                    _Kimlik(viewModel: vm),
-                    const SizedBox(height: 20),
-                    // Lig rozeti: oyuncunun puani artik bir sayi degil,
-                    // bir basamak. Hedefi de altinda yaziyor.
-                    if (vm.rank != null) ...[
-                      RankProgressCard(rank: vm.rank!),
-                      const SizedBox(height: 12),
-                    ],
-                    _SkorKarolari(viewModel: vm),
-                    const SizedBox(height: 12),
-                    _OzetKarti(viewModel: vm),
-                    const SizedBox(height: 22),
-                    AchievementsSection(
-                      viewModel: vm,
-                      columns: boyut.usesSidebar ? 3 : 2,
-                    ),
-                    const SizedBox(height: 22),
-                    FavoriteCardsSection(viewModel: vm),
-                    const SizedBox(height: 22),
-                    _GecmisBolumu(viewModel: vm),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _AyarlarButonu extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => context.push(AppRoutes.settings),
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.surfaceLight),
-          ),
-          child: const Icon(
-            Icons.settings_rounded,
-            size: 19,
-            color: AppColors.textSecondary,
-          ),
+    return LayoutBuilder(builder: (context, kk) {
+      final genis = kk.maxWidth >= 900;
+      final sol = <Widget>[
+        _Kimlik(viewModel: vm),
+        const SizedBox(height: Ref.pageGap),
+        RefStatRow([
+          RefStat('${k?.wins ?? 0}', 'KAZANILAN MAÇ'),
+          RefStat(oran, 'KAZANMA ORANI'),
+          RefStat(trThousands(k?.mmr ?? 0), 'PUAN'),
+        ]),
+        const SizedBox(height: 7),
+        RefStatRow([
+          RefStat(trThousands(k?.coins ?? 0), 'ALTIN', valueSize: 20),
+          RefStat('${vm.protectionSlots}/${GameRules.maxProtectionSlots}', 'KORUMA', valueSize: 20),
+          RefStat('${vm.totalMatches}', 'MAÇ', valueSize: 20),
+        ]),
+        const SizedBox(height: Ref.pageGap),
+        AchievementsSection(viewModel: vm),
+      ];
+      final sag = <Widget>[
+        FavoriteCardsSection(viewModel: vm),
+        if (vm.supportsFavorites) const SizedBox(height: Ref.pageGap),
+        _Gecmis(viewModel: vm),
+        const SizedBox(height: Ref.pageGap),
+        RefSecondaryButton('LİG SIRALAMASINI GÖR', onTap: () => context.go(AppRoutes.leaderboard)),
+        const SizedBox(height: 8),
+        RefNeutralButton(
+          onTap: () => context.push(AppRoutes.settings),
+          semanticLabel: 'Ayarlar',
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Icon(Icons.settings_rounded, size: 14, color: Ref.neutralText),
+            const SizedBox(width: 6),
+            Text('AYARLAR', style: Ref.bodyText(11, color: Ref.neutralText, weight: FontWeight.w800)),
+          ]),
         ),
-      ),
-    );
-  }
-}
+      ];
 
-// ====================================================================
-// KİMLİK: avatar, ad, kayıt tarihi
-// ====================================================================
-class _Kimlik extends StatelessWidget {
-  final ProfileViewModel viewModel;
-
-  const _Kimlik({required this.viewModel});
-
-  @override
-  Widget build(BuildContext context) {
-    final kullanici = viewModel.user;
-    final ad = kullanici?.username ?? 'Oyuncu';
-    final harf = ad.trim().isEmpty ? '?' : ad.trim()[0].toUpperTr();
-
-    return Row(
-      children: [
-        Container(
-          width: 76,
-          height: 76,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.primary, AppColors.primaryDark],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.4),
-                blurRadius: 30,
-                offset: const Offset(0, 12),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              harf,
-              style: AppTypography.display(size: 36, weight: FontWeight.w900),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                ad,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.display(
-                  size: 26,
-                  weight: FontWeight.w900,
-                  height: 1.05,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                _kayitMetni(kullanici?.createdAt),
-                style: AppTypography.bodyS,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _kayitMetni(DateTime? tarih) {
-    if (tarih == null) return 'Hoş geldin';
-    // Türkçe ay adı için intl kullanılıyor; elle ay listesi tutmak
-    // yerelleştirme eklendiğinde ikinci bir yer daha bırakırdı.
-    final bicim = DateFormat('d MMMM yyyy', 'tr');
-    return "${bicim.format(tarih.toLocal())}'dan beri oynuyor";
-  }
-}
-
-// ====================================================================
-// GALİBİYET / MAĞLUBİYET / BERABERLİK
-// ====================================================================
-class _SkorKarolari extends StatelessWidget {
-  final ProfileViewModel viewModel;
-
-  const _SkorKarolari({required this.viewModel});
-
-  @override
-  Widget build(BuildContext context) {
-    final k = viewModel.user;
-
-    return Row(
-      children: [
-        Expanded(
-          child: _SkorKarosu(
-            value: k?.wins ?? 0,
-            label: 'GALİBİYET',
-            color: AppColors.success,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _SkorKarosu(
-            value: k?.losses ?? 0,
-            label: 'MAĞLUBİYET',
-            color: AppColors.danger,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _SkorKarosu(
-            value: k?.draws ?? 0,
-            label: 'BERABERLİK',
-            color: AppColors.warning,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SkorKarosu extends StatelessWidget {
-  final int value;
-  final String label;
-  final Color color;
-
-  const _SkorKarosu({
-    required this.value,
-    required this.label,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SurfaceCard(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      child: Column(
-        children: [
-          Text(
-            '$value',
-            style: AppTypography.display(
-              size: 26,
-              weight: FontWeight.w900,
-              height: 1.0,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 3),
-          FittedBox(
-            child: Text(
-              label,
-              style: AppTypography.body(
-                size: 10.5,
-                weight: FontWeight.w800,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ====================================================================
-// ÖZET: kazanma oranı, coin, koruma
-// ====================================================================
-class _OzetKarti extends StatelessWidget {
-  final ProfileViewModel viewModel;
-
-  const _OzetKarti({required this.viewModel});
-
-  @override
-  Widget build(BuildContext context) {
-    final oran = viewModel.winRate;
-    final oynanmis = viewModel.totalMatches > 0;
-
-    return SurfaceCard(
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Kazanma oranı',
-                style: AppTypography.body(
-                  size: 12.5,
-                  weight: FontWeight.w800,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              Text(
-                oynanmis ? '%${(oran * 100).round()}' : '—',
-                style: AppTypography.display(
-                  size: 20,
-                  weight: FontWeight.w900,
-                  color: AppColors.success,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: oran,
-              minHeight: 8,
-              backgroundColor: AppColors.surfaceLight,
-              valueColor: const AlwaysStoppedAnimation(AppColors.success),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: _MiniKutu(
-                  icon: Icons.monetization_on_rounded,
-                  iconColor: AppColors.accent,
-                  value: _binlik(viewModel.user?.coins ?? 0),
-                  label: 'Coin',
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _MiniKutu(
-                  icon: Icons.shield_rounded,
-                  iconColor: AppColors.tierDiamond,
-                  value: '${viewModel.protectionSlots}',
-                  suffix: '/${GameRules.maxProtectionSlots}',
-                  label: 'Koruma',
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _MiniKutu(
-                  icon: Icons.emoji_events_rounded,
-                  iconColor: AppColors.accent,
-                  value: _binlik(viewModel.user?.mmr ?? 0),
-                  label: 'Puan',
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  static String _binlik(int sayi) {
-    final metin = sayi.abs().toString();
-    final tampon = StringBuffer(sayi < 0 ? '-' : '');
-    for (var i = 0; i < metin.length; i++) {
-      if (i > 0 && (metin.length - i) % 3 == 0) tampon.write('.');
-      tampon.write(metin[i]);
-    }
-    return tampon.toString();
-  }
-}
-
-class _MiniKutu extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String value;
-  final String? suffix;
-  final String label;
-
-  const _MiniKutu({
-    required this.icon,
-    required this.iconColor,
-    required this.value,
-    required this.label,
-    this.suffix,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(13),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: iconColor),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  alignment: Alignment.centerLeft,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        value,
-                        style: AppTypography.display(
-                          size: 17,
-                          weight: FontWeight.w900,
-                          height: 1.0,
-                        ),
-                      ),
-                      if (suffix != null)
-                        Text(
-                          suffix!,
-                          style: AppTypography.display(
-                            size: 13,
-                            weight: FontWeight.w700,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.body(
-                    size: 10,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ====================================================================
-// MAÇ GEÇMİŞİ
-// ====================================================================
-class _GecmisBolumu extends StatelessWidget {
-  final ProfileViewModel viewModel;
-
-  const _GecmisBolumu({required this.viewModel});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionTitle('Son maçlar'),
-        const SizedBox(height: 10),
-        if (viewModel.isBusy && viewModel.history.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 28),
-            child: Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
-          )
-        else if (viewModel.history.isEmpty)
-          _BosGecmis(hasError: viewModel.hasError, viewModel: viewModel)
-        else
-          for (final mac in viewModel.history)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _GecmisSatiri(entry: mac),
-            ),
-      ],
-    );
-  }
-}
-
-class _BosGecmis extends StatelessWidget {
-  final bool hasError;
-  final ProfileViewModel viewModel;
-
-  const _BosGecmis({required this.hasError, required this.viewModel});
-
-  @override
-  Widget build(BuildContext context) {
-    if (hasError) {
-      return SurfaceCard(
-        child: Column(
+      return RefreshIndicator(
+        color: Ref.accent,
+        backgroundColor: Ref.panel,
+        onRefresh: vm.refresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: Ref.pagePadding,
           children: [
-            Text(
-              viewModel.errorMessage ?? 'Geçmiş yüklenemedi.',
-              textAlign: TextAlign.center,
-              style: AppTypography.bodyS,
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: viewModel.loadHistory,
-              child: const Text('Tekrar dene'),
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: genis ? 1100 : 620),
+                child: RefPageEnter(
+                  child: genis
+                      ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: sol)),
+                          const SizedBox(width: 20),
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: sag)),
+                        ])
+                      : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                          ...sol,
+                          const SizedBox(height: Ref.pageGap),
+                          ...sag,
+                        ]),
+                ),
+              ),
             ),
           ],
         ),
       );
-    }
+    });
+  }
+}
 
-    return SurfaceCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 26),
+/// .hero { text-align:center } avatar 72px · h2 ad · .pill lig · muted alt satır
+class _Kimlik extends StatelessWidget {
+  final ProfileViewModel viewModel;
+  const _Kimlik({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    final k = viewModel.user;
+    final r = viewModel.rank;
+    return RefHero(
       child: Column(
         children: [
-          const Icon(
-            Icons.sports_soccer_rounded,
-            size: 32,
-            color: AppColors.textSecondary,
+          Container(
+            width: 84,
+            height: 84,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFF0B1424),
+              border: Border.all(color: Ref.heroBorder, width: 2),
+            ),
+            child: ClipOval(
+              child: AvatarPortrait(
+                spec: AvatarSpec.generate('oyuncu-${k?.id ?? k?.username ?? '?'}'),
+                size: 84,
+                headshot: true,
+              ),
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
-            'Henüz bitmiş maçın yok',
-            style: AppTypography.body(size: 14, weight: FontWeight.w800),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'İlk maçını oynadığında burada görünecek.',
+            (k?.username ?? 'Oyuncu').toUpperTr(),
             textAlign: TextAlign.center,
-            style: AppTypography.bodyS,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Ref.heading(36, height: 0.94),
           ),
-          const SizedBox(height: 16),
-          FilledButton(
-            onPressed: () => context.go(AppRoutes.matchmaking),
-            child: const Text('RAKİP BUL'),
+          const SizedBox(height: 8),
+          RefPill(r == null ? 'LİG YÜKLENİYOR' : '${r.label.toUpperTr()} LİGİ'),
+          const SizedBox(height: 10),
+          Text(
+            k == null || k.totalMatches == 0
+                ? 'Henüz maç oynamadın'
+                : '${k.wins} galibiyet · ${k.losses} mağlubiyet · ${k.draws} beraberlik',
+            textAlign: TextAlign.center,
+            style: Ref.bodyText(11, color: Ref.muted),
           ),
         ],
       ),
@@ -559,100 +169,86 @@ class _BosGecmis extends StatelessWidget {
   }
 }
 
-class _GecmisSatiri extends StatelessWidget {
-  final MatchHistoryEntry entry;
+/// SON MAÇLAR (oyunda gerçek; referansta yok) — .card-panel satırları
+class _Gecmis extends StatelessWidget {
+  final ProfileViewModel viewModel;
+  const _Gecmis({required this.viewModel});
 
-  const _GecmisSatiri({required this.entry});
+  @override
+  Widget build(BuildContext context) {
+    final liste = viewModel.history;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      RefSectionHead('SON MAÇLAR', trailing: Text('${liste.length} MAÇ', style: Ref.tiny(Ref.muted))),
+      const SizedBox(height: Ref.pageGap),
+      if (liste.isEmpty)
+        RefCardPanel(children: [
+          Text('Henüz bitmiş maçın yok.', style: Ref.bodyText(12, weight: FontWeight.w700)),
+          Text('İlk maçını oyna; sonuçların burada görünür.', style: Ref.tiny(Ref.muted)),
+          RefSecondaryButton('MAÇA BAŞLA', leadingGlyph: RefGlyph.swords, onTap: () => context.go(AppRoutes.matchmaking)),
+        ])
+      else
+        for (final m in liste.take(10)) ...[
+          _MacSatiri(entry: m),
+          const SizedBox(height: 8),
+        ],
+    ]);
+  }
+}
+
+class _MacSatiri extends StatelessWidget {
+  final MatchHistoryEntry entry;
+  const _MacSatiri({required this.entry});
 
   @override
   Widget build(BuildContext context) {
     final renk = switch (entry.outcome) {
-      MatchOutcome.win => AppColors.success,
-      MatchOutcome.loss => AppColors.danger,
-      MatchOutcome.draw => AppColors.warning,
+      MatchOutcome.win => Ref.accent,
+      MatchOutcome.loss => Ref.red,
+      MatchOutcome.draw => Ref.gold,
     };
-
-    return SurfaceCard(
-      radius: 14,
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-      child: Row(
-        children: [
-          // Sonuç şeridi: listeyi okumadan galibiyet/mağlubiyet
-          // dağılımı görünsün
-          Container(
-            width: 5,
-            height: 32,
-            decoration: BoxDecoration(
-              color: renk,
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entry.opponentUsername,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.body(
-                    size: 13.5,
-                    weight: FontWeight.w800,
-                  ),
-                ),
-                Text(
-                  _altSatir(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodyXS,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            entry.scoreText,
-            style: AppTypography.display(size: 18, weight: FontWeight.w900),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 58,
-            child: Text(
-              entry.outcome.shortLabel,
+    final transfer = entry.transferText;
+    final zaman = _zaman(entry.finishedAt);
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        gradient: Ref.cardPanelGradient,
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: Ref.cardPanelBorder),
+      ),
+      child: Row(children: [
+        Container(width: 5, height: 32, decoration: BoxDecoration(color: renk, borderRadius: BorderRadius.circular(3))),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(entry.opponentUsername,
+                maxLines: 1, overflow: TextOverflow.ellipsis, style: Ref.bodyText(13, weight: FontWeight.w700)),
+            Text(transfer == null ? zaman : '$zaman · $transfer',
+                maxLines: 1, overflow: TextOverflow.ellipsis, style: Ref.tiny(Ref.muted)),
+          ]),
+        ),
+        Text(entry.scoreText, style: Ref.heading(18, weight: FontWeight.w900)),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 58,
+          child: Text(entry.outcome.shortLabel,
               textAlign: TextAlign.right,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.body(
-                size: 11.5,
-                weight: FontWeight.w900,
-                color: renk,
-              ),
-            ),
-          ),
-        ],
-      ),
+              style: Ref.bodyText(11, color: renk, weight: FontWeight.w900)),
+        ),
+      ]),
     );
   }
 
-  String _altSatir() {
-    final zaman = _zamanMetni(entry.finishedAt);
-    final transfer = entry.transferText;
-    if (transfer == null) return zaman;
-    return '$zaman · $transfer';
-  }
-
   /// "12 dakika önce", "Dün", "3 Eylül"
-  static String _zamanMetni(DateTime? tarih) {
+  static String _zaman(DateTime? tarih) {
     if (tarih == null) return 'Bitti';
-
     final fark = DateTime.now().difference(tarih.toLocal());
     if (fark.inMinutes < 1) return 'Az önce';
     if (fark.inMinutes < 60) return '${fark.inMinutes} dakika önce';
     if (fark.inHours < 24) return '${fark.inHours} saat önce';
     if (fark.inDays == 1) return 'Dün';
     if (fark.inDays < 7) return '${fark.inDays} gün önce';
-
     return DateFormat('d MMMM', 'tr').format(tarih.toLocal());
   }
 }
