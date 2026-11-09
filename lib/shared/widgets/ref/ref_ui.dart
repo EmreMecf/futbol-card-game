@@ -27,7 +27,10 @@ class RefPill extends StatelessWidget {
   final bool dot;
   final Color? textColor;
 
-  const RefPill(this.text, {super.key, this.emoji, this.dot = false, this.textColor});
+  /// Metnin önündeki çizim (ör. altın sikke)
+  final Widget? leading;
+
+  const RefPill(this.text, {super.key, this.emoji, this.dot = false, this.textColor, this.leading});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -53,6 +56,7 @@ class RefPill extends StatelessWidget {
               const SizedBox(width: 6),
             ],
             if (emoji != null) ...[Em(emoji!, size: 10), const SizedBox(width: 4)],
+            if (leading != null) ...[leading!, const SizedBox(width: 4)],
             Text(text, style: Ref.bodyText(10, color: textColor ?? Ref.pillText, weight: FontWeight.w900)),
           ],
         ),
@@ -119,7 +123,11 @@ class RefCta extends StatelessWidget {
   final RefGlyph? trailing;
   final double fontSize;
 
-  const RefCta(this.label, {super.key, this.onTap, this.leading, this.trailing, this.fontSize = 23});
+  /// [leading] yerine serbest çizim (ör. altın sikke)
+  final Widget? leadingWidget;
+
+  const RefCta(this.label,
+      {super.key, this.onTap, this.leading, this.trailing, this.fontSize = 23, this.leadingWidget});
 
   @override
   Widget build(BuildContext context) {
@@ -150,6 +158,7 @@ class RefCta extends StatelessWidget {
               RefGlyphIcon(leading!, size: fontSize * 0.8, color: Ref.ctaText),
               SizedBox(width: fontSize * 0.25),
             ],
+            if (leadingWidget != null) ...[leadingWidget!, SizedBox(width: fontSize * 0.3)],
             Flexible(
               child: FittedBox(fit: BoxFit.scaleDown, child: Text(label, maxLines: 1, style: yazi)),
             ),

@@ -1,12 +1,15 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../core/utils/turkish_text.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/feedback/game_feedback.dart';
 import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/premium_card/premium_card.dart';
 import 'pack_box.dart';
 
@@ -56,8 +59,7 @@ class PackSealScene extends StatefulWidget {
   State<PackSealScene> createState() => _PackSealSceneState();
 }
 
-class _PackSealSceneState extends State<PackSealScene>
-    with TickerProviderStateMixin {
+class _PackSealSceneState extends State<PackSealScene> with TickerProviderStateMixin {
   /// Bekleme hareketi (süzülme + ışık geçişi), sürekli döner
   late final AnimationController _bekleme;
 
@@ -69,16 +71,11 @@ class _PackSealSceneState extends State<PackSealScene>
   @override
   void initState() {
     super.initState();
-    _bekleme = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    );
+    _bekleme = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400));
     if (GameFeedback.cardAnimationsEnabled) _bekleme.repeat();
 
-    _acilis = AnimationController(
-      vsync: this,
-      duration: PackSealScene.openDuration,
-    )..addStatusListener((durum) {
+    _acilis = AnimationController(vsync: this, duration: PackSealScene.openDuration)
+      ..addStatusListener((durum) {
         if (durum == AnimationStatus.completed) widget.onOpened();
       });
   }
@@ -111,11 +108,10 @@ class _PackSealSceneState extends State<PackSealScene>
   Widget build(BuildContext context) {
     final enIyi = widget.result.bestCard?.tier ?? CardTier.bronze;
     final parilti = CardTierTheme.of(enIyi).glowColor;
-    final kutuGenisligi =
-        math.min(220.0, MediaQuery.sizeOf(context).width * 0.52);
+    final kutuGenisligi = math.min(220.0, MediaQuery.sizeOf(context).width * 0.52);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Ref.phoneBg,
       body: SafeArea(
         child: Semantics(
           button: true,
@@ -132,19 +128,13 @@ class _PackSealSceneState extends State<PackSealScene>
                     children: [
                       Expanded(
                         child: Text(
-                          widget.result.packName,
+                          widget.result.packName.toUpperTr(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.display(
-                            size: 18,
-                            weight: FontWeight.w900,
-                          ),
+                          style: Ref.h3(),
                         ),
                       ),
-                      TextButton(
-                        onPressed: widget.onSkipAll,
-                        child: const Text('Hepsini göster'),
-                      ),
+                      RefNeutralButton(label: 'Hepsini göster', onTap: widget.onSkipAll),
                     ],
                   ),
                 ),
@@ -173,17 +163,12 @@ class _PackSealSceneState extends State<PackSealScene>
                       children: [
                         Text(
                           'AÇMAK İÇİN DOKUN',
-                          style: AppTypography.display(
-                            size: 18,
-                            weight: FontWeight.w900,
-                            letterSpacing: 2,
-                            color: AppColors.victoryGold,
-                          ),
+                          style: Ref.heading(18, color: Ref.gold, weight: FontWeight.w900).copyWith(letterSpacing: 2),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           '${widget.result.cards.length} kart seni bekliyor',
-                          style: AppTypography.bodyS,
+                          style: Ref.bodyText(12, color: Ref.muted),
                         ),
                       ],
                     ),
@@ -197,11 +182,7 @@ class _PackSealSceneState extends State<PackSealScene>
     );
   }
 
-  Widget _sahne({
-    required double kutuGenisligi,
-    required Color parilti,
-    required bool nadir,
-  }) {
+  Widget _sahne({required double kutuGenisligi, required Color parilti, required bool nadir}) {
     final b = _bekleme.value;
     final a = _acilis.value;
 
@@ -211,14 +192,10 @@ class _PackSealSceneState extends State<PackSealScene>
     // Açılış: ilk %55 titreme + parıltı, sonrası patlama
     final titremeK = (a / 0.55).clamp(0.0, 1.0);
     final patlamaK = ((a - 0.55) / 0.45).clamp(0.0, 1.0);
-    final titreme = a > 0 && a < 0.55
-        ? math.sin(a * 90) * 6 * (0.4 + titremeK)
-        : 0.0;
+    final titreme = a > 0 && a < 0.55 ? math.sin(a * 90) * 6 * (0.4 + titremeK) : 0.0;
     final olcek = 1 + 0.06 * titremeK + 0.5 * Curves.easeIn.transform(patlamaK);
     final kutuOpakligi = 1 - Curves.easeIn.transform(patlamaK);
-    final flas = patlamaK == 0
-        ? 0.0
-        : math.sin(patlamaK * math.pi).clamp(0.0, 1.0);
+    final flas = patlamaK == 0 ? 0.0 : math.sin(patlamaK * math.pi).clamp(0.0, 1.0);
     final parlaklik = 0.25 + 0.75 * titremeK;
 
     return SizedBox(
@@ -253,21 +230,15 @@ class _PackSealSceneState extends State<PackSealScene>
                     children: [
                       PackBox.visual(
                         tier: widget.packTier,
-                        label: PackBox.boxLabel(
-                          widget.result.packName,
-                          widget.result.packSlug,
-                        ),
+                        label: PackBox.boxLabel(widget.result.packName, widget.result.packSlug),
                         width: kutuGenisligi,
                       ),
                       // Folyo üzerinde geçen ışık
                       Positioned.fill(
                         child: IgnorePointer(
                           child: ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(kutuGenisligi * 0.12),
-                            child: CustomPaint(
-                              painter: _IsikGecisiPainter(progress: b),
-                            ),
+                            borderRadius: BorderRadius.circular(kutuGenisligi * 0.12),
+                            child: CustomPaint(painter: _IsikGecisiPainter(progress: b)),
                           ),
                         ),
                       ),
@@ -286,11 +257,13 @@ class _PackSealSceneState extends State<PackSealScene>
                 height: kutuGenisligi * 1.9 * (0.5 + patlamaK),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: RadialGradient(colors: [
-                    Colors.white.withValues(alpha: flas),
-                    parilti.withValues(alpha: flas * 0.6),
-                    Colors.transparent,
-                  ]),
+                  gradient: RadialGradient(
+                    colors: [
+                      Colors.white.withValues(alpha: flas),
+                      parilti.withValues(alpha: flas * 0.6),
+                      Colors.transparent,
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -307,12 +280,7 @@ class _ParlamaPainter extends CustomPainter {
   final bool rays;
   final double turn;
 
-  _ParlamaPainter({
-    required this.color,
-    required this.intensity,
-    required this.rays,
-    required this.turn,
-  });
+  _ParlamaPainter({required this.color, required this.intensity, required this.rays, required this.turn});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -323,10 +291,12 @@ class _ParlamaPainter extends CustomPainter {
       m,
       r,
       Paint()
-        ..shader = RadialGradient(colors: [
-          color.withValues(alpha: 0.55 * intensity),
-          color.withValues(alpha: 0),
-        ]).createShader(Rect.fromCircle(center: m, radius: r)),
+        ..shader = RadialGradient(
+          colors: [
+            color.withValues(alpha: 0.55 * intensity),
+            color.withValues(alpha: 0),
+          ],
+        ).createShader(Rect.fromCircle(center: m, radius: r)),
     );
 
     if (!rays) return;
@@ -347,10 +317,7 @@ class _ParlamaPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ParlamaPainter e) =>
-      e.color != color ||
-      e.intensity != intensity ||
-      e.rays != rays ||
-      e.turn != turn;
+      e.color != color || e.intensity != intensity || e.rays != rays || e.turn != turn;
 }
 
 /// Folyonun üstünden çapraz geçen parlak şerit

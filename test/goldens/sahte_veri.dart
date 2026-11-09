@@ -7,6 +7,7 @@ import 'package:futbol_card/features/leaderboard/domain/repositories/leaderboard
 import 'package:futbol_card/core/network/websocket_service.dart';
 import 'package:futbol_card/features/match/domain/repositories/match_repository.dart';
 import 'package:futbol_card/features/matchmaking/domain/repositories/matchmaking_repository.dart';
+import 'package:futbol_card/features/store/domain/repositories/store_repository.dart';
 import 'package:shared_models/shared_models.dart';
 
 /// Golden testlerinin verisi.
@@ -248,6 +249,68 @@ class GoldenArenaRepo implements MatchRepository {
         ),
       ]));
 
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}
+
+// ====================================================================
+// FAZ 6: mağaza (fiyat ve oranlar yerel veritabanındaki pack_types'tan
+// birebir: tier_weights / 10000)
+// ====================================================================
+List<TierOdds> _oranlar(Map<CardTier, int> m) =>
+    [for (final e in m.entries.toList()..sort((a, b) => b.value.compareTo(a.value))) TierOdds(tier: e.key, weight: e.value)];
+
+final List<PackType> kGoldenPacks = [
+  PackType(
+    slug: 'standard',
+    name: 'Standart Paket',
+    description: 'Legend çıkma ihtimali binde bir.',
+    cardCount: 5,
+    priceCoins: 500,
+    sortOrder: 1,
+    odds: _oranlar({
+      CardTier.bronze: 5500, CardTier.silver: 3000, CardTier.gold: 1300, CardTier.diamond: 190, CardTier.legend: 10,
+    }),
+  ),
+  PackType(
+    slug: 'premium',
+    name: 'Premium Paket',
+    description: 'Belirgin şekilde daha yüksek ihtimaller. En az bir Altın.',
+    cardCount: 5,
+    priceCoins: 2500,
+    sortOrder: 2,
+    odds: _oranlar({
+      CardTier.bronze: 2000, CardTier.silver: 3500, CardTier.gold: 3500, CardTier.diamond: 900, CardTier.legend: 100,
+    }),
+  ),
+  PackType(
+    slug: 'squad',
+    name: 'Kadro Paketi',
+    description: 'Tam bir 11 kişilik kadro: 1 kaleci, 4 defans, 4 orta saha, 2 forvet.',
+    cardCount: 11,
+    priceCoins: 4000,
+    sortOrder: 3,
+    positionQuota: const {'GK': 1, 'DEF': 4, 'MID': 4, 'FWD': 2},
+    odds: _oranlar({
+      CardTier.bronze: 4000, CardTier.silver: 3500, CardTier.gold: 2200, CardTier.diamond: 280, CardTier.legend: 20,
+    }),
+  ),
+];
+
+/// Premium paket açılışı (5 kart, biri Efsane)
+final PackOpenResult kGoldenOpening = PackOpenResult(
+  packSlug: 'premium',
+  packName: 'Premium Paket',
+  coinsSpent: 2500,
+  coinsLeft: 0,
+  cards: [kGoldenCards[8], kGoldenCards[2], kGoldenCards[3], kGoldenCards[6], kGoldenCards[7]],
+);
+
+class GoldenStoreRepo implements StoreRepository {
+  @override
+  Future<Result<List<PackType>>> fetchPacks() async => Success(kGoldenPacks);
+  @override
+  Future<Result<PackOpenResult>> openPack(String slug) async => Success(kGoldenOpening);
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }

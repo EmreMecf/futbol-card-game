@@ -53,10 +53,7 @@ class StoreViewModel extends BaseViewModel {
   }
 
   Future<void> load() async {
-    final liste = await run(
-      () => _repository.fetchPacks(),
-      loadingState: ViewState.loading,
-    );
+    final liste = await run(() => _repository.fetchPacks(), loadingState: ViewState.loading);
 
     if (liste != null) {
       _paketler = liste;
@@ -93,9 +90,7 @@ class StoreViewModel extends BaseViewModel {
     final kullanici = _session.user;
     final acilis = _sonAcilis;
     if (kullanici != null && acilis != null) {
-      await _session.updateUser(
-        kullanici.copyWith(coins: acilis.coinsLeft),
-      );
+      await _session.updateUser(kullanici.copyWith(coins: acilis.coinsLeft));
     }
 
     safeNotify();

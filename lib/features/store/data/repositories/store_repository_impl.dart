@@ -14,9 +14,7 @@ class StoreRepositoryImpl implements StoreRepository {
     return Result.guard(() async {
       final cevap = await _remote.packs();
       final ham = cevap['packs'] as List? ?? const [];
-      return ham
-          .map((p) => PackType.fromJson(p as Map<String, dynamic>))
-          .toList();
+      return ham.map((p) => PackType.fromJson(p as Map<String, dynamic>)).toList();
     });
   }
 

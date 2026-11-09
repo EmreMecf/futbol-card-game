@@ -54,7 +54,7 @@ FAZ 4–8 henüz yapılmadı (bkz. "Sıradaki fazlar").
 | Gezinme (üst başlık + alt çubuk + masaüstü kenar çubuğu) | ✅ | bütün görüntülerde |
 | Kadro / formasyon | ✅ FAZ 4 | `04_kadro`, `04b_kadro_alt`; golden'da kart seçimi `04c` |
 | Maç hazırlığı + arena | ✅ FAZ 5 | `02_arena`, `02b_arena_alt`, `02d_duello_kareler` |
-| Mağaza + paket açma | ⏳ FAZ 6 | yalnızca referans görüntüsü var |
+| Mağaza + paket açma | ✅ FAZ 6 | `05_magaza`, `05b_magaza_alt`, `05c_paket_acma`; golden'da mühür ve özet |
 | Ligler, liderlik, profil, görevler, maç sonucu | ⏳ FAZ 7 | yalnızca referans görüntüsü var |
 
 **Önemli:** Mağaza ve maç ekranlarında da yeni kart artık görünüyor,
@@ -269,6 +269,108 @@ uygulamaya gömülebilir (boyut artar; karar bekliyor).
 baştan sona oynanmadı. Maç ekranı, sunucu biçimindeki verilerle (golden ve
 davranış testleri) doğrulandı. Sunucu tarafındaki maç akışı testleri
 (uçtan uca maç) bu fazda değişmedi.
+
+## FAZ 6 — Mağaza ve paket açma (yapıldı)
+
+### Taşma hatası
+
+Test ortamında yeniden üretildi:
+
+- **Ne oluyordu:** eski mağaza 1366 ve 1440 px genişlikte alttan 60–85 px
+  taşıyordu ("BOTTOM OVERFLOWED").
+- **Sebep:** masaüstü ızgarasında her paket sabit 420 px yükseklikteki
+  kutuya sığdırılıyordu. Açıklaması ve oranı uzun paketler sığmıyordu.
+  Kullanıcının gördüğü 18 ve 35 px aynı hatanın farklı pencere
+  boyutlarıydı.
+- **Çözüm:** yeni yerleşimde hiçbir pakete sabit yükseklik verilmiyor.
+  Karolar satırdaki en uzun içerik kadar uzuyor (`IntrinsicHeight`).
+- **Doğrulama:** golden testi 6 boyutta ve ayrıca 1440×900'de taşma
+  olmadığını denetliyor.
+
+### Mağaza
+
+Referans `shop()` düzeni:
+
+1. "MAĞAZA" başlığı ve altın bakiyesi
+2. Sekmeler: PAKETLER, TEKLİFLER, KOZMETİK
+3. Öne çıkan paket paneli (`.shop-feature`: altın çerçeve, radyal ışık,
+   94 px paket simgesi, altın CTA)
+4. KART PAKETLERİ karoları (`.shopgrid`)
+5. Görev ödülleri paneli ve not
+
+**Gerçek veriler:**
+
+- Paket adları, açıklamaları, kart sayıları, fiyatlar ve nadirlik oranları
+  sunucudan gelir (`pack_types`).
+- Testler yerel veritabanındaki gerçek değerlerle yapıldı:
+  - Standart: 500 altın, Bronz %55 … Efsane %0,1
+  - Premium: 2.500 altın, … Efsane %1
+  - Kadro: 4.000 altın, tam 4-4-2 garantili
+- Öne çıkan paket veriden türetilir: Efsane ihtimali en yüksek satılık
+  paket.
+
+**Referanstan bilinçli farklar:**
+
+- **Karoya dokunmak paketi yalnızca SEÇER.** Satın alma öne çıkan paneldeki
+  CTA ile yapılır. Referansta karoya dokunmak doğrudan satın alıyordu; bu
+  yanlışlıkla altın harcatabilirdi.
+- **Altın yetmiyorsa CTA pasif** ve "YETERSİZ ALTIN" yazar.
+- **"PAKET KARŞILAŞTIRMA" tablosu eklendi.** Kullanıcı karşılaştırma ve
+  doğru oran bilgisi istedi; tabloda her paketin kart sayısı, fiyatı ve 5
+  nadirliğin yüzdesi var.
+- **Referanstaki "💎 elmas" ve "1 BEDAVA PAKET" yok.** Oyunda karşılığı yok.
+  Yerine altın bakiyesi gösteriliyor.
+- **TEKLİFLER ve KOZMETİK sekmeleri görünür ama "yakında".** Basınca
+  açıklama çıkar; sahte içerik yok.
+- **"HEDİYE PAKETLERİN" yerine "GÖREV ÖDÜLLERİ" paneli.** Gerçek kart
+  görevlerine götürür; oyunda hediye paketi envanteri yok.
+- **Referanstaki "fiyatlar örnek" notunun yerine gerçek bilgi:** çekiliş
+  sunucuda yapılır, oranlar uygulanan değerlerdir.
+- **Paket simgeleri referanstaki emojiler:** 📦 Standart, 💠 Premium,
+  🎴 Kadro. Geliştirme test paketleri 🧪.
+
+### Paket açma
+
+Akış korundu, görünüm referans diline geçti.
+
+1. **Mühürlü paket:** dokun → aç. "Hepsini göster" ile atlanır.
+2. **Her kart için referans "✦ YENİ KART KEŞFEDİLDİ ✦" penceresi:**
+   - İlerleme hapı (1/5) ve kart
+   - Kart dönme animasyonu korundu: Bronz/Gümüş hızlı, Altın parlamalı.
+   - "TEBRİKLER!" yalnızca Altın ve üstü kartlarda; düşük kartta kartın
+     adı yazar.
+   - Altında "Kart koleksiyonuna eklendi." ve SIRADAKİ KART / Hepsini göster.
+3. **Elmas ve Efsane:** mevcut tam ekran "walkout" sahnesi aynen kalıyor
+   (paket başına bir kez).
+4. **Özet:** "✦ PAKET AÇILDI ✦", paket adı, en iyi kart (açılış ölçüsü),
+   nadirlik renginde sayaçlar ve diğer kartlar.
+   - Kartlar ortak ızgara kartı; eski 0.66 oranlı hücreler yerine referans
+     oranı kullanılıyor.
+   - Altta "N kart koleksiyonuna eklendi · kalan X altın", "KOLEKSİYONA
+     GİT" ve "MAĞAZAYA DÖN".
+
+**Paket içeriği her zaman sunucuda belirlenir.** Uygulama yalnızca
+`PackOpenResult`'ı gösterir.
+
+### Bulunup düzeltilenler
+
+- **Çok büyük gölge bulanıklığı** (90 px) sert kenarlı siyah dikdörtgen
+  olarak çiziliyordu. 40 px'e indirildi; kart detayı penceresi de
+  düzeltildi.
+- **Oran hapları** ağırlığa göre (Gümüş, Altın, Bronz…) diziliyordu. Artık
+  nadirlik sırasıyla.
+
+### Testler
+
+- Mağaza 6 boyutta ve 1440×900'de taşma denetimiyle golden testinden
+  geçiyor.
+- Ayrıca:
+  - Karoya dokunmak satın almıyor
+  - Yetersiz altın
+  - Paket açılışı (mühür → kart → özet) 390 ve 320 px'te, her adımda
+    taşma yok
+- `pack_flow_test` yeni metinlere göre güncellendi: "altın", "MAĞAZAYA
+  DÖN".
 
 ## 6. Sıradaki fazlar
 

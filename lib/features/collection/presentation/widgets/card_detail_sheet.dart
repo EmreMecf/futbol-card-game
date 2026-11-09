@@ -77,7 +77,7 @@ class CardDetailSheet extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(21),
                   border: Border.all(color: Ref.modalBorder),
-                  boxShadow: const [BoxShadow(color: Color(0xEE000000), blurRadius: 90, offset: Offset(0, 22))],
+                  boxShadow: const [BoxShadow(color: Color(0xAA000000), blurRadius: 40, offset: Offset(0, 18))],
                 ),
                 child: LayoutBuilder(builder: (context, k) {
                   final kartGenislik = math.min(205.0, k.maxWidth);

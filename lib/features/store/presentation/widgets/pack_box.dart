@@ -31,18 +31,12 @@ class PackBox extends StatelessWidget {
   final double tilt;
 
   PackBox({super.key, required PackType pack, required this.width})
-      : tier = pack.signatureTier,
-        label = boxLabel(pack.name, pack.slug),
-        tilt = -0.09;
+    : tier = pack.signatureTier,
+      label = boxLabel(pack.name, pack.slug),
+      tilt = -0.09;
 
   /// Paket türü elde yoksa (ör. açılış ekranı) seviye ve adla çizer.
-  const PackBox.visual({
-    super.key,
-    required this.tier,
-    required this.label,
-    required this.width,
-    this.tilt = 0,
-  });
+  const PackBox.visual({super.key, required this.tier, required this.label, required this.width, this.tilt = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -58,19 +52,9 @@ class PackBox extends StatelessWidget {
         height: yukseklik,
         padding: EdgeInsets.all(width * 0.035),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: tema.frameGradient,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          gradient: LinearGradient(colors: tema.frameGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
           borderRadius: BorderRadius.circular(width * 0.12),
-          boxShadow: [
-            BoxShadow(
-              color: tema.glowColor,
-              blurRadius: width * 0.34,
-              offset: Offset(0, width * 0.14),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: tema.glowColor, blurRadius: width * 0.34, offset: Offset(0, width * 0.14))],
         ),
         child: Container(
           decoration: BoxDecoration(
@@ -91,10 +75,7 @@ class PackBox extends StatelessWidget {
                     gradient: RadialGradient(
                       center: const Alignment(0, -1),
                       radius: 1.1,
-                      colors: [
-                        tema.specularColor.withValues(alpha: 0.28),
-                        Colors.transparent,
-                      ],
+                      colors: [tema.specularColor.withValues(alpha: 0.28), Colors.transparent],
                     ),
                   ),
                 ),
@@ -103,11 +84,7 @@ class PackBox extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.card_giftcard_rounded,
-                      size: width * 0.32,
-                      color: tema.textColor,
-                    ),
+                    Icon(Icons.card_giftcard_rounded, size: width * 0.32, color: tema.textColor),
                     SizedBox(height: width * 0.07),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: width * 0.08),
@@ -138,8 +115,7 @@ class PackBox extends StatelessWidget {
   /// Paket adının ilk kelimesi: "Kadro Paketi" -> "KADRO"
   static String boxLabel(String name, String slug) {
     final parcalar = name.trim().split(RegExp(r'\s+'));
-    return (parcalar.isEmpty || parcalar.first.isEmpty ? slug : parcalar.first)
-        .toUpperTr();
+    return (parcalar.isEmpty || parcalar.first.isEmpty ? slug : parcalar.first).toUpperTr();
   }
 }
 
@@ -165,22 +141,14 @@ class OddsChip extends StatelessWidget {
         const SizedBox(width: 5),
         Text(
           odds.tier.label,
-          style: AppTypography.body(
-            size: compact ? 10.5 : 11.5,
-            color: AppColors.textSecondary,
-          ),
+          style: AppTypography.body(size: compact ? 10.5 : 11.5, color: AppColors.textSecondary),
         ),
         const SizedBox(width: 4),
         Text(
           odds.displayPercent,
-          style: AppTypography.display(
-            size: compact ? 12 : 13,
-            weight: FontWeight.w800,
-            color: renk,
-          ),
+          style: AppTypography.display(size: compact ? 12 : 13, weight: FontWeight.w800, color: renk),
         ),
       ],
     );
   }
-
 }

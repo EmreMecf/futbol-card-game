@@ -70,8 +70,7 @@ class PackOpeningViewModel extends ChangeNotifier {
   }
 
   /// Şu an ekranda olan kart (hepsi açıldıysa null)
-  InventoryCard? get currentCard =>
-      _acilan < _sira.length ? _sira[_acilan] : null;
+  InventoryCard? get currentCard => _acilan < _sira.length ? _sira[_acilan] : null;
 
   /// "3 / 15" gibi ilerleme metni
   String get progressText => '${_acilan + 1} / ${_sira.length}';

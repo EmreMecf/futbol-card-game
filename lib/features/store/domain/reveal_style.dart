@@ -43,10 +43,10 @@ enum RevealStyle {
   /// Kart dönme (flip) animasyonunun süresi.
   /// Walkout'ta flip yoktur; kart sahnenin sonunda vurarak gelir.
   Duration get flipDuration => switch (this) {
-        RevealStyle.simple => const Duration(milliseconds: 350),
-        RevealStyle.golden => const Duration(milliseconds: 750),
-        RevealStyle.walkout => Duration.zero,
-      };
+    RevealStyle.simple => const Duration(milliseconds: 350),
+    RevealStyle.golden => const Duration(milliseconds: 750),
+    RevealStyle.walkout => Duration.zero,
+  };
 
   /// Kart göründüğünde hangi şiddette titreşim?
   ///
@@ -54,9 +54,8 @@ enum RevealStyle {
   /// rahatsız edici olur ve titreşim "önemli bir şey oldu" anlamını
   /// tamamen kaybeder.
   HapticStrength get haptic => switch (this) {
-        RevealStyle.simple => HapticStrength.none,
-        RevealStyle.golden => HapticStrength.light,
-        RevealStyle.walkout => HapticStrength.heavy,
-      };
+    RevealStyle.simple => HapticStrength.none,
+    RevealStyle.golden => HapticStrength.light,
+    RevealStyle.walkout => HapticStrength.heavy,
+  };
 }
-

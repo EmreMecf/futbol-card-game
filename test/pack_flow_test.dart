@@ -90,10 +90,11 @@ void main() {
       expect(find.text('KADRO PAKETİ'), findsOneWidget,
           reason: 'Türkçe büyük harf: i -> İ');
       expect(find.text('EN İYİ KART'), findsOneWidget);
-      expect(find.text('3 kart koleksiyonuna eklendi · kalan 400 coin'),
+      // Para birimi oyunun diliyle "altın" (referans: 🪙 ... altın)
+      expect(find.text('3 kart koleksiyonuna eklendi · kalan 400 altın'),
           findsOneWidget);
 
-      await t.tap(find.text('TAMAM'));
+      await t.tap(find.text('MAĞAZAYA DÖN'));
       expect(kapandi, 1);
     });
   });
