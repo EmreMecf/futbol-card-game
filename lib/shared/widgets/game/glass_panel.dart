@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_colors.dart';
 import '../../../core/feedback/game_feedback.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/ref_tokens.dart';
 
 /// CAM PANEL — oyun arayüzünün temel kutusu.
 ///
@@ -46,7 +46,7 @@ class GlassPanel extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(AppSpacing.md),
-    this.radius = AppRadius.lg,
+    this.radius = 13, // referans .card-panel
     this.accentColor,
     this.blur = false,
     this.glow = false,
@@ -55,21 +55,24 @@ class GlassPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kenar = accentColor ?? AppColors.surfaceLight;
+    final kenar = accentColor ?? Ref.cardPanelBorder;
     final kose = BorderRadius.circular(radius);
 
     Widget panel = Container(
       padding: padding,
       decoration: BoxDecoration(
         borderRadius: kose,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF1B2740).withValues(alpha: blur ? 0.72 : 0.96),
-            AppColors.deepNavy.withValues(alpha: blur ? 0.66 : 0.96),
-          ],
-        ),
+        // FAZ 8: referans .card-panel degradesi
+        gradient: blur
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF15253C).withValues(alpha: 0.72),
+                  const Color(0xFF101A2D).withValues(alpha: 0.66),
+                ],
+              )
+            : Ref.cardPanelGradient,
         border: Border.all(
           color: kenar.withValues(alpha: accentColor == null ? 1 : 0.55),
         ),

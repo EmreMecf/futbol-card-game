@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../core/utils/turkish_text.dart';
 import '../../../core/feedback/game_feedback.dart';
+import '../../../core/utils/turkish_text.dart';
 import '../premium_card/premium_card.dart';
+import '../ref_card/ref_player_card.dart';
 import 'club_crest.dart';
 import 'confetti_overlay.dart';
 import 'nation_flag.dart';
@@ -174,7 +175,10 @@ class _WalkoutScreenState extends State<WalkoutScreen>
 
     if (yerel < girisOrani) {
       final p = Curves.easeOutBack.transform(yerel / girisOrani);
-      return (opacity: (yerel / girisOrani).clamp(0.0, 1.0), scale: 0.72 + p * 0.28);
+      return (
+        opacity: (yerel / girisOrani).clamp(0.0, 1.0),
+        scale: 0.72 + p * 0.28,
+      );
     }
 
     if (yerel > 1 - cikisOrani) {
@@ -225,8 +229,10 @@ class _WalkoutScreenState extends State<WalkoutScreen>
             AnimatedBuilder(
               animation: Listenable.merge([_kontrolcu, _salinim]),
               builder: (context, _) {
-                final isik = ((_kontrolcu.value - _isikBas) / 0.11)
-                    .clamp(0.0, 1.0);
+                final isik = ((_kontrolcu.value - _isikBas) / 0.11).clamp(
+                  0.0,
+                  1.0,
+                );
                 return SpotlightBackdrop(
                   progress: isik,
                   sway: _salinim.value,
@@ -280,8 +286,7 @@ class _WalkoutScreenState extends State<WalkoutScreen>
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      if (v.shock > 0 && v.shock < 1)
-                        _sokDalgasi(v.shock),
+                      if (v.shock > 0 && v.shock < 1) _sokDalgasi(v.shock),
                       Opacity(
                         opacity: v.opacity,
                         child: Transform.scale(scale: v.scale, child: kart),
@@ -312,7 +317,9 @@ class _WalkoutScreenState extends State<WalkoutScreen>
                   opacity: _sahneBitti ? 1 : 0.45,
                   duration: const Duration(milliseconds: 400),
                   child: Text(
-                    _sahneBitti ? 'Devam etmek için dokun' : 'Atlamak için dokun',
+                    _sahneBitti
+                        ? 'Devam etmek için dokun'
+                        : 'Atlamak için dokun',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.75),
                       fontSize: 12.5,
@@ -329,10 +336,7 @@ class _WalkoutScreenState extends State<WalkoutScreen>
   }
 
   /// Bir aşamayı ekranın ortasına, verilen saydamlık/ölçekle yerleştirir
-  Widget _asamaKatmani(
-    ({double opacity, double scale}) durum,
-    Widget cocuk,
-  ) {
+  Widget _asamaKatmani(({double opacity, double scale}) durum, Widget cocuk) {
     if (durum.opacity <= 0) return const SizedBox.shrink();
 
     return Center(
@@ -398,14 +402,11 @@ class _WalkoutScreenState extends State<WalkoutScreen>
           decoration: BoxDecoration(
             gradient: LinearGradient(colors: _tema.frameGradient),
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(color: _tema.glowColor, blurRadius: 18),
-            ],
+            boxShadow: [BoxShadow(color: _tema.glowColor, blurRadius: 18)],
           ),
           child: Text(
-            widget.card.tier == CardTier.legend
-                ? 'LEGEND'
-                : widget.card.tier.label.toUpperCase(),
+            // Referans nadirlik adı (Bronz … Efsane), Türkçe büyük harf
+            RefRarity.of(widget.card.tier).name.toUpperTr(),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w900,

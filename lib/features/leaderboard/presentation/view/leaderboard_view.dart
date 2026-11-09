@@ -10,6 +10,7 @@ import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../viewmodel/leaderboard_view_model.dart';
+import '../widgets/rank_badge.dart';
 
 /// LİGLER / SIRALAMA — referans `leagues()` ekranı.
 ///
@@ -34,14 +35,6 @@ class LeaderboardView extends StatelessWidget {
     );
   }
 }
-
-/// Gerçek liglerin rozetleri (sırayla)
-const kLigRozetleri = <(String, String, String)>[
-  ('amateur', '🛡️', 'Amatör'),
-  ('usta', '🥈', 'Usta'),
-  ('master', '🥇', 'Master'),
-  ('master_class', '👑', 'Master Class'),
-];
 
 class _Govde extends StatelessWidget {
   const _Govde();

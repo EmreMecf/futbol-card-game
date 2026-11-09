@@ -283,13 +283,15 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1000));
       expect(find.text('FORVET'), findsNothing);
       expect(find.byType(ClubCrest), findsOneWidget);
-      expect(find.text('RIO ATLETICO'), findsOneWidget);
+      // Türkçe büyük harf kuralı (i -> İ), oyunun her yerinde aynı
+      expect(find.text('RİO ATLETİCO'), findsOneWidget);
 
       // ---- 4. AŞAMA: KART VURUR (3.5 sn +) ----
       await tester.pump(const Duration(milliseconds: 800));
       expect(find.byType(ClubCrest), findsNothing);
       expect(find.byType(PremiumPlayerCard), findsOneWidget);
-      expect(find.text('LEGEND'), findsOneWidget);
+      // Referans nadirlik adı (eskiden İngilizce "LEGEND" yazıyordu)
+      expect(find.text('EFSANE'), findsOneWidget);
       expect(find.byType(ConfettiOverlay), findsOneWidget);
 
       expect(tester.takeException(), isNull);

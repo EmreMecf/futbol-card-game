@@ -448,3 +448,18 @@ Akış korundu, görünüm referans diline geçti.
 | FAZ 6 | Mağaza | PAKETLER / TEKLİFLER / KOZMETİK sekmeleri, günün paketi, 3 paket karosu, paket açma modalı. Taşmalar giderilecek. Fiyat ve olasılıklar sunucudan gelecek. |
 | FAZ 7 | ✅ Yapıldı | Ligler, lig basamakları, profil, maç sonucu, görevler |
 | FAZ 8 | Bütün ekranlar | 6 boyutta golden, performans; eski renklerde kalan ekranlar (ayarlar, lig değişikliği paneli, walkout, tasarım sistemi) |
+
+## FAZ 8 — Tek palet, kalan ekranlar, performans (yapıldı)
+
+- `AppColors` değerleri referans paletine (`Ref`) bağlandı; eski adları kullanan bütün ekranlar aynı renklere geçti. Kontrast: metin/zemin 17,61; muted/panel 7,07; accent/panel 10,41; red/panel 5,87; yeşil üstünde koyu yazı 11,22.
+- Tema: giriş alanı (.search), pencere (.modal), alt pencere, bildirim, anahtar (switch) referans renklerinde.
+- `GameButton`, `GlassPanel`, `GameLogo` referans görünümünde. Giriş, kayıt ve ayarlar ekranları referans dilinde.
+- Lig rozeti her yerde aynı (🛡️ Amatör, 🥈 Usta, 🥇 Master, 👑 Master Class); bilinmeyen lig için eski kalkan yedekte.
+- "Diamond/Legend" → "Elmas/Efsane" (walkout dahil); büyük harfler Türkçe kurala göre (`toUpperTr`).
+- Nötr buton 47 → 49 px (en az 48 px parmak hedefi).
+- Yeni testler: `faz8_golden_test` (giriş, kayıt, ayarlar, lig atlama, lig paneli, walkout × 6 boyut) ve `faz8_performans_test` (13 ekran).
+  - Animasyonlar kapalıyken 13 ekranın hepsi boşta 0 animasyon.
+  - Açıkken yalnız koleksiyon (Efsane kart ışığı), maç hazırlığı ve arena (stadyum salınımı) çizer.
+  - %130 yazı + 320×568: 13 ekranda taşma yok.
+- Web yayın derlemesi başarılı; main.dart.js 3,96 MB (sıkıştırmasız).
+- Açık soru: 🥈 emojisinin içinde "2" yazıyor; lig atlama ekranında yanında "Usta 1" rozeti var.

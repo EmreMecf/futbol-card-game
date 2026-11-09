@@ -7,6 +7,7 @@ import '../../../../core/error/app_exception.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/ref_tokens.dart';
 import '../../../../shared/widgets/game/game_ui.dart';
 import '../viewmodel/auth_view_model.dart';
 import '../widgets/auth_scaffold.dart';
@@ -77,11 +78,11 @@ class _LoginViewState extends State<LoginView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('TEKRAR HOŞ GELDİN', style: AppTypography.h2),
+                  Text('TEKRAR HOŞ GELDİN', style: Ref.h2()),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Kadrona dönmek için giriş yap.',
-                    style: AppTypography.bodyS,
+                    style: Ref.bodyText(12, color: Ref.muted),
                   ),
                   const SizedBox(height: AppSpacing.xl),
 
@@ -151,7 +152,7 @@ class _LoginViewState extends State<LoginView> {
             alignment: WrapAlignment.center,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text('Hesabın yok mu?', style: AppTypography.bodyS),
+              Text('Hesabın yok mu?', style: Ref.bodyText(12, color: Ref.muted)),
               TextButton(
                 onPressed: viewModel.isBusy
                     ? null

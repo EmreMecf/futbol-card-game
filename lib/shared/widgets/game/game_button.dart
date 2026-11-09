@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/turkish_text.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/feedback/game_feedback.dart';
 import '../../../core/theme/app_tokens.dart';
-import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/ref_tokens.dart';
 
 /// Oyun butonunun görsel türü.
 enum GameButtonVariant {
@@ -120,34 +119,36 @@ class _GameButtonState extends State<GameButton> {
     widget.onPressed!();
   }
 
+  // FAZ 8: değerler referans HTML'den (.cta / .secondary-button /
+  // .neutral-button). 3B basma davranışı aynen korunuyor.
   _Gorunum get _gorunum => switch (widget.variant) {
     GameButtonVariant.primary => const _Gorunum(
-      gradient: AppGradients.cta,
-      kenar: AppGradients.ctaEdge,
-      yazi: Color(0xFF261705),
+      gradient: Ref.ctaGradient,
+      kenar: Ref.ctaShadow,
+      yazi: Ref.ctaText,
       cerceve: null,
       yaziBoyutu: 22,
-      yukseklik: 56,
+      yukseklik: 54,
+      basliktaYazi: true,
     ),
     GameButtonVariant.secondary => const _Gorunum(
-      gradient: AppGradients.secondary,
-      kenar: Color(0xFF022C22),
-      yazi: Color(0xFFD1FAE5),
-      cerceve: Color(0xFF10B981),
-      yaziBoyutu: 17,
-      yukseklik: 50,
+      gradient: Ref.secondaryGradient,
+      kenar: Color(0xFF052820),
+      yazi: Ref.secondaryText,
+      cerceve: Ref.secondaryBorder,
+      yaziBoyutu: 13,
+      yukseklik: 46,
+      basliktaYazi: false,
     ),
     GameButtonVariant.neutral => const _Gorunum(
-      gradient: LinearGradient(
-        colors: [Color(0xFF1E293B), Color(0xFF162032)],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ),
-      kenar: Color(0xFF0B1220),
-      yazi: AppColors.textPrimary,
-      cerceve: Color(0xFF334155),
-      yaziBoyutu: 16,
-      yukseklik: 48,
+      gradient: LinearGradient(colors: [Ref.neutralBg, Ref.neutralBg]),
+      kenar: Color(0xFF0A1424),
+      yazi: Ref.neutralText,
+      cerceve: Ref.neutralBorder,
+      yaziBoyutu: 12,
+      // 46 + 3 px kenar = 49: en az 48 px parmak hedefi
+      yukseklik: 46,
+      basliktaYazi: false,
     ),
   };
 
@@ -168,7 +169,7 @@ class _GameButtonState extends State<GameButton> {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: g.kenar,
-                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
           ),
@@ -184,13 +185,11 @@ class _GameButtonState extends State<GameButton> {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: g.gradient,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                border: g.cerceve == null
-                    ? null
-                    : Border.all(color: g.cerceve!.withValues(alpha: 0.6)),
+                borderRadius: BorderRadius.circular(10),
+                border: g.cerceve == null ? null : Border.all(color: g.cerceve!),
                 // Sadece altın buton parlıyor: ekrandaki "asıl eylem" o
                 boxShadow: widget.variant == GameButtonVariant.primary && aktif
-                    ? AppShadows.glow(AppColors.victoryGold, siddet: 0.6)
+                    ? const [BoxShadow(color: Ref.ctaGlow, offset: Offset(0, 8), blurRadius: 28)]
                     : null,
               ),
               child: Padding(
@@ -234,12 +233,12 @@ class _GameButtonState extends State<GameButton> {
       );
     }
 
-    final yaziStili = AppTypography.display(
-      size: g.yaziBoyutu,
-      weight: FontWeight.w900,
-      color: g.yazi,
-      letterSpacing: 1.0,
-    );
+    // Altın buton: referans .cta (başlık yazısı). Diğerleri: gövde
+    // yazısı 900 (referans .secondary-button / .neutral-button).
+    final yaziStili = g.basliktaYazi
+        ? Ref.heading(g.yaziBoyutu, color: g.yazi, weight: FontWeight.w900, height: 1.2)
+            .copyWith(letterSpacing: g.yaziBoyutu * 0.04)
+        : Ref.bodyText(g.yaziBoyutu, color: g.yazi, weight: FontWeight.w900);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -274,7 +273,11 @@ class _Gorunum {
   final double yaziBoyutu;
   final double yukseklik;
 
+  /// Başlık yazı tipi mi (altın buton), gövde yazısı mı?
+  final bool basliktaYazi;
+
   const _Gorunum({
+    required this.basliktaYazi,
     required this.gradient,
     required this.kenar,
     required this.yazi,

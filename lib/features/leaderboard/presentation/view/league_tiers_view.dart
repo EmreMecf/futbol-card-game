@@ -10,7 +10,7 @@ import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../viewmodel/league_tiers_view_model.dart';
-import 'leaderboard_view.dart' show kLigRozetleri;
+import '../widgets/rank_badge.dart' show kLigRozetleri;
 
 /// LİGLER — bütün basamaklar (4 lig x 3 seviye).
 ///

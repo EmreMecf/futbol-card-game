@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/collection/domain/repositories/collection_repository.dart';
 import 'package:futbol_card/features/collection/presentation/viewmodel/collection_view_model.dart';
+import 'package:futbol_card/shared/widgets/game/tier_badge.dart';
 import 'package:futbol_card/features/collection/presentation/widgets/collection_filter_bar.dart';
 import 'package:futbol_card/shared/widgets/premium_card/premium_card.dart';
 import 'package:provider/provider.dart';
@@ -238,9 +239,12 @@ void main() {
     testWidgets('filtre bandi tum seviyeleri gosterir', (tester) async {
       await ekraniAc(tester);
 
+      // Ekrandaki adlar: Bronz, Gümüş, Altın, Elmas, Efsane
+      // Kartlar da aynı nadirlik adını yazar; yalnız filtre bandına bak
+      final bant = find.byType(CollectionFilterBar);
       for (final seviye in CardTier.values) {
-        expect(find.text(seviye.label), findsOneWidget,
-            reason: '${seviye.label} rozeti gorunmeli');
+        expect(find.descendant(of: bant, matching: find.text(seviye.displayName)), findsOneWidget,
+            reason: '${seviye.displayName} rozeti gorunmeli');
       }
 
       // Pozisyon rozetleri
@@ -255,7 +259,7 @@ void main() {
         (tester) async {
       final vm = await ekraniAc(tester);
 
-      await tester.tap(find.text('Legend'));
+      await tester.tap(find.descendant(of: find.byType(CollectionFilterBar), matching: find.text('Efsane')));
       await tester.pump(const Duration(milliseconds: 200));
 
       expect(vm.filteredCards.length, 6);

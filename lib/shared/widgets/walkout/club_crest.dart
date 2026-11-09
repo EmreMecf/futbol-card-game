@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/turkish_text.dart';
+
 /// KULÜP ARMASI — kulüp adından TÜRETİLEN prosedürel arma.
 ///
 /// -------------------------------------------------------------------
@@ -47,7 +49,7 @@ class ClubCrest extends StatelessWidget {
         SizedBox(
           width: size * 1.9,
           child: Text(
-            ad.isEmpty ? 'SERBEST OYUNCU' : ad.toUpperCase(),
+            ad.isEmpty ? 'SERBEST OYUNCU' : ad.toUpperTr(),
             maxLines: 2,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,

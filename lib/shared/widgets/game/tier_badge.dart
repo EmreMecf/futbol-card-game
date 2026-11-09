@@ -4,6 +4,7 @@ import 'package:shared_models/shared_models.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/turkish_text.dart';
 
 /// Kart seviyesinin EKRANDA görünen Türkçe adı ve rengi.
 ///
@@ -17,12 +18,12 @@ extension CardTierDisplay on CardTier {
     CardTier.bronze => 'Bronz',
     CardTier.silver => 'Gümüş',
     CardTier.gold => 'Altın',
-    // Diamond ve Legend Türkçeleştirilmedi: oyun kurallarında ve
-    // uygulamanın geri kalanında (walkout "LEGEND" yazısı dahil)
-    // bu adlar geçiyor. Prototipteki "Elmas/Efsane" ile karışırsa
-    // oyuncu aynı seviyeyi iki farklı adla görürdü.
-    CardTier.diamond => 'Diamond',
-    CardTier.legend => 'Legend',
+    // FAZ 8: referans HTML ve oyunun bütün ekranları "Elmas" ve
+    // "Efsane" diyor (kart, koleksiyon, mağaza, walkout). Eskiden
+    // burada İngilizce ad vardı; oyuncu aynı seviyeyi iki adla
+    // görüyordu.
+    CardTier.diamond => 'Elmas',
+    CardTier.legend => 'Efsane',
   };
 
   Color get color => switch (this) {
@@ -77,7 +78,7 @@ class TierBadge extends StatelessWidget {
             const SizedBox(width: AppSpacing.xs),
           ],
           Text(
-            tier.displayName.toUpperCase(),
+            tier.displayName.toUpperTr(),
             style: AppTypography.display(
               size: compact ? 11 : 13,
               weight: FontWeight.w900,

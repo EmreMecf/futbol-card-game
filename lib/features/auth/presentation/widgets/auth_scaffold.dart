@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/walkout/spotlight_backdrop.dart';
 
 /// Giriş ve kayıt ekranlarının ortak iskeleti: gece stadyumu zemini,
@@ -28,14 +28,14 @@ class AuthScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Ref.phoneBg,
       body: Stack(
         fit: StackFit.expand,
         children: [
           const SpotlightBackdrop(
             progress: 1,
             sway: 0.25,
-            color: AppColors.emerald,
+            color: Ref.accent,
           ),
           SafeArea(
             child: Center(
@@ -60,10 +60,15 @@ class AuthScaffold extends StatelessWidget {
               child: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.sm),
-                  child: IconButton(
-                    tooltip: 'Geri',
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    onPressed: () => Navigator.of(context).maybePop(),
+                  // Referans .neutral-button (lig basamakları ekranındaki geri ile aynı)
+                  child: Tooltip(
+                    message: 'Geri',
+                    child: RefNeutralButton(
+                      padding: const EdgeInsets.all(9),
+                      semanticLabel: 'Geri',
+                      onTap: () => Navigator.of(context).maybePop(),
+                      child: const Icon(Icons.arrow_back_rounded, size: 18, color: Ref.neutralText),
+                    ),
                   ),
                 ),
               ),
@@ -97,9 +102,9 @@ class AuthErrorBanner extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.danger.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: AppColors.danger.withValues(alpha: 0.45)),
+          color: Ref.red.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Ref.red.withValues(alpha: 0.45)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,7 +113,7 @@ class AuthErrorBanner extends StatelessWidget {
               isConnection
                   ? Icons.wifi_off_rounded
                   : Icons.error_outline_rounded,
-              color: AppColors.danger,
+              color: Ref.red,
               size: 18,
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -117,7 +122,7 @@ class AuthErrorBanner extends StatelessWidget {
                 isConnection
                     ? '$message\nİnternet bağlantını kontrol edip tekrar dene.'
                     : message,
-                style: AppTypography.body(size: 12.5, height: 1.4),
+                style: Ref.bodyText(12.5, height: 1.4),
               ),
             ),
           ],

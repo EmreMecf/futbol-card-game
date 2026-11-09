@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import 'app_tokens.dart';
 import 'app_typography.dart';
+import 'ref_tokens.dart';
 
 /// Uygulamanin gorsel kimligi.
 /// Oyun karanlik tema uzerine kuruludur (stadyum gece atmosferi).
@@ -86,36 +87,67 @@ class AppTheme {
           ),
         ),
       ),
+      // FAZ 8: giriş alanı = referans .search (#111e31 zemin, #344a65
+      // kenar, 10px köşe); odakta --accent.
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.all(AppSpacing.lg),
+        fillColor: Ref.searchBg,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Ref.searchBorder),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Ref.searchBorder),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Ref.accent, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: const BorderSide(color: AppColors.danger),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Ref.red),
         ),
-        hintStyle: const TextStyle(color: AppColors.textSecondary),
-        labelStyle: const TextStyle(color: AppColors.textSecondary),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Ref.red, width: 1.5),
+        ),
+        prefixIconColor: Ref.muted,
+        suffixIconColor: Ref.muted,
+        hintStyle: const TextStyle(color: Ref.muted),
+        labelStyle: const TextStyle(color: Ref.muted),
+        errorStyle: const TextStyle(color: Ref.red),
+      ),
+      // Pencereler: referans modal (.modal-content)
+      dialogTheme: DialogThemeData(
+        backgroundColor: Ref.modalBg,
+        surfaceTintColor: Colors.transparent,
+        barrierColor: Ref.modalBack,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(21),
+          side: const BorderSide(color: Ref.modalBorder),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Ref.modalBg,
+        surfaceTintColor: Colors.transparent,
+        modalBarrierColor: Ref.modalBack,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.surfaceLight,
-        contentTextStyle: const TextStyle(color: AppColors.textPrimary),
+        backgroundColor: Ref.panel2,
+        contentTextStyle: const TextStyle(color: Ref.text, fontFamily: AppTypography.bodyFamily),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: BorderRadius.circular(10),
+          side: const BorderSide(color: Ref.cardPanelBorder),
         ),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(color: Ref.accent, linearTrackColor: Ref.barTrack),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((d) => d.contains(WidgetState.selected) ? Ref.bg : Ref.muted),
+        trackColor: WidgetStateProperty.resolveWith((d) => d.contains(WidgetState.selected) ? Ref.accent : Ref.barTrack),
+        trackOutlineColor: const WidgetStatePropertyAll(Ref.cardPanelBorder),
       ),
       dividerTheme: const DividerThemeData(
         color: AppColors.surfaceLight,

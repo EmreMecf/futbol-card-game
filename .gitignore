@@ -72,3 +72,6 @@ server/*.log
 
 # Referans ekran cekme araci gecici dosyalari
 design-reference/.gecici/
+
+# Golden test hatalarinda olusan fark goruntuleri (yerel)
+test/goldens/failures/

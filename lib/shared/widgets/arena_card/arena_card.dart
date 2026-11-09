@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../../../core/feedback/game_feedback.dart';
+import '../../../core/utils/turkish_text.dart';
 import '../avatar2d/avatar_painter.dart';
 import '../avatar2d/avatar_spec.dart';
 import 'rarity_style.dart';
@@ -355,7 +356,7 @@ class _IsimPlakasi extends StatelessWidget {
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      name.toUpperCase(),
+                      name.toUpperTr(),
                       maxLines: 1,
                       style: TextStyle(
                         fontFamily: 'BarlowCondensed',

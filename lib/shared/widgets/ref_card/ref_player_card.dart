@@ -7,6 +7,7 @@ import 'package:shared_models/shared_models.dart';
 
 import '../../../core/feedback/game_feedback.dart';
 import '../../../core/theme/ref_tokens.dart';
+import '../../../core/utils/turkish_text.dart';
 import '../avatar2d/avatar_painter.dart';
 import '../avatar2d/avatar_spec.dart';
 import '../ref/ref_glyphs.dart';
@@ -407,7 +408,7 @@ class _NadirlikSatiri extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final yazi = Text(
-      sparkles ? rarity.name.toUpperCase() : rarity.name,
+      sparkles ? rarity.name.toUpperTr() : rarity.name,
       textScaler: TextScaler.noScaling,
       style: Ref.bodyText(9 * k, color: rarity.color, weight: FontWeight.w900, height: 1.3),
     );

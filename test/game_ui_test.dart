@@ -74,17 +74,19 @@ void main() {
     });
   });
 
-  group('MD paleti birebir', () {
-    test('dokuz ana renk MD bölüm 3 ile aynı', () {
-      expect(AppColors.obsidian, const Color(0xFF0A0C10));
-      expect(AppColors.deepNavy, const Color(0xFF111827));
-      expect(AppColors.midnightBlue, const Color(0xFF0F172A));
-      expect(AppColors.emerald, const Color(0xFF10B981));
-      expect(AppColors.cyan, const Color(0xFF22D3EE));
-      expect(AppColors.championGold, const Color(0xFFD4AF37));
-      expect(AppColors.victoryGold, const Color(0xFFFBBF24));
-      expect(AppColors.dangerRed, const Color(0xFFEF4444));
-      expect(AppColors.epicPurple, const Color(0xFF8B5CF6));
+  group('Palet referans HTML ile aynı', () {
+    // FAZ 8: tasarımın tek kaynağı referans HTML (Ref). Eski adlar
+    // (AppColors) değerlerini oradan alır; iki palet ayrışamaz.
+    test('eski adlar referans :root değişkenlerine bağlı', () {
+      expect(AppColors.background, const Color(0xFF080E19)); // --bg
+      expect(AppColors.surface, const Color(0xFF0E1728)); // --panel
+      expect(AppColors.primary, const Color(0xFF21DFAA)); // --accent
+      expect(AppColors.accent, const Color(0xFFF8C665)); // --gold
+      expect(AppColors.textPrimary, const Color(0xFFEEF5FF)); // --text
+      expect(AppColors.textSecondary, const Color(0xFF93A4BD)); // --muted
+      expect(AppColors.danger, const Color(0xFFF26479)); // --red
+      expect(AppColors.info, const Color(0xFF3BAAFA)); // --blue
+      expect(AppColors.epicPurple, const Color(0xFFA56BFF)); // --purple
     });
 
     test('animasyon süreleri MD bölüm 9 aralıklarında', () {
@@ -292,13 +294,14 @@ void main() {
     test('ekranda Türkçe karakterli adlar', () {
       expect(CardTier.silver.displayName, 'Gümüş');
       expect(CardTier.gold.displayName, 'Altın');
-      // Oyun genelindeki adlarla tutarlı (walkout "LEGEND" yazar)
-      expect(CardTier.legend.displayName, 'Legend');
+      // Referans ve oyunun geri kalanıyla aynı adlar (Elmas, Efsane)
+      expect(CardTier.diamond.displayName, 'Elmas');
+      expect(CardTier.legend.displayName, 'Efsane');
     });
 
-    testWidgets('Legend rozeti yıldızlı (simge, karakter değil)', (tester) async {
+    testWidgets('Efsane rozeti yıldızlı (simge, karakter değil)', (tester) async {
       await tester.pumpWidget(sarmala(const TierBadge(CardTier.legend)));
-      expect(find.text('LEGEND'), findsOneWidget);
+      expect(find.text('EFSANE'), findsOneWidget);
       // REGRESYON: "✦" karakteri Barlow Condensed'de yok, kutu çiziliyordu
       expect(find.textContaining('✦'), findsNothing);
       expect(find.byIcon(Icons.auto_awesome), findsNWidgets(2));

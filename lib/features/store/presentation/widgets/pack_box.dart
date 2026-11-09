@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/premium_card/premium_card.dart';
+import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 
 /// Mağazadaki paketin 3B görünümlü kutusu.
 ///
@@ -140,7 +141,7 @@ class OddsChip extends StatelessWidget {
         ),
         const SizedBox(width: 5),
         Text(
-          odds.tier.label,
+          RefRarity.of(odds.tier).name,
           style: AppTypography.body(size: compact ? 10.5 : 11.5, color: AppColors.textSecondary),
         ),
         const SizedBox(width: 4),

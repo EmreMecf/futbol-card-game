@@ -3,6 +3,8 @@ import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
 
 /// Lig rengini `#RRGGBB` metninden çözer.
 ///
@@ -14,11 +16,35 @@ Color leagueColor(String hex) {
   var metin = hex.trim().replaceFirst('#', '');
   if (metin.length == 6) metin = 'FF$metin';
   final deger = int.tryParse(metin, radix: 16);
-  if (deger == null) return AppColors.textSecondary;
+  if (deger == null) return Ref.muted;
   return Color(deger);
 }
 
-/// Lig rozeti: kalkan biçiminde, içinde seviye numarası.
+/// Gerçek liglerin rozetleri (sırayla): (kod, emoji, ad).
+///
+/// Referans HTML'in .league-badges dili. Ligler ekranı, lig atlama
+/// kutlaması ve maç sonucu paneli AYNI rozeti kullanır; oyuncu bir
+/// ligi her yerde aynı simgeyle görür.
+const kLigRozetleri = <(String, String, String)>[
+  ('amateur', '🛡️', 'Amatör'),
+  ('usta', '🥈', 'Usta'),
+  ('master', '🥇', 'Master'),
+  ('master_class', '👑', 'Master Class'),
+];
+
+/// Lig koduna (yoksa adına) göre rozet emojisi; bilinmeyen lig: null
+String? leagueEmoji({String? code, String? name}) {
+  for (final (kod, emoji, ad) in kLigRozetleri) {
+    if (kod == code || ad == name) return emoji;
+  }
+  return null;
+}
+
+/// Lig rozeti: ligin emojisi + köşede seviye numarası.
+///
+/// FAZ 8: bilinen liglerde referans rozeti (bkz. [kLigRozetleri]).
+/// Veritabanına yeni bir lig eklenip burada emojisi yoksa eski kalkan
+/// çizimine (lig renginde, içinde seviye numarası) düşülür.
 ///
 /// ===================================================================
 /// NEDEN KART SEVİYELERİNDEN FARKLI BİR BİÇİM?
@@ -36,6 +62,9 @@ class RankBadge extends StatelessWidget {
   final String colorHex;
   final double size;
 
+  /// Lig kodu (amateur, usta…). Yoksa ad ile eşleştirilir.
+  final String? leagueCode;
+
   /// Rozetin yanında lig adını da yaz
   final bool showLabel;
 
@@ -46,6 +75,7 @@ class RankBadge extends StatelessWidget {
     required this.colorHex,
     this.size = 44,
     this.showLabel = false,
+    this.leagueCode,
   });
 
   /// Oyuncunun kendi rütbesinden
@@ -56,6 +86,7 @@ class RankBadge extends StatelessWidget {
   }) =>
       RankBadge(
         leagueName: rank.leagueName,
+        leagueCode: rank.leagueCode,
         division: rank.division,
         colorHex: rank.color,
         size: size,
@@ -76,32 +107,67 @@ class RankBadge extends StatelessWidget {
         showLabel: showLabel,
       );
 
-  @override
-  Widget build(BuildContext context) {
-    final renk = leagueColor(colorHex);
+  /// Referans rozeti: emoji (lig renginde ışık) + sağ altta seviye
+  Widget _emojiRozet(String emoji, Color renk) => SizedBox(
+        width: size,
+        height: size * 1.12,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            RefDropShadow(
+              color: renk.withValues(alpha: 0.55),
+              offset: Offset.zero,
+              blur: size * 0.3,
+              child: Em(emoji, size: size * 0.86),
+            ),
+            Positioned(
+              right: -size * 0.04,
+              bottom: 0,
+              child: Container(
+                constraints: BoxConstraints(minWidth: size * 0.42),
+                padding: EdgeInsets.symmetric(horizontal: size * 0.07, vertical: size * 0.02),
+                decoration: BoxDecoration(
+                  color: Ref.bg,
+                  borderRadius: BorderRadius.circular(size),
+                  border: Border.all(color: renk, width: 1.5),
+                ),
+                child: Text(
+                  '$division',
+                  textAlign: TextAlign.center,
+                  style: Ref.heading(size * 0.3, weight: FontWeight.w900, height: 1.05),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
 
-    final rozet = SizedBox(
-      width: size,
-      height: size * 1.12,
-      child: CustomPaint(
-        painter: _KalkanPainter(color: renk),
-        child: Center(
-          child: Padding(
-            // Kalkanın alt ucu sivri; numara biraz yukarıda dursun
-            padding: EdgeInsets.only(bottom: size * 0.12),
-            child: Text(
-              '$division',
-              style: AppTypography.display(
-                size: size * 0.46,
-                weight: FontWeight.w900,
-                color: AppColors.background,
-                height: 1.0,
+  /// Yedek: lig renginde kalkan, içinde seviye numarası
+  Widget _kalkan(Color renk) => SizedBox(
+        width: size,
+        height: size * 1.12,
+        child: CustomPaint(
+          painter: _KalkanPainter(color: renk),
+          child: Center(
+            child: Padding(
+              // Kalkanın alt ucu sivri; numara biraz yukarıda dursun
+              padding: EdgeInsets.only(bottom: size * 0.12),
+              child: Text(
+                '$division',
+                style: Ref.heading(size * 0.46, color: Ref.bg, weight: FontWeight.w900, height: 1.0),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final renk = leagueColor(colorHex);
+
+    final emoji = leagueEmoji(code: leagueCode, name: leagueName);
+    final rozet = emoji == null ? _kalkan(renk) : _emojiRozet(emoji, renk);
 
     if (!showLabel) return rozet;
 
@@ -119,19 +185,11 @@ class RankBadge extends StatelessWidget {
                 leagueName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.display(
-                  size: size * 0.42,
-                  weight: FontWeight.w900,
-                  color: renk,
-                  height: 1.05,
-                ),
+                style: Ref.heading(size * 0.42, color: renk, weight: FontWeight.w900, height: 1.05),
               ),
               Text(
                 'Seviye $division',
-                style: AppTypography.body(
-                  size: size * 0.24,
-                  color: AppColors.textSecondary,
-                ),
+                style: Ref.bodyText(size * 0.24, color: Ref.muted),
               ),
             ],
           ),

@@ -3,6 +3,7 @@ import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/feedback/game_feedback.dart';
 import '../../../../core/theme/ref_tokens.dart';
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 import '../../../../shared/widgets/walkout/confetti_overlay.dart';
@@ -213,7 +214,7 @@ class _ZaferPaneli extends StatelessWidget {
         Text('${sonuc.myScore} – ${sonuc.opponentScore}', style: Ref.heading(49, height: 1.1)),
         const SizedBox(height: 4),
         Text(
-          'SEN · ${(sonuc.opponent?.username ?? 'RAKİP').toUpperCase()}',
+          'SEN · ${(sonuc.opponent?.username ?? 'RAKİP').toUpperTr()}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Ref.caps(Ref.muted),

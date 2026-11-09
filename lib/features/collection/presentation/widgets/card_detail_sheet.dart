@@ -7,6 +7,7 @@ import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/feedback/game_feedback.dart';
 import '../../../../core/theme/ref_tokens.dart';
+import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 
@@ -102,7 +103,7 @@ class CardDetailSheet extends StatelessWidget {
                       const SizedBox(height: 16),
                       RefStatRow([
                         RefStat('${card.power}', 'GÜÇ'),
-                        RefStat(RefRarity.of(card.tier).name.toUpperCase(), 'NADİRLİK', valueSize: 20),
+                        RefStat(RefRarity.of(card.tier).name.toUpperTr(), 'NADİRLİK', valueSize: 20),
                         RefStat(card.position.code, 'MEVKİ'),
                       ]),
                       if (a != null && a.isNotEmpty) ...[

@@ -291,7 +291,8 @@ void main() {
       expect(find.text('KART'), findsOneWidget);
       expect(find.text('Prototip'), findsOneWidget);
       expect(find.textContaining('Gerçek nadirliği: ALTIN'), findsOneWidget);
-      expect(find.text('KAELEN BRISVOY'), findsWidgets);
+      // Türkçe büyük harf kuralı (i -> İ), oyunun her yerinde aynı
+      expect(find.text('KAELEN BRİSVOY'), findsWidgets);
       expect(find.text('PORTRE YOK'), findsOneWidget);
     });
 
