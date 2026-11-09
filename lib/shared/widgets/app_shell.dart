@@ -134,7 +134,11 @@ class RefPhoneHeader extends StatelessWidget {
   final String currentRoute;
   final bool showLogo;
 
-  const RefPhoneHeader({super.key, required this.currentRoute, this.showLogo = true});
+  /// Maç sırasında: başlık başka ekrana götürmez (maçtan kaçış yok;
+  /// çıkış yalnızca teslim olarak)
+  final bool locked;
+
+  const RefPhoneHeader({super.key, required this.currentRoute, this.showLogo = true, this.locked = false});
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +155,7 @@ class RefPhoneHeader extends StatelessWidget {
                 // .logo-small { font: italic 900 20px Barlow; line-height:1 }
                 Expanded(
                   child: GestureDetector(
-                    onTap: currentRoute == AppRoutes.home ? null : () => context.go(AppRoutes.home),
+                    onTap: locked || currentRoute == AppRoutes.home ? null : () => context.go(AppRoutes.home),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -175,7 +179,7 @@ class RefPhoneHeader extends StatelessWidget {
               Semantics(
                 label: 'Altın: ${kullanici?.coins ?? 0}',
                 child: GestureDetector(
-                  onTap: () => context.go(AppRoutes.store),
+                  onTap: locked ? null : () => context.go(AppRoutes.store),
                   child: Container(
                     // .currency { padding:5px 7px; border-radius:8px }
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
@@ -200,7 +204,7 @@ class RefPhoneHeader extends StatelessWidget {
               RefNeutralButton(
                 padding: const EdgeInsets.all(5),
                 semanticLabel: 'Profil',
-                onTap: currentRoute == AppRoutes.profile ? null : () => context.go(AppRoutes.profile),
+                onTap: locked || currentRoute == AppRoutes.profile ? null : () => context.go(AppRoutes.profile),
                 child: const RefGlyphIcon(RefGlyph.smile, size: 12, color: Ref.neutralText),
               ),
             ],

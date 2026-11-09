@@ -172,10 +172,13 @@ class RefSecondaryButton extends StatelessWidget {
   final VoidCallback? onTap;
   final RefGlyph? trailing;
   final IconData? leadingIcon;
+
+  /// Referans sembolü (⚔ gibi), [leadingIcon] yerine
+  final RefGlyph? leadingGlyph;
   final bool expand;
 
   const RefSecondaryButton(this.label,
-      {super.key, this.onTap, this.trailing, this.leadingIcon, this.expand = true});
+      {super.key, this.onTap, this.trailing, this.leadingIcon, this.leadingGlyph, this.expand = true});
 
   @override
   Widget build(BuildContext context) => _Basilabilir(
@@ -196,6 +199,10 @@ class RefSecondaryButton extends StatelessWidget {
             children: [
               if (leadingIcon != null) ...[
                 Icon(leadingIcon, size: 14, color: Ref.secondaryText),
+                const SizedBox(width: 5),
+              ],
+              if (leadingGlyph != null) ...[
+                RefGlyphIcon(leadingGlyph!, size: 12, color: Ref.secondaryText),
                 const SizedBox(width: 5),
               ],
               Flexible(

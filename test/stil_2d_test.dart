@@ -13,6 +13,7 @@ import 'package:futbol_card/features/match/presentation/arena/stage2d/duel_stage
 import 'package:futbol_card/features/match/presentation/arena/stage2d/figure_painter.dart';
 import 'package:futbol_card/features/match/presentation/arena/stage2d/figure_rig.dart';
 import 'package:futbol_card/shared/widgets/arena_card/arena_card.dart';
+import 'package:futbol_card/shared/widgets/ref_card/ref_player_card.dart';
 import 'package:futbol_card/shared/widgets/arena_card/rarity_style.dart';
 import 'package:futbol_card/shared/widgets/avatar2d/avatar_painter.dart';
 import 'package:futbol_card/shared/widgets/avatar2d/avatar_spec.dart';
@@ -250,12 +251,12 @@ void main() {
               ),
             ),
           ));
-          expect(find.byType(ArenaCard), findsNWidgets(2), reason: 'girişte iki kart');
+          expect(find.byType(RefPlayerCard), findsNWidgets(2), reason: 'girişte iki kart');
           for (var ms = 0; ms < DuelStage.totalMs(m, sonuc) + 100; ms += 100) {
             await t.pump(const Duration(milliseconds: 100));
           }
           expect(t.takeException(), isNull);
-          expect(find.byType(ArenaCard), findsNothing, reason: 'kartlar figüre dönüştü');
+          expect(find.byType(RefPlayerCard), findsNothing, reason: 'kartlar figüre dönüştü');
           expect(find.text(yazi), findsOneWidget);
           expect(find.text('83  -  70'), findsOneWidget);
           expect(bitti, isTrue);

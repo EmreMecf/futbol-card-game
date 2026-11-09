@@ -4,7 +4,9 @@ import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/collection/domain/repositories/collection_repository.dart';
 import 'package:futbol_card/features/deck/domain/repositories/deck_repository.dart';
 import 'package:futbol_card/features/leaderboard/domain/repositories/leaderboard_repository.dart';
+import 'package:futbol_card/core/network/websocket_service.dart';
 import 'package:futbol_card/features/match/domain/repositories/match_repository.dart';
+import 'package:futbol_card/features/matchmaking/domain/repositories/matchmaking_repository.dart';
 import 'package:shared_models/shared_models.dart';
 
 /// Golden testlerinin verisi.
@@ -162,4 +164,90 @@ Future<SessionManager> goldenSession() async {
   final s = SessionManager(_Depo());
   await s.updateUser(kGoldenUser);
   return s;
+}
+
+// ====================================================================
+// FAZ 5: maç hazırlığı ve maç
+// ====================================================================
+class GoldenMatchmakingRepo implements MatchmakingRepository {
+  @override
+  Future<Result<String?>> activeMatchId() async => const Success(null);
+  @override
+  Future<Result<List<DeckSummary>>> fetchDecks() async =>
+      const Success([DeckSummary(id: 'd1', name: 'Ana kadro', isActive: true, cardCount: 11)]);
+  @override
+  Future<Result<List<InventoryCard>>> fetchDeckCards(String deckId) async => Success(kGoldenSquad.values.toList());
+  @override
+  Future<Result<DeckValidation>> validateDeck(String deckId) async => const Success(DeckValidation(isValid: true));
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}
+
+class GoldenSocket implements WebSocketService {
+  @override
+  Stream<bool> get connectionState => const Stream<bool>.empty();
+  @override
+  bool get isConnected => true;
+  @override
+  Stream<RealtimeEvent> get events => const Stream.empty();
+  @override
+  dynamic noSuchMethod(Invocation i) => null;
+}
+
+/// Maç kurgusu (match_layout_test ile aynı): 5. tur, sıra bende,
+/// rakip Forvet açtı (Elmas 88 + 2 kimya, taktiği gizli), masada 2 kart,
+/// skor 2-2, enerji 3/5, 31 sn.
+class GoldenArenaRepo implements MatchRepository {
+  @override
+  Future<Result<MatchState>> fetchState(String m) async {
+    final n = DateTime.now();
+    return Success(MatchState(
+      matchId: m,
+      status: MatchStatus.active,
+      roundNumber: 5,
+      isMyTurn: true,
+      requiredPosition: CardPosition.forward,
+      serverTime: n,
+      turnDeadline: n.add(const Duration(seconds: 31)),
+      myScore: 2,
+      opponentScore: 2,
+      myCardsLeft: 7,
+      opponentCardsLeft: 6,
+      potCount: 2,
+      myEnergy: 3,
+      opponentEnergy: 4,
+      opponent: const OpponentInfo(id: 'o', username: 'StormFC', mmr: 1640),
+    ));
+  }
+
+  @override
+  Future<Result<List<HandCard>>> fetchHand(String m) async => Success([
+        for (final (id, p, t, g, ad, k) in const [
+          ('1', CardPosition.forward, CardTier.gold, 84, 'Altın Golcü', 3),
+          ('2', CardPosition.forward, CardTier.legend, 96, 'Kuzey Yıldızı', 4),
+          ('3', CardPosition.midfielder, CardTier.legend, 98, 'Efsane Kaptan', 6),
+          ('4', CardPosition.defender, CardTier.silver, 85, 'Sert Stoper', 2),
+          ('5', CardPosition.goalkeeper, CardTier.diamond, 93, 'Usta Kaleci', 4),
+          ('6', CardPosition.midfielder, CardTier.gold, 86, 'Saha Generali', 1),
+          ('7', CardPosition.defender, CardTier.silver, 84, 'Çelik Bek', 0),
+        ])
+          HandCard(userCardId: id, cardId: 'golden-$ad', fullName: ad, position: p, tier: t, power: g, chemistry: k),
+      ]);
+
+  @override
+  Future<Result<MatchHistory>> fetchHistory(String m) async => const Success(MatchHistory(moves: [
+        MatchMove(
+          roundNumber: 5,
+          userId: 'o',
+          isLead: true,
+          position: CardPosition.forward,
+          tier: CardTier.diamond,
+          power: 88,
+          chemistry: 2,
+          fullName: 'Hız Ustası',
+        ),
+      ]));
+
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }

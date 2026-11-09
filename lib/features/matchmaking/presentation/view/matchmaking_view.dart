@@ -2,17 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../shared/widgets/app_button.dart';
+import '../../../../core/theme/ref_tokens.dart';
+import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
-import '../../../../shared/widgets/premium_card/premium_card.dart';
+import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../../shared/widgets/ref_card/ref_player_card.dart';
+import '../../../match/presentation/arena/ref_stadium.dart';
 import '../viewmodel/matchmaking_view_model.dart';
-import '../../../../core/theme/app_breakpoints.dart';
-import '../../../../shared/widgets/screen_header.dart';
 
-/// Eşleşme ekranı: kadro seç, kartlarını korumaya al, rakip ara.
+/// MAÇ HAZIRLIĞI — alt menüdeki "Arena" sekmesi.
+///
+/// Referansta ayrı bir hazırlık ekranı yok; referans arena ekranının
+/// dili kullanıldı: "⚔ DERECELİ KARŞILAŞMA" başlığı, .arena-stage
+/// stadyumu, .card-panel, ortak kart ızgarası ve altın .cta.
+///
+/// Oyun mantığı MatchmakingViewModel'de, DEĞİŞMEDİ: kadro doğrulama,
+/// kart koruma (kaybedilirse korunmayan kartlardan 3'ü rakibe geçer),
+/// arama, iptal, eşleşince maça geçiş.
 class MatchmakingView extends StatelessWidget {
   const MatchmakingView({super.key});
 
@@ -20,249 +28,194 @@ class MatchmakingView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<MatchmakingViewModel>(
       create: (_) => getIt<MatchmakingViewModel>()..initialize(),
-      child: const _MatchmakingBody(),
+      child: const _Govde(),
     );
   }
 }
 
-class _MatchmakingBody extends StatefulWidget {
-  const _MatchmakingBody();
+class _Govde extends StatelessWidget {
+  const _Govde();
 
-  @override
-  State<_MatchmakingBody> createState() => _MatchmakingBodyState();
-}
-
-class _MatchmakingBodyState extends State<_MatchmakingBody> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<MatchmakingViewModel>();
 
-    // Rakip bulunduğunda maç ekranına geç.
-    // build içinde doğrudan navigasyon yapılamaz; bir sonraki kareye
-    // erteliyoruz.
     final macId = vm.foundMatchId;
     if (macId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
+        if (!context.mounted) return;
         vm.consumeFoundMatch();
         context.pushReplacement(AppRoutes.matchWithId(macId));
       });
     }
 
+    final ariyor = vm.stage == MatchmakingStage.searching;
     return PopScope(
-      // Kuyrukta beklerken geri tuşuna basılırsa önce kuyruktan çık
-      canPop: vm.stage != MatchmakingStage.searching,
+      canPop: !ariyor,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) vm.cancelSearch();
       },
-      child: Scaffold(
-        body: SafeArea(
-          child: ResponsiveBuilder(
-            builder: (context, boyut) {
-              final kenar = AppBreakpoints.pagePadding(boyut);
-              return ContentWidth(
-                maxWidth: 720,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        kenar,
-                        boyut.usesSidebar ? 32 : 16,
-                        kenar,
-                        0,
-                      ),
-                      child: ScreenHeader(
-                        title: vm.stage == MatchmakingStage.searching
-                            ? 'Rakip Aranıyor'
-                            : 'Maça Hazırlan',
-                        subtitle: vm.stage == MatchmakingStage.searching
-                            ? 'Yakın puanlı bir rakip bekleniyor'
-                            : 'Kartlarını koru, sonra rakip ara',
-                        showBack: vm.stage != MatchmakingStage.searching,
-                        breadcrumb: 'Ana sayfa',
-                      ),
+      // Arama sürerken başka sekmeye geçilmesin (kuyrukta unutulmasın):
+      // gezinme gizlenir, çıkış "ARAMAYI İPTAL ET" ile.
+      child: AppShell(
+        currentRoute: AppRoutes.matchmaking,
+        showNavigation: !ariyor,
+        child: LayoutBuilder(
+          builder: (context, k) {
+            return ListView(
+              padding: Ref.pagePadding,
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: k.maxWidth >= 900 ? 900 : 620),
+                    child: RefPageEnter(
+                      child: vm.isLoading
+                          ? const Padding(
+                              padding: EdgeInsets.all(40),
+                              child: Center(child: CircularProgressIndicator(color: Ref.accent)),
+                            )
+                          : (ariyor ? _Arama(viewModel: vm) : _Hazirlik(viewModel: vm)),
                     ),
-                    const SizedBox(height: 18),
-                    Expanded(child: _icerik(context, vm)),
-                  ],
+                  ),
                 ),
-              );
-            },
-          ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
-
-  Widget _icerik(BuildContext context, MatchmakingViewModel vm) {
-    if (vm.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      );
-    }
-
-    if (vm.stage == MatchmakingStage.searching) {
-      return _AramaEkrani(viewModel: vm);
-    }
-
-    return _HazirlikEkrani(viewModel: vm);
-  }
 }
 
-// ====================================================================
-// HAZIRLIK: kadro + koruma seçimi
-// ====================================================================
-class _HazirlikEkrani extends StatelessWidget {
-  final MatchmakingViewModel viewModel;
+Widget _baslik(String baslik, Widget? sag) => Row(
+  children: [
+    Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const RefGlyphIcon(RefGlyph.swords, size: 10, color: Ref.accent),
+              const SizedBox(width: 4),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text('DERECELİ KARŞILAŞMA', maxLines: 1, style: Ref.caps(Ref.accent)),
+                ),
+              ),
+            ],
+          ),
+          Text(baslik, style: Ref.h2()),
+        ],
+      ),
+    ),
+    ?sag,
+  ],
+);
 
-  const _HazirlikEkrani({required this.viewModel});
+// ====================================================================
+// HAZIRLIK
+// ====================================================================
+class _Hazirlik extends StatelessWidget {
+  final MatchmakingViewModel viewModel;
+  const _Hazirlik({required this.viewModel});
 
   @override
   Widget build(BuildContext context) {
-    final dogrulama = viewModel.validation;
+    final vm = viewModel;
+    final dogrulama = vm.validation;
     final gecerli = dogrulama?.isValid ?? false;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ---- KADRO DURUMU ----
-        Container(
-          margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: gecerli
-                ? AppColors.success.withValues(alpha: 0.12)
-                : AppColors.danger.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: (gecerli ? AppColors.success : AppColors.danger)
-                  .withValues(alpha: 0.4),
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                gecerli ? Icons.check_circle : Icons.error_outline,
-                color: gecerli ? AppColors.success : AppColors.danger,
-                size: 20,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  dogrulama?.displayMessage ?? 'Kadro kontrol ediliyor...',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // ---- KORUMA BAŞLIĞI ----
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
-          child: Row(
-            children: [
-              const Icon(Icons.shield_outlined,
-                  size: 18, color: AppColors.accent),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Kartlarını koru  '
-                  '(${viewModel.protectedCardIds.length}/${viewModel.maxProtection})',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: viewModel.autoProtectBest,
-                child: const Text('En iyileri koru'),
-              ),
-            ],
-          ),
-        ),
-
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'Maçı kaybedersen, korumaya ALMADIĞIN kartlardan 3 tanesi '
-            'rastgele seçilip kalıcı olarak rakibe geçer.',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-          ),
-        ),
-
-        const SizedBox(height: 12),
-
-        // ---- KADRO KARTLARI ----
-        Expanded(
-          child: viewModel.deckCards.isEmpty
-              ? const Center(
+        _baslik('MAÇA HAZIRLAN', RefPill('KORUMA ${vm.protectedCardIds.length}/${vm.maxProtection}')),
+        const SizedBox(height: Ref.pageGap),
+        RefArenaStage(stadium: RefStadium(caption: gecerli ? 'KADRO HAZIR!' : 'KADRO EKSİK', height: 200)),
+        const SizedBox(height: Ref.pageGap),
+        // Kadro durumu
+        RefCardPanel(
+          children: [
+            Row(
+              children: [
+                Em(gecerli ? '✅' : '⚠️', size: 20),
+                const SizedBox(width: 10),
+                Expanded(
                   child: Text(
-                    'Kadronda kart yok.',
-                    style: TextStyle(color: AppColors.textSecondary),
+                    dogrulama?.displayMessage ?? 'Kadro kontrol ediliyor...',
+                    style: Ref.bodyText(12, weight: FontWeight.w700, color: gecerli ? Ref.text : Ref.red),
                   ),
-                )
-              : GridView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  gridDelegate:
-                      const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 120,
-                    childAspectRatio: 0.66,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: viewModel.deckCards.length,
-                  itemBuilder: (context, index) {
-                    final kart = viewModel.deckCards[index];
-                    final korunuyor =
-                        viewModel.isProtected(kart.userCardId);
-
-                    return LayoutBuilder(
-                      builder: (context, kisitlar) {
-                        return PremiumPlayerCard(
-                          key: ValueKey(kart.userCardId),
-                          fullName: kart.fullName,
-                          position: kart.position,
-                          tier: kart.tier,
-                          power: kart.power,
-                          imageUrl: kart.imageUrl,
-                          nationality: kart.nationality,
-                          club: kart.club,
-                          width: kisitlar.maxWidth,
-                          isProtected: korunuyor,
-                          isSelected: korunuyor,
-                          // Liste modunda animasyon kapalı (performans)
-                          interactive: false,
-                          onTap: () {
-                            if (!korunuyor && !viewModel.canProtectMore) {
-                              AppSnackBar.showInfo(
-                                context,
-                                'Koruma hakkın doldu. Her galibiyette '
-                                '1 hak kazanırsın.',
-                              );
-                              return;
-                            }
-                            viewModel.toggleProtection(kart.userCardId);
-                          },
-                        );
-                      },
-                    );
-                  },
                 ),
+              ],
+            ),
+            if (!gecerli && dogrulama != null)
+              RefNeutralButton(label: 'KADROYU DÜZENLE', onTap: () => context.go(AppRoutes.deck)),
+          ],
         ),
-
-        // ---- MAÇ ARA ----
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: AppButton(
-            label: 'RAKİP ARA',
-            icon: Icons.search,
-            onPressed: viewModel.canSearch ? viewModel.startSearch : null,
+        const SizedBox(height: Ref.pageGap),
+        RefSectionHead(
+          'KARTLARINI KORU',
+          trailing: RefNeutralButton(label: 'En iyileri koru', onTap: vm.autoProtectBest),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Maçı kaybedersen korumaya ALMADIĞIN kartlardan 3 tanesi rastgele seçilip kalıcı olarak '
+          'rakibe geçer. Her galibiyette 1 koruma hakkı kazanırsın.',
+          style: Ref.bodyText(11, color: Ref.muted, height: 1.4),
+        ),
+        const SizedBox(height: 10),
+        if (vm.deckCards.isEmpty)
+          Text('Kadronda kart yok.', style: Ref.bodyText(13, color: Ref.muted))
+        else
+          LayoutBuilder(
+            builder: (context, k) {
+              final sutun = k.maxWidth < 360 ? 3 : (k.maxWidth / 120).floor().clamp(3, 6);
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: sutun,
+                  crossAxisSpacing: 7,
+                  mainAxisSpacing: 7,
+                  childAspectRatio: RefCardLayout.grid.aspectRatio,
+                ),
+                itemCount: vm.deckCards.length,
+                itemBuilder: (context, i) {
+                  final kart = vm.deckCards[i];
+                  final korunuyor = vm.isProtected(kart.userCardId);
+                  return LayoutBuilder(
+                    builder: (context, kk) => RefPlayerCard(
+                      key: ValueKey(kart.userCardId),
+                      name: kart.fullName,
+                      position: kart.position,
+                      tier: kart.tier,
+                      power: kart.power,
+                      seed: kart.cardId,
+                      kitSeed: kart.club ?? kart.nationality,
+                      imageUrl: kart.imageUrl,
+                      width: kk.maxWidth,
+                      isProtected: korunuyor,
+                      isSelected: korunuyor,
+                      onTap: () {
+                        if (!korunuyor && !vm.canProtectMore) {
+                          AppSnackBar.showInfo(context, 'Koruma hakkın doldu. Her galibiyette 1 hak kazanırsın.');
+                          return;
+                        }
+                        vm.toggleProtection(kart.userCardId);
+                      },
+                    ),
+                  );
+                },
+              );
+            },
           ),
+        const SizedBox(height: Ref.pageGap),
+        RefCta(
+          'RAKİP BUL',
+          leading: RefGlyph.swords,
+          trailing: RefGlyph.play,
+          onTap: vm.canSearch ? vm.startSearch : null,
         ),
       ],
     );
@@ -270,87 +223,40 @@ class _HazirlikEkrani extends StatelessWidget {
 }
 
 // ====================================================================
-// ARAMA: kuyrukta bekleme
+// ARAMA
 // ====================================================================
-class _AramaEkrani extends StatelessWidget {
+class _Arama extends StatelessWidget {
   final MatchmakingViewModel viewModel;
-
-  const _AramaEkrani({required this.viewModel});
+  const _Arama({required this.viewModel});
 
   @override
   Widget build(BuildContext context) {
     final sure = viewModel.searchDuration;
-    final dakika = sure.inMinutes.toString().padLeft(2, '0');
-    final saniye = (sure.inSeconds % 60).toString().padLeft(2, '0');
-
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            width: 72,
-            height: 72,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              color: AppColors.primary,
+    final dk = sure.inMinutes.toString().padLeft(2, '0');
+    final sn = (sure.inSeconds % 60).toString().padLeft(2, '0');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _baslik('RAKİP ARANIYOR', RefPill(' $dk:$sn', dot: true)),
+        const SizedBox(height: Ref.pageGap),
+        const RefArenaStage(stadium: RefStadium(caption: 'RAKİP ARANIYOR...', height: 230)),
+        const SizedBox(height: Ref.pageGap),
+        RefCardPanel(
+          children: [
+            Text('Yakın puanlı bir rakip bekleniyor.', style: Ref.bodyText(12, weight: FontWeight.w700)),
+            Text(
+              'Bekleme süresi uzadıkça puan aralığı genişler, böylece daha hızlı eşleşirsin.',
+              style: Ref.bodyText(11, color: Ref.muted, height: 1.4),
             ),
-          ),
-          const SizedBox(height: 28),
-          const Text(
-            'Rakip aranıyor...',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: RefPill('${viewModel.protectedCardIds.length} kart korumada', emoji: '🛡️'),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '$dakika:$saniye',
-            style: const TextStyle(
-              fontSize: 15,
-              color: AppColors.textSecondary,
-              fontFeatures: [FontFeature.tabularFigures()],
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Bekleme süresi uzadıkça puan aralığı genişler, '
-            'böylece daha hızlı eşleşirsin.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.shield, size: 15, color: AppColors.success),
-                const SizedBox(width: 7),
-                Text(
-                  '${viewModel.protectedCardIds.length} kart korumada',
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Spacer(),
-          AppOutlinedButton(
-            label: 'Aramayı iptal et',
-            icon: Icons.close,
-            onPressed: viewModel.cancelSearch,
-          ),
-        ],
-      ),
+          ],
+        ),
+        const SizedBox(height: Ref.pageGap),
+        RefNeutralButton(label: 'ARAMAYI İPTAL ET', onTap: viewModel.cancelSearch),
+      ],
     );
   }
 }

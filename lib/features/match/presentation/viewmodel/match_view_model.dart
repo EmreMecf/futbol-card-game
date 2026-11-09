@@ -99,6 +99,9 @@ class MatchViewModel extends BaseViewModel {
 
   String? get myUserId => _session.userId;
 
+  /// Skor başlığında "SEN" altında görünen ad
+  String? get myUsername => _session.username;
+
   // ------------------------------------------------------------------
   // TÜRETİLMİŞ DEĞERLER
   // ------------------------------------------------------------------
