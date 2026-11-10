@@ -79,6 +79,10 @@ class RefPlayerCard extends StatefulWidget {
   final RefCardLayout layout;
 
   final bool isFavorite;
+
+  /// Ekonomi V2 (033): futbolcu seviyesi. 2 ve üstünde sol altta rozet.
+  /// K1: yalnız ustalık göstergesi; kartın gücü DEĞİŞMEZ.
+  final int level;
   final bool isProtected;
   final bool isLocked;
   final bool isPlayed;
@@ -101,6 +105,7 @@ class RefPlayerCard extends StatefulWidget {
     this.width = 176.5,
     this.layout = RefCardLayout.grid,
     this.isFavorite = false,
+    this.level = 1,
     this.isProtected = false,
     this.isLocked = false,
     this.isPlayed = false,
@@ -236,6 +241,12 @@ class _RefPlayerCardState extends State<RefPlayerCard> with SingleTickerProvider
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
                   for (final z in rozetler) Padding(padding: EdgeInsets.only(bottom: 4 * k), child: z),
                 ]),
+              ),
+            if (widget.level > 1)
+              Positioned(
+                left: 7 * k,
+                bottom: 30 * k,
+                child: _SeviyeRozeti(level: widget.level, k: k),
               ),
             if (widget.isPlayed || widget.isLocked)
               const IgnorePointer(child: ColoredBox(color: Color(0x8C000000))),
@@ -570,4 +581,35 @@ class _CerceveRessami extends CustomPainter {
   @override
   bool shouldRepaint(_CerceveRessami old) =>
       old.isik != isik || old._t != _t || old.r != r || old.hareketli != hareketli || old.tier != tier;
+}
+
+/// Seviye rozeti: yıldız simgesi (çizim, karakter değil) + seviye.
+/// Seviye 5 ve 10 (ustalık eşikleri) altın çerçeveli.
+class _SeviyeRozeti extends StatelessWidget {
+  final int level;
+  final double k;
+  const _SeviyeRozeti({required this.level, required this.k});
+
+  @override
+  Widget build(BuildContext context) {
+    final usta = level >= 5;
+    final renk = level >= 10 ? const Color(0xFFF8C665) : usta ? const Color(0xFFF3CE70) : const Color(0xFFB8CEDB);
+    return Semantics(
+      label: 'Seviye $level',
+      excludeSemantics: true,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 5 * k, vertical: 2 * k),
+        decoration: BoxDecoration(
+          color: const Color(0xCC08111F),
+          borderRadius: BorderRadius.circular(20 * k),
+          border: Border.all(color: renk.withValues(alpha: usta ? 1 : 0.6), width: math.max(1, 1.2 * k)),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.star_rounded, size: 11 * k, color: renk),
+          SizedBox(width: 2 * k),
+          Text('$level', style: Ref.heading(11 * k, color: renk, height: 1)),
+        ]),
+      ),
+    );
+  }
 }

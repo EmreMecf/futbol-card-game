@@ -11,6 +11,7 @@ import 'package:futbol_card/features/leaderboard/domain/repositories/leaderboard
 import 'package:futbol_card/core/network/websocket_service.dart';
 import 'package:futbol_card/features/match/domain/repositories/match_repository.dart';
 import 'package:futbol_card/features/matchmaking/domain/repositories/matchmaking_repository.dart';
+import 'package:futbol_card/features/progress/domain/progress_repository.dart';
 import 'package:futbol_card/features/store/domain/repositories/store_repository.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -502,6 +503,44 @@ class GoldenChestRepo implements ChestRepository {
       Success(kGoldenChestOpen);
   @override
   Future<Result<EmergencySquadStatus>> fetchEmergencySquad() async => Success(emergency);
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}
+
+// =====================================================================
+// EKONOMİ V2 (FAZ 2): FUTBOLCU SEVİYESİ — sahte veri (yalnız test)
+// =====================================================================
+PlayerProgressItem goldenProgress(int i, {required int level, required int copies, LevelCost? next,
+    int owned = 1, int convertible = 0, int jokers = 0}) {
+  final k = kGoldenCards[i];
+  return PlayerProgressItem(
+    cardId: k.cardId, fullName: k.fullName, position: k.position, tier: k.tier, power: k.power,
+    club: k.club, nationality: k.nationality, level: level, copies: copies, ownedCopies: owned,
+    convertibleCopies: convertible, next: next, jokersAvailable: jokers);
+}
+
+final kGoldenProgress = ProgressOverview(
+  items: [
+    // Kopyayla hazır (Altın 3->4: 2 kopya, 250 altın)
+    goldenProgress(1, level: 3, copies: 2, next: const LevelCost(copies: 2, coins: 250)),
+    // Jokerle hazır (Elmas 4->5: 2 kopya, 900 altın; 1 kopya + 3 joker)
+    goldenProgress(2, level: 4, copies: 1, next: const LevelCost(copies: 2, coins: 900), jokers: 3),
+    // Ustalık eşiğini geçmiş (seviye 6)
+    goldenProgress(0, level: 6, copies: 1, next: const LevelCost(copies: 3, coins: 4000)),
+    // Kopya eksik + dönüştürülebilir fazla kopya
+    goldenProgress(7, level: 1, copies: 0, next: const LevelCost(copies: 1, coins: 20), owned: 4, convertible: 2),
+    // En yüksek seviye
+    goldenProgress(9, level: 10, copies: 0),
+  ],
+  jokers: const {'bronze': 4, 'silver': 2, 'gold': 1, 'diamond': 3},
+  coins: 2450,
+  mastery: const {'5': {'coins': 200}, '10': {'coins': 1000}},
+  enabled: true,
+);
+
+class GoldenProgressRepo implements ProgressRepository {
+  @override
+  Future<Result<ProgressOverview>> fetchOverview() async => Success(kGoldenProgress);
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }

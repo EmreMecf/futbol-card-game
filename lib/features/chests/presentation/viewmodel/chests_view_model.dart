@@ -40,11 +40,15 @@ class ChestsViewModel extends BaseViewModel {
 
   // Özel adlı parametre yazımı projede kullanılmıyor (bkz. ProfileViewModel)
   // ignore: prefer_initializing_formals
-  ChestsViewModel(this._repository, {WebSocketService? socket, SessionManager? session})
+  ChestsViewModel(this._repository, {WebSocketService? socket, SessionManager? session, DateTime Function()? clock})
       // ignore: prefer_initializing_formals
       : _socket = socket,
         // ignore: prefer_initializing_formals
-        _session = session;
+        _session = session,
+        _saat = clock ?? DateTime.now;
+
+  /// Cihaz saati (testlerde sabit saat verilir: sayaç kararlı görünsün)
+  final DateTime Function() _saat;
 
   ChestInventory? _envanter;
   ChestInventory? get inventory => _envanter;
@@ -67,7 +71,7 @@ class ChestsViewModel extends BaseViewModel {
 
   // Sunucu saati - cihaz saati farkı
   Duration _saatFarki = Duration.zero;
-  DateTime get serverNow => DateTime.now().toUtc().add(_saatFarki);
+  DateTime get serverNow => _saat().toUtc().add(_saatFarki);
 
   Timer? _sayac;
   StreamSubscription<RealtimeEvent>? _abonelik;
@@ -99,7 +103,7 @@ class ChestsViewModel extends BaseViewModel {
 
   void _envanterAyarla(ChestInventory env) {
     _envanter = env;
-    _saatFarki = env.serverTime.toUtc().difference(DateTime.now().toUtc());
+    _saatFarki = env.serverTime.toUtc().difference(_saat().toUtc());
     _sayaciAyarla();
     safeNotify();
   }

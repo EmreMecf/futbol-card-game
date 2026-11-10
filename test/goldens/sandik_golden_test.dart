@@ -42,7 +42,8 @@ void main() {
     depo = GoldenChestRepo();
     getIt
       ..registerSingleton<ChestRepository>(depo)
-      ..registerFactory<ChestsViewModel>(() => ChestsViewModel(depo, session: oturum))
+      // Sabit saat: sayaç (1:23:45) makine yükünden bağımsız, kararlı
+      ..registerFactory<ChestsViewModel>(() => ChestsViewModel(depo, session: oturum, clock: () => kGoldenServerTime))
       ..registerFactory<HomeViewModel>(
           () => HomeViewModel(GoldenLeaderboardRepo(), GoldenMatchRepo(), GoldenDeckRepo()))
       ..registerFactory<DeckViewModel>(() => DeckViewModel(GoldenDeckRepo()));

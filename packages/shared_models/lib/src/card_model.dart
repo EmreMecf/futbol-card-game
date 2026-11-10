@@ -83,6 +83,10 @@ abstract class InventoryCard with _$InventoryCard implements ChemistrySource {
     /// Devam eden bir macta kilitli mi?
     /// Kilitliyse desteden cikarilamaz, satilamaz.
     @Default(false) bool isLocked,
+
+    /// Ekonomi V2 (033): futbolcunun SEVIYESI (oyuncuya bagli, 1-10).
+    /// K1: dereceli macta kart gucunu DEGISTIRMEZ; yalniz ustalik gostergesi.
+    @Default(1) int level,
   }) = _InventoryCard;
 
   factory InventoryCard.fromJson(Map<String, dynamic> json) =>

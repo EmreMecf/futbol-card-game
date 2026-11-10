@@ -70,6 +70,7 @@ class RowMappers {
       imageUrl: row['image_url'] as String?,
       inDeck: row['in_deck'] == true,
       isLocked: row['locked_match_id'] != null,
+      level: row['level'] == null ? 1 : _int(row['level']),
     );
   }
 

@@ -680,6 +680,7 @@ bağlanmada kayıp ya da çift yok; mevcut 622 + 21 test geçer.
 |---|---|---|
 | FAZ 0 | ✅ Yapıldı (`75f67f5`) | `database/tests/028_economy_foundation_test.sql`, `server/test/idempotency_test.dart` (8), `test/economy_models_test.dart` |
 | FAZ 1 | ✅ Yapıldı | 029–032 migration; veritabanı testleri `031_chests_test.sql` (49 kontrol + 20.000 çekilişlik dağılım) ve `032_emergency_squad_test.sql`; `test/chests_test.dart` (7); `test/goldens/sandik_golden_test.dart` (26, 6 boyut); uçtan uca gerçek sunucu testi `tool/ekonomi/sandik_e2e.mjs` |
+| FAZ 2 | ✅ Yapıldı | 033 migration; `033_player_levels_test.sql` (34 kontrol, K1 dahil: maç/eşleştirme fonksiyonları seviyeyi okumuyor); `test/progress_test.dart` (5); `test/goldens/gelisim_golden_test.dart` (9); gerçek sunucuda `tool/ekonomi/gelisim_e2e.mjs` (11 kontrol) |
 
 **Tasarımdan sapmalar:**
 
@@ -691,6 +692,24 @@ bağlanmada kayıp ya da çift yok; mevcut 622 + 21 test geçer.
 - **Sayaç açıkken kilitli kalan sandık:** sayacı bitmiş ama açılmamış
   sandık "tek kilit" kuralında sayılmaya devam ediyor. Oyuncu önce onu
   açmalı; ekran bunu "AÇ!" ile gösteriyor.
+
+**FAZ 2 notları:**
+
+- **K1:** seviye yalnız gelişim ve ustalık göstergesi. Kart rozeti 2. seviyeden itibaren görünür; kart gücü,
+  kimya ve eşleştirme gücü değişmez (veritabanı testinde doğrulanıyor).
+- **Kopya dönüşümü fiziksel kartı SİLMEZ.** `user_cards` satırı silinseydi `match_hands` CASCADE ile geçmiş
+  maç kayıtları da silinirdi; ayrıca oynanmış kartta `match_moves` silmeyi engellerdi. Dönüştürülen kopya,
+  giriş yapılamayan ve banlı `sistem_arsiv` hesabına devredilir ve `card_transfers` tablosuna
+  `converted_to_progress` nedeniyle yazılır. Kart cezasıyla aynı sahiplik devri yöntemi kullanılır.
+  Oyuncuda en az 2 kopya kalır; destedeki ve maçtaki kartlara dokunulmaz.
+- **Tek sefer garantisi:**
+  - Seviye atlama: defter anahtarı hedef seviyeyi içerir (aynı seviye iki kez ödenmez).
+  - Ustalık ödülü: kullanıcı + kart + seviye başına tek kayıt.
+  - Kopya dönüşümü: istemcinin istek kimliğine bağlı.
+- **Seviye 10 taşması:** seviye 10'daki futbolcunun sandıktan gelen kopyası joker parçaya döner
+  (`open_chest` yeniden tanımlandı; tek fark bu).
+- **Listede jokerle atlama:** yalnız en az 1 kopyası olan futbolcuda önerilir. 1 joker, kopyası olmayan
+  onlarca futbolcuda ayrı ayrı "hazır" görünüyordu (gerçek veride bulundu).
 
 **Varsayılan:** `economy_v2_enabled` migration'da **kapalı**. Yerel
 geliştirme veritabanında kabul testi için sürüm 2 ile açıldı. Kapatmak

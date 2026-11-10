@@ -31,6 +31,9 @@ class AppRoutes {
   static const String chests = '/sandiklar';
   static const String chestOdds = '/sandiklar/olasiliklar';
 
+  /// Ekonomi V2 (FAZ 2): futbolcu seviyeleri
+  static const String progress = '/gelisim';
+
   /// Gorev kadrosu kurma ekrani: /gorevler/{challenge_id}
   static String sbcBuilderWithId(String challengeId) => '$sbc/$challengeId';
 

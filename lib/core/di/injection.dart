@@ -43,6 +43,9 @@ import '../storage/favorites_store.dart';
 import '../storage/token_storage.dart';
 import '../utils/logger.dart';
 import '../../features/home/presentation/viewmodel/home_view_model.dart';
+import '../../features/progress/data/progress_repository_impl.dart';
+import '../../features/progress/domain/progress_repository.dart';
+import '../../features/progress/presentation/viewmodel/progress_view_model.dart';
 import '../../features/profile/presentation/viewmodel/profile_view_model.dart';
 import '../../features/settings/presentation/viewmodel/settings_view_model.dart';
 import '../../features/leaderboard/data/datasources/leaderboard_remote_datasource.dart';
@@ -180,6 +183,13 @@ Future<void> configureDependencies() async {
     // Ekonomi V2 (FAZ 1): sandıklar, ödül enerjisi, acil kadro
     ..registerLazySingleton<ChestRepository>(
       () => ChestRepositoryImpl(getIt<ApiClient>()),
+    )
+    // Ekonomi V2 (FAZ 2): futbolcu seviyesi
+    ..registerLazySingleton<ProgressRepository>(
+      () => ProgressRepositoryImpl(getIt<ApiClient>()),
+    )
+    ..registerFactory<ProgressViewModel>(
+      () => ProgressViewModel(getIt<ProgressRepository>(), session: getIt<SessionManager>()),
     )
     ..registerFactory<ChestsViewModel>(
       () => ChestsViewModel(

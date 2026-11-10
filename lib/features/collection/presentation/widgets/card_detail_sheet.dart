@@ -10,6 +10,7 @@ import '../../../../core/theme/ref_tokens.dart';
 import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
+import '../../../progress/presentation/widgets/progress_panel.dart';
 
 /// Kart detayı — referans `showCard()` modalı.
 ///
@@ -97,6 +98,7 @@ class CardDetailSheet extends StatelessWidget {
                           width: kartGenislik,
                           layout: RefCardLayout.reveal,
                           isLocked: card.isLocked,
+                          level: card.level,
                           animate: true,
                         ),
                       ),
@@ -139,6 +141,8 @@ class CardDetailSheet extends StatelessWidget {
                             'Gücü ne olursa olsun alttaki 4 nadirliği yener. Sadece gücü daha yüksek bir Efsane yenebilir.',
                             title: 'Efsane kart'),
                       ],
+                      // Ekonomi V2 (FAZ 2): gelişim paneli (kapalıysa yer kaplamaz)
+                      CardProgressSection(cardId: card.cardId),
                       if (onToggleFavorite != null) ...[
                         const SizedBox(height: 16),
                         _FavoriButonu(baslangic: isFavorite, onToggle: onToggleFavorite!),

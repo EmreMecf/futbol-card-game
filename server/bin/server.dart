@@ -14,6 +14,7 @@ import 'package:futbol_card_server/routes/chest_routes.dart';
 import 'package:futbol_card_server/routes/economy_routes.dart';
 import 'package:futbol_card_server/routes/game_routes.dart';
 import 'package:futbol_card_server/routes/match_routes.dart';
+import 'package:futbol_card_server/routes/progress_routes.dart';
 import 'package:futbol_card_server/routes/sbc_routes.dart';
 import 'package:futbol_card_server/scheduler/timeout_sweeper.dart';
 import 'package:futbol_card_server/utils/api_response.dart';
@@ -113,6 +114,8 @@ Future<void> main(List<String> args) async {
   // FAZ 1: sandiklar ve odul enerjisi (031)
   api.mount('/chests', idempotent.addHandler(chestRoutes(db).call));
   api.mount('/energy', idempotent.addHandler(energyRoutes(db).call));
+  // FAZ 2: futbolcu seviyesi (033)
+  api.mount('/progress', idempotent.addHandler(progressRoutes(db).call));
 
   // ---- 5. WEBSOCKET ----
   // Baglanti adresi: ws://localhost:8080/ws?token=<access_token>

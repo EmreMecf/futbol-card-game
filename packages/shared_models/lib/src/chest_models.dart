@@ -295,3 +295,127 @@ abstract class EmergencySquadClaim with _$EmergencySquadClaim {
 
   factory EmergencySquadClaim.fromJson(Map<String, dynamic> json) => _$EmergencySquadClaimFromJson(json);
 }
+
+// =====================================================================
+// FAZ 2 (033): FUTBOLCU SEVİYESİ
+// =====================================================================
+/// Bir sonraki seviyenin maliyeti
+@freezed
+abstract class LevelCost with _$LevelCost {
+  const factory LevelCost({required int copies, required int coins}) = _LevelCost;
+  factory LevelCost.fromJson(Map<String, dynamic> json) => _$LevelCostFromJson(json);
+}
+
+/// Bir futbolcunun gelişimi (oyuncuya bağlı; K1: dereceli gücü etkilemez)
+@freezed
+abstract class PlayerProgressItem with _$PlayerProgressItem {
+  const PlayerProgressItem._();
+
+  const factory PlayerProgressItem({
+    required String cardId,
+    String? slug,
+    required String fullName,
+    required CardPosition position,
+    required CardTier tier,
+    required int power,
+    String? club,
+    String? nationality,
+    String? imageUrl,
+    @Default(1) int level,
+
+    /// Biriken gelişim kopyası
+    @Default(0) int copies,
+
+    /// Koleksiyondaki fiziksel kopya (0: kart kaybedilmiş, seviye duruyor)
+    @Default(0) int ownedCopies,
+
+    /// Gönüllü dönüştürülebilecek fiziksel kopya
+    @Default(0) int convertibleCopies,
+
+    /// null: en yüksek seviye
+    LevelCost? next,
+
+    /// Bu nadirlikteki joker parça
+    @Default(0) int jokersAvailable,
+  }) = _PlayerProgressItem;
+
+  factory PlayerProgressItem.fromJson(Map<String, dynamic> json) => _$PlayerProgressItemFromJson(json);
+
+  bool get isMax => next == null;
+  bool get isOwned => ownedCopies > 0;
+  int get missingCopies => next == null ? 0 : (next!.copies - copies).clamp(0, 1 << 30);
+
+  /// Kopyayla (jokersiz) atlanabilir mi?
+  bool canLevelUp(int coins) => isOwned && next != null && copies >= next!.copies && coins >= next!.coins;
+
+  /// Joker parçayla tamamlanarak atlanabilir mi?
+  bool canLevelWithJokers(int coins) =>
+      isOwned && next != null && missingCopies > 0 && jokersAvailable >= missingCopies && coins >= next!.coins;
+
+  /// Kopya ilerlemesi 0..1
+  double get progress => next == null ? 1 : (copies / next!.copies).clamp(0, 1).toDouble();
+}
+
+/// `GET /api/progress`
+@freezed
+abstract class ProgressOverview with _$ProgressOverview {
+  const ProgressOverview._();
+
+  const factory ProgressOverview({
+    @Default([]) List<PlayerProgressItem> items,
+    @Default({}) Map<String, int> jokers,
+    @Default(0) int coins,
+    @Default(1) int rulesVersion,
+    @Default(10) int maxLevel,
+    @Default(2) int convertKeep,
+
+    /// Seviye -> ödül (ör. "5": {"coins": 200})
+    @Default({}) Map<String, Map<String, int>> mastery,
+    @Default(false) bool affectsRankedPower,
+    @Default(false) bool enabled,
+  }) = _ProgressOverview;
+
+  factory ProgressOverview.fromJson(Map<String, dynamic> json) => _$ProgressOverviewFromJson(json);
+
+  PlayerProgressItem? item(String cardId) => items.where((i) => i.cardId == cardId).firstOrNull;
+
+  /// Şu an (kopyayla) seviye atlanabilecek futbolcu sayısı
+  int get readyCount => items.where((i) => i.canLevelUp(coins)).length;
+
+  /// Listede "atlayabilir" sayılır mı? Jokerle atlama yalnız en az 1
+  /// kopyası olan futbolcuda önerilir (aksi hâlde 1 joker, hiç kopyası
+  /// olmayan onlarca futbolcuda ayrı ayrı "hazır" görünüyordu).
+  bool isSuggested(PlayerProgressItem i) => i.canLevelUp(coins) || (i.copies > 0 && i.canLevelWithJokers(coins));
+  int get suggestedCount => items.where(isSuggested).length;
+}
+
+/// `POST /api/progress/{cardId}/level-up`
+@freezed
+abstract class LevelUpResult with _$LevelUpResult {
+  const factory LevelUpResult({
+    required String cardId,
+    required int level,
+    @Default(0) int copies,
+    @Default(0) int coinsSpent,
+    @Default(0) int jokersUsed,
+    @Default(0) int masteryCoins,
+    LevelCost? next,
+    int? coinsAfter,
+  }) = _LevelUpResult;
+
+  factory LevelUpResult.fromJson(Map<String, dynamic> json) => _$LevelUpResultFromJson(json);
+}
+
+/// `POST /api/progress/{cardId}/convert`
+@freezed
+abstract class ConvertCopiesResult with _$ConvertCopiesResult {
+  const factory ConvertCopiesResult({
+    required String cardId,
+    required int converted,
+    required int copies,
+    required int ownedCopies,
+    @Default(false) bool replay,
+  }) = _ConvertCopiesResult;
+
+  factory ConvertCopiesResult.fromJson(Map<String, dynamic> json) => _$ConvertCopiesResultFromJson(json);
+}

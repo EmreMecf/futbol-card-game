@@ -57,10 +57,13 @@ Router gameRoutes(Database db) {
              c.power, c.nationality, c.league, c.club, c.image_url,
              c.shooting, c.pace, c.physical,
              c.defending, c.dribbling, c.acceleration,
-             (dc.deck_id is not null) as in_deck
+             (dc.deck_id is not null) as in_deck,
+             -- Ekonomi V2 (033): futbolcu seviyesi (K1: dereceli gucu etkilemez)
+             coalesce(pp.level, 1) as level
       from user_cards uc
       join cards c on c.id = uc.card_id
       left join deck_cards dc on dc.user_card_id = uc.id
+      left join player_progress pp on pp.user_id = uc.owner_id and pp.card_id = uc.card_id
       where uc.owner_id = @userId::uuid
       order by c.tier desc, c.power desc
       ''',

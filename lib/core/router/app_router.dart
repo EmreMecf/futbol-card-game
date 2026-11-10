@@ -17,6 +17,7 @@ import '../../features/leaderboard/presentation/view/league_tiers_view.dart';
 import '../../features/match/presentation/view/match_view.dart';
 import '../../features/matchmaking/presentation/view/matchmaking_view.dart';
 import '../../features/profile/presentation/view/profile_view.dart';
+import '../../features/progress/presentation/view/progress_view.dart';
 import '../../features/sbc/presentation/view/sbc_builder_view.dart';
 import '../../features/sbc/presentation/view/sbc_list_view.dart';
 import '../../features/settings/presentation/view/design_system_view.dart';
@@ -118,6 +119,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.chestOdds,
         builder: (context, state) => const ChestOddsView(),
+      ),
+      GoRoute(
+        path: AppRoutes.progress,
+        builder: (context, state) => const ProgressView(),
       ),
       GoRoute(
         path: AppRoutes.sbc,

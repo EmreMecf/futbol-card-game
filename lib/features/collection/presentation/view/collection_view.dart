@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -9,6 +10,7 @@ import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
+import '../../../progress/domain/progress_repository.dart';
 import '../viewmodel/collection_view_model.dart';
 import '../widgets/card_detail_sheet.dart';
 
@@ -90,6 +92,13 @@ class _GovdeState extends State<_Govde> {
                 const SizedBox(height: Ref.pageGap),
                 _Filtreler(vm: vm),
                 const SizedBox(height: Ref.pageGap),
+                // Ekonomi V2 (FAZ 2): gelişim ekranı. Başlığa konunca referans
+                // başlığı iki satıra düşüyordu; ayrı satır (servis kayıtlıysa).
+                if (getIt.isRegistered<ProgressRepository>()) ...[
+                  RefSecondaryButton('GELİŞİM · FUTBOLCU SEVİYELERİ', leadingIcon: Icons.trending_up_rounded,
+                      trailing: RefGlyph.arrowRight, onTap: () => context.push(AppRoutes.progress)),
+                  const SizedBox(height: Ref.pageGap),
+                ],
               ]),
             ),
             ..._icerik(context, vm, sutun, kenarBosluk),
@@ -174,6 +183,7 @@ class _GovdeState extends State<_Govde> {
                 width: k.maxWidth,
                 isFavorite: favori,
                 isLocked: kart.isLocked,
+                level: kart.level,
                 // Listede yalnız Efsane ışığı döner (performans)
                 animate: kart.tier == CardTier.legend,
                 onTap: () => CardDetailSheet.show(
@@ -181,7 +191,11 @@ class _GovdeState extends State<_Govde> {
                   kart,
                   isFavorite: favori,
                   onToggleFavorite: () => vm.toggleFavorite(kart),
-                ),
+                  // Detayda seviye atlanmış / kopya dönüştürülmüş olabilir:
+                  // seviye rozetleri ve kart sayısı sessizce tazelensin
+                ).then((_) {
+                  if (getIt.isRegistered<ProgressRepository>()) vm.load(showLoading: false);
+                }),
               ),
             );
           },

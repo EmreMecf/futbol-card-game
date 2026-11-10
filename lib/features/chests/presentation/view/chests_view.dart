@@ -142,7 +142,8 @@ class _Govde extends StatelessWidget {
 
   static int _kalanGun(Chest c, ChestInventory env, DateTime simdi) {
     final son = c.createdAt.add(Duration(days: env.mailboxDays));
-    return son.difference(simdi).inHours ~/ 24 + 1;
+    // Yukarı yuvarla: tam 5 gün kala "5 gün" (eskiden sınırda 6 yazıyordu)
+    return (son.difference(simdi).inMinutes / 1440).ceil().clamp(0, 365);
   }
 }
 
