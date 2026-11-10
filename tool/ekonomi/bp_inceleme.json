@@ -1,0 +1,66 @@
+{
+ "1000xp 2/gun": {
+  "sezon": 60,
+  "tamamlama": 0.0,
+  "ort_kademe": 26.2,
+  "medyan_kademe": 26.0,
+  "p10_kademe": 22,
+  "medyan_tamam_gunu": null
+ },
+ "1000xp 3/gun": {
+  "sezon": 60,
+  "tamamlama": 0.017,
+  "ort_kademe": 39.1,
+  "medyan_kademe": 39.5,
+  "p10_kademe": 33,
+  "medyan_tamam_gunu": 30
+ },
+ "1000xp 5/gun": {
+  "sezon": 60,
+  "tamamlama": 0.95,
+  "ort_kademe": 49.9,
+  "medyan_kademe": 50.0,
+  "p10_kademe": 50,
+  "medyan_tamam_gunu": 30
+ },
+ "1000xp 10/gun": {
+  "sezon": 60,
+  "tamamlama": 1.0,
+  "ort_kademe": 50,
+  "medyan_kademe": 50.0,
+  "p10_kademe": 50,
+  "medyan_tamam_gunu": 26.0
+ },
+ "900xp 2/gun": {
+  "sezon": 60,
+  "tamamlama": 0.0,
+  "ort_kademe": 28.8,
+  "medyan_kademe": 29.0,
+  "p10_kademe": 25,
+  "medyan_tamam_gunu": null
+ },
+ "900xp 3/gun": {
+  "sezon": 60,
+  "tamamlama": 0.083,
+  "ort_kademe": 45.2,
+  "medyan_kademe": 46.0,
+  "p10_kademe": 40,
+  "medyan_tamam_gunu": 30
+ },
+ "900xp 5/gun": {
+  "sezon": 60,
+  "tamamlama": 0.95,
+  "ort_kademe": 49.8,
+  "medyan_kademe": 50.0,
+  "p10_kademe": 50,
+  "medyan_tamam_gunu": 28
+ },
+ "900xp 10/gun": {
+  "sezon": 60,
+  "tamamlama": 1.0,
+  "ort_kademe": 50,
+  "medyan_kademe": 50.0,
+  "p10_kademe": 50,
+  "medyan_tamam_gunu": 23.0
+ }
+}
