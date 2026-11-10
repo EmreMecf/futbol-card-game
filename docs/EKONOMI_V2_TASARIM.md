@@ -683,6 +683,7 @@ bağlanmada kayıp ya da çift yok; mevcut 622 + 21 test geçer.
 | FAZ 2 | ✅ Yapıldı | 033 migration; `033_player_levels_test.sql` (34 kontrol, K1 dahil: maç/eşleştirme fonksiyonları seviyeyi okumuyor); `test/progress_test.dart` (5); `test/goldens/gelisim_golden_test.dart` (9); gerçek sunucuda `tool/ekonomi/gelisim_e2e.mjs` (11 kontrol) |
 | FAZ 3 | ✅ Yapıldı | 034 migration; `034_items_test.sql` (31 kontrol); `test/goldens/envanter_golden_test.dart` (envanter 6 boyut + davranış + sandık seçenekleri); gerçek sunucuda `tool/ekonomi/envanter_e2e.mjs` (16 kontrol, tekrar koşulabilir) |
 | FAZ 4 | ✅ Yapıldı | 035 migration; `035_season_pass_test.sql` (46 kontrol, K1 dahil); `test/goldens/sezon_golden_test.dart` (Sezon Yolu 6 boyut + ödül yolu + ana sayfa görevleri + maç sonu XP + davranış); gerçek sunucuda `tool/ekonomi/sezon_e2e.mjs` (15 kontrol, gerçek maç XP'si dahil, tekrar koşulabilir) |
+| FAZ 6 | ✅ Yapıldı | Yalnız istemci (sunucu ve veritabanı değişmedi); `test/goldens/kozmetik_golden_test.dart` (profil 3 boyut, kart, arena, zafer, canlı çıkarma, servis); var olan bütün golden görüntüler kozmetiksiz hâliyle birebir aynı; gerçek uygulamada `tool/ekonomi/kozmetik_ekran.mjs` (konsol hatası 0) |
 
 **Tasarımdan sapmalar:**
 
@@ -763,6 +764,32 @@ bağlanmada kayıp ya da çift yok; mevcut 622 + 21 test geçer.
 - **Sezon 2 kozmetikleri:** yeni `season_rules` sürümü yayınlanmazsa Sezon 2 aynı "Sezon 1" kozmetiklerini verir;
   sahip olunan kozmetik tekrar gelince altına döner. Yeni sezondan önce yeni sürüm eklenmeli.
 - **Gün ve hafta sınırı:** veritabanı sunucusunun saat dilimine göre (034'teki enerji içeceği sınırıyla aynı).
+
+**FAZ 6 notları (kozmetik gösterimi):**
+
+| Yuva | Kozmetik | Nerede görünür |
+|---|---|---|
+| `frame` | Profil çerçevesi: Sezon 1 | Profil avatarında altın-yeşil halka + "S1" plakası |
+| `kit` | Forma: Sezon 1 | Profil karakterinin forma renkleri (yüz kimliği aynı) |
+| `character` | Kaptan bandı | Profil karakterinde "C" bandı |
+| `badge` | Sezon rozeti | Profilde lig hapının altında |
+| `card_skin` | Gece Işığı | Oyuncunun KENDİ kartlarının zemini (koleksiyon, kart detayı, kadro seçimi, maç hazırlığı, maçtaki el, favoriler, gelişim). Nadirlik halesi, çerçevesi, güç ve yüz aynı |
+| `arena` | Yağmurlu Gece | Oyuncunun KENDİ maç ve maç hazırlığı ekranındaki stadyum |
+| `victory` | Havai Fişek | Galibiyet ekranında konfetinin yerine |
+
+- **K1:** hepsi yalnız görsel. Kart gücü, kimya, kurallar, kart ve yüz kimliği değişmez; golden testi güç ve adın
+  aynı kaldığını doğruluyor. Kozmetik giyilmemişken bütün ekranlar eskisiyle piksel piksel aynı.
+- **Animasyon ayarı:** "kart animasyonları" kapalıysa yağmur durağan çizilir, havai fişek oynamaz.
+- **Performans:** yağmur ve fişek ayrı katmanda (RepaintBoundary); her karede yalnız ince çizgiler çizilir,
+  parçacık başına bulanıklık yok.
+
+**FAZ 6 sapmaları:**
+
+- **Rakip kozmetikleri görünmüyor:** her oyuncu yalnız kendi kozmetiklerini görür. Rakibin çerçevesini, kart
+  görünümünü ya da formasını göstermek maç verisine yeni alan eklemeyi gerektirir; maç protokolüne dokunulmadı.
+- **Maçtaki 2D futbolcular kulüp formasıyla kalır:** forma kozmetiği yalnız oyuncunun kendi profil karakterine
+  uygulanır. Kart futbolcularının formasını değiştirmek kart kimliğini değiştirmek olurdu.
+- **Ayrı önizleme ekranı yok:** kozmetik envanterde giyilir ve hemen ilgili ekranlarda görünür.
 
 **Varsayılan:** `economy_v2_enabled` migration'da **kapalı**. Yerel
 geliştirme veritabanında kabul testi için sürüm 2 ile açıldı. Kapatmak

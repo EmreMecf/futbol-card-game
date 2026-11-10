@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/feedback/game_feedback.dart';
 import '../../../../core/theme/ref_tokens.dart';
+import '../../../../shared/widgets/cosmetics/cosmetic_art.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 
 /// Referans `.arena-stage` paneli: skor başlığı + stadyum.
@@ -148,11 +149,16 @@ class RefStadium extends StatefulWidget {
   final double height;
   final Object? flashKey;
 
+  /// Ekonomi V2 (FAZ 6): arena kozmetiği (ör. arena_rainy_night). Yalnız
+  /// oyuncunun KENDİ ekranında; rakip kendi seçtiğini görür.
+  final String? skin;
+
   const RefStadium({
     super.key,
     required this.caption,
     this.height = 230,
     this.flashKey,
+    this.skin,
   });
 
   @override
@@ -198,6 +204,17 @@ class _RefStadiumState extends State<RefStadium> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final sahne = _sahne(context);
+    if (widget.skin != 'arena_rainy_night') return sahne;
+    return Stack(children: [
+      sahne,
+      Positioned.fill(
+        child: ClipRRect(borderRadius: BorderRadius.circular(9), child: const RainyNightOverlay()),
+      ),
+    ]);
+  }
+
+  Widget _sahne(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(9),
       child: SizedBox(

@@ -6,6 +6,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/ref_tokens.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../../domain/achievements.dart';
 import '../viewmodel/profile_view_model.dart';
 
@@ -169,6 +170,7 @@ class FavoriteCardsSection extends StatelessWidget {
               final InventoryCard k = kartlar[i];
               return RefPlayerCard(
                 key: ValueKey('favori-${k.cardId}'),
+                skin: EquippedCosmetics.current?.cardSkin,
                 name: k.fullName,
                 position: k.position,
                 tier: k.tier,

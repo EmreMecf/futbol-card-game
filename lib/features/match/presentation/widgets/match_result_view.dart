@@ -4,10 +4,12 @@ import 'package:shared_models/shared_models.dart';
 import '../../../../core/feedback/game_feedback.dart';
 import '../../../../core/theme/ref_tokens.dart';
 import '../../../../core/utils/turkish_text.dart';
+import '../../../../shared/widgets/cosmetics/cosmetic_art.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 import '../../../../shared/widgets/walkout/confetti_overlay.dart';
 import '../../../chests/presentation/widgets/match_chest_panel.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../../../season/presentation/widgets/season_home_card.dart';
 import '../viewmodel/match_view_model.dart';
 import 'league_change_widgets.dart';
@@ -93,12 +95,15 @@ class _MatchResultViewState extends State<MatchResultView> with SingleTickerProv
     }
     _titret();
 
+    final fisek = EquippedCosmetics.current?.victory == 'victory_fireworks';
     return Scaffold(
       backgroundColor: Ref.phoneBg,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          if (sonuc.didIWin)
+          // FAZ 6: zafer animasyonu kozmetiği konfetinin yerine geçer
+          // (fişekler içeriğin ÜSTÜNDE çizilir: Stack'in sonunda)
+          if (sonuc.didIWin && !fisek)
             ConfettiOverlay(
               active: GameFeedback.cardAnimationsEnabled,
               colors: const [Ref.gold, Ref.accent, Ref.blue, Colors.white],
@@ -172,6 +177,7 @@ class _MatchResultViewState extends State<MatchResultView> with SingleTickerProv
                 onContinue: () => setState(() => _terfiKapandi = true),
               ),
             ),
+          if (sonuc.didIWin && fisek) FireworksOverlay(active: GameFeedback.cardAnimationsEnabled),
         ],
       ),
     );

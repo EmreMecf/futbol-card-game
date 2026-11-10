@@ -12,6 +12,7 @@ import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../auth/presentation/viewmodel/auth_view_model.dart';
 import '../../../chests/presentation/widgets/chest_strip.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../../../season/presentation/widgets/season_home_card.dart';
 import '../viewmodel/home_view_model.dart';
 
@@ -51,6 +52,8 @@ class _HomeBodyState extends State<_HomeBody> {
     // Coin, puan ve devam eden maç bilgisi maç sonrası değişmiş olabilir
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      // FAZ 6: giyilen kozmetikler (oturum değişmiş olabilir)
+      EquippedCosmetics.current?.refresh();
       try {
         context.read<AuthViewModel>().refreshProfile();
       } on ProviderNotFoundException {

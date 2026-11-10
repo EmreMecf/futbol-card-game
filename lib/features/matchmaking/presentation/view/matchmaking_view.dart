@@ -9,6 +9,7 @@ import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../../../match/presentation/arena/ref_stadium.dart';
 import '../viewmodel/matchmaking_view_model.dart';
 
@@ -132,7 +133,11 @@ class _Hazirlik extends StatelessWidget {
       children: [
         _baslik('MAÇA HAZIRLAN', RefPill('KORUMA ${vm.protectedCardIds.length}/${vm.maxProtection}')),
         const SizedBox(height: Ref.pageGap),
-        RefArenaStage(stadium: RefStadium(caption: gecerli ? 'KADRO HAZIR!' : 'KADRO EKSİK', height: 200)),
+        RefArenaStage(
+            stadium: RefStadium(
+                caption: gecerli ? 'KADRO HAZIR!' : 'KADRO EKSİK',
+                height: 200,
+                skin: EquippedCosmetics.current?.arena)),
         const SizedBox(height: Ref.pageGap),
         // Kadro durumu
         RefCardPanel(
@@ -187,6 +192,7 @@ class _Hazirlik extends StatelessWidget {
                   return LayoutBuilder(
                     builder: (context, kk) => RefPlayerCard(
                       key: ValueKey(kart.userCardId),
+                      skin: EquippedCosmetics.current?.cardSkin,
                       name: kart.fullName,
                       position: kart.position,
                       tier: kart.tier,
@@ -239,7 +245,8 @@ class _Arama extends StatelessWidget {
       children: [
         _baslik('RAKİP ARANIYOR', RefPill(' $dk:$sn', dot: true)),
         const SizedBox(height: Ref.pageGap),
-        const RefArenaStage(stadium: RefStadium(caption: 'RAKİP ARANIYOR...', height: 230)),
+        RefArenaStage(
+            stadium: RefStadium(caption: 'RAKİP ARANIYOR...', height: 230, skin: EquippedCosmetics.current?.arena)),
         const SizedBox(height: Ref.pageGap),
         RefCardPanel(
           children: [

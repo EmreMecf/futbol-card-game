@@ -11,7 +11,9 @@ import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/avatar2d/avatar_painter.dart';
 import '../../../../shared/widgets/avatar2d/avatar_spec.dart';
+import '../../../../shared/widgets/cosmetics/cosmetic_art.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../viewmodel/profile_view_model.dart';
 import '../../../items/domain/items_repository.dart';
 import '../widgets/profile_sections.dart';
@@ -143,22 +145,7 @@ class _Kimlik extends StatelessWidget {
     return RefHero(
       child: Column(
         children: [
-          Container(
-            width: 84,
-            height: 84,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFF0B1424),
-              border: Border.all(color: Ref.heroBorder, width: 2),
-            ),
-            child: ClipOval(
-              child: AvatarPortrait(
-                spec: AvatarSpec.generate('oyuncu-${k?.id ?? k?.username ?? '?'}'),
-                size: 84,
-                headshot: true,
-              ),
-            ),
-          ),
+          _ProfilAvatari(seed: 'oyuncu-${k?.id ?? k?.username ?? '?'}'),
           const SizedBox(height: 10),
           Text(
             (k?.username ?? 'Oyuncu').toUpperTr(),
@@ -169,6 +156,7 @@ class _Kimlik extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           RefPill(r == null ? 'LİG YÜKLENİYOR' : '${r.label.toUpperTr()} LİGİ'),
+          const _SezonRozeti(),
           const SizedBox(height: 10),
           Text(
             k == null || k.totalMatches == 0
@@ -179,6 +167,45 @@ class _Kimlik extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// FAZ 6: profil karakteri + giyilen kozmetikler (çerçeve, forma, kaptan
+/// bandı). Yüz kimliği aynı kalır; yalnız forma renkleri değişir.
+class _ProfilAvatari extends StatelessWidget {
+  final String seed;
+  const _ProfilAvatari({required this.seed});
+
+  @override
+  Widget build(BuildContext context) {
+    final servis = EquippedCosmetics.current;
+    Widget ciz() {
+      var spec = AvatarSpec.generate(seed);
+      final forma = cosmeticKitColors(servis?.kit);
+      if (forma != null) spec = spec.copyWith(jersey: forma.$1, jerseyTrim: forma.$2);
+      return Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [
+        CosmeticFrame(slug: servis?.frame, size: 84, child: AvatarPortrait(spec: spec, size: 84, headshot: true)),
+        if (servis?.character == 'captain_band') const Positioned(right: -4, bottom: 14, child: CaptainBandBadge()),
+      ]);
+    }
+
+    return servis == null ? ciz() : ListenableBuilder(listenable: servis, builder: (_, _) => ciz());
+  }
+}
+
+class _SezonRozeti extends StatelessWidget {
+  const _SezonRozeti();
+
+  @override
+  Widget build(BuildContext context) {
+    final servis = EquippedCosmetics.current;
+    if (servis == null) return const SizedBox.shrink();
+    return ListenableBuilder(
+      listenable: servis,
+      builder: (_, _) => servis.badge == null
+          ? const SizedBox.shrink()
+          : Padding(padding: const EdgeInsets.only(top: 6), child: SeasonBadgeChip(servis.badge!)),
     );
   }
 }

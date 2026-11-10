@@ -10,6 +10,7 @@ import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 import '../../../chests/presentation/widgets/chest_widgets.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../viewmodel/progress_view_model.dart';
 import '../widgets/progress_panel.dart';
 
@@ -138,6 +139,7 @@ class _Satir extends StatelessWidget {
         SizedBox(
           width: 78,
           child: RefPlayerCard(
+            skin: EquippedCosmetics.current?.cardSkin,
             name: item.fullName,
             position: item.position,
             tier: item.tier,

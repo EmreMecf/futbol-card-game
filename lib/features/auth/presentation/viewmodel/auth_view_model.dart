@@ -3,6 +3,7 @@ import 'package:shared_models/shared_models.dart';
 import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 /// Giris / kayit / profil ekranlarinin beyni.
@@ -88,6 +89,7 @@ class AuthViewModel extends BaseViewModel {
   // ------------------------------------------------------------------
   Future<void> signOut() async {
     _activeMatchId = null;
+    EquippedCosmetics.current?.clear();
     await run(() => _repository.signOut());
   }
 }

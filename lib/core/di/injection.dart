@@ -18,6 +18,7 @@ import '../../features/deck/data/datasources/deck_remote_datasource.dart';
 import '../../features/deck/data/repositories/deck_repository_impl.dart';
 import '../../features/deck/domain/repositories/deck_repository.dart';
 import '../../features/deck/presentation/viewmodel/deck_view_model.dart';
+import '../../features/items/cosmetics/equipped_cosmetics.dart';
 import '../../features/match/data/datasources/match_remote_datasource.dart';
 import '../../features/match/data/repositories/match_repository_impl.dart';
 import '../../features/match/domain/repositories/match_repository.dart';
@@ -203,6 +204,10 @@ Future<void> configureDependencies() async {
     )
     ..registerFactory<ItemsViewModel>(
       () => ItemsViewModel(getIt<ItemsRepository>()),
+    )
+    // Ekonomi V2 (FAZ 6): giyilen kozmetikler (yalnız görsel)
+    ..registerLazySingleton<EquippedCosmetics>(
+      () => EquippedCosmetics(getIt<ItemsRepository>()),
     )
     // Ekonomi V2 (FAZ 2): futbolcu seviyesi
     ..registerLazySingleton<ProgressRepository>(

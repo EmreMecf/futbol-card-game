@@ -5,6 +5,7 @@ import '../../../../core/theme/ref_tokens.dart';
 import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import 'formation_pitch.dart';
 
 /// Bir yuvaya kart seçmek için açılan pencere.
@@ -164,6 +165,7 @@ class CardPickerSheet extends StatelessWidget {
                             children: [
                               RefPlayerCard(
                                 key: ValueKey(kart.userCardId),
+                                skin: EquippedCosmetics.current?.cardSkin,
                                 name: kart.fullName,
                                 position: kart.position,
                                 tier: kart.tier,

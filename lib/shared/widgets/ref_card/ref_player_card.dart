@@ -10,6 +10,7 @@ import '../../../core/theme/ref_tokens.dart';
 import '../../../core/utils/turkish_text.dart';
 import '../avatar2d/avatar_painter.dart';
 import '../avatar2d/avatar_spec.dart';
+import '../cosmetics/cosmetic_art.dart';
 import '../ref/ref_glyphs.dart';
 
 /// Referans nadirlik renkleri: .rarity-* { --rarity; --halo }
@@ -90,6 +91,11 @@ class RefPlayerCard extends StatefulWidget {
 
   /// Hareketli nadirlik efektleri (Efsane ışığı, Altın/Elmas parıltısı)
   final bool animate;
+
+  /// Ekonomi V2 (FAZ 6): kart görünümü kozmetiği (ör. card_skin_night).
+  /// Yalnız oyuncunun KENDİ kartlarında verilir. Zemin değişir; nadirlik
+  /// halesi, çerçevesi, güç ve yüz AYNI kalır.
+  final String? skin;
   final VoidCallback? onTap;
 
   const RefPlayerCard({
@@ -111,6 +117,7 @@ class RefPlayerCard extends StatefulWidget {
     this.isPlayed = false,
     this.isSelected = false,
     this.animate = false,
+    this.skin,
     this.onTap,
   });
 
@@ -232,7 +239,7 @@ class _RefPlayerCardState extends State<RefPlayerCard> with SingleTickerProvider
         child: Stack(
           fit: StackFit.expand,
           children: [
-            CustomPaint(painter: _ZeminRessami(r, widget.tier, k)),
+            CustomPaint(painter: _ZeminRessami(r, widget.tier, k, widget.skin)),
             icerik,
             if (rozetler.isNotEmpty)
               Positioned(
@@ -461,13 +468,16 @@ class _ZeminRessami extends CustomPainter {
   final RefRarity r;
   final CardTier tier;
   final double k;
-  const _ZeminRessami(this.r, this.tier, this.k);
+  final String? skin;
+  const _ZeminRessami(this.r, this.tier, this.k, [this.skin]);
 
   @override
   void paint(Canvas c, Size s) {
     final rect = Offset.zero & s;
-    // linear-gradient(150deg,#182a42,#0d1326 84%)
-    c.drawRect(rect, Paint()..shader = Ref.collectibleGradient.createShader(rect));
+    // linear-gradient(150deg,#182a42,#0d1326 84%) — kozmetik zemin varsa o
+    if (!paintCardSkinBase(c, s, k, skin)) {
+      c.drawRect(rect, Paint()..shader = Ref.collectibleGradient.createShader(rect));
+    }
     // radial-gradient(circle at 55% 36%, var(--halo) 0%, transparent 65%)
     final m = Offset(s.width * 0.55, s.height * 0.36);
     final enUzak = [Offset.zero, Offset(s.width, 0), Offset(0, s.height), Offset(s.width, s.height)]
@@ -514,7 +524,7 @@ class _ZeminRessami extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ZeminRessami old) => old.r != r || old.k != k || old.tier != tier;
+  bool shouldRepaint(_ZeminRessami old) => old.r != r || old.k != k || old.tier != tier || old.skin != skin;
 }
 
 class _CerceveRessami extends CustomPainter {

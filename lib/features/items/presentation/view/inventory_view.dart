@@ -90,7 +90,8 @@ class _Govde extends StatelessWidget {
         const SizedBox(height: Ref.pageGap),
         const RefNote(
             'Itemler dereceli maçta güç vermez. Anahtar ve hızlandırıcı sandık ekranında, ustalık kitabı ve '
-            'gelişim indirimi gelişim ekranında kullanılır. Süresi dolan item gösterilmez.',
+            'gelişim indirimi gelişim ekranında kullanılır. Giydiğin kozmetikler profilinde, kendi kartlarında, '
+            'kendi arena ekranında ve maç sonunda görünür. Süresi dolan item gösterilmez.',
             title: 'Nasıl kullanılır?'),
       ];
     }

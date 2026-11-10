@@ -13,6 +13,7 @@ import '../../../../shared/widgets/avatar2d/avatar_spec.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../arena/ref_stadium.dart';
 import '../arena/stage2d/duel_stage.dart';
 import '../viewmodel/match_view_model.dart';
@@ -387,6 +388,7 @@ class _ArenaPaneli extends StatelessWidget {
         height: stadiumHeight,
         // Yeni bir tur çözüldüğünde şut + saha parlaması
         flashKey: viewModel.lastResolvedRound?.roundNumber,
+        skin: EquippedCosmetics.current?.arena,
       ),
     );
   }
@@ -635,6 +637,7 @@ class _El extends StatelessWidget {
                   opacity: oynanabilir ? 1 : 0.45,
                   child: RefPlayerCard(
                     name: k.fullName,
+                    skin: EquippedCosmetics.current?.cardSkin,
                     position: k.position,
                     tier: k.tier,
                     power: k.effectivePower,

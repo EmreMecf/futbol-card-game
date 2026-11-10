@@ -10,6 +10,7 @@ import '../../../../core/theme/ref_tokens.dart';
 import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../../../progress/presentation/widgets/progress_panel.dart';
 
 /// Kart detayı — referans `showCard()` modalı.
@@ -88,6 +89,7 @@ class CardDetailSheet extends StatelessWidget {
                     children: [
                       _Pop(
                         child: RefPlayerCard(
+                          skin: EquippedCosmetics.current?.cardSkin,
                           name: card.fullName,
                           position: card.position,
                           tier: card.tier,

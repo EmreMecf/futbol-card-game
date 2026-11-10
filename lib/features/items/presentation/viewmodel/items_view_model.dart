@@ -5,6 +5,7 @@ import '../../../../core/base/view_state.dart';
 import '../../../../core/error/app_exception.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/utils/result.dart';
+import '../../cosmetics/equipped_cosmetics.dart';
 import '../../domain/items_repository.dart';
 
 /// ENVANTER (Ekonomi V2, FAZ 3). Her eylem bir idempotency anahtarı
@@ -31,14 +32,21 @@ class ItemsViewModel extends BaseViewModel {
     final e = await run(() => _repository.fetchInventory(), loadingState: ViewState.loading);
     if (e != null) {
       _envanter = e;
+      _kozmetikleriYay(e);
       safeNotify();
     }
   }
 
   Future<void> _tazele() async {
     final e = (await _repository.fetchInventory()).dataOrNull;
-    if (e != null) _envanter = e;
+    if (e != null) {
+      _envanter = e;
+      _kozmetikleriYay(e);
+    }
   }
+
+  /// FAZ 6: giyilenler bütün ekranlara (profil, kartlar, arena, maç sonu)
+  void _kozmetikleriYay(ItemInventory e) => EquippedCosmetics.current?.apply(e.enabled ? e.equipped : const {});
 
   /// Envanterden kullanılan item (şimdilik enerji içeceği)
   Future<bool> use(ItemDefinition d) => _eylem(d.slug, 'use:${d.slug}:${_envanter?.quantity(d.slug)}',

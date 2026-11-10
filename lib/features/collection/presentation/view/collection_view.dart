@@ -10,6 +10,7 @@ import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
+import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../../../progress/domain/progress_repository.dart';
 import '../viewmodel/collection_view_model.dart';
 import '../widgets/card_detail_sheet.dart';
@@ -173,6 +174,7 @@ class _GovdeState extends State<_Govde> {
             return LayoutBuilder(
               builder: (context, k) => RefPlayerCard(
                 key: ValueKey(kart.userCardId),
+                skin: EquippedCosmetics.current?.cardSkin,
                 name: kart.fullName,
                 position: kart.position,
                 tier: kart.tier,
