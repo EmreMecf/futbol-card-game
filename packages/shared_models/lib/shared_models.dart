@@ -17,6 +17,7 @@ export 'src/card_model.dart';
 export 'src/character_models.dart';
 export 'src/chemistry.dart';
 export 'src/deck_models.dart';
+export 'src/economy_models.dart';
 export 'src/enums.dart';
 export 'src/game_rules.dart';
 export 'src/league_models.dart';

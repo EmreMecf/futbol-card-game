@@ -10,11 +10,13 @@ import 'package:futbol_card_server/realtime/notification_listener.dart';
 import 'package:futbol_card_server/realtime/ws_hub.dart';
 import 'package:futbol_card_server/routes/auth_routes.dart';
 import 'package:futbol_card_server/routes/character_routes.dart';
+import 'package:futbol_card_server/routes/economy_routes.dart';
 import 'package:futbol_card_server/routes/game_routes.dart';
 import 'package:futbol_card_server/routes/match_routes.dart';
 import 'package:futbol_card_server/routes/sbc_routes.dart';
 import 'package:futbol_card_server/scheduler/timeout_sweeper.dart';
 import 'package:futbol_card_server/utils/api_response.dart';
+import 'package:futbol_card_server/utils/idempotency.dart';
 import 'package:futbol_card_server/utils/middlewares.dart';
 import 'package:futbol_card_server/utils/security.dart';
 import 'package:shelf/shelf.dart';
@@ -102,6 +104,11 @@ Future<void> main(List<String> args) async {
   api.mount('/sbc', korumali.addHandler(sbcRoutes(db).call));
   api.mount('/leaderboard', korumali.addHandler(leaderboardRoutes(db).call));
   api.mount('/characters', korumali.addHandler(characterRoutes(db).call));
+
+  // Ekonomi V2 (028+). Degistirici uclar Idempotency-Key ister; FAZ 0'da
+  // yalniz okuma uclari var, ara katman simdiden bagli.
+  final idempotent = korumali.addMiddleware(idempotency(DbIdempotencyStore(db)));
+  api.mount('/economy', idempotent.addHandler(economyRoutes(db).call));
 
   // ---- 5. WEBSOCKET ----
   // Baglanti adresi: ws://localhost:8080/ws?token=<access_token>

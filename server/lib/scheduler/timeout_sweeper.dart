@@ -53,6 +53,8 @@ class TimeoutSweeper {
   Future<void> _cleanupTokens() async {
     try {
       await _db.scalar('select cleanup_expired_tokens()');
+      // Ekonomi V2 (028): 48 saatten eski idempotency anahtarlari
+      await _db.scalar('select purge_idempotency_keys()');
     } catch (e) {
       // ignore: avoid_print
       print('[ZAMANLAYICI] Jeton temizligi basarisiz: $e');
