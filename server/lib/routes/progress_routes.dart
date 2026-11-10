@@ -30,14 +30,16 @@ Router progressRoutes(Database db) {
     return jsonOk(ProgressOverview.fromJson(RowMappers.asMap(ham)).toJson());
   });
 
-  // POST /api/progress/<cardId>/level-up  {"use_jokers": false}
+  // POST /api/progress/<cardId>/level-up  {"use_jokers": false, "use_discount": false}
   router.post('/<cardId>/level-up', (Request request, String cardId) async {
     final userId = requireUserId(request);
     final govde = await readJsonBody(request);
     final joker = govde['use_jokers'] == true;
+    // 034: %25 gelişim indirimi (item) kullanılsın mı?
+    final indirim = govde['use_discount'] == true;
     return withRuleCodes(() async {
-      final ham = await db.scalar('select level_up_player(@u::uuid, @c::uuid, @j)',
-          params: {'u': userId, 'c': cardId, 'j': joker});
+      final ham = await db.scalar('select level_up_player(@u::uuid, @c::uuid, @j, @d)',
+          params: {'u': userId, 'c': cardId, 'j': joker, 'd': indirim});
       return jsonOk(LevelUpResult.fromJson(RowMappers.asMap(ham)).toJson());
     });
   });

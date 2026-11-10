@@ -681,6 +681,7 @@ bağlanmada kayıp ya da çift yok; mevcut 622 + 21 test geçer.
 | FAZ 0 | ✅ Yapıldı (`75f67f5`) | `database/tests/028_economy_foundation_test.sql`, `server/test/idempotency_test.dart` (8), `test/economy_models_test.dart` |
 | FAZ 1 | ✅ Yapıldı | 029–032 migration; veritabanı testleri `031_chests_test.sql` (49 kontrol + 20.000 çekilişlik dağılım) ve `032_emergency_squad_test.sql`; `test/chests_test.dart` (7); `test/goldens/sandik_golden_test.dart` (26, 6 boyut); uçtan uca gerçek sunucu testi `tool/ekonomi/sandik_e2e.mjs` |
 | FAZ 2 | ✅ Yapıldı | 033 migration; `033_player_levels_test.sql` (34 kontrol, K1 dahil: maç/eşleştirme fonksiyonları seviyeyi okumuyor); `test/progress_test.dart` (5); `test/goldens/gelisim_golden_test.dart` (9); gerçek sunucuda `tool/ekonomi/gelisim_e2e.mjs` (11 kontrol) |
+| FAZ 3 | ✅ Yapıldı | 034 migration; `034_items_test.sql` (31 kontrol); `test/goldens/envanter_golden_test.dart` (envanter 6 boyut + davranış + sandık seçenekleri); gerçek sunucuda `tool/ekonomi/envanter_e2e.mjs` (16 kontrol, tekrar koşulabilir) |
 
 **Tasarımdan sapmalar:**
 
@@ -710,6 +711,31 @@ bağlanmada kayıp ya da çift yok; mevcut 622 + 21 test geçer.
   (`open_chest` yeniden tanımlandı; tek fark bu).
 - **Listede jokerle atlama:** yalnız en az 1 kopyası olan futbolcuda önerilir. 1 joker, kopyası olmayan
   onlarca futbolcuda ayrı ayrı "hazır" görünüyordu (gerçek veride bulundu).
+
+**FAZ 3 notları:**
+
+- **Tablolar:** `item_definitions` (23 item tohumu), `user_items` (süresiz itemler tek satırda yığılır,
+  süreli olanlar ayrı satır), `user_equipped` (kozmetik yuvası başına bir item).
+- **K1:** hiçbir item maç gücünü değiştirmez. Kozmetikler yalnız giyilir; oyunda gösterimi FAZ 6'dadır.
+- **Joker parçaları taşındı, silinmedi:** `user_joker_shards` satırları `joker_<nadirlik>` itemi olarak
+  `user_items`'a kopyalandı, eski tablo `user_joker_shards_legacy` adıyla duruyor. Migration tekrar
+  koşulursa ikinci kez saymaz.
+- **Kullanım (`use_item`):**
+  - Sandık anahtarı: sandık anında hazır olur (Efsane 2 anahtar).
+  - Hızlandırıcı: kalan süreden 2 saat düşer.
+  - Enerji içeceği: +3 ödül enerjisi, günde en fazla 2.
+  - Ustalık kitabı: aynı nadirlikteki futbolcuya bir seviyelik kopya verir; altın yine ödenir.
+  - Gelişim indirimi: seviye atlarken `use_discount` ile %25 düşer, tek kullanım, 7 gün geçerli.
+  - Hepsi Idempotency-Key ile tek sefer işlenir ve deftere yazılır.
+
+**FAZ 3 sapmaları:**
+
+- **Taşma posta kutusuna değil altına:** yığın sınırını aşan item ve ikinci kez gelen kozmetik,
+  tanımdaki karşılığı kadar altına çevrilir. Item için ayrı posta kutusu açmak yerine bu seçildi.
+- **"Tek kilit" kuralına anahtar istisnası:** anahtarla açılan sandık (`unlocked_by_item`) tek sayaç
+  kuralında sayılmaz. Başka bir sandığın sayacı çalışırken de anahtar kullanılabilir.
+- **`level_up_player` 4 argümanlı oldu** (jokerler + indirim). Eski 3 argümanlı sürüm kaldırıldı.
+- **Geliştirme ucu:** `POST /api/items/dev/grant` yalnız üretim dışında açık; testler için.
 
 **Varsayılan:** `economy_v2_enabled` migration'da **kapalı**. Yerel
 geliştirme veritabanında kabul testi için sürüm 2 ile açıldı. Kapatmak

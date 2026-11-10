@@ -179,9 +179,12 @@ class _Yuvalar extends StatelessWidget {
             ? null
             : c.isReady
                 ? () => _ac(context, vm, c)
-                : c.isSealed && !kilitAcan
-                    ? () => vm.startUnlock(c)
-                    : null,
+                // FAZ 3: anahtar / hızlandırıcı varsa seçenekler; yoksa eskisi gibi
+                : vm.canUseKey(c) || vm.canSpeedUp(c)
+                    ? () => _secenekler(context, vm, c, kilitAcan)
+                    : c.isSealed && !kilitAcan
+                        ? () => vm.startUnlock(c)
+                        : null,
       );
     }
 
@@ -210,6 +213,58 @@ class _Yuvalar extends StatelessWidget {
     ]);
   }
 }
+
+/// Kilitli / sayacı çalışan sandık için seçenekler (FAZ 3 itemleri)
+Future<void> _secenekler(BuildContext context, ChestsViewModel vm, Chest c, bool kilitAcan) =>
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Ref.modalBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(21)),
+        side: BorderSide(color: Ref.modalBorder),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(children: [
+              ChestIcon(type: c.chestType, size: 44),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text('${c.typeName.toUpperTr()} SANDIK',
+                    style: Ref.heading(20, color: chestColor(c.chestType))),
+              ),
+            ]),
+            const SizedBox(height: 12),
+            if (c.isSealed && !kilitAcan) ...[
+              RefSecondaryButton('KİLİDİ AÇ (${chestDuration(Duration(seconds: c.unlockSeconds))})',
+                  leadingIcon: Icons.lock_clock_rounded, onTap: () {
+                Navigator.pop(ctx);
+                vm.startUnlock(c);
+              }),
+              const SizedBox(height: 8),
+            ],
+            if (vm.canUseKey(c)) ...[
+              RefSecondaryButton('ANAHTARLA AÇ (${vm.keyCost(c)} / ${vm.keys} anahtar)',
+                  leadingIcon: Icons.vpn_key_rounded, onTap: () {
+                Navigator.pop(ctx);
+                vm.useKey(c);
+              }),
+              const SizedBox(height: 8),
+            ],
+            if (vm.canSpeedUp(c)) ...[
+              RefSecondaryButton('2 SAAT HIZLANDIR (${vm.speedups} adet)', leadingIcon: Icons.fast_forward_rounded,
+                  onTap: () {
+                Navigator.pop(ctx);
+                vm.speedUp(c);
+              }),
+              const SizedBox(height: 8),
+            ],
+            RefNeutralButton(label: 'VAZGEÇ', onTap: () => Navigator.pop(ctx)),
+          ]),
+        ),
+      ),
+    );
 
 class _SatirSandik extends StatelessWidget {
   final Chest chest;

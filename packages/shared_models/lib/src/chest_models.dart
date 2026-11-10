@@ -337,6 +337,9 @@ abstract class PlayerProgressItem with _$PlayerProgressItem {
 
     /// Bu nadirlikteki joker parça
     @Default(0) int jokersAvailable,
+
+    /// Bu nadirlikteki ustalık kitabı (034)
+    @Default(0) int booksAvailable,
   }) = _PlayerProgressItem;
 
   factory PlayerProgressItem.fromJson(Map<String, dynamic> json) => _$PlayerProgressItemFromJson(json);
@@ -364,6 +367,9 @@ abstract class ProgressOverview with _$ProgressOverview {
   const factory ProgressOverview({
     @Default([]) List<PlayerProgressItem> items,
     @Default({}) Map<String, int> jokers,
+
+    /// %25 gelişim indirimi adedi (034)
+    @Default(0) int discounts,
     @Default(0) int coins,
     @Default(1) int rulesVersion,
     @Default(10) int maxLevel,
@@ -399,6 +405,9 @@ abstract class LevelUpResult with _$LevelUpResult {
     @Default(0) int coinsSpent,
     @Default(0) int jokersUsed,
     @Default(0) int masteryCoins,
+
+    /// Gelişim indirimiyle düşülen altın (034)
+    @Default(0) int discount,
     LevelCost? next,
     int? coinsAfter,
   }) = _LevelUpResult;
@@ -418,4 +427,80 @@ abstract class ConvertCopiesResult with _$ConvertCopiesResult {
   }) = _ConvertCopiesResult;
 
   factory ConvertCopiesResult.fromJson(Map<String, dynamic> json) => _$ConvertCopiesResultFromJson(json);
+}
+
+// =====================================================================
+// FAZ 3 (034): ITEM KATALOĞU VE ENVANTER
+// =====================================================================
+/// Item türü: stackable | consumable | timed | cosmetic
+abstract final class ItemKinds {
+  static const stackable = 'stackable';
+  static const consumable = 'consumable';
+  static const timed = 'timed';
+  static const cosmetic = 'cosmetic';
+}
+
+@freezed
+abstract class ItemDefinition with _$ItemDefinition {
+  const ItemDefinition._();
+
+  const factory ItemDefinition({
+    required String slug,
+    required String kind,
+    required String category,
+    required String name,
+    required String description,
+    int? maxStack,
+    int? durationSeconds,
+    String? cosmeticSlot,
+    @Default(0) int overflowCoins,
+    @Default({}) Map<String, dynamic> params,
+    @Default(0) int sortOrder,
+  }) = _ItemDefinition;
+
+  factory ItemDefinition.fromJson(Map<String, dynamic> json) => _$ItemDefinitionFromJson(json);
+
+  bool get isCosmetic => kind == ItemKinds.cosmetic;
+  bool get isTimed => kind == ItemKinds.timed;
+
+  /// Envanterden doğrudan kullanılabilir mi? (anahtar ve hızlandırıcı
+  /// sandık ekranında, kitap gelişimde, indirim seviye atlarken kullanılır)
+  bool get usableFromInventory => category == 'energy_drink';
+}
+
+/// Sahip olunan item (süreli itemlerde her bitiş ayrı satır)
+@freezed
+abstract class OwnedItem with _$OwnedItem {
+  const factory OwnedItem({
+    required String slug,
+    required int quantity,
+    DateTime? expiresAt,
+  }) = _OwnedItem;
+
+  factory OwnedItem.fromJson(Map<String, dynamic> json) => _$OwnedItemFromJson(json);
+}
+
+/// `GET /api/items`
+@freezed
+abstract class ItemInventory with _$ItemInventory {
+  const ItemInventory._();
+
+  const factory ItemInventory({
+    @Default([]) List<ItemDefinition> catalog,
+    @Default([]) List<OwnedItem> items,
+
+    /// Kozmetik yuvası -> giyilen item
+    @Default({}) Map<String, String> equipped,
+    @Default(0) int energyDrinksToday,
+    @Default(false) bool enabled,
+    required DateTime serverTime,
+  }) = _ItemInventory;
+
+  factory ItemInventory.fromJson(Map<String, dynamic> json) => _$ItemInventoryFromJson(json);
+
+  ItemDefinition? definition(String slug) => catalog.where((d) => d.slug == slug).firstOrNull;
+
+  int quantity(String slug) => items.where((i) => i.slug == slug).fold(0, (a, b) => a + b.quantity);
+
+  bool isEquipped(String slug) => equipped.values.contains(slug);
 }

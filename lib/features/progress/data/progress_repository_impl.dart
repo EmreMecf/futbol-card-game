@@ -13,9 +13,10 @@ class ProgressRepositoryImpl implements ProgressRepository {
       Result.guard(() async => ProgressOverview.fromJson(await _api.get('/progress')));
 
   @override
-  Future<Result<LevelUpResult>> levelUp(String cardId, {required bool useJokers, required String idempotencyKey}) =>
+  Future<Result<LevelUpResult>> levelUp(String cardId,
+          {required bool useJokers, bool useDiscount = false, required String idempotencyKey}) =>
       Result.guard(() async => LevelUpResult.fromJson(await _api.postIdempotent('/progress/$cardId/level-up',
-          anahtar: idempotencyKey, govde: {'use_jokers': useJokers})));
+          anahtar: idempotencyKey, govde: {'use_jokers': useJokers, 'use_discount': useDiscount})));
 
   @override
   Future<Result<ConvertCopiesResult>> convert(String cardId, int count, {required String idempotencyKey}) =>

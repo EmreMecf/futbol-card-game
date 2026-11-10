@@ -48,6 +48,9 @@ import '../../features/progress/domain/progress_repository.dart';
 import '../../features/progress/presentation/viewmodel/progress_view_model.dart';
 import '../../features/profile/presentation/viewmodel/profile_view_model.dart';
 import '../../features/settings/presentation/viewmodel/settings_view_model.dart';
+import '../../features/items/data/items_repository_impl.dart';
+import '../../features/items/domain/items_repository.dart';
+import '../../features/items/presentation/viewmodel/items_view_model.dart';
 import '../../features/leaderboard/data/datasources/leaderboard_remote_datasource.dart';
 import '../../features/leaderboard/data/repositories/leaderboard_repository_impl.dart';
 import '../../features/leaderboard/domain/repositories/leaderboard_repository.dart';
@@ -184,18 +187,27 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<ChestRepository>(
       () => ChestRepositoryImpl(getIt<ApiClient>()),
     )
+    // Ekonomi V2 (FAZ 3): item envanteri
+    ..registerLazySingleton<ItemsRepository>(
+      () => ItemsRepositoryImpl(getIt<ApiClient>()),
+    )
+    ..registerFactory<ItemsViewModel>(
+      () => ItemsViewModel(getIt<ItemsRepository>()),
+    )
     // Ekonomi V2 (FAZ 2): futbolcu seviyesi
     ..registerLazySingleton<ProgressRepository>(
       () => ProgressRepositoryImpl(getIt<ApiClient>()),
     )
     ..registerFactory<ProgressViewModel>(
-      () => ProgressViewModel(getIt<ProgressRepository>(), session: getIt<SessionManager>()),
+      () => ProgressViewModel(getIt<ProgressRepository>(),
+          session: getIt<SessionManager>(), items: getIt<ItemsRepository>()),
     )
     ..registerFactory<ChestsViewModel>(
       () => ChestsViewModel(
         getIt<ChestRepository>(),
         socket: getIt<WebSocketService>(),
         session: getIt<SessionManager>(),
+        items: getIt<ItemsRepository>(),
       ),
     )
     // Gorev kadrosu kurma ekrani hangi gorev icin acildigini bilmeli

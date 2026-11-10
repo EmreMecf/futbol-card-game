@@ -93,10 +93,11 @@ begin
   -- 5) Joker ile: 3->4 icin 3 kopya; joker yoksa reddedilir, varsa harcanir
   perform pg_temp.hata_bekle('jokersiz eksik kopya reddedilir',
     format('select level_up_player(%L, %L, true)', u, bronz), 'not_enough_jokers');
-  insert into user_joker_shards (user_id, tier, amount) values (u, 'bronze', 10);
+  -- 034'ten beri joker parcalar item envanterinde
+  perform _item_add(u, 'joker_bronze', 10, 'test');
   v := level_up_player(u, bronz, true);
   perform pg_temp.beklenen('jokerle seviye 4', (v ->> 'level')::int, 4);
-  perform pg_temp.beklenen('3 joker harcandi', (select amount from user_joker_shards where user_id = u and tier = 'bronze'), 7);
+  perform pg_temp.beklenen('3 joker harcandi', _item_qty(u, 'joker_bronze'), 7);
 
   -- 6) Ustalik: seviye 5'te tek seferlik 200 altin
   update player_progress set copies = 5 where user_id = u and card_id = bronz;

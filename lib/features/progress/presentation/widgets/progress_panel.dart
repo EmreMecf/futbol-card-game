@@ -109,6 +109,32 @@ class ProgressPanel extends StatelessWidget {
             style: Ref.bodyText(11, color: Ref.muted),
           ),
       ],
+      // FAZ 3: ustalık kitabı (kopya eksikse) ve %25 gelişim indirimi
+      if (!mesgul && next != null && item.isOwned && vm.canUseItems && item.booksAvailable > 0 && item.missingCopies > 0)
+        RefNeutralButton(
+          onTap: () => vm.useBook(item),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Icon(Icons.menu_book_rounded, size: 15, color: Ref.accent),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text('USTALIK KİTABI (${item.booksAvailable})', maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: Ref.bodyText(11, color: Ref.neutralText, weight: FontWeight.w800)),
+            ),
+          ]),
+        ),
+      if (!mesgul && hazir && overview.discounts > 0 && detailed)
+        RefNeutralButton(
+          onTap: () => vm.levelUp(item, useDiscount: true),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Icon(Icons.sell_rounded, size: 15, color: Ref.gold),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text('%25 İNDİRİMLE ATLA (${trThousands(next!.coins * 3 ~/ 4)} altın)',
+                  maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: Ref.bodyText(11, color: Ref.neutralText, weight: FontWeight.w800)),
+            ),
+          ]),
+        ),
       if (vm.actionError != null && vm.busyCardId == null)
         Text(vm.actionError!, style: Ref.bodyText(11.5, color: Ref.red, weight: FontWeight.w700)),
       if (item.convertibleCopies > 0)

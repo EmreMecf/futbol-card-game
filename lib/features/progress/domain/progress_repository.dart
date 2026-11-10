@@ -5,7 +5,8 @@ import '../../../core/utils/result.dart';
 /// Futbolcu seviyesi (Ekonomi V2, FAZ 2). K1: dereceli gücü etkilemez.
 abstract class ProgressRepository {
   Future<Result<ProgressOverview>> fetchOverview();
-  Future<Result<LevelUpResult>> levelUp(String cardId, {required bool useJokers, required String idempotencyKey});
+  Future<Result<LevelUpResult>> levelUp(String cardId,
+      {required bool useJokers, bool useDiscount = false, required String idempotencyKey});
   Future<Result<ConvertCopiesResult>> convert(String cardId, int count, {required String idempotencyKey});
 }
 
@@ -19,6 +20,8 @@ String progressErrorMessage(String? code, String fallback) => switch (code) {
       'not_enough_coins' => 'Yeterli altın yok.',
       'not_convertible' => 'Bu kadar kopya dönüştürülemez (destedeki ve maçtaki kartlar sayılmaz).',
       'invalid_count' => 'Geçersiz adet.',
+      'not_enough_items' => 'Yeterli item yok.',
+      'item_not_applicable' => 'Bu item bu futbolcuya kullanılamaz.',
       'idempotency_in_progress' => 'İstek hâlâ işleniyor, birazdan tekrar dene.',
       _ => fallback,
     };

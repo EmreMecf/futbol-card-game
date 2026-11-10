@@ -10,6 +10,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/network/websocket_service.dart';
 import '../../../../core/utils/result.dart';
 import '../../domain/chest_messages.dart';
+import '../../../items/domain/items_repository.dart';
 import '../../domain/chest_repository.dart';
 
 /// Sandıklar (Ekonomi V2, FAZ 1) — ana sayfa şeridi ve sandık ekranı.
@@ -40,12 +41,30 @@ class ChestsViewModel extends BaseViewModel {
 
   // Özel adlı parametre yazımı projede kullanılmıyor (bkz. ProfileViewModel)
   // ignore: prefer_initializing_formals
-  ChestsViewModel(this._repository, {WebSocketService? socket, SessionManager? session, DateTime Function()? clock})
+  ChestsViewModel(this._repository,
+      {WebSocketService? socket, SessionManager? session, DateTime Function()? clock, ItemsRepository? items})
       // ignore: prefer_initializing_formals
       : _socket = socket,
         // ignore: prefer_initializing_formals
         _session = session,
+        // ignore: prefer_initializing_formals
+        _items = items,
         _saat = clock ?? DateTime.now;
+
+  /// FAZ 3: sandık anahtarı ve hızlandırıcı (kayıtlı değilse seçenek yok)
+  final ItemsRepository? _items;
+  int _anahtarSayisi = 0;
+  int _hizlandirici = 0;
+
+  /// Sahip olunan sandık anahtarı / hızlandırıcı
+  int get keys => _anahtarSayisi;
+  int get speedups => _hizlandirici;
+
+  /// Bu sandığı anahtarla açmak için gereken anahtar (Efsane 2)
+  int keyCost(Chest c) => c.chestType == ChestTypes.legend ? 2 : 1;
+  bool canUseKey(Chest c) =>
+      _items != null && (c.isSealed || c.isUnlocking) && c.location == 'slot' && _anahtarSayisi >= keyCost(c);
+  bool canSpeedUp(Chest c) => _items != null && c.isUnlocking && _hizlandirici > 0;
 
   /// Cihaz saati (testlerde sabit saat verilir: sayaç kararlı görünsün)
   final DateTime Function() _saat;
@@ -83,6 +102,7 @@ class ChestsViewModel extends BaseViewModel {
   Future<void> load() async {
     final sonuc = await run(() => _repository.fetchInventory(), loadingState: ViewState.loading);
     if (sonuc != null) _envanterAyarla(sonuc);
+    await _itemleriYukle();
     _abonelik ??= _socket?.events.listen((olay) {
       if (olay.isChestGranted) refresh();
     });
@@ -93,7 +113,24 @@ class ChestsViewModel extends BaseViewModel {
     final sonuc = await _repository.fetchInventory();
     final env = sonuc.dataOrNull;
     if (env != null) _envanterAyarla(env);
+    await _itemleriYukle();
   }
+
+  Future<void> _itemleriYukle() async {
+    final e = (await _items?.fetchInventory())?.dataOrNull;
+    if (e == null) return;
+    _anahtarSayisi = e.quantity('chest_key');
+    _hizlandirici = e.quantity('chest_speedup_2h');
+    safeNotify();
+  }
+
+  /// Anahtarla aç: sandık hemen "hazır" olur (başka sayaç çalışırken de)
+  Future<bool> useKey(Chest c) => _eylem(c.id, 'key:${c.id}',
+      (k) => _items!.use('chest_key', target: {'chest_id': c.id}, idempotencyKey: k), (_) => refresh());
+
+  /// Sayacı çalışan sandıktan 2 saat düş
+  Future<bool> speedUp(Chest c) => _eylem(c.id, 'speed:${c.id}:$_hizlandirici',
+      (k) => _items!.use('chest_speedup_2h', target: {'chest_id': c.id}, idempotencyKey: k), (_) => refresh());
 
   Future<void> loadOdds({int? version}) async {
     final sonuc = await _repository.fetchOdds(version: version);
@@ -177,7 +214,7 @@ class ChestsViewModel extends BaseViewModel {
       // Ağ hatasında anahtar KORUNUR (tekrar aynı anahtarla); kesin
       // red (kural) gelirse yeni eylem yeni anahtar alır.
       if (hata.type != AppErrorType.network) _anahtarlar.remove(eylem);
-      _hata = chestErrorMessage(hata);
+      _hata = itemErrorMessage(hata.technicalDetail, chestErrorMessage(hata));
       safeNotify();
       return false;
     }

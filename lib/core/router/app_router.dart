@@ -12,6 +12,7 @@ import '../../features/chests/presentation/view/chests_view.dart';
 import '../../features/collection/presentation/view/collection_view.dart';
 import '../../features/deck/presentation/view/deck_view.dart';
 import '../../features/home/presentation/view/home_view.dart';
+import '../../features/items/presentation/view/inventory_view.dart';
 import '../../features/leaderboard/presentation/view/leaderboard_view.dart';
 import '../../features/leaderboard/presentation/view/league_tiers_view.dart';
 import '../../features/match/presentation/view/match_view.dart';
@@ -123,6 +124,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.progress,
         builder: (context, state) => const ProgressView(),
+      ),
+      GoRoute(
+        path: AppRoutes.inventory,
+        builder: (context, state) => const InventoryView(),
       ),
       GoRoute(
         path: AppRoutes.sbc,

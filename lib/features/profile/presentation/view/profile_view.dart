@@ -13,6 +13,7 @@ import '../../../../shared/widgets/avatar2d/avatar_painter.dart';
 import '../../../../shared/widgets/avatar2d/avatar_spec.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../viewmodel/profile_view_model.dart';
+import '../../../items/domain/items_repository.dart';
 import '../widgets/profile_sections.dart';
 
 /// PROFİL — referans `profile()` ekranı.
@@ -82,6 +83,19 @@ class _Govde extends StatelessWidget {
             Text('AYARLAR', style: Ref.bodyText(11, color: Ref.neutralText, weight: FontWeight.w800)),
           ]),
         ),
+        // Ekonomi V2 (FAZ 3): envanter (servis kayıtlıysa)
+        if (getIt.isRegistered<ItemsRepository>()) ...[
+          const SizedBox(height: 8),
+          RefNeutralButton(
+            onTap: () => context.push(AppRoutes.inventory),
+            semanticLabel: 'Envanter',
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              const Icon(Icons.inventory_2_rounded, size: 14, color: Ref.neutralText),
+              const SizedBox(width: 6),
+              Text('ENVANTER', style: Ref.bodyText(11, color: Ref.neutralText, weight: FontWeight.w800)),
+            ]),
+          ),
+        ],
       ];
 
       return RefreshIndicator(

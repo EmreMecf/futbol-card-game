@@ -14,7 +14,8 @@ class _Depo extends GoldenProgressRepo {
   final hatalar = <AppException>[];
 
   @override
-  Future<Result<LevelUpResult>> levelUp(String cardId, {required bool useJokers, required String idempotencyKey}) async {
+  Future<Result<LevelUpResult>> levelUp(String cardId,
+      {required bool useJokers, bool useDiscount = false, required String idempotencyKey}) async {
     anahtarlar.add(idempotencyKey);
     if (hatalar.isNotEmpty) return Failure(hatalar.removeAt(0));
     return Success(LevelUpResult(cardId: cardId, level: 4, coinsSpent: 250, coinsAfter: 2200));

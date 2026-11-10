@@ -5,6 +5,7 @@ import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
 import '../../../../core/error/app_exception.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../items/domain/items_repository.dart';
 import '../../domain/progress_repository.dart';
 
 /// Futbolcu gelişimi (Ekonomi V2, FAZ 2).
@@ -20,7 +21,15 @@ class ProgressViewModel extends BaseViewModel {
   final SessionManager? _session;
 
   // ignore: prefer_initializing_formals
-  ProgressViewModel(this._repository, {SessionManager? session}) : _session = session;
+  ProgressViewModel(this._repository, {SessionManager? session, ItemsRepository? items})
+      // ignore: prefer_initializing_formals
+      : _session = session,
+        // ignore: prefer_initializing_formals
+        _items = items;
+
+  /// FAZ 3: ustalık kitabı kullanımı (kayıtlı değilse seçenek yok)
+  final ItemsRepository? _items;
+  bool get canUseItems => _items != null;
 
   ProgressOverview? _ozet;
   ProgressOverview? get overview => _ozet;
@@ -74,15 +83,16 @@ class ProgressViewModel extends BaseViewModel {
     if (o != null) _ozet = o;
   }
 
-  Future<bool> levelUp(PlayerProgressItem item, {bool useJokers = false}) async {
+  Future<bool> levelUp(PlayerProgressItem item, {bool useJokers = false, bool useDiscount = false}) async {
     if (_islenen != null) return false;
     // Anahtar HEDEF seviyeye bağlı: aynı seviye için tekrar = aynı anahtar
-    final eylem = 'level:${item.cardId}:${item.level + 1}:$useJokers';
+    final eylem = 'level:${item.cardId}:${item.level + 1}:$useJokers:$useDiscount';
     final anahtar = _anahtarlar.putIfAbsent(eylem, ApiClient.newIdempotencyKey);
     _islenen = item.cardId;
     _hata = null;
     safeNotify();
-    final s = await _repository.levelUp(item.cardId, useJokers: useJokers, idempotencyKey: anahtar);
+    final s = await _repository.levelUp(item.cardId,
+        useJokers: useJokers, useDiscount: useDiscount, idempotencyKey: anahtar);
     _islenen = null;
     final hata = s.errorOrNull;
     if (hata != null) {
@@ -107,6 +117,30 @@ class ProgressViewModel extends BaseViewModel {
     _hata = null;
     safeNotify();
     final s = await _repository.convert(item.cardId, count, idempotencyKey: anahtar);
+    _islenen = null;
+    final hata = s.errorOrNull;
+    if (hata != null) {
+      if (hata.type != AppErrorType.network) _anahtarlar.remove(eylem);
+      _hata = progressErrorMessage(hata.technicalDetail, hata.message);
+      safeNotify();
+      return false;
+    }
+    _anahtarlar.remove(eylem);
+    await _tazele();
+    safeNotify();
+    return true;
+  }
+
+  /// Ustalık kitabı: bu seviye için gereken kopyayı verir (altın yine ödenir)
+  Future<bool> useBook(PlayerProgressItem item) async {
+    final depo = _items;
+    if (_islenen != null || depo == null) return false;
+    final eylem = 'book:${item.cardId}:${item.level}:${item.copies}';
+    final anahtar = _anahtarlar.putIfAbsent(eylem, ApiClient.newIdempotencyKey);
+    _islenen = item.cardId;
+    _hata = null;
+    safeNotify();
+    final s = await depo.use('mastery_book_${item.tier.name}', target: {'card_id': item.cardId}, idempotencyKey: anahtar);
     _islenen = null;
     final hata = s.errorOrNull;
     if (hata != null) {
