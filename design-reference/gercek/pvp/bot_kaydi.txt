@@ -1,0 +1,16 @@
+yeni test hesabı oluşturuldu: rakip_7737a2
+B (rakip_7737a2) kadro: ffa9a5fa-539f-4dd9-818b-0836b4586e85 (11 kart)
+find: {"status":"matched","match_id":"2d966f1e-decc-4a59-85fd-c533625e5b51"}
+MAÇ: 2d966f1e-decc-4a59-85fd-c533625e5b51
+tur 1: zorunlu=DEF oynadı Luca Conti (DEF 74) -> {"status":"ok","phase":"round_resolved"}
+tur 2: zorunlu=MID oynadı Serkan Aslan (MID 71) -> {"status":"ok","phase":"round_resolved"}
+tur 3: zorunlu=FWD oynadı Ruud Meijer (FWD 70) -> {"status":"ok","phase":"round_resolved"}
+tur 4: zorunlu=MID oynadı Cheikh Fall (MID 70) -> {"status":"ok","phase":"round_resolved"}
+tur 5: zorunlu=DEF oynadı Javier Torres (DEF 70) -> {"status":"ok","phase":"round_resolved"}
+tur 6: zorunlu=GK oynadı Sergio Marin (GK 56) -> {"status":"ok","phase":"round_resolved"}
+tur 7: zorunlu=FWD oynadı Julian Weber (FWD 56) -> {"status":"ok","phase":"round_resolved"}
+tur 8: zorunlu=MID oynadı Jack Hughes (MID 63) -> {"status":"ok","phase":"round_resolved"}
+tur 9: zorunlu=DEF oynadı Ousmane Diallo (DEF 60) -> {"status":"ok","phase":"round_resolved"}
+tur 10: zorunlu=MID oynadı Sora Suzuki (MID 62) -> {"status":"ok","phase":"round_resolved"}
+tur 11: zorunlu=DEF oynadı Yuki Tanaka (DEF 58) -> {"status":"ok","phase":"round_resolved"}
+BİTTİ: durum=finished skor B 0 - A 22 kazanan=896d22d0-ec55-4a3a-8d01-269f394fd1ca

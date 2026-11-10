@@ -210,6 +210,14 @@ abstract class MatchMove with _$MatchMove {
     String? userCardId,
     String? fullName,
     String? imageUrl,
+
+    /// GÖRSEL KİMLİK (oyun kuralı DEĞİL): kartın katalog kimliği ve
+    /// forma tohumu. 2D yüz, koleksiyondakiyle aynı olsun diye
+    /// `AvatarSpec.generate(cardId, kitSeed: club ?? nationality)`.
+    /// Eski sunucu bunları göndermez; o zaman istemci ada düşer.
+    String? cardId,
+    String? club,
+    String? nationality,
   }) = _MatchMove;
 
   factory MatchMove.fromJson(Map<String, dynamic> json) =>
@@ -226,6 +234,9 @@ abstract class MatchMove with _$MatchMove {
   bool get hasTactic => tactic != null && !tactic!.isNone;
 
   bool get hasChemistry => chemistry > 0;
+
+  /// Forma (kit) tohumu: koleksiyondaki kartla aynı kural
+  String? get kitSeed => club ?? nationality;
 }
 
 /// Bir turun sonucu (animasyon ve mac ozeti icin)

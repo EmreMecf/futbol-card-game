@@ -1,0 +1,62 @@
+{
+  "01_ana_sayfa": {
+    "fps": 60.4,
+    "kare": 182,
+    "p95ms": 16.8,
+    "uzun": 0
+  },
+  "03_koleksiyon": {
+    "fps": 60.2,
+    "kare": 181,
+    "p95ms": 16.8,
+    "uzun": 0
+  },
+  "03b_koleksiyon_kaydirma": {
+    "fps": 53.2,
+    "kare": 134,
+    "p95ms": 33.5,
+    "uzun": 18
+  },
+  "04_kadro": {
+    "fps": 60.1,
+    "kare": 181,
+    "p95ms": 16.8,
+    "uzun": 0
+  },
+  "02m_mac_hazirligi": {
+    "fps": 60.1,
+    "kare": 181,
+    "p95ms": 16.8,
+    "uzun": 0
+  },
+  "05_magaza": {
+    "fps": 60.4,
+    "kare": 182,
+    "p95ms": 16.8,
+    "uzun": 0
+  },
+  "06_ligler": {
+    "fps": 60.4,
+    "kare": 182,
+    "p95ms": 16.8,
+    "uzun": 0
+  },
+  "07_profil": {
+    "fps": 60.4,
+    "kare": 182,
+    "p95ms": 16.8,
+    "uzun": 0
+  },
+  "10_gorevler": {
+    "fps": 60.3,
+    "kare": 181,
+    "p95ms": 16.8,
+    "uzun": 0
+  },
+  "12_ayarlar": {
+    "fps": 60.4,
+    "kare": 182,
+    "p95ms": 16.8,
+    "uzun": 0
+  }
+}

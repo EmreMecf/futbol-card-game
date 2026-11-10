@@ -446,7 +446,11 @@ class RefHero extends StatelessWidget {
               borderRadius: BorderRadius.circular(17),
               border: Border.all(color: Ref.heroBorder),
             ),
+            // passthrough: içerik kartın TAM genişliğini alır. (loose
+            // ile kendi genişliğine büzülüp sola yaslanıyordu; profildeki
+            // ortalanmış avatar ve isim bu yüzden solda kalıyordu.)
             child: Stack(
+              fit: StackFit.passthrough,
               children: [
                 if (crest != null)
                   Positioned(

@@ -18,26 +18,26 @@ class RefArenaStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(9),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF476B81)),
-          gradient: const LinearGradient(
-            begin: Alignment(-0.5, -0.87),
-            end: Alignment(0.5, 0.87),
-            colors: [Color(0xFF1A3D49), Color(0xFF08182B)],
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (head != null) ...[
-              Padding(padding: const EdgeInsets.fromLTRB(2, 3, 2, 8), child: head),
-            ],
-            stadium,
-          ],
-        ),
-      );
+    padding: const EdgeInsets.all(9),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFF476B81)),
+      gradient: const LinearGradient(
+        begin: Alignment(-0.5, -0.87),
+        end: Alignment(0.5, 0.87),
+        colors: [Color(0xFF1A3D49), Color(0xFF08182B)],
+      ),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (head != null) ...[
+          Padding(padding: const EdgeInsets.fromLTRB(2, 3, 2, 8), child: head),
+        ],
+        stadium,
+      ],
+    ),
+  );
 }
 
 /// .arena-head: "🔵 SEN / ad"  ·  .score "0 – 0"  ·  "RAKİP 🔴 / ad"
@@ -58,24 +58,28 @@ class RefArenaHead extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget taraf(String baslik, String ad, Color nokta, bool sag) => Expanded(
-          child: Column(
-            crossAxisAlignment: sag ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: sag
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (!sag) ...[_Nokta(nokta), const SizedBox(width: 4)],
-                  Text(baslik, style: Ref.bodyText(11, weight: FontWeight.w900)),
-                  if (sag) ...[const SizedBox(width: 4), _Nokta(nokta)],
-                ],
-              ),
-              Text(ad,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Ref.bodyText(10, color: Ref.muted, weight: FontWeight.w900)),
+              if (!sag) ...[_Nokta(nokta), const SizedBox(width: 4)],
+              Text(baslik, style: Ref.bodyText(11, weight: FontWeight.w900)),
+              if (sag) ...[const SizedBox(width: 4), _Nokta(nokta)],
             ],
           ),
-        );
+          Text(
+            ad,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Ref.bodyText(10, color: Ref.muted, weight: FontWeight.w900),
+          ),
+        ],
+      ),
+    );
 
     return Row(
       children: [
@@ -93,7 +97,10 @@ class RefArenaHead extends StatelessWidget {
             duration: const Duration(milliseconds: 600),
             // Skor değişince "pop" (galibiyet vurgusu 500-800 ms)
             transitionBuilder: (c, a) => ScaleTransition(
-              scale: Tween(begin: 1.6, end: 1.0).animate(CurvedAnimation(parent: a, curve: Ref.popCurve)),
+              scale: Tween(
+                begin: 1.6,
+                end: 1.0,
+              ).animate(CurvedAnimation(parent: a, curve: Ref.popCurve)),
               child: FadeTransition(opacity: a, child: c),
             ),
             child: Text(
@@ -116,14 +123,14 @@ class _Nokta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        width: 10,
-        height: 10,
-        decoration: BoxDecoration(
-          color: c,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
-        ),
-      );
+    width: 10,
+    height: 10,
+    decoration: BoxDecoration(
+      color: c,
+      shape: BoxShape.circle,
+      border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
+    ),
+  );
 }
 
 /// Referans `.stadium`: perspektifli saha, projektörler, oyuncu noktaları,
@@ -141,7 +148,12 @@ class RefStadium extends StatefulWidget {
   final double height;
   final Object? flashKey;
 
-  const RefStadium({super.key, required this.caption, this.height = 230, this.flashKey});
+  const RefStadium({
+    super.key,
+    required this.caption,
+    this.height = 230,
+    this.flashKey,
+  });
 
   @override
   State<RefStadium> createState() => _RefStadiumState();
@@ -156,15 +168,23 @@ class _RefStadiumState extends State<RefStadium> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _bob = AnimationController(vsync: this, duration: const Duration(milliseconds: 1700));
-    _sut = AnimationController(vsync: this, duration: const Duration(milliseconds: 650));
+    _bob = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1700),
+    );
+    _sut = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 650),
+    );
     if (_hareket) _bob.repeat(reverse: true);
   }
 
   @override
   void didUpdateWidget(RefStadium old) {
     super.didUpdateWidget(old);
-    if (old.flashKey != widget.flashKey && widget.flashKey != null && _hareket) {
+    if (old.flashKey != widget.flashKey &&
+        widget.flashKey != null &&
+        _hareket) {
       _sut.forward(from: 0);
     }
   }
@@ -182,88 +202,137 @@ class _RefStadiumState extends State<RefStadium> with TickerProviderStateMixin {
       borderRadius: BorderRadius.circular(9),
       child: SizedBox(
         height: widget.height,
-        child: LayoutBuilder(builder: (context, k) {
-          final w = k.maxWidth;
-          final h = widget.height;
-          return AnimatedBuilder(
-            animation: Listenable.merge([_bob, _sut]),
-            builder: (context, _) {
-              final parlak = _sut.isAnimating ? 1 - (_sut.value - 0.5).abs() * 2 : 0.0;
-              return Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Positioned.fill(child: CustomPaint(painter: _StadyumZemini())),
-                  // Projektörler (.flood)
-                  const Positioned(left: 15, top: 4, child: _Projektor()),
-                  const Positioned(right: 15, top: 4, child: _Projektor()),
-                  // Perspektifli saha
-                  Positioned(
-                    left: w * 0.16,
-                    top: 17,
-                    width: w * 0.68,
-                    height: 185,
-                    child: Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.identity()
-                        ..setEntry(3, 2, 1 / 430)
-                        ..rotateX(-43 * math.pi / 180) // Flutter: işaret CSS'in tersi (uzak kenar daralsın)
-                        ..rotateZ(-8 * math.pi / 180),
-                      child: ColorFiltered(
-                        colorFilter: ColorFilter.matrix(_parlaklik(1 + 0.35 * parlak)),
-                        child: const _Saha3d(),
-                      ),
+        child: LayoutBuilder(
+          builder: (context, k) {
+            final w = k.maxWidth;
+            final h = widget.height;
+            // PERFORMANS (FAZ 9 ölçümü: maç hazırlığı ~43 FPS): eskiden
+            // her karede BÜTÜN stadyum (perspektifli saha, renk filtresi,
+            // bulanık projektörler, gölgeli yazı) yeniden kuruluyordu;
+            // oysa sürekli hareket eden yalnız top. Artık:
+            //   * durağan katman bir kez çizilir (RepaintBoundary)
+            //   * saha parlaklığı yalnız şut anında (_sut) değişir ve renk
+            //     filtresi yalnız o an açılır (her karede ek katman yok)
+            //   * her karede yalnız top çizilir
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned.fill(
+                  child: RepaintBoundary(
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Positioned.fill(
+                          child: CustomPaint(painter: _StadyumZemini()),
+                        ),
+                        // Projektörler (.flood)
+                        const Positioned(left: 15, top: 4, child: _Projektor()),
+                        const Positioned(
+                          right: 15,
+                          top: 4,
+                          child: _Projektor(),
+                        ),
+                        // Perspektifli saha
+                        Positioned(
+                          left: w * 0.16,
+                          top: 17,
+                          width: w * 0.68,
+                          height: 185,
+                          child: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.identity()
+                              ..setEntry(3, 2, 1 / 430)
+                              ..rotateX(
+                                -43 * math.pi / 180,
+                              ) // Flutter: işaret CSS'in tersi (uzak kenar daralsın)
+                              ..rotateZ(-8 * math.pi / 180),
+                            child: AnimatedBuilder(
+                              animation: _sut,
+                              child: const _Saha3d(),
+                              builder: (context, saha) {
+                                final parlak = _sut.isAnimating
+                                    ? 1 - (_sut.value - 0.5).abs() * 2
+                                    : 0.0;
+                                if (parlak <= 0) return saha!;
+                                return ColorFiltered(
+                                  colorFilter: ColorFilter.matrix(
+                                    _parlaklik(1 + 0.35 * parlak),
+                                  ),
+                                  child: saha,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        // Oyuncu noktaları (.player-dot)
+                        for (final (sol, sag, ust, no, kirmizi) in const [
+                          (0.32, null, 0.39, '7', false),
+                          (0.37, null, 0.65, '9', false),
+                          (0.28, null, 0.80, '3', false),
+                          (null, 0.32, 0.38, '4', true),
+                          (null, 0.37, 0.67, '8', true),
+                          (null, 0.27, 0.79, '6', true),
+                        ])
+                          Positioned(
+                            left: sol == null ? null : w * sol,
+                            right: sag == null ? null : w * sag,
+                            top: h * ust,
+                            child: _OyuncuNoktasi(no, kirmizi: kirmizi),
+                          ),
+                        // .turf-caption { bottom:8px; font:900 17px Barlow; text-shadow:0 2px 6px #000 }
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 8,
+                          child: Text(
+                            widget.caption,
+                            textAlign: TextAlign.center,
+                            style: Ref.heading(17, weight: FontWeight.w900)
+                                .copyWith(
+                                  shadows: const [
+                                    Shadow(
+                                      color: Colors.black,
+                                      offset: Offset(0, 2),
+                                      blurRadius: 6,
+                                    ),
+                                  ],
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  // Oyuncu noktaları (.player-dot)
-                  for (final (sol, sag, ust, no, kirmizi) in const [
-                    (0.32, null, 0.39, '7', false),
-                    (0.37, null, 0.65, '9', false),
-                    (0.28, null, 0.80, '3', false),
-                    (null, 0.32, 0.38, '4', true),
-                    (null, 0.37, 0.67, '8', true),
-                    (null, 0.27, 0.79, '6', true),
-                  ])
-                    Positioned(
-                      left: sol == null ? null : w * sol,
-                      right: sag == null ? null : w * sag,
-                      top: h * ust,
-                      child: _OyuncuNoktasi(no, kirmizi: kirmizi),
-                    ),
-                  // Top (.football top:51% left:49%; bob ±13px/±4px)
-                  Positioned(
-                    left: w * 0.49,
-                    top: h * 0.51,
-                    child: Transform.translate(
-                      offset: _topKonumu(),
-                      child: Transform.scale(
-                        scale: _sut.isAnimating ? 1 - 0.5 * Curves.easeOut.transform(_sut.value) : 1,
-                        child: const RefDropShadow(
-                          color: Color(0xFF000000),
-                          offset: Offset(0, 4),
-                          blur: 5,
-                          child: Em('⚽', size: 24, height: 1),
+                ),
+                // Top (.football top:51% left:49%; bob ±13px/±4px) — her karede
+                // yalnız bu katman çizilir
+                Positioned(
+                  left: w * 0.49,
+                  top: h * 0.51,
+                  child: RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: Listenable.merge([_bob, _sut]),
+                      child: const RefDropShadow(
+                        color: Color(0xFF000000),
+                        offset: Offset(0, 4),
+                        blur: 5,
+                        child: Em('⚽', size: 24, height: 1),
+                      ),
+                      builder: (context, top) => Transform.translate(
+                        offset: _topKonumu(),
+                        child: Transform.scale(
+                          scale: _sut.isAnimating
+                              ? 1 - 0.5 * Curves.easeOut.transform(_sut.value)
+                              : 1,
+                          child: top,
                         ),
                       ),
                     ),
                   ),
-                  // .turf-caption { bottom:8px; font:900 17px Barlow; text-shadow:0 2px 6px #000 }
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 8,
-                    child: Text(
-                      widget.caption,
-                      textAlign: TextAlign.center,
-                      style: Ref.heading(17, weight: FontWeight.w900).copyWith(
-                        shadows: const [Shadow(color: Colors.black, offset: Offset(0, 2), blurRadius: 6)],
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          );
-        }),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -274,7 +343,11 @@ class _RefStadiumState extends State<RefStadium> with TickerProviderStateMixin {
       final t = Curves.easeOut.transform(_sut.value);
       return t < 0.55
           ? Offset.lerp(Offset.zero, const Offset(70, -19), t / 0.55)!
-          : Offset.lerp(const Offset(70, -19), const Offset(110, -35), (t - 0.55) / 0.45)!;
+          : Offset.lerp(
+              const Offset(70, -19),
+              const Offset(110, -35),
+              (t - 0.55) / 0.45,
+            )!;
     }
     // @keyframes bob: translate(-13px,-4px) → translate(13px,4px), ease-in-out
     final t = Curves.easeInOut.transform(_bob.value);
@@ -282,11 +355,11 @@ class _RefStadiumState extends State<RefStadium> with TickerProviderStateMixin {
   }
 
   static List<double> _parlaklik(double b) => [
-        b, 0, 0, 0, 0, //
-        0, b, 0, 0, 0, //
-        0, 0, b, 0, 0, //
-        0, 0, 0, 1, 0,
-      ];
+    b, 0, 0, 0, 0, //
+    0, b, 0, 0, 0, //
+    0, 0, b, 0, 0, //
+    0, 0, 0, 1, 0,
+  ];
 }
 
 class _StadyumZemini extends CustomPainter {
@@ -301,21 +374,36 @@ class _StadyumZemini extends CustomPainter {
     c.scale(s.width / s.height, 1);
     final yr = s.height / 2 * math.sqrt2;
     c.drawCircle(
-        Offset.zero,
-        yr * 1.05,
-        Paint()
-          ..shader = const RadialGradient(
-            colors: [Color(0xFF225968), Color(0xFF0D2337), Color(0xFF030A13)],
-            stops: [0, 0.45, 0.95],
-          ).createShader(Rect.fromCircle(center: Offset.zero, radius: yr)));
+      Offset.zero,
+      yr * 1.05,
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Color(0xFF225968), Color(0xFF0D2337), Color(0xFF030A13)],
+          stops: [0, 0.45, 0.95],
+        ).createShader(Rect.fromCircle(center: Offset.zero, radius: yr)),
+    );
     c.restore();
     // :before — radial-gradient(ellipse at 50% 8%, #eafaff3d, transparent 28%)
     final ust = Offset(s.width / 2, s.height * 0.08);
     c.drawOval(
-        Rect.fromCenter(center: ust, width: s.width * 0.9, height: s.height * 0.6),
-        Paint()
-          ..shader = const RadialGradient(colors: [Color(0x3DEAFAFF), Color(0x00EAFAFF)], stops: [0, 0.6])
-              .createShader(Rect.fromCenter(center: ust, width: s.width * 0.9, height: s.height * 0.6)));
+      Rect.fromCenter(
+        center: ust,
+        width: s.width * 0.9,
+        height: s.height * 0.6,
+      ),
+      Paint()
+        ..shader =
+            const RadialGradient(
+              colors: [Color(0x3DEAFAFF), Color(0x00EAFAFF)],
+              stops: [0, 0.6],
+            ).createShader(
+              Rect.fromCenter(
+                center: ust,
+                width: s.width * 0.9,
+                height: s.height * 0.6,
+              ),
+            ),
+    );
     // repeating-linear-gradient(90deg, transparent 0 19px, #ffffff05 20px 21px)
     final cizgi = Paint()..color = const Color(0x05FFFFFF);
     for (var x = 20.0; x < s.width; x += 21) {
@@ -336,8 +424,11 @@ class _Projektor extends StatelessWidget {
   // BoxShadow'un büyük yayılımı burada sert kutu olarak çiziliyordu;
   // aynı ışık elle çizilir: geniş hale + bulanık parlaklık + beyaz çekirdek.
   @override
-  Widget build(BuildContext context) =>
-      const SizedBox(width: 90, height: 3, child: CustomPaint(painter: _ProjektorCizim()));
+  Widget build(BuildContext context) => const SizedBox(
+    width: 90,
+    height: 3,
+    child: CustomPaint(painter: _ProjektorCizim()),
+  );
 }
 
 class _ProjektorCizim extends CustomPainter {
@@ -349,15 +440,22 @@ class _ProjektorCizim extends CustomPainter {
     // 0 0 55px 12px #6aebff80 — geniş, yumuşak hale
     final hale = Rect.fromCenter(center: m, width: s.width + 110, height: 70);
     c.drawOval(
-        hale,
-        Paint()
-          ..shader = const RadialGradient(colors: [Color(0x806AEBFF), Color(0x006AEBFF)]).createShader(hale));
+      hale,
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Color(0x806AEBFF), Color(0x006AEBFF)],
+        ).createShader(hale),
+    );
     // 0 0 9px 5px #c5f8ff — çekirdeğin çevresindeki parlaklık
     c.drawRRect(
-        RRect.fromRectAndRadius(Rect.fromCenter(center: m, width: s.width + 10, height: 13), const Radius.circular(6)),
-        Paint()
-          ..color = const Color(0xCCC5F8FF)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.5));
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: m, width: s.width + 10, height: 13),
+        const Radius.circular(6),
+      ),
+      Paint()
+        ..color = const Color(0xCCC5F8FF)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.5),
+    );
     // background:#fff
     c.drawRect(Offset.zero & s, Paint()..color = Colors.white);
   }
@@ -373,15 +471,19 @@ class _Saha3d extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: const Color(0x80C4FFDF), width: 2),
-          boxShadow: const [
-            BoxShadow(color: Color(0xAA000000), blurRadius: 38, offset: Offset(0, 16)),
-            BoxShadow(color: Color(0xAA18BA83), blurRadius: 28),
-          ],
+    decoration: BoxDecoration(
+      border: Border.all(color: const Color(0x80C4FFDF), width: 2),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0xAA000000),
+          blurRadius: 38,
+          offset: Offset(0, 16),
         ),
-        child: const CustomPaint(painter: _Saha3dCizim()),
-      );
+        BoxShadow(color: Color(0xAA18BA83), blurRadius: 28),
+      ],
+    ),
+    child: const CustomPaint(painter: _Saha3dCizim()),
+  );
 }
 
 class _Saha3dCizim extends CustomPainter {
@@ -405,19 +507,21 @@ class _Saha3dCizim extends CustomPainter {
     c.drawCircle(s.center(Offset.zero), 25, cizgi);
     // .pitch-box 58x95, top:44px; sol kutunun solu, sağ kutunun sağı açık
     c.drawPath(
-        Path()
-          ..moveTo(0, 44)
-          ..lineTo(58, 44)
-          ..lineTo(58, 139)
-          ..lineTo(0, 139),
-        cizgi);
+      Path()
+        ..moveTo(0, 44)
+        ..lineTo(58, 44)
+        ..lineTo(58, 139)
+        ..lineTo(0, 139),
+      cizgi,
+    );
     c.drawPath(
-        Path()
-          ..moveTo(s.width, 44)
-          ..lineTo(s.width - 58, 44)
-          ..lineTo(s.width - 58, 139)
-          ..lineTo(s.width, 139),
-        cizgi);
+      Path()
+        ..moveTo(s.width, 44)
+        ..lineTo(s.width - 58, 44)
+        ..lineTo(s.width - 58, 139)
+        ..lineTo(s.width, 139),
+      cizgi,
+    );
   }
 
   @override
@@ -434,21 +538,33 @@ class _OyuncuNoktasi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        width: 23,
-        height: 23,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: kirmizi ? const Color(0xFFFFE1E1) : const Color(0xFFD3F0FF), width: 2),
-          gradient: LinearGradient(
-            begin: const Alignment(-0.57, -0.82),
-            end: const Alignment(0.57, 0.82),
-            colors: kirmizi
-                ? const [Color(0xFFFF999F), Color(0xFFBD173B)]
-                : const [Color(0xFF6ED0FF), Color(0xFF0872D4)],
-          ),
-          boxShadow: const [BoxShadow(color: Color(0x88000000), blurRadius: 10, offset: Offset(0, 4))],
+    width: 23,
+    height: 23,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      border: Border.all(
+        color: kirmizi ? const Color(0xFFFFE1E1) : const Color(0xFFD3F0FF),
+        width: 2,
+      ),
+      gradient: LinearGradient(
+        begin: const Alignment(-0.57, -0.82),
+        end: const Alignment(0.57, 0.82),
+        colors: kirmizi
+            ? const [Color(0xFFFF999F), Color(0xFFBD173B)]
+            : const [Color(0xFF6ED0FF), Color(0xFF0872D4)],
+      ),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x88000000),
+          blurRadius: 10,
+          offset: Offset(0, 4),
         ),
-        child: Text(no, style: Ref.bodyText(10, weight: FontWeight.w900, height: 1)),
-      );
+      ],
+    ),
+    child: Text(
+      no,
+      style: Ref.bodyText(10, weight: FontWeight.w900, height: 1),
+    ),
+  );
 }

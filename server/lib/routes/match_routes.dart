@@ -169,6 +169,9 @@ Router matchRoutes(Database db) {
       select mm.round_number, mm.user_id, mm.is_lead, mm.is_pass,
              mm.position, mm.tier, mm.power, mm.chemistry, mm.created_at,
              mm.user_card_id, c.full_name, c.image_url, mm.tactic_bonus,
+             -- Görsel kimlik: rakip kartın 2D yüzü koleksiyondakiyle
+             -- aynı çizilsin (kart zaten masada açık; gizli bilgi değil)
+             mm.card_id, c.club, c.nationality,
              -- GIZLILIK: rakibin taktigi, o tur cozulene kadar gonderilmez.
              -- (Turu acan taktigini secip bekliyorken cevap veren onu
              -- gorebilseydi her zaman karsi taktigi secerdi.)

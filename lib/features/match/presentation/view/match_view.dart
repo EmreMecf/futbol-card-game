@@ -278,6 +278,15 @@ class _MatchBodyState extends State<_MatchBody> {
 /// Bir kartın 2D yüzü (koleksiyondaki yüzün aynısı: cardId + kulüp)
 AvatarSpec _yuz(String seed, String? kulup) => AvatarSpec.generate(seed, kitSeed: kulup);
 
+/// Masadaki bir hamlenin 2D yüzü — koleksiyondaki kartla AYNI kimlik:
+/// tohum = kartın katalog kimliği (cardId), forma = kulüp ?? uyruk.
+/// Sunucu kimliği göndermiyorsa (eski sürüm) eldeki karttan, o da
+/// yoksa ada düşülür.
+(String, String?) _hamleKimligi(MatchMove m, HandCard? elde) => (
+      m.cardId ?? elde?.cardId ?? m.fullName ?? '?',
+      m.kitSeed ?? elde?.club ?? elde?.nationality,
+    );
+
 // ====================================================================
 // BAŞLIK
 // ====================================================================
@@ -401,7 +410,10 @@ class _VsSatiri extends StatelessWidget {
     if (benimHamle != null && !benimHamle.isPass) {
       final elde = vm.hand.where((k) => k.userCardId == benimHamle.userCardId).firstOrNull;
       benim = _SavasIcerigi(
-        yuz: _yuz(elde?.cardId ?? benimHamle.fullName ?? '?', elde?.club),
+        yuz: () {
+          final (seed, kit) = _hamleKimligi(benimHamle, elde);
+          return _yuz(seed, kit);
+        }(),
         guc: benimHamle.effectivePower ?? 0,
         ad: benimHamle.fullName ?? '',
         kimya: benimHamle.chemistry,
@@ -409,7 +421,7 @@ class _VsSatiri extends StatelessWidget {
       );
     } else if (secili != null) {
       benim = _SavasIcerigi(
-        yuz: _yuz(secili!.cardId, secili!.club),
+        yuz: _yuz(secili!.cardId, secili!.club ?? secili!.nationality),
         guc: secili!.effectivePower,
         ad: secili!.fullName,
         kimya: secili!.chemistry,
@@ -419,7 +431,10 @@ class _VsSatiri extends StatelessWidget {
     _SavasIcerigi? rakip;
     if (rakipHamle != null && !rakipHamle.isPass) {
       rakip = _SavasIcerigi(
-        yuz: _yuz(rakipHamle.fullName ?? '?', null),
+        yuz: () {
+          final (seed, kit) = _hamleKimligi(rakipHamle, null);
+          return _yuz(seed, kit);
+        }(),
         guc: rakipHamle.effectivePower ?? 0,
         ad: rakipHamle.fullName ?? '',
         kimya: rakipHamle.chemistry,
@@ -1000,9 +1015,9 @@ class _CatismaKatmani extends StatelessWidget {
         );
       }
       final elde = benim ? viewModel.hand.where((k) => k.userCardId == m.userCardId).firstOrNull : null;
-      final seed = elde?.cardId ?? m.fullName ?? '?';
+      final (seed, kit) = _hamleKimligi(m, elde);
       return DuelSide(
-        spec: _yuz(seed, elde?.club),
+        spec: _yuz(seed, kit),
         seed: seed,
         name: m.fullName ?? '',
         tier: m.tier ?? CardTier.bronze,

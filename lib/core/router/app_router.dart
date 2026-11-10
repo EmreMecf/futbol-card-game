@@ -20,7 +20,9 @@ import '../../features/sbc/presentation/view/sbc_list_view.dart';
 import '../../features/settings/presentation/view/design_system_view.dart';
 import '../../features/settings/presentation/view/settings_view.dart';
 import '../../features/store/presentation/view/store_view.dart';
+import '../../shared/widgets/ref/ref_ui.dart';
 import '../auth/session_manager.dart';
+import '../theme/ref_tokens.dart';
 import 'app_routes.dart';
 
 /// Uygulamanin yonlendirme (navigasyon) yapisi.
@@ -126,13 +128,32 @@ class AppRouter {
         ],
       ),
     ],
+    // Bilinmeyen adres (eski bağlantı, elle yazılmış yol): referans
+    // dilinde boş durum + oyuncuyu çıkmazda bırakmayan ana sayfa düğmesi.
     errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            'Sayfa bulunamadi:\n${state.uri}',
-            textAlign: TextAlign.center,
+      backgroundColor: Ref.phoneBg,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            // Kaydırılabilir alan: panel içeriği kadar yer kaplar (Center
+            // içinde tam ekrana uzuyordu) ve çok küçük ekranda taşmaz.
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: RefCardPanel(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  const Center(child: Em('🧭', size: 46)),
+                  Text('SAYFA BULUNAMADI', textAlign: TextAlign.center, style: Ref.h2()),
+                  Text(
+                    'Bu adreste bir ekran yok. Bağlantı eskimiş ya da yanlış yazılmış olabilir.',
+                    textAlign: TextAlign.center,
+                    style: Ref.bodyText(12, color: Ref.muted),
+                  ),
+                  RefCta('ANA SAYFAYA DÖN', fontSize: 19, onTap: () => context.go(AppRoutes.home)),
+                ],
+              ),
+            ),
           ),
         ),
       ),

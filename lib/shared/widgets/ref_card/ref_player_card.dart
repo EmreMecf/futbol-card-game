@@ -244,19 +244,26 @@ class _RefPlayerCardState extends State<RefPlayerCard> with SingleTickerProvider
       ),
     );
 
-    // Çerçeve (+ hareketli ışık) en üstte
+    // Çerçeve (+ hareketli ışık) en üstte.
+    //
+    // PERFORMANS (FAZ 9 ölçümü, gerçek Chrome + Intel HD 530): ışık
+    // animasyonu kartın geri kalanıyla aynı katmandayken her karede
+    // 2D yüz, yüz gölgesi (bulanıklık) ve arka plan da yeniden
+    // çiziliyordu; koleksiyon boştayken ~39 FPS'e düşüyordu. Hareketli
+    // çerçeve ve durağan kart AYRI katmanlarda: her karede yalnız ince
+    // çerçeve çizilir.
     kart = Stack(
       clipBehavior: Clip.none,
       children: [
-        kart,
+        _isik == null ? kart : RepaintBoundary(child: kart),
         Positioned.fill(
           child: IgnorePointer(
             child: _isik == null
                 ? CustomPaint(painter: _CerceveRessami(r, widget.tier, yaricap, cerceve, 0, false))
-                : AnimatedBuilder(
-                    animation: _isik!,
-                    builder: (_, _) =>
-                        CustomPaint(painter: _CerceveRessami(r, widget.tier, yaricap, cerceve, _isik!.value, true)),
+                : RepaintBoundary(
+                    child: CustomPaint(
+                      painter: _CerceveRessami(r, widget.tier, yaricap, cerceve, 0, true, isik: _isik),
+                    ),
                   ),
           ),
         ),
@@ -504,10 +511,17 @@ class _CerceveRessami extends CustomPainter {
   final CardTier tier;
   final double yaricap;
   final double kalinlik;
-  final double t;
+  final double _t;
   final bool hareketli;
 
-  const _CerceveRessami(this.r, this.tier, this.yaricap, this.kalinlik, this.t, this.hareketli);
+  /// Verilirse ressam her karede yalnız kendini boyar (widget ağacı
+  /// yeniden kurulmaz); `t` bu animasyondan okunur.
+  final Animation<double>? isik;
+
+  _CerceveRessami(this.r, this.tier, this.yaricap, this.kalinlik, this._t, this.hareketli, {this.isik})
+      : super(repaint: isik);
+
+  double get t => isik?.value ?? _t;
 
   @override
   void paint(Canvas c, Size s) {
@@ -554,5 +568,6 @@ class _CerceveRessami extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CerceveRessami old) => old.t != t || old.r != r || old.hareketli != hareketli;
+  bool shouldRepaint(_CerceveRessami old) =>
+      old.isik != isik || old._t != _t || old.r != r || old.hareketli != hareketli || old.tier != tier;
 }

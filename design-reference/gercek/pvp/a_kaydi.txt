@@ -1,0 +1,14 @@
+B (testoyuncu) kadro: 29109958-0bcf-4750-b964-dd20087496ac (11 kart)
+find: {"match_id":"2d966f1e-decc-4a59-85fd-c533625e5b51"}
+MAÇ: 2d966f1e-decc-4a59-85fd-c533625e5b51
+tur 2: zorunlu=- oynadı Diego Maradona (MID 99) -> {"status":"ok","phase":"waiting_opponent"}
+tur 3: zorunlu=- oynadı Pele (FWD 98) -> {"status":"ok","phase":"waiting_opponent"}
+tur 4: zorunlu=- oynadı Johan Cruyff (MID 97) -> {"status":"ok","phase":"waiting_opponent"}
+tur 5: zorunlu=- oynadı Franz Beckenbauer (DEF 96) -> {"status":"ok","phase":"waiting_opponent"}
+tur 6: zorunlu=- oynadı Lev Yashin (GK 95) -> {"status":"ok","phase":"waiting_opponent"}
+tur 7: zorunlu=- oynadı Ferenc Puskas (FWD 94) -> {"status":"ok","phase":"waiting_opponent"}
+tur 8: zorunlu=- oynadı Alfie Foster (MID 92) -> {"status":"ok","phase":"waiting_opponent"}
+tur 9: zorunlu=- oynadı Vinicius Nunes (DEF 90) -> {"status":"ok","phase":"waiting_opponent"}
+tur 10: zorunlu=- oynadı Federico Bruno (MID 90) -> {"status":"ok","phase":"waiting_opponent"}
+tur 11: zorunlu=- oynadı Volkan Aydin (DEF 88) -> {"status":"ok","phase":"waiting_opponent"}
+BİTTİ: durum=finished skor B 22 - A 0 kazanan=896d22d0-ec55-4a3a-8d01-269f394fd1ca

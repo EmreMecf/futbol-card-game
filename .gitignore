@@ -75,3 +75,8 @@ design-reference/.gecici/
 
 # Golden test hatalarinda olusan fark goruntuleri (yerel)
 test/goldens/failures/
+
+# Kabul testi ham kareleri (yerel; ozet seri goruntuleri ve kayitlar depoda)
+design-reference/gercek/pvp/*
+!design-reference/gercek/pvp/*_seri.png
+!design-reference/gercek/pvp/*_kaydi.txt

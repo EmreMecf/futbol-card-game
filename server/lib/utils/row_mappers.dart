@@ -136,6 +136,10 @@ class RowMappers {
       userCardId: row['user_card_id']?.toString(),
       fullName: row['full_name'] as String?,
       imageUrl: row['image_url'] as String?,
+      // Görsel kimlik (2D yüz ve forma); kural hesabında kullanılmaz
+      cardId: row['card_id']?.toString(),
+      club: row['club'] as String?,
+      nationality: row['nationality'] as String?,
     );
   }
 
