@@ -1,7 +1,7 @@
 # Futbol Card Arena — Game Economy V2 Tasarım Belgesi
 
-Sürüm: taslak 1 (10 Kasım 2026). Durum: **onay bekliyor** (bkz.
-"Senin kararın gereken konular").
+Sürüm: 2 (10 Kasım 2026). Durum: **K1–K6 onaylandı**. FAZ 0 ve FAZ 1
+uygulandı (bkz. §14 "Uygulama durumu").
 
 Bu belge sandık, futbolcu seviyesi, Battle Pass, item envanteri ve ödül
 enerjisi sistemlerini tasarlar. **Kod değişikliği yok.** Sayılar,
@@ -27,7 +27,7 @@ doğrulandı (sonuçlar: `tool/ekonomi/sonuclar.md`).
 | # | Karar | Önerim | Neden |
 |---|---|---|---|
 | **K1** | Futbolcu seviyesi dereceli maçta kart gücünü değiştirsin mi? | **Hayır.** Seviye dereceli düelloda güce etki etmez. | Simülasyon: aynı kadroda seviye başına +1 güç → %100 kazanma; en fazla +4'lük yumuşak eğri bile %99–100. Bu oyunda aynı mevkideki kartlar birbirine çok yakın, kimya bile +1/+2. En küçük bonus bile maçı belirliyor (bkz. §2.4). |
-| **K2** | Aynı futbolcu tekrar çıkınca ne olsun? | **Gelişim kopyası + kadro kilidi koruması.** Var olan fazla kopyalar silinmez, istenirse oyuncu kendisi dönüştürür. | Kalıcı kart kaybıyla çakışma: kopyalar parçaya dönerse kaybedilen kartın yerine yenisi gelmiyor. Koruma yokken günde 2 maç oynayan ücretsiz oyuncu 180 günde ortalama 23 gün kadro kuramıyor; korumayla 0 gün (§1.3, §2.1, §10). |
+| **K2** | Aynı futbolcu tekrar çıkınca ne olsun? | **Gelişim kopyası + kadro kilidi koruması.** Var olan fazla kopyalar silinmez, istenirse oyuncu kendisi dönüştürür. | Kalıcı kart kaybıyla çakışma: kopyalar parçaya dönerse kaybedilen kartın yerine yenisi gelmiyor. Koruma yokken (gerçekçi paket modeliyle) oyuncular 180 günün 72–112 gününde kadro kuramıyor; koruma + Acil Kadro ile 0–0,1 gün (§1.3, §1.6, §10). |
 | **K3** | Yenilgide de sandık verilsin mi? | **Evet** (Bronz ağırlıklı). | Kart kaybının acısını azaltır, maç başına ödül hedefi tutar. |
 | **K4** | Premium ödemesi | **Bu fazda yok.** Premium yalnız tasarımda; ödeme (Google Play / App Store) ayrı faz ve ayrı onay. | Gerçek para, iade, vergi, yaş ve ganimet kutusu mevzuatı ayrı iş (§12). |
 | **K5** | Sandık gerçek parayla satılsın mı? | **Hayır.** Sandıklar yalnız oynayarak kazanılır. | Belçika ve Hollanda gibi ülkelerde ücretli ganimet kutusu yasak; olasılık gösterimi her yerde zorunlu hâle geliyor. |
@@ -125,6 +125,30 @@ Her sandık **tam 3 futbolcu** içerir. Her yuva ayrı çekilir; Gümüş ve
 - **Sonuç:** açılırken `secure_random_int` ile çekilir ve sandık
   satırına (`result jsonb`) yazılır. Aynı sandık ikinci kez açılamaz,
   sonuç değişmez.
+
+### 1.6 Acil Kadro (K2'nin ikinci parçası; FAZ 1'de eklendi)
+
+Kabul testinde canlı görüldü: yenilgide 3 kart kaybeden test hesabı
+orta saha mevkiinde formasyonu kuramadı. 1.000 altınıyla 2 standart paket
+aldı; standart ve premium paketlerde **mevki garantisi yok**, eksik
+kapanmadı ve oyuncu 0 altınla kalıcı olarak kilitlendi. Kilitli oyuncu
+maç oynayamadığı için sandık da kazanamıyor; yani §1.3'teki koruma tek
+başına yetmiyor.
+
+**Kural (`032_emergency_squad.sql`):**
+
+- **Hak:** koleksiyonu formasyonu (1 GK, 4 DEF, 4 MID, 2 FWD)
+  karşılamayan oyuncu. Yalnızca kadroya seçmesi gereken oyuncu hak
+  kazanmaz.
+- **Ne alır:** Bronz kart; her mevki "ihtiyaç + 1 yedek"e tamamlanır.
+- **Sıklık:** 24 saatte en fazla 1 kez.
+- **Kayıt:** deftere yazılır ve idempotent'tir.
+- **Neden +1 yedek:** yalnızca eksik sayısı verilince günde 20 maç
+  oynayan oyuncu 180 günün 22,5'inde yine kilitleniyordu. Acil kadroyu
+  kullandıktan sonra aynı gün bir yenilgiyle tekrar kilitleniyordu.
+  +1 yedekle bu 0,1 güne iniyor.
+- **Suistimal:** Bronz kart olduğu için kötüye kullanmaya değmez.
+  Düello kurallarına dokunmaz.
 
 ---
 
@@ -491,13 +515,13 @@ kodu).
 
 | Ölçüt | 2/gün ücretsiz | 5/gün ücretsiz | 10/gün ücretsiz | 10/gün premium | 20/gün premium+ |
 |---|---|---|---|---|---|
-| Kadro ortalama seviye | 4,85 | 5,67 | 6,47 | 6,67 | 7,65 |
-| Sandık (B/G/A/E) | 226/112/46/7 | 570/263/106/25 | 1142/488/184/43 | 1128/499/201/47 | 1698/610/225/51 |
-| Yuvalar dolu (zamanın) | %0 | %1 | %13 | %22 | %97 |
-| Telafiye dönen sandık | 0 | 2 | 8 | 43 | 230 |
-| Fazla kopya (seviye 10 üstü) | 0 | 0 | 0 | 0 | 132 |
-| Altın bakiyesi (sonda) | 750 | 1.060 | 1.384 | 1.263 | 1.347 |
-| Kadro kilitli gün | 0 | 0 | 0 | 0 | 0 |
+| Kadro ortalama seviye | 4,84 | 5,66 | 6,46 | 6,74 | 7,59 |
+| Sandık (B/G/A/E) | 224/114/46/7 | 568/266/105/25 | 1139/490/185/43 | 1126/500/202/47 | 1707/602/232/51 |
+| Yuvalar dolu (zamanın) | %0 | %1 | %12 | %22 | %96 |
+| Telafiye dönen sandık | 0 | 2 | 7 | 43 | 224 |
+| Fazla kopya (seviye 10 üstü) | 0 | 0 | 0 | 1 | 145 |
+| Altın bakiyesi (sonda) | 760 | 1.058 | 1.272 | 1.141 | 1.212 |
+| Kadro kilitli gün | 0 | 0 | 0 | 0 | 0,1 |
 
 **Okuma:**
 
@@ -510,10 +534,21 @@ kodu).
   Yan etkisi: paket satın alma azalıyor (§12 R4).
 - **Sandık kuyruğu:** günde 10 maça kadar sorun yok. Günde 20 maçta
   yuvalar sürekli dolu; telafi devreye giriyor, sandık kaybolmuyor.
-- **Kadro kilidi:** kilit koruması açıkken 0 gün. Kapalıyken, günde 2 maç
-  oynayan ücretsiz oyuncu 180 günde ortalama 23 gün kadro kuramıyor;
-  diğer profillerde 1–4 gün (§2.1). Komut:
-  `python -I tool/ekonomi/simulasyon.py 8 parca yok`.
+- **Kadro kilidi** (180 gün):
+
+  | Senaryo | 2/gün | 5/gün | 10/gün ücretsiz | 10/gün premium | 20/gün |
+  |---|---|---|---|---|---|
+  | Koruma yok | 98 | 106 | 112 | 73 | 72 |
+  | Sandık önceliği + Acil Kadro (yalnız eksik) | 0,1 | 0 | 0 | 0 | 22,5 |
+  | Sandık önceliği + Acil Kadro (+1 yedek, **uygulanan**) | 0 | 0 | 0 | 0 | 0,1 |
+
+  - **Düzeltme:** taslak 1'de "koruma yokken 23 gün" yazıyordu. O model,
+    kilitli oyuncunun aldığı paketin eksik mevkiden kart verdiğini
+    varsayıyordu; gerçekte standart paketin mevki garantisi yok. Gerçekçi
+    modelle risk çok daha büyük çıktı.
+  - Komutlar: `simulasyon.py 8 parca yok` (koruma yok),
+    `simulasyon.py 8 parca koruma 0` (yalnız eksik),
+    `simulasyon.py 8` (uygulanan).
 - **Yeni oyuncu:** dereceli eşleşmede seviye etkisi olmadığı için yeni
   oyuncunun kazanma şansını yalnız kart gücü ve kimya belirliyor; bu
   mevcut durumla aynı (§2.4).
@@ -636,3 +671,27 @@ bağlanmada kayıp ya da çift yok; mevcut 622 + 21 test geçer.
 | 4 | Battle Pass + görevler (premium satın alma kapalı) |
 | 5 | Ödeme altyapısı. **K4, ayrı yasal inceleme** |
 | 6 | Kozmetiklerin oyunda gösterimi (forma, arena, zafer animasyonu) |
+
+---
+
+## 14. Uygulama durumu (10 Kasım 2026)
+
+| Faz | Durum | Kanıt |
+|---|---|---|
+| FAZ 0 | ✅ Yapıldı (`75f67f5`) | `database/tests/028_economy_foundation_test.sql`, `server/test/idempotency_test.dart` (8), `test/economy_models_test.dart` |
+| FAZ 1 | ✅ Yapıldı | 029–032 migration; veritabanı testleri `031_chests_test.sql` (49 kontrol + 20.000 çekilişlik dağılım) ve `032_emergency_squad_test.sql`; `test/chests_test.dart` (7); `test/goldens/sandik_golden_test.dart` (26, 6 boyut); uçtan uca gerçek sunucu testi `tool/ekonomi/sandik_e2e.mjs` |
+
+**Tasarımdan sapmalar:**
+
+- **Olasılıkların yeri:** ayrı tablolar yerine `economy_config_versions`
+  (`kind = chest_rules`) içinde tutuluyor. Yayınlanmış sürüm
+  değiştirilemiyor (tetikleyici) ve her sandık kendi sürümünü saklıyor.
+- **Acil Kadro (§1.6):** tasarımda yoktu; kabul testinde ortaya çıkan
+  kilitlenme yüzünden eklendi (K2'nin kapsamında).
+- **Sayaç açıkken kilitli kalan sandık:** sayacı bitmiş ama açılmamış
+  sandık "tek kilit" kuralında sayılmaya devam ediyor. Oyuncu önce onu
+  açmalı; ekran bunu "AÇ!" ile gösteriyor.
+
+**Varsayılan:** `economy_v2_enabled` migration'da **kapalı**. Yerel
+geliştirme veritabanında kabul testi için sürüm 2 ile açıldı. Kapatmak
+için daha yüksek bir sürümle `false` eklenir.

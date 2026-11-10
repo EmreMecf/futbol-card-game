@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:shared_models/shared_models.dart';
@@ -196,6 +197,31 @@ class ApiClient {
   }) async {
     final cevap = await _dio.post<dynamic>(yol, data: govde, cancelToken: iptal);
     return _mapCevap(cevap);
+  }
+
+  /// Ekonomi V2: ödül veren istekler için `Idempotency-Key` başlıklı POST.
+  ///
+  /// Aynı kullanıcı eylemi için AYNI [anahtar] gönderilir (ör. ağ hatası
+  /// sonrası tekrar). Sunucu ilk cevabı saklar; işlem iki kez yapılmaz.
+  Future<Map<String, dynamic>> postIdempotent(
+    String yol, {
+    required String anahtar,
+    Object? govde,
+    CancelToken? iptal,
+  }) async {
+    final cevap = await _dio.post<dynamic>(
+      yol,
+      data: govde ?? const <String, dynamic>{},
+      cancelToken: iptal,
+      options: Options(headers: {'Idempotency-Key': anahtar}),
+    );
+    return _mapCevap(cevap);
+  }
+
+  /// Rastgele, tahmin edilemez istek kimliği (128 bit, hex)
+  static String newIdempotencyKey() {
+    final r = Random.secure();
+    return List.generate(16, (_) => r.nextInt(256).toRadixString(16).padLeft(2, '0')).join();
   }
 
   Future<Map<String, dynamic>> put(

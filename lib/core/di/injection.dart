@@ -1,6 +1,9 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../features/chests/data/chest_repository_impl.dart';
+import '../../features/chests/domain/chest_repository.dart';
+import '../../features/chests/presentation/viewmodel/chests_view_model.dart';
 import '../../features/characters/data/character_repository.dart';
 import '../../features/characters/presentation/character_preview_view_model.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -173,6 +176,17 @@ Future<void> configureDependencies() async {
     )
     ..registerFactory<SbcListViewModel>(
       () => SbcListViewModel(getIt<SbcRepository>()),
+    )
+    // Ekonomi V2 (FAZ 1): sandıklar, ödül enerjisi, acil kadro
+    ..registerLazySingleton<ChestRepository>(
+      () => ChestRepositoryImpl(getIt<ApiClient>()),
+    )
+    ..registerFactory<ChestsViewModel>(
+      () => ChestsViewModel(
+        getIt<ChestRepository>(),
+        socket: getIt<WebSocketService>(),
+        session: getIt<SessionManager>(),
+      ),
     )
     // Gorev kadrosu kurma ekrani hangi gorev icin acildigini bilmeli
     ..registerFactoryParam<SbcBuilderViewModel, SbcChallenge, void>(

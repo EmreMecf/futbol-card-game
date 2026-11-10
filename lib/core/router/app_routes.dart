@@ -27,6 +27,10 @@ class AppRoutes {
   static const String store = '/magaza';
   static const String sbc = '/gorevler';
 
+  /// Ekonomi V2 (FAZ 1): sandıklar ve sürümlü olasılık tablosu
+  static const String chests = '/sandiklar';
+  static const String chestOdds = '/sandiklar/olasiliklar';
+
   /// Gorev kadrosu kurma ekrani: /gorevler/{challenge_id}
   static String sbcBuilderWithId(String challengeId) => '$sbc/$challengeId';
 

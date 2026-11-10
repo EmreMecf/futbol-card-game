@@ -7,6 +7,8 @@ import '../../features/characters/presentation/style_prototype_view.dart';
 import '../../features/auth/presentation/view/login_view.dart';
 import '../../features/auth/presentation/view/register_view.dart';
 import '../../features/auth/presentation/view/splash_view.dart';
+import '../../features/chests/presentation/view/chest_odds_view.dart';
+import '../../features/chests/presentation/view/chests_view.dart';
 import '../../features/collection/presentation/view/collection_view.dart';
 import '../../features/deck/presentation/view/deck_view.dart';
 import '../../features/home/presentation/view/home_view.dart';
@@ -107,6 +109,15 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.store,
         builder: (context, state) => const StoreView(),
+      ),
+      // Ekonomi V2 (FAZ 1): sandıklar ve olasılıklar
+      GoRoute(
+        path: AppRoutes.chests,
+        builder: (context, state) => const ChestsView(),
+      ),
+      GoRoute(
+        path: AppRoutes.chestOdds,
+        builder: (context, state) => const ChestOddsView(),
       ),
       GoRoute(
         path: AppRoutes.sbc,

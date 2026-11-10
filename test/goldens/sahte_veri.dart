@@ -4,6 +4,7 @@ import 'package:futbol_card/features/auth/domain/repositories/auth_repository.da
 import 'package:futbol_card/features/sbc/domain/repositories/sbc_repository.dart';
 import 'package:futbol_card/core/storage/token_storage.dart';
 import 'package:futbol_card/core/utils/result.dart';
+import 'package:futbol_card/features/chests/domain/chest_repository.dart';
 import 'package:futbol_card/features/collection/domain/repositories/collection_repository.dart';
 import 'package:futbol_card/features/deck/domain/repositories/deck_repository.dart';
 import 'package:futbol_card/features/leaderboard/domain/repositories/leaderboard_repository.dart';
@@ -391,6 +392,116 @@ class GoldenSbcRepo implements SbcRepository {
 class GoldenAuthRepo implements AuthRepository {
   @override
   Future<Result<MeResponse>> fetchProfile() async => const Failure(AppException(message: 'test'));
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}
+
+// =====================================================================
+// EKONOMİ V2 (FAZ 1): SANDIKLAR — sahte veri (yalnız test)
+// =====================================================================
+/// Sabit sunucu saati: sayaçlar golden'da kararlı görünsün
+final kGoldenServerTime = DateTime.utc(2026, 11, 10, 10);
+
+Chest goldenChest(String id, String type,
+        {String status = 'sealed', String location = 'slot', int? slot, Duration? kalan, int unlock = 7200}) =>
+    Chest(
+      id: id,
+      chestType: type,
+      status: status,
+      location: location,
+      slotNo: slot,
+      sourceType: 'match',
+      sourceId: 'mac-$id',
+      unlockSeconds: unlock,
+      unlockStartedAt: kalan == null ? null : kGoldenServerTime.subtract(const Duration(minutes: 30)),
+      // +0,5 sn: ekran saniyeyi aşağı yuvarlar, test süresi sayacı oynatmaz
+      unlockReadyAt: kalan == null ? null : kGoldenServerTime.add(kalan + const Duration(milliseconds: 500)),
+      createdAt: kGoldenServerTime.subtract(const Duration(days: 2)),
+    );
+
+final kGoldenChestInventory = ChestInventory(
+  slots: [
+    goldenChest('s1', ChestTypes.silver, status: 'unlocking', slot: 1, kalan: const Duration(hours: 1, minutes: 23, seconds: 45)),
+    goldenChest('s2', ChestTypes.gold, slot: 2, unlock: 21600),
+    goldenChest('s4', ChestTypes.legend, slot: 4, unlock: 43200),
+  ],
+  instant: [goldenChest('i1', ChestTypes.bronze, status: 'ready', location: 'instant', unlock: 0)],
+  mailbox: [goldenChest('m1', ChestTypes.gold, location: 'mailbox', unlock: 21600)],
+  enabled: true,
+  energy: RewardEnergy(energy: 7, max: 10, nextAt: kGoldenServerTime.add(const Duration(minutes: 41)), serverTime: kGoldenServerTime),
+  serverTime: kGoldenServerTime,
+);
+
+ChestCard goldenChestCard(int i, String outcome) {
+  final k = kGoldenCards[i];
+  return ChestCard(
+    cardId: k.cardId, slug: k.cardId, fullName: k.fullName, position: k.position, tier: k.tier,
+    power: k.power, club: k.club, nationality: k.nationality, outcome: outcome);
+}
+
+final kGoldenChestOpen = ChestOpenResult(
+  chestId: 'g1',
+  chestType: ChestTypes.gold,
+  cards: [goldenChestCard(7, 'new'), goldenChestCard(3, 'copy'), goldenChestCard(5, 'squad_guard')],
+  coins: 104,
+  jokers: const {'silver': 2, 'gold': 1},
+  coinsAfter: 2554,
+);
+
+/// Sunucudaki sürüm 1 (031) ile aynı tablolar
+final kGoldenChestOdds = ChestOdds.fromJson({
+  'version': 1,
+  'active_from': '2026-11-10T08:00:00.000Z',
+  'types': {
+    'bronze': {'name': 'Bronz', 'unlock_seconds': 0, 'coins': [10, 20], 'jokers': {'bronze': 1}, 'compensation': 25, 'sort': 1},
+    'silver': {'name': 'Gümüş', 'unlock_seconds': 7200, 'coins': [30, 50], 'jokers': {'bronze': 2, 'silver': 1}, 'compensation': 70, 'sort': 2},
+    'gold': {'name': 'Altın', 'unlock_seconds': 21600, 'coins': [80, 120], 'jokers': {'silver': 2, 'gold': 1}, 'compensation': 180, 'sort': 3},
+    'legend': {'name': 'Efsane', 'unlock_seconds': 43200, 'coins': [200, 300], 'jokers': {'gold': 2, 'diamond': 1}, 'compensation': 450, 'sort': 4},
+  },
+  'type_odds': {
+    'win': {'bronze': 520, 'silver': 350, 'gold': 110, 'legend': 20},
+    'draw': {'bronze': 700, 'silver': 260, 'gold': 40},
+    'loss': {'bronze': 800, 'silver': 180, 'gold': 20},
+  },
+  'slot_odds': {
+    'bronze': [for (var i = 0; i < 3; i++) {'bronze': 720, 'silver': 240, 'gold': 40}],
+    'silver': [
+      {'bronze': 500, 'silver': 380, 'gold': 110, 'diamond': 10},
+      {'bronze': 500, 'silver': 380, 'gold': 110, 'diamond': 10},
+      {'silver': 700, 'gold': 260, 'diamond': 36, 'legend': 4},
+    ],
+    'gold': [
+      {'bronze': 250, 'silver': 420, 'gold': 280, 'diamond': 45, 'legend': 5},
+      {'bronze': 250, 'silver': 420, 'gold': 280, 'diamond': 45, 'legend': 5},
+      {'gold': 820, 'diamond': 160, 'legend': 20},
+    ],
+    'legend': [
+      {'silver': 300, 'gold': 520, 'diamond': 160, 'legend': 20},
+      {'silver': 300, 'gold': 520, 'diamond': 160, 'legend': 20},
+      {'diamond': 850, 'legend': 150},
+    ],
+  },
+  'pity': {'gold_after': 15, 'legend_after': 60},
+  'weight_total': 1000,
+});
+
+class GoldenChestRepo implements ChestRepository {
+  ChestInventory inventory = kGoldenChestInventory;
+  SourceChest matchChest = SourceChest(chest: goldenChest('mc', ChestTypes.silver, slot: 3));
+  EmergencySquadStatus emergency = EmergencySquadStatus(
+      enabled: true, missing: const {'MID': 1}, eligible: true, serverTime: kGoldenServerTime);
+
+  @override
+  Future<Result<ChestInventory>> fetchInventory() async => Success(inventory);
+  @override
+  Future<Result<ChestOdds>> fetchOdds({int? version}) async => Success(kGoldenChestOdds);
+  @override
+  Future<Result<SourceChest>> fetchMatchChest(String matchId) async => Success(matchChest);
+  @override
+  Future<Result<ChestOpenResult>> open(String chestId, {required String idempotencyKey}) async =>
+      Success(kGoldenChestOpen);
+  @override
+  Future<Result<EmergencySquadStatus>> fetchEmergencySquad() async => Success(emergency);
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }

@@ -20,8 +20,11 @@ begin
   select id into u from users order by created_at limit 1;
   select coins into once from users where id = u;
 
-  -- 1) Ozellik anahtari KAPALI baslar, tanimsiz anahtar KAPALI
-  if economy_flag('economy_v2_enabled') then
+  -- 1) Migration anahtari KAPALI yazar (surum 1); tanimsiz anahtar KAPALI.
+  --    (Yerel ortamda daha yeni bir surumle acilmis olabilir; o yuzden
+  --    etkin deger degil, migration'in yazdigi surum kontrol edilir.)
+  if (select payload ->> 'economy_v2_enabled' from economy_config_versions
+      where kind = 'feature_flags' and version = 1) <> 'false' then
     raise exception 'TEST BASARISIZ: economy_v2_enabled acik basladi';
   end if;
   if economy_flag('olmayan_anahtar') then

@@ -118,6 +118,9 @@ AYARLAR = {
     # Kadro kurulamıyor ve altın < standart paket: ücretsiz "acil kadro"
     # (eksik mevkiler için Bronz kart), en fazla 24 saatte bir
     'acil_kadro': True,
+    # Acil kadro mevki basina "ihtiyac + bu kadar yedek"e tamamlar
+    # (032: 1 = ihtiyac + 1 yedek; gercek sistemle ayni)
+    'acil_yedek': 1,
     'standart_paket_fiyat': 500,
     # Oyuncu davranışı: bu kadar altını aşınca standart paket alır
     # (mevcut paket sistemi; paket kartı FİZİKSEL kopyadır) ve 2'den
@@ -247,23 +250,33 @@ class Oyuncu:
         return {m for m, n in FORMASYON.items() if say[m] < n + 1}
 
     def kilit_coz(self, gun: int):
-        """Kadro kurulamıyorsa: altın yetiyorsa standart paket, yoksa acil kadro"""
+        """Kadro kurulamıyorsa: önce ACİL KADRO (032, 24 saatte bir, eksik
+        sayıda Bronz), o da yoksa altın yetiyorsa standart paket (mevki
+        garantisi YOK, gerçekteki gibi)"""
         if self.kadro() is not None:
             return
+        if AYARLAR['acil_kadro'] and (self.son_acil < 0 or gun - self.son_acil >= 1):
+            # 032 ACIL KADRO: eksik sayida Bronz kart, 24 saatte bir
+            self.son_acil = gun
+            self.m['acil_kadro'] += 1
+            ihtiyac = {m: n + AYARLAR['acil_yedek'] for m, n in FORMASYON.items()}
+            for mevki, gerek in ihtiyac.items():
+                sahip = sum(self.kopyalar.get(k.slug, 0) for k in KATALOG if k.mevki == mevki)
+                for _ in range(max(0, gerek - sahip)):
+                    havuz = [k for k in KATALOG if k.mevki == mevki and k.tier == 'bronze']
+                    self.kart_ekle(self.r.choice(havuz), sayac=False)
+            if self.kadro() is not None:
+                return
         if self.altin >= AYARLAR['standart_paket_fiyat']:
             self.altin -= AYARLAR['standart_paket_fiyat']
             self.m['altin_harcama'] += AYARLAR['standart_paket_fiyat']
             self.m['kilit_paket'] += 1
+            # GERCEKCI: standart paketin mevki garantisi YOK (pack_types.
+            # position_quota bos). Kabul testinde canli goruldu: 2 paket
+            # eksik mevkiyi dolduramadi.
             for _ in range(5):
-                eksik = self.eksik_mevkiler()
-                havuz = [k for k in KATALOG if (not eksik or k.mevki in eksik) and k.tier in ('bronze', 'silver', 'gold')]
-                self.kart_ekle(self.r.choice(havuz), sayac=False)
-        elif AYARLAR['acil_kadro'] and self.son_acil != gun:
-            self.son_acil = gun
-            self.m['acil_kadro'] += 1
-            for mevki in self.eksik_mevkiler():
-                havuz = [k for k in KATALOG if k.mevki == mevki and k.tier == 'bronze']
-                self.kart_ekle(self.r.choice(havuz), sayac=False)
+                t = agirlikli(self.r, {'bronze': 5500, 'silver': 3000, 'gold': 1300, 'diamond': 190, 'legend': 10})
+                self.kart_ekle(self.r.choice(TIER_KARTLARI[t]), sayac=False)
 
     def kadro(self) -> list[Kart] | None:
         """1-4-4-2: her mevkide (güç + seviye) en iyiler; kurulamıyorsa None"""
@@ -681,6 +694,8 @@ def main():
         AYARLAR['kopya_modeli'] = sys.argv[2]
     if len(sys.argv) > 3:
         AYARLAR['eksik_mevki_onceligi'] = AYARLAR['acil_kadro'] = sys.argv[3] == 'koruma'
+    if len(sys.argv) > 4:
+        AYARLAR['acil_yedek'] = int(sys.argv[4])
     print('kopya modeli:', AYARLAR['kopya_modeli'], '| kilit koruması:', AYARLAR['eksik_mevki_onceligi'])
     sonuclar = {}
     sonlar = {}

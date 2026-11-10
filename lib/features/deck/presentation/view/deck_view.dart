@@ -9,6 +9,7 @@ import '../../../../core/theme/ref_tokens.dart';
 import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../chests/presentation/widgets/emergency_squad_banner.dart';
 import '../viewmodel/deck_view_model.dart';
 import '../widgets/card_picker_sheet.dart';
 import '../widgets/formation_pitch.dart';
@@ -95,6 +96,8 @@ class _DeckBodyState extends State<_DeckBody> {
         RefSectionHead('TAKIMIM',
             size: 27, trailing: RefPill('${vm.totalSelected} / ${GameRules.squadSize}', dot: vm.isComplete)),
         const SizedBox(height: Ref.pageGap),
+        // Ekonomi V2 (032): koleksiyon formasyonu kuramıyorsa acil kadro
+        if (!vm.isComplete) EmergencySquadBanner(onClaimed: vm.load),
         _FormasyonSatiri(viewModel: vm),
         const SizedBox(height: Ref.pageGap),
       ];

@@ -11,6 +11,7 @@ import '../../../../core/utils/turkish_text.dart';
 import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../auth/presentation/viewmodel/auth_view_model.dart';
+import '../../../chests/presentation/widgets/chest_strip.dart';
 import '../viewmodel/home_view_model.dart';
 
 /// ANA SAYFA — referans `home()` ekranı.
@@ -106,6 +107,8 @@ class _DarYerlesim extends StatelessWidget {
           SizedBox(height: Ref.pageGap),
           _Karolar(),
           SizedBox(height: Ref.pageGap),
+          // Ekonomi V2: sandık şeridi (kapalıysa yer kaplamaz)
+          ChestStrip(),
           _Gorevler(),
           SizedBox(height: Ref.pageGap),
           _LigIlerlemesi(),
@@ -132,7 +135,7 @@ class _GenisYerlesim extends StatelessWidget {
               SizedBox(width: 20),
               Expanded(
                 flex: 5,
-                child: Column(children: [_Gorevler(), SizedBox(height: Ref.pageGap), _LigIlerlemesi()]),
+                child: Column(children: [ChestStrip(), _Gorevler(), SizedBox(height: Ref.pageGap), _LigIlerlemesi()]),
               ),
             ],
           ),

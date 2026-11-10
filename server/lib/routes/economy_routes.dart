@@ -5,6 +5,8 @@ import 'package:shelf_router/shelf_router.dart';
 import '../auth/auth_middleware.dart';
 import '../db/database.dart';
 import '../utils/api_response.dart';
+import '../utils/row_mappers.dart';
+import '../utils/rule_errors.dart';
 
 /// EKONOMİ V2 uç noktaları (FAZ 0: salt okunur).
 ///
@@ -70,6 +72,24 @@ Router economyRoutes(Database db) {
             createdAt: (s['created_at'] as DateTime).toUtc(),
           ).toJson(),
       ],
+    });
+  });
+
+  // ------------------------------------------------------------------
+  // ACIL KADRO (032): kadrosu formasyonu karsilamayan oyuncuya eksik
+  // sayida Bronz kart, 24 saatte bir
+  // ------------------------------------------------------------------
+  router.get('/emergency-squad', (Request request) async {
+    final userId = requireUserId(request);
+    final ham = await db.scalar('select emergency_squad_status(@u::uuid)', params: {'u': userId});
+    return jsonOk(EmergencySquadStatus.fromJson(RowMappers.asMap(ham)).toJson());
+  });
+
+  router.post('/emergency-squad/claim', (Request request) async {
+    final userId = requireUserId(request);
+    return withRuleCodes(() async {
+      final ham = await db.scalar('select claim_emergency_squad(@u::uuid)', params: {'u': userId});
+      return jsonOk(EmergencySquadClaim.fromJson(RowMappers.asMap(ham)).toJson());
     });
   });
 

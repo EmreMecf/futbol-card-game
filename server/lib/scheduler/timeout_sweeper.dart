@@ -55,6 +55,10 @@ class TimeoutSweeper {
       await _db.scalar('select cleanup_expired_tokens()');
       // Ekonomi V2 (028): 48 saatten eski idempotency anahtarlari
       await _db.scalar('select purge_idempotency_keys()');
+      // Ekonomi V2 (031): omru dolan posta kutusu sandiklari -> guvenli
+      // telafi; tetikleyicide hata alan mac sandiklarini yeniden dene
+      await _db.scalar('select expire_mailbox_chests()');
+      await _db.scalar('select repair_match_chests()');
     } catch (e) {
       // ignore: avoid_print
       print('[ZAMANLAYICI] Jeton temizligi basarisiz: $e');

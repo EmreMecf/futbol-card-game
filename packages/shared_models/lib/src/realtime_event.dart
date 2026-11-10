@@ -34,6 +34,11 @@ enum RealtimeEventType {
   @JsonValue('pong')
   pong,
 
+  /// Ekonomi V2 (031): oyuncuya sandik verildi (mac sonu, BP...).
+  /// Yalniz kimlik tasir; ayrinti GET /api/chests ile cekilir.
+  @JsonValue('chest_granted')
+  chestGranted,
+
   /// Taninmayan olay (ileride sunucuya yeni olay eklenirse
   /// eski uygulama surumleri cokmesin diye)
   @JsonValue('unknown')
@@ -59,6 +64,12 @@ abstract class RealtimeEvent with _$RealtimeEvent {
     String? userId,
     String? status,
     DateTime? at,
+
+    /// chest_granted: sandik kimligi, turu ve kaynagi (mac kimligi)
+    String? chestId,
+    String? chestType,
+    String? sourceType,
+    String? sourceId,
   }) = _RealtimeEvent;
 
   factory RealtimeEvent.fromJson(Map<String, dynamic> json) =>
@@ -74,6 +85,9 @@ abstract class RealtimeEvent with _$RealtimeEvent {
       type == RealtimeEventType.movePlayed ||
       type == RealtimeEventType.roundResolved ||
       type == RealtimeEventType.matchFinished;
+
+  /// Sandik verildi mi? (ana sayfa seridi ve mac sonu tazelensin)
+  bool get isChestGranted => type == RealtimeEventType.chestGranted;
 
   /// Mac bitis olayi mi?
   bool get isMatchFinished => type == RealtimeEventType.matchFinished;

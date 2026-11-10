@@ -10,6 +10,7 @@ import 'package:futbol_card_server/realtime/notification_listener.dart';
 import 'package:futbol_card_server/realtime/ws_hub.dart';
 import 'package:futbol_card_server/routes/auth_routes.dart';
 import 'package:futbol_card_server/routes/character_routes.dart';
+import 'package:futbol_card_server/routes/chest_routes.dart';
 import 'package:futbol_card_server/routes/economy_routes.dart';
 import 'package:futbol_card_server/routes/game_routes.dart';
 import 'package:futbol_card_server/routes/match_routes.dart';
@@ -109,6 +110,9 @@ Future<void> main(List<String> args) async {
   // yalniz okuma uclari var, ara katman simdiden bagli.
   final idempotent = korumali.addMiddleware(idempotency(DbIdempotencyStore(db)));
   api.mount('/economy', idempotent.addHandler(economyRoutes(db).call));
+  // FAZ 1: sandiklar ve odul enerjisi (031)
+  api.mount('/chests', idempotent.addHandler(chestRoutes(db).call));
+  api.mount('/energy', idempotent.addHandler(energyRoutes(db).call));
 
   // ---- 5. WEBSOCKET ----
   // Baglanti adresi: ws://localhost:8080/ws?token=<access_token>

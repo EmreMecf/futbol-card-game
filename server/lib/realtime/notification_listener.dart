@@ -25,6 +25,7 @@ class NotificationListener {
 
   StreamSubscription<String>? _macAboneligi;
   StreamSubscription<String>? _kuyrukAboneligi;
+  StreamSubscription<String>? _ekonomiAboneligi;
 
   NotificationListener(this._db, this._hub);
 
@@ -46,6 +47,15 @@ class NotificationListener {
       onError: (Object e) {
         // ignore: avoid_print
         print('[NOTIFY] queue_events hatasi: $e');
+      },
+    );
+
+    // ---- EKONOMI OLAYLARI (031: sandik verildi) ----
+    _ekonomiAboneligi = conn.channels['economy_events'].listen(
+      _handleEconomyEvent,
+      onError: (Object e) {
+        // ignore: avoid_print
+        print('[NOTIFY] economy_events hatasi: $e');
       },
     );
 
@@ -91,7 +101,29 @@ class NotificationListener {
     }
   }
 
+  /// Sandik verildi -> yalniz o oyuncuya. Baglanti kopuksa kayip
+  /// olmaz: istemci GET /api/chests ile toparlar.
+  void _handleEconomyEvent(String payload) {
+    try {
+      final veri = jsonDecode(payload) as Map<String, dynamic>;
+      final userId = veri['user_id']?.toString();
+      if (userId == null) return;
+      _hub.sendTo(userId, {
+        'type': veri['event'],
+        'chest_id': veri['chest_id'],
+        'chest_type': veri['chest_type'],
+        'source_type': veri['source_type'],
+        'source_id': veri['source_id'],
+        'at': veri['at'],
+      });
+    } catch (e) {
+      // ignore: avoid_print
+      print('[NOTIFY] economy_events cozulemedi: $e | $payload');
+    }
+  }
+
   Future<void> stop() async {
+    await _ekonomiAboneligi?.cancel();
     await _macAboneligi?.cancel();
     await _kuyrukAboneligi?.cancel();
   }
