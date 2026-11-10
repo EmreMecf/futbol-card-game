@@ -1,0 +1,1094 @@
+{
+ "ayarlar": {
+  "sandik_turu": {
+   "galibiyet": {
+    "bronz": 52,
+    "gumus": 35,
+    "altin": 11,
+    "efsane": 2
+   },
+   "beraberlik": {
+    "bronz": 70,
+    "gumus": 26,
+    "altin": 4,
+    "efsane": 0
+   },
+   "yenilgi": {
+    "bronz": 80,
+    "gumus": 18,
+    "altin": 2,
+    "efsane": 0
+   }
+  },
+  "sandik_garanti": {
+   "altin": 15,
+   "efsane": 60
+  },
+  "kilit_suresi_saat": {
+   "bronz": 0,
+   "gumus": 2,
+   "altin": 6,
+   "efsane": 12
+  },
+  "sandik_icerik": {
+   "bronz": [
+    {
+     "bronze": 72,
+     "silver": 24,
+     "gold": 4
+    },
+    {
+     "bronze": 72,
+     "silver": 24,
+     "gold": 4
+    },
+    {
+     "bronze": 72,
+     "silver": 24,
+     "gold": 4
+    }
+   ],
+   "gumus": [
+    {
+     "bronze": 50,
+     "silver": 38,
+     "gold": 11,
+     "diamond": 1
+    },
+    {
+     "bronze": 50,
+     "silver": 38,
+     "gold": 11,
+     "diamond": 1
+    },
+    {
+     "silver": 70,
+     "gold": 26,
+     "diamond": 3.6,
+     "legend": 0.4
+    }
+   ],
+   "altin": [
+    {
+     "bronze": 25,
+     "silver": 42,
+     "gold": 28,
+     "diamond": 4.5,
+     "legend": 0.5
+    },
+    {
+     "bronze": 25,
+     "silver": 42,
+     "gold": 28,
+     "diamond": 4.5,
+     "legend": 0.5
+    },
+    {
+     "gold": 82,
+     "diamond": 16,
+     "legend": 2
+    }
+   ],
+   "efsane": [
+    {
+     "silver": 30,
+     "gold": 52,
+     "diamond": 16,
+     "legend": 2
+    },
+    {
+     "silver": 30,
+     "gold": 52,
+     "diamond": 16,
+     "legend": 2
+    },
+    {
+     "diamond": 85,
+     "legend": 15
+    }
+   ]
+  },
+  "sandik_joker": {
+   "bronz": {
+    "bronze": 1
+   },
+   "gumus": {
+    "bronze": 2,
+    "silver": 1
+   },
+   "altin": {
+    "silver": 2,
+    "gold": 1
+   },
+   "efsane": {
+    "gold": 2,
+    "diamond": 1
+   }
+  },
+  "sandik_altin": {
+   "bronz": [
+    10,
+    20
+   ],
+   "gumus": [
+    30,
+    50
+   ],
+   "altin": [
+    80,
+    120
+   ],
+   "efsane": [
+    200,
+    300
+   ]
+  },
+  "yuva_sayisi": 4,
+  "posta_kapasite": 8,
+  "posta_omur_gun": 7,
+  "telafi_altin": {
+   "bronz": 25,
+   "gumus": 70,
+   "altin": 180,
+   "efsane": 450
+  },
+  "enerji_max": 10,
+  "enerji_dolum_dk": 96,
+  "seviye_kopya": {
+   "bronze": [
+    1,
+    2,
+    3,
+    5,
+    8,
+    12,
+    16,
+    22,
+    30
+   ],
+   "silver": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    9,
+    13,
+    18,
+    24
+   ],
+   "gold": [
+    1,
+    1,
+    2,
+    3,
+    5,
+    7,
+    10,
+    14,
+    18
+   ],
+   "diamond": [
+    1,
+    1,
+    1,
+    2,
+    3,
+    4,
+    6,
+    8,
+    11
+   ],
+   "legend": [
+    1,
+    1,
+    1,
+    1,
+    2,
+    3,
+    4,
+    5,
+    7
+   ]
+  },
+  "seviye_altin": {
+   "bronze": [
+    20,
+    50,
+    100,
+    200,
+    400,
+    700,
+    1000,
+    1500,
+    2500
+   ],
+   "silver": [
+    30,
+    75,
+    150,
+    300,
+    600,
+    1000,
+    1500,
+    2200,
+    3500
+   ],
+   "gold": [
+    50,
+    125,
+    250,
+    500,
+    900,
+    1500,
+    2200,
+    3200,
+    5000
+   ],
+   "diamond": [
+    100,
+    250,
+    500,
+    900,
+    1500,
+    2400,
+    3600,
+    5000,
+    7500
+   ],
+   "legend": [
+    200,
+    500,
+    900,
+    1500,
+    2500,
+    4000,
+    6000,
+    8500,
+    12000
+   ]
+  },
+  "fazla_kopya_joker": {
+   "bronze": 1,
+   "silver": 2,
+   "gold": 4,
+   "diamond": 10,
+   "legend": 25
+  },
+  "galibiyet_altin": 100,
+  "koruma_baslangic": 3,
+  "koruma_max": 10,
+  "kayip_kart": 3,
+  "bp_kademe": 50,
+  "bp_kademe_xp": 1000,
+  "xp_mac": {
+   "galibiyet": 100,
+   "beraberlik": 70,
+   "yenilgi": 60
+  },
+  "xp_enerjisiz_carpan": 0.25,
+  "gunluk_gorev": [
+   [
+    1,
+    150
+   ],
+   [
+    2,
+    200
+   ],
+   [
+    3,
+    250
+   ]
+  ],
+  "haftalik_gorev_xp": 6000,
+  "haftalik_gorev_mac": 28,
+  "sezon_gorev_xp": 10000,
+  "sezon_gorev_mac": 120,
+  "premium_plus_kademe": 5,
+  "premium_xp_carpan": 1.0,
+  "premium_plus_xp_carpan": 1.1,
+  "bp_ucretsiz": {
+   "altin": 3000,
+   "sandik_gumus": 6,
+   "sandik_altin": 4,
+   "sandik_efsane": 1,
+   "joker": {
+    "gold": 10
+   }
+  },
+  "bp_premium": {
+   "altin": 4500,
+   "sandik_altin": 6,
+   "sandik_efsane": 3,
+   "joker": {
+    "gold": 20,
+    "diamond": 6
+   }
+  },
+  "gun_basi_aktif_saat": [
+   8,
+   24
+  ],
+  "eksik_mevki_onceligi": true,
+  "acil_kadro": true,
+  "standart_paket_fiyat": 500,
+  "paket_al_esik": 3000,
+  "tut_kopya": 2,
+  "kopya_modeli": "parca"
+ },
+ "sonuclar": {
+  "Gunde 2 mac, ucretsiz": {
+   "30": {
+    "kadro_ort_seviye": 2.273,
+    "kadro_max_seviye": 4.125,
+    "koleksiyon_ort_seviye": 1.992,
+    "farkli_kart": 80,
+    "kadro_gucu": 90.511,
+    "altin_son": 601.5,
+    "bp_kademe_son_sezon": 31.875,
+    "bp_tamam_orani": 0.0,
+    "bp_ort_kademe": 31.875,
+    "mac": 60,
+    "galibiyet": 28.25,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 0,
+    "telafi": 0,
+    "telafi_altin": 0,
+    "yuva_dolu_saat": 0,
+    "saat": 720,
+    "yeni_kart": 70,
+    "kopya": 121.125,
+    "fazla_kopya": 0,
+    "joker": 121.625,
+    "altin_kazanc": 6885.25,
+    "altin_harcama": 7283.75,
+    "seviye_atlama": 88,
+    "kart_kaybi": 47,
+    "kart_kazanc": 84.75,
+    "kilitli_gun": 0,
+    "bp_xp": 32247.5,
+    "kilit_paket": 0.5,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 1.25,
+    "joker_bosa": 74.5,
+    "paket": 0,
+    "donusturulen_kopya": 25.875,
+    "sandik": {
+     "bronz": 38.4,
+     "gumus": 17.8,
+     "altin": 7.5,
+     "efsane": 0.5
+    },
+    "yuva_doluluk_orani": 0.0
+   },
+   "90": {
+    "kadro_ort_seviye": 3.966,
+    "kadro_max_seviye": 5.25,
+    "koleksiyon_ort_seviye": 2.195,
+    "farkli_kart": 91.625,
+    "kadro_gucu": 92.875,
+    "altin_son": 319,
+    "bp_kademe_son_sezon": 32,
+    "bp_tamam_orani": 0.0,
+    "bp_ort_kademe": 32,
+    "mac": 180,
+    "galibiyet": 88.875,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 0,
+    "telafi": 0,
+    "telafi_altin": 0,
+    "yuva_dolu_saat": 0.125,
+    "saat": 2160,
+    "yeni_kart": 101.25,
+    "kopya": 480.5,
+    "fazla_kopya": 0,
+    "joker": 375.125,
+    "altin_kazanc": 21617.75,
+    "altin_harcama": 22298.75,
+    "seviye_atlama": 128.5,
+    "kart_kaybi": 96.625,
+    "kart_kazanc": 266.625,
+    "kilitli_gun": 0,
+    "bp_xp": 96933.75,
+    "kilit_paket": 0.5,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 2.125,
+    "joker_bosa": 264.75,
+    "paket": 0,
+    "donusturulen_kopya": 171.875,
+    "sandik": {
+     "bronz": 113.4,
+     "gumus": 54.6,
+     "altin": 23.5,
+     "efsane": 3.1
+    },
+    "yuva_doluluk_orani": 0.0
+   },
+   "180": {
+    "kadro_ort_seviye": 4.852,
+    "kadro_max_seviye": 5.875,
+    "koleksiyon_ort_seviye": 2.543,
+    "farkli_kart": 89.875,
+    "kadro_gucu": 92.977,
+    "altin_son": 750.25,
+    "bp_kademe_son_sezon": 31.875,
+    "bp_tamam_orani": 0.0,
+    "bp_ort_kademe": 32.458,
+    "mac": 360,
+    "galibiyet": 167.125,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 0,
+    "telafi": 0,
+    "telafi_altin": 0,
+    "yuva_dolu_saat": 0,
+    "saat": 4320,
+    "yeni_kart": 145.625,
+    "kopya": 1023.75,
+    "fazla_kopya": 0,
+    "joker": 757.75,
+    "altin_kazanc": 42614.625,
+    "altin_harcama": 42864.375,
+    "seviye_atlama": 176.25,
+    "kart_kaybi": 191.375,
+    "kart_kazanc": 501.375,
+    "kilitli_gun": 0,
+    "bp_xp": 196450,
+    "kilit_paket": 0.25,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 3.625,
+    "joker_bosa": 612.125,
+    "paket": 0,
+    "donusturulen_kopya": 359.625,
+    "sandik": {
+     "bronz": 226.1,
+     "gumus": 111.9,
+     "altin": 46.2,
+     "efsane": 6.8
+    },
+    "yuva_doluluk_orani": 0.0
+   }
+  },
+  "Gunde 5 mac, ucretsiz": {
+   "30": {
+    "kadro_ort_seviye": 3.295,
+    "kadro_max_seviye": 4.75,
+    "koleksiyon_ort_seviye": 2.074,
+    "farkli_kart": 90.25,
+    "kadro_gucu": 93.17,
+    "altin_son": 115.75,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 150,
+    "galibiyet": 69.875,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 0.5,
+    "telafi": 0,
+    "telafi_altin": 0,
+    "yuva_dolu_saat": 8.375,
+    "saat": 720,
+    "yeni_kart": 97.375,
+    "kopya": 381.5,
+    "fazla_kopya": 0,
+    "joker": 297.875,
+    "altin_kazanc": 15797,
+    "altin_harcama": 16681.25,
+    "seviye_atlama": 112.375,
+    "kart_kaybi": 89.875,
+    "kart_kazanc": 209.625,
+    "kilitli_gun": 0,
+    "bp_xp": 63857.5,
+    "kilit_paket": 0.25,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 1.5,
+    "joker_bosa": 201.5,
+    "paket": 0,
+    "donusturulen_kopya": 117.875,
+    "sandik": {
+     "bronz": 96.2,
+     "gumus": 42.4,
+     "altin": 17.8,
+     "efsane": 3.8
+    },
+    "yuva_doluluk_orani": 0.012
+   },
+   "90": {
+    "kadro_ort_seviye": 5.114,
+    "kadro_max_seviye": 6,
+    "koleksiyon_ort_seviye": 2.578,
+    "farkli_kart": 91.75,
+    "kadro_gucu": 93.523,
+    "altin_son": 1161,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 450,
+    "galibiyet": 210.5,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 1.375,
+    "telafi": 0.625,
+    "telafi_altin": 281.25,
+    "yuva_dolu_saat": 26.625,
+    "saat": 2160,
+    "yeni_kart": 173.875,
+    "kopya": 1265.75,
+    "fazla_kopya": 0,
+    "joker": 911.125,
+    "altin_kazanc": 48227.875,
+    "altin_harcama": 48066.875,
+    "seviye_atlama": 173.625,
+    "kart_kaybi": 235.75,
+    "kart_kazanc": 631.5,
+    "kilitli_gun": 0,
+    "bp_xp": 191577.5,
+    "kilit_paket": 0.5,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 3.75,
+    "joker_bosa": 703.75,
+    "paket": 0,
+    "donusturulen_kopya": 472.125,
+    "sandik": {
+     "bronz": 281.1,
+     "gumus": 134.2,
+     "altin": 53.9,
+     "efsane": 11.9
+    },
+    "yuva_doluluk_orani": 0.012
+   },
+   "180": {
+    "kadro_ort_seviye": 5.67,
+    "kadro_max_seviye": 7,
+    "koleksiyon_ort_seviye": 3.953,
+    "farkli_kart": 87.5,
+    "kadro_gucu": 92.534,
+    "altin_son": 1059.75,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 900,
+    "galibiyet": 417.25,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 3.25,
+    "telafi": 1.625,
+    "telafi_altin": 548.75,
+    "yuva_dolu_saat": 52.5,
+    "saat": 4320,
+    "yeni_kart": 299.25,
+    "kopya": 2591.375,
+    "fazla_kopya": 0,
+    "joker": 1811.875,
+    "altin_kazanc": 96229.75,
+    "altin_harcama": 96170,
+    "seviye_atlama": 322.375,
+    "kart_kaybi": 462.125,
+    "kart_kazanc": 1251.75,
+    "kilitli_gun": 0,
+    "bp_xp": 389018.75,
+    "kilit_paket": 0.125,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 1,
+    "joker_bosa": 1463.375,
+    "paket": 0,
+    "donusturulen_kopya": 991.625,
+    "sandik": {
+     "bronz": 569.9,
+     "gumus": 263.2,
+     "altin": 105.9,
+     "efsane": 24.9
+    },
+    "yuva_doluluk_orani": 0.012
+   }
+  },
+  "Gunde 10 mac, ucretsiz (kontrol)": {
+   "30": {
+    "kadro_ort_seviye": 4.545,
+    "kadro_max_seviye": 5.625,
+    "koleksiyon_ort_seviye": 2.199,
+    "farkli_kart": 87.375,
+    "kadro_gucu": 92.682,
+    "altin_son": 633.25,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 300,
+    "galibiyet": 147,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 9.25,
+    "telafi": 2,
+    "telafi_altin": 460,
+    "yuva_dolu_saat": 91.375,
+    "saat": 720,
+    "yeni_kart": 116.625,
+    "kopya": 806,
+    "fazla_kopya": 0,
+    "joker": 555.25,
+    "altin_kazanc": 29013.875,
+    "altin_harcama": 29380.625,
+    "seviye_atlama": 127.625,
+    "kart_kaybi": 154.25,
+    "kart_kazanc": 441,
+    "kilitli_gun": 0,
+    "bp_xp": 75991.25,
+    "kilit_paket": 0.5,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 1.375,
+    "joker_bosa": 429.5,
+    "paket": 0,
+    "donusturulen_kopya": 307.625,
+    "sandik": {
+     "bronz": 189.4,
+     "gumus": 80.5,
+     "altin": 31.4,
+     "efsane": 6.8
+    },
+    "yuva_doluluk_orani": 0.127
+   },
+   "90": {
+    "kadro_ort_seviye": 6.114,
+    "kadro_max_seviye": 7.25,
+    "koleksiyon_ort_seviye": 3.011,
+    "farkli_kart": 86.5,
+    "kadro_gucu": 92.523,
+    "altin_son": 693.75,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 900,
+    "galibiyet": 429.125,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 16.125,
+    "telafi": 5.25,
+    "telafi_altin": 1123.75,
+    "yuva_dolu_saat": 208.125,
+    "saat": 2160,
+    "yeni_kart": 279.5,
+    "kopya": 2497.25,
+    "fazla_kopya": 0,
+    "joker": 1658.625,
+    "altin_kazanc": 85468.125,
+    "altin_harcama": 85774.375,
+    "seviye_atlama": 235.875,
+    "kart_kaybi": 453.25,
+    "kart_kazanc": 1287.375,
+    "kilitli_gun": 0,
+    "bp_xp": 227472.5,
+    "kilit_paket": 0.25,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 2.375,
+    "joker_bosa": 1346.5,
+    "paket": 0,
+    "donusturulen_kopya": 1018.125,
+    "sandik": {
+     "bronz": 575.2,
+     "gumus": 240,
+     "altin": 91.1,
+     "efsane": 20
+    },
+    "yuva_doluluk_orani": 0.096
+   },
+   "180": {
+    "kadro_ort_seviye": 6.466,
+    "kadro_max_seviye": 7.25,
+    "koleksiyon_ort_seviye": 4.758,
+    "farkli_kart": 88.5,
+    "kadro_gucu": 93.364,
+    "altin_son": 1383.75,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 1800,
+    "galibiyet": 867.5,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 52.625,
+    "telafi": 7.5,
+    "telafi_altin": 1703.75,
+    "yuva_dolu_saat": 542.875,
+    "saat": 4320,
+    "yeni_kart": 499.875,
+    "kopya": 5067.375,
+    "fazla_kopya": 0,
+    "joker": 3345.25,
+    "altin_kazanc": 172301.875,
+    "altin_harcama": 171918.125,
+    "seviye_atlama": 403.75,
+    "kart_kaybi": 879,
+    "kart_kazanc": 2602.5,
+    "kilitli_gun": 0,
+    "bp_xp": 461425,
+    "kilit_paket": 0.625,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 2.25,
+    "joker_bosa": 2749.5,
+    "paket": 0,
+    "donusturulen_kopya": 2128.625,
+    "sandik": {
+     "bronz": 1142.1,
+     "gumus": 487.6,
+     "altin": 184.1,
+     "efsane": 42.6
+    },
+    "yuva_doluluk_orani": 0.126
+   }
+  },
+  "Gunde 10 mac, premium": {
+   "30": {
+    "kadro_ort_seviye": 4.818,
+    "kadro_max_seviye": 6,
+    "koleksiyon_ort_seviye": 2.37,
+    "farkli_kart": 88.625,
+    "kadro_gucu": 92.864,
+    "altin_son": 467.875,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 300,
+    "galibiyet": 142.375,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 14.25,
+    "telafi": 6.625,
+    "telafi_altin": 1920,
+    "yuva_dolu_saat": 110.75,
+    "saat": 720,
+    "yeni_kart": 122.375,
+    "kopya": 810.375,
+    "fazla_kopya": 0,
+    "joker": 589,
+    "altin_kazanc": 34835.375,
+    "altin_harcama": 35367.5,
+    "seviye_atlama": 145.25,
+    "kart_kaybi": 158.25,
+    "kart_kazanc": 427.125,
+    "kilitli_gun": 0,
+    "bp_xp": 75812.5,
+    "kilit_paket": 0.5,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 1.75,
+    "joker_bosa": 441.25,
+    "paket": 0,
+    "donusturulen_kopya": 294.625,
+    "sandik": {
+     "bronz": 190.8,
+     "gumus": 80.2,
+     "altin": 33.5,
+     "efsane": 7
+    },
+    "yuva_doluluk_orani": 0.154
+   },
+   "90": {
+    "kadro_ort_seviye": 6.409,
+    "kadro_max_seviye": 7.25,
+    "koleksiyon_ort_seviye": 3.343,
+    "farkli_kart": 85.375,
+    "kadro_gucu": 92.659,
+    "altin_son": 1038.125,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 900,
+    "galibiyet": 427.75,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 63.25,
+    "telafi": 21.5,
+    "telafi_altin": 5897.5,
+    "yuva_dolu_saat": 454.25,
+    "saat": 2160,
+    "yeni_kart": 273.75,
+    "kopya": 2536.5,
+    "fazla_kopya": 0,
+    "joker": 1791.5,
+    "altin_kazanc": 105720.625,
+    "altin_harcama": 105682.5,
+    "seviye_atlama": 269.375,
+    "kart_kaybi": 450.25,
+    "kart_kazanc": 1283.25,
+    "kilitli_gun": 0,
+    "bp_xp": 227461.25,
+    "kilit_paket": 0.25,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 2.25,
+    "joker_bosa": 1439,
+    "paket": 0,
+    "donusturulen_kopya": 1012.125,
+    "sandik": {
+     "bronz": 564.5,
+     "gumus": 249.5,
+     "altin": 99.8,
+     "efsane": 23.8
+    },
+    "yuva_doluluk_orani": 0.21
+   },
+   "180": {
+    "kadro_ort_seviye": 6.67,
+    "kadro_max_seviye": 8.25,
+    "koleksiyon_ort_seviye": 5.308,
+    "farkli_kart": 88,
+    "kadro_gucu": 92.5,
+    "altin_son": 1263.125,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 1800,
+    "galibiyet": 864.25,
+    "sandik_enerjisiz_kacan": 0,
+    "posta_giren": 126.5,
+    "telafi": 43.125,
+    "telafi_altin": 11777.5,
+    "yuva_dolu_saat": 945.625,
+    "saat": 4320,
+    "yeni_kart": 518.375,
+    "kopya": 5105,
+    "fazla_kopya": 0.5,
+    "joker": 3587.625,
+    "altin_kazanc": 212109.375,
+    "altin_harcama": 211846.25,
+    "seviye_atlama": 458.25,
+    "kart_kaybi": 882.375,
+    "kart_kazanc": 2592.75,
+    "kilitli_gun": 0,
+    "bp_xp": 461293.75,
+    "kilit_paket": 0.625,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 1.875,
+    "joker_bosa": 2880.375,
+    "paket": 0,
+    "donusturulen_kopya": 2133.125,
+    "sandik": {
+     "bronz": 1127.5,
+     "gumus": 499.4,
+     "altin": 201.2,
+     "efsane": 47.1
+    },
+    "yuva_doluluk_orani": 0.219
+   }
+  },
+  "Gunde 20 mac, premium plus": {
+   "30": {
+    "kadro_ort_seviye": 5.614,
+    "kadro_max_seviye": 7.125,
+    "koleksiyon_ort_seviye": 2.471,
+    "farkli_kart": 85.75,
+    "kadro_gucu": 92.114,
+    "altin_son": 625.375,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 600,
+    "galibiyet": 285.25,
+    "sandik_enerjisiz_kacan": 146,
+    "posta_giren": 138.375,
+    "telafi": 27.25,
+    "telafi_altin": 4452.5,
+    "yuva_dolu_saat": 624.625,
+    "saat": 720,
+    "yeni_kart": 185.75,
+    "kopya": 1126.75,
+    "fazla_kopya": 0,
+    "joker": 764.375,
+    "altin_kazanc": 53907.875,
+    "altin_harcama": 54282.5,
+    "seviye_atlama": 159.25,
+    "kart_kaybi": 297.5,
+    "kart_kazanc": 855.75,
+    "kilitli_gun": 0,
+    "bp_xp": 96743.25,
+    "kilit_paket": 0.75,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 1.875,
+    "joker_bosa": 570.875,
+    "paket": 0,
+    "donusturulen_kopya": 651.75,
+    "sandik": {
+     "bronz": 291.5,
+     "gumus": 98.1,
+     "altin": 41.5,
+     "efsane": 7
+    },
+    "yuva_doluluk_orani": 0.868
+   },
+   "90": {
+    "kadro_ort_seviye": 6.977,
+    "kadro_max_seviye": 8.25,
+    "koleksiyon_ort_seviye": 4.179,
+    "farkli_kart": 84.375,
+    "kadro_gucu": 92.659,
+    "altin_son": 1503.375,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 1800,
+    "galibiyet": 848.125,
+    "sandik_enerjisiz_kacan": 446,
+    "posta_giren": 454.75,
+    "telafi": 91,
+    "telafi_altin": 15065,
+    "yuva_dolu_saat": 2021.75,
+    "saat": 2160,
+    "yeni_kart": 513.25,
+    "kopya": 3422.625,
+    "fazla_kopya": 2.25,
+    "joker": 2308.875,
+    "altin_kazanc": 163097.125,
+    "altin_harcama": 162593.75,
+    "seviye_atlama": 344.625,
+    "kart_kaybi": 895.75,
+    "kart_kazanc": 2544.375,
+    "kilitli_gun": 0,
+    "bp_xp": 288817.875,
+    "kilit_paket": 1,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 4.25,
+    "joker_bosa": 1718.75,
+    "paket": 0.125,
+    "donusturulen_kopya": 2073,
+    "sandik": {
+     "bronz": 867.4,
+     "gumus": 306.5,
+     "altin": 115.8,
+     "efsane": 24.5
+    },
+    "yuva_doluluk_orani": 0.936
+   },
+   "180": {
+    "kadro_ort_seviye": 7.648,
+    "kadro_max_seviye": 9.125,
+    "koleksiyon_ort_seviye": 6.42,
+    "farkli_kart": 86.375,
+    "kadro_gucu": 92.602,
+    "altin_son": 1347.25,
+    "bp_kademe_son_sezon": 50,
+    "bp_tamam_orani": 1.0,
+    "bp_ort_kademe": 50,
+    "mac": 3600,
+    "galibiyet": 1730.375,
+    "sandik_enerjisiz_kacan": 896,
+    "posta_giren": 933.375,
+    "telafi": 230.375,
+    "telafi_altin": 35870,
+    "yuva_dolu_saat": 4191.5,
+    "saat": 4320,
+    "yeni_kart": 917.75,
+    "kopya": 6702.125,
+    "fazla_kopya": 131.875,
+    "joker": 4687.625,
+    "altin_kazanc": 334837.25,
+    "altin_harcama": 334490,
+    "seviye_atlama": 555.875,
+    "kart_kaybi": 1728.375,
+    "kart_kazanc": 5191.125,
+    "kilitli_gun": 0,
+    "bp_xp": 585454.25,
+    "kilit_paket": 0.75,
+    "acil_kadro": 0,
+    "kilit_onleme_karti": 1.75,
+    "joker_bosa": 3597.875,
+    "paket": 0,
+    "donusturulen_kopya": 4287.375,
+    "sandik": {
+     "bronz": 1697.9,
+     "gumus": 610.1,
+     "altin": 225.2,
+     "efsane": 51.2
+    },
+    "yuva_doluluk_orani": 0.97
+   }
+  }
+ },
+ "normalizasyon": {
+  "Gunde 2 mac, ucretsiz": {
+   "yok": {
+    "saf_seviye_kazanma": 0.509,
+    "veteran_vs_yeni_kazanma": 0.718
+   },
+   "ham": {
+    "saf_seviye_kazanma": 1.0,
+    "veteran_vs_yeni_kazanma": 1.0
+   },
+   "egri": {
+    "saf_seviye_kazanma": 0.995,
+    "veteran_vs_yeni_kazanma": 0.995
+   },
+   "normalize": {
+    "saf_seviye_kazanma": 0.495,
+    "veteran_vs_yeni_kazanma": 0.72
+   },
+   "_kadro_ort_seviye": 4.91
+  },
+  "Gunde 5 mac, ucretsiz": {
+   "yok": {
+    "saf_seviye_kazanma": 0.499,
+    "veteran_vs_yeni_kazanma": 0.768
+   },
+   "ham": {
+    "saf_seviye_kazanma": 1.0,
+    "veteran_vs_yeni_kazanma": 1.0
+   },
+   "egri": {
+    "saf_seviye_kazanma": 0.99,
+    "veteran_vs_yeni_kazanma": 0.993
+   },
+   "normalize": {
+    "saf_seviye_kazanma": 0.504,
+    "veteran_vs_yeni_kazanma": 0.757
+   },
+   "_kadro_ort_seviye": 5.55
+  },
+  "Gunde 10 mac, ucretsiz (kontrol)": {
+   "yok": {
+    "saf_seviye_kazanma": 0.495,
+    "veteran_vs_yeni_kazanma": 0.692
+   },
+   "ham": {
+    "saf_seviye_kazanma": 1.0,
+    "veteran_vs_yeni_kazanma": 1.0
+   },
+   "egri": {
+    "saf_seviye_kazanma": 1.0,
+    "veteran_vs_yeni_kazanma": 0.999
+   },
+   "normalize": {
+    "saf_seviye_kazanma": 0.499,
+    "veteran_vs_yeni_kazanma": 0.69
+   },
+   "_kadro_ort_seviye": 6.55
+  },
+  "Gunde 10 mac, premium": {
+   "yok": {
+    "saf_seviye_kazanma": 0.494,
+    "veteran_vs_yeni_kazanma": 0.691
+   },
+   "ham": {
+    "saf_seviye_kazanma": 1.0,
+    "veteran_vs_yeni_kazanma": 1.0
+   },
+   "egri": {
+    "saf_seviye_kazanma": 0.998,
+    "veteran_vs_yeni_kazanma": 0.998
+   },
+   "normalize": {
+    "saf_seviye_kazanma": 0.517,
+    "veteran_vs_yeni_kazanma": 0.68
+   },
+   "_kadro_ort_seviye": 6.73
+  },
+  "Gunde 20 mac, premium plus": {
+   "yok": {
+    "saf_seviye_kazanma": 0.51,
+    "veteran_vs_yeni_kazanma": 0.666
+   },
+   "ham": {
+    "saf_seviye_kazanma": 1.0,
+    "veteran_vs_yeni_kazanma": 1.0
+   },
+   "egri": {
+    "saf_seviye_kazanma": 1.0,
+    "veteran_vs_yeni_kazanma": 1.0
+   },
+   "normalize": {
+    "saf_seviye_kazanma": 0.499,
+    "veteran_vs_yeni_kazanma": 0.65
+   },
+   "_kadro_ort_seviye": 7.73
+  }
+ }
+}

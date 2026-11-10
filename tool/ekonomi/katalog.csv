@@ -1,0 +1,101 @@
+slug,position,tier,power,club,nationality,league
+bronz-defans-pierre-dubois,DEF,bronze,45,Verona FC,FRA,Serie A
+bronz-orta-lucas-silva,MID,bronze,45,Rotterdam FC,BRA,Eredivisie
+bronz-forvet-ibrahima-ndiaye,FWD,bronze,45,Aragon FC,SEN,La Liga
+bronz-kaleci-emre-yilmaz,GK,bronze,45,Anadolu SK,TUR,Super Lig
+bronz-orta-alvaro-navarro,MID,bronze,47,Ege United,ESP,Super Lig
+bronz-defans-marco-bellini,DEF,bronze,47,Paris Nord,ITA,Ligue 1
+bronz-forvet-kerem-kaya,FWD,bronze,48,Hamburg BSC,TUR,Bundesliga
+bronz-defans-tom-baker,DEF,bronze,49,Amsterdam AC,ENG,Eredivisie
+bronz-orta-karl-fischer,MID,bronze,49,Leeds Rovers,GER,Premier Lig
+bronz-forvet-matheus-santos,FWD,bronze,51,Napoli SC,BRA,Serie A
+bronz-defans-nico-jansen,DEF,bronze,51,Bosphorus FC,NED,Super Lig
+bronz-kaleci-rafael-costa,GK,bronze,51,Dover United,BRA,Premier Lig
+bronz-orta-vincent-leclerc,MID,bronze,51,Sevilla Norte,FRA,La Liga
+bronz-orta-andrea-rossi,MID,bronze,53,Berlin Nord,ITA,Bundesliga
+bronz-orta-owen-clarke,MID,bronze,54,Roma Est,ENG,Serie A
+bronz-defans-nicolas-salas,DEF,bronze,54,Thames FC,ARG,Premier Lig
+bronz-forvet-pablo-iglesias,FWD,bronze,54,Nantes FC,ESP,Ligue 1
+bronz-forvet-julian-weber,FWD,bronze,56,Utrecht FC,GER,Eredivisie
+bronz-defans-tiago-alves,DEF,bronze,56,Costa CF,POR,La Liga
+bronz-orta-sven-bakker,MID,bronze,56,Marsilya OC,NED,Ligue 1
+bronz-kaleci-sergio-marin,GK,bronze,56,Madrid Real,ESP,La Liga
+bronz-defans-yuki-tanaka,DEF,bronze,58,Munchen SV,JPN,Bundesliga
+bronz-orta-facundo-ortega,MID,bronze,58,Eindhoven SV,ARG,Eredivisie
+bronz-forvet-antoine-moreau,FWD,bronze,59,Anadolu SK,FRA,Super Lig
+bronz-orta-rui-sousa,MID,bronze,60,Kartal SK,POR,Super Lig
+bronz-defans-ousmane-diallo,DEF,bronze,60,Milano Nero,SEN,Serie A
+bronz-defans-burak-demir,DEF,bronze,62,Lyon Sud,TUR,Ligue 1
+bronz-kaleci-lukas-vogel,GK,bronze,62,Rhein FC,GER,Bundesliga
+bronz-orta-sora-suzuki,MID,bronze,62,Bristol AC,JPN,Premier Lig
+bronz-forvet-matteo-greco,FWD,bronze,62,Dover United,ITA,Premier Lig
+gumus-kaleci-harry-wright,GK,silver,63,Madrid Real,ENG,La Liga
+gumus-defans-joao-fonseca,DEF,silver,63,Paris Nord,POR,Ligue 1
+gumus-orta-jack-hughes,MID,silver,63,Ege United,ENG,Super Lig
+gumus-forvet-felix-braun,FWD,silver,63,Aragon FC,GER,La Liga
+gumus-orta-bram-smit,MID,silver,64,Leeds Rovers,NED,Premier Lig
+gumus-defans-haruto-watanabe,DEF,silver,64,Amsterdam AC,JPN,Eredivisie
+gumus-forvet-theo-fontaine,FWD,silver,65,Hamburg BSC,FRA,Bundesliga
+gumus-orta-emiliano-molina,MID,silver,66,Sevilla Norte,ARG,La Liga
+gumus-defans-mamadou-sarr,DEF,silver,66,Bosphorus FC,SEN,Super Lig
+gumus-defans-hakan-sahin,DEF,silver,67,Thames FC,TUR,Premier Lig
+gumus-forvet-davide-marino,FWD,silver,67,Napoli SC,ITA,Serie A
+gumus-orta-andre-cardoso,MID,silver,67,Berlin Nord,POR,Bundesliga
+gumus-orta-riku-ito,MID,silver,68,Roma Est,JPN,Serie A
+gumus-defans-gabriel-oliveira,DEF,silver,68,Costa CF,BRA,La Liga
+gumus-kaleci-daan-visser,GK,silver,68,Rhein FC,NED,Bundesliga
+gumus-forvet-callum-turner,FWD,silver,68,Nantes FC,ENG,Ligue 1
+gumus-defans-javier-torres,DEF,silver,70,Munchen SV,ESP,Bundesliga
+gumus-forvet-ruud-meijer,FWD,silver,70,Utrecht FC,NED,Eredivisie
+gumus-orta-cheikh-fall,MID,silver,70,Marsilya OC,SEN,Ligue 1
+gumus-defans-tobias-hoffmann,DEF,silver,71,Milano Nero,GER,Serie A
+gumus-orta-serkan-aslan,MID,silver,71,Eindhoven SV,TUR,Eredivisie
+gumus-forvet-agustin-rojas,FWD,silver,72,Anadolu SK,ARG,Super Lig
+gumus-defans-hugo-girard,DEF,silver,73,Lyon Sud,FRA,Ligue 1
+gumus-orta-thiago-pereira,MID,silver,73,Kartal SK,BRA,Super Lig
+gumus-orta-marco-ramos,MID,silver,74,Bristol AC,ESP,Premier Lig
+gumus-kaleci-santiago-herrera,GK,silver,74,Verona FC,ARG,Serie A
+gumus-defans-luca-conti,DEF,silver,74,Rotterdam FC,ITA,Eredivisie
+gumus-forvet-nuno-mendes,FWD,silver,74,Dover United,POR,Premier Lig
+altin-orta-lautaro-acosta,MID,gold,75,Lyon Sud,ARG,Ligue 1
+altin-kaleci-kaito-nakamura,GK,gold,75,Madrid Real,JPN,La Liga
+altin-defans-bruno-almeida,DEF,gold,75,Paris Nord,BRA,Ligue 1
+altin-forvet-enzo-renaud,FWD,gold,75,Eindhoven SV,FRA,Eredivisie
+altin-orta-ricardo-teixeira,MID,gold,76,Rotterdam FC,POR,Eredivisie
+altin-forvet-alessio-galli,FWD,gold,77,Kartal SK,ITA,Super Lig
+altin-defans-nacho-vega,DEF,gold,77,Amsterdam AC,ESP,Eredivisie
+altin-defans-jonas-schulz,DEF,gold,78,Bosphorus FC,GER,Super Lig
+altin-orta-ren-kobayashi,MID,gold,78,Ege United,JPN,Super Lig
+altin-orta-moussa-sow,MID,gold,79,Leeds Rovers,SEN,Premier Lig
+altin-forvet-mason-cooper,FWD,gold,79,Bristol AC,ENG,Premier Lig
+altin-kaleci-aliou-gueye,GK,gold,80,Rhein FC,SEN,Bundesliga
+altin-defans-mathis-barbier,DEF,gold,80,Thames FC,FRA,Premier Lig
+altin-forvet-stijn-dekker,FWD,gold,81,Aragon FC,NED,La Liga
+altin-orta-cenk-dogan,MID,gold,81,Sevilla Norte,TUR,La Liga
+altin-orta-diego-ribeiro,MID,gold,82,Berlin Nord,BRA,Bundesliga
+altin-defans-simone-ferrari,DEF,gold,82,Costa CF,ITA,La Liga
+altin-forvet-julian-benitez,FWD,gold,83,Hamburg BSC,ARG,Bundesliga
+altin-defans-ethan-barnes,DEF,gold,83,Munchen SV,ENG,Bundesliga
+altin-orta-raul-delgado,MID,gold,84,Roma Est,ESP,Serie A
+altin-defans-joost-bos,DEF,gold,85,Milano Nero,NED,Serie A
+altin-orta-niklas-krause,MID,gold,85,Marsilya OC,GER,Ligue 1
+altin-kaleci-onur-ozturk,GK,gold,85,Verona FC,TUR,Serie A
+altin-forvet-fabio-lopes,FWD,gold,85,Napoli SC,POR,Serie A
+diamond-defans-pape-diouf,DEF,diamond,86,Utrecht FC,SEN,Eredivisie
+diamond-forvet-lars-vos,FWD,diamond,86,Bosphorus FC,NED,Super Lig
+diamond-orta-maximilian-winkler,MID,diamond,86,Rhein FC,GER,Bundesliga
+diamond-orta-nolan-chevalier,MID,diamond,88,Verona FC,FRA,Serie A
+diamond-defans-volkan-aydin,DEF,diamond,88,Anadolu SK,TUR,Super Lig
+diamond-kaleci-takumi-sato,GK,diamond,89,Nantes FC,JPN,Ligue 1
+diamond-forvet-mateo-cabrera,FWD,diamond,89,Thames FC,ARG,Premier Lig
+diamond-orta-federico-bruno,MID,diamond,90,Paris Nord,ITA,Ligue 1
+diamond-defans-vinicius-nunes,DEF,diamond,90,Dover United,BRA,Premier Lig
+diamond-orta-alfie-foster,MID,diamond,92,Amsterdam AC,ENG,Eredivisie
+diamond-defans-iker-castillo,DEF,diamond,92,Madrid Real,ESP,La Liga
+diamond-forvet-diogo-barros,FWD,diamond,92,Costa CF,POR,La Liga
+legend-forvet-ferenc-puskas,FWD,legend,94,Efsaneler,HUN,Efsaneler Ligi
+legend-kaleci-lev-yashin,GK,legend,95,Efsaneler,RUS,Efsaneler Ligi
+legend-defans-franz-beckenbauer,DEF,legend,96,Efsaneler,GER,Efsaneler Ligi
+legend-orta-johan-cruyff,MID,legend,97,Efsaneler,NED,Efsaneler Ligi
+legend-forvet-pele,FWD,legend,98,Efsaneler,BRA,Efsaneler Ligi
+legend-orta-diego-maradona,MID,legend,99,Efsaneler,ARG,Efsaneler Ligi
