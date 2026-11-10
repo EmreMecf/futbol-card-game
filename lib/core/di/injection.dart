@@ -30,6 +30,9 @@ import '../../features/sbc/data/datasources/sbc_remote_datasource.dart';
 import '../../features/sbc/data/repositories/sbc_repository_impl.dart';
 import '../../features/sbc/domain/repositories/sbc_repository.dart';
 import '../../features/sbc/presentation/viewmodel/sbc_builder_view_model.dart';
+import '../../features/season/data/season_repository_impl.dart';
+import '../../features/season/domain/season_repository.dart';
+import '../../features/season/presentation/viewmodel/season_view_model.dart';
 import '../../features/sbc/presentation/viewmodel/sbc_list_view_model.dart';
 import '../../features/store/data/datasources/store_remote_datasource.dart';
 import '../../features/store/data/repositories/store_repository_impl.dart';
@@ -186,6 +189,13 @@ Future<void> configureDependencies() async {
     // Ekonomi V2 (FAZ 1): sandıklar, ödül enerjisi, acil kadro
     ..registerLazySingleton<ChestRepository>(
       () => ChestRepositoryImpl(getIt<ApiClient>()),
+    )
+    // Ekonomi V2 (FAZ 4): Battle Pass + görevler
+    ..registerLazySingleton<SeasonRepository>(
+      () => SeasonRepositoryImpl(getIt<ApiClient>()),
+    )
+    ..registerFactory<SeasonViewModel>(
+      () => SeasonViewModel(getIt<SeasonRepository>()),
     )
     // Ekonomi V2 (FAZ 3): item envanteri
     ..registerLazySingleton<ItemsRepository>(

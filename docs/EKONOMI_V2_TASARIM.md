@@ -682,6 +682,7 @@ bağlanmada kayıp ya da çift yok; mevcut 622 + 21 test geçer.
 | FAZ 1 | ✅ Yapıldı | 029–032 migration; veritabanı testleri `031_chests_test.sql` (49 kontrol + 20.000 çekilişlik dağılım) ve `032_emergency_squad_test.sql`; `test/chests_test.dart` (7); `test/goldens/sandik_golden_test.dart` (26, 6 boyut); uçtan uca gerçek sunucu testi `tool/ekonomi/sandik_e2e.mjs` |
 | FAZ 2 | ✅ Yapıldı | 033 migration; `033_player_levels_test.sql` (34 kontrol, K1 dahil: maç/eşleştirme fonksiyonları seviyeyi okumuyor); `test/progress_test.dart` (5); `test/goldens/gelisim_golden_test.dart` (9); gerçek sunucuda `tool/ekonomi/gelisim_e2e.mjs` (11 kontrol) |
 | FAZ 3 | ✅ Yapıldı | 034 migration; `034_items_test.sql` (31 kontrol); `test/goldens/envanter_golden_test.dart` (envanter 6 boyut + davranış + sandık seçenekleri); gerçek sunucuda `tool/ekonomi/envanter_e2e.mjs` (16 kontrol, tekrar koşulabilir) |
+| FAZ 4 | ✅ Yapıldı | 035 migration; `035_season_pass_test.sql` (46 kontrol, K1 dahil); `test/goldens/sezon_golden_test.dart` (Sezon Yolu 6 boyut + ödül yolu + ana sayfa görevleri + maç sonu XP + davranış); gerçek sunucuda `tool/ekonomi/sezon_e2e.mjs` (15 kontrol, gerçek maç XP'si dahil, tekrar koşulabilir) |
 
 **Tasarımdan sapmalar:**
 
@@ -736,6 +737,32 @@ bağlanmada kayıp ya da çift yok; mevcut 622 + 21 test geçer.
   kuralında sayılmaz. Başka bir sandığın sayacı çalışırken de anahtar kullanılabilir.
 - **`level_up_player` 4 argümanlı oldu** (jokerler + indirim). Eski 3 argümanlı sürüm kaldırıldı.
 - **Geliştirme ucu:** `POST /api/items/dev/grant` yalnız üretim dışında açık; testler için.
+
+**FAZ 4 notları:**
+
+- **Tablolar:** `seasons`, `season_tiers` (ödül tablosu sezon açılırken dondurulur), `user_seasons`,
+  `season_claims` (kullanıcı + sezon + kademe + yol birincil anahtarı = tek sefer), `missions`, `user_missions`.
+  Kurallar `economy_config_versions` içinde `season_rules` sürüm 1 (§3 tablosu, `bp_tablo.py` ile aynı).
+- **Sezon tembel açılır:** aktif sezon yoksa ilk istekte 30 günlük yeni sezon açılır (ayrı zamanlayıcı yok).
+  Biten sezon saatlik sunucu işinde (`close_due_seasons`) kapanır: ulaşılmış ama alınmamış ödüller otomatik
+  verilir (sandık yuva doluysa posta kutusuna). Tekrar çalışırsa sonuç değişmez.
+- **XP:** enerjili maç 100/70/60; ödül enerjisi yüzünden sandık atlanan maçta %25. Mevcut maç sonu ödülleri
+  (altın, MMR, koruma, kart kaybı) değişmedi.
+- **K1:** sezon verisini maç ve eşleştirme fonksiyonlarından hiçbiri okumuyor (veritabanı testinde doğrulanıyor).
+- **K4:** premium yol görünür ama kilitli ("PREMIUM (YAKINDA)"). Yalnız geliştirme ortamında test için açılabilir
+  (`POST /api/season/dev/premium`, üretimde yok).
+
+**FAZ 4 sapmaları:**
+
+- **Görev listesi:** §5'teki örneklerden "taktik kullan", "kimyası +2 kartla tur kazan" ve "5 farklı mevkide tur
+  kazan" bu fazda yok (tur bazlı sayaç gerekir). Yerine: haftalık 25 maç / 10 galibiyet / 3 sandık, sezon 120 maç /
+  bir futbolcuyu 5. seviyeye çıkar / 3 kart görevi. XP toplamları §5 ile aynı (günlük 600, haftalık 6.000, sezon 10.000).
+- **Görev XP'si otomatik:** görev tamamlanınca XP hemen eklenir, ayrıca "al" düğmesi yok.
+- **K6 XP'ye de uygulandı:** 4. turdan önce biten maç XP vermez ve görev ilerletmez (teslim çiftçiliğine karşı).
+- **Premium Plus:** yalnız %10 XP bayrağı var; "anında 5 kademe" satın almayla birlikte FAZ 5'te.
+- **Sezon 2 kozmetikleri:** yeni `season_rules` sürümü yayınlanmazsa Sezon 2 aynı "Sezon 1" kozmetiklerini verir;
+  sahip olunan kozmetik tekrar gelince altına döner. Yeni sezondan önce yeni sürüm eklenmeli.
+- **Gün ve hafta sınırı:** veritabanı sunucusunun saat dilimine göre (034'teki enerji içeceği sınırıyla aynı).
 
 **Varsayılan:** `economy_v2_enabled` migration'da **kapalı**. Yerel
 geliştirme veritabanında kabul testi için sürüm 2 ile açıldı. Kapatmak

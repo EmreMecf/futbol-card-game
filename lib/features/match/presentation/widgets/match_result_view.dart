@@ -8,6 +8,7 @@ import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../../shared/widgets/ref_card/ref_player_card.dart';
 import '../../../../shared/widgets/walkout/confetti_overlay.dart';
 import '../../../chests/presentation/widgets/match_chest_panel.dart';
+import '../../../season/presentation/widgets/season_home_card.dart';
 import '../viewmodel/match_view_model.dart';
 import 'league_change_widgets.dart';
 
@@ -122,6 +123,8 @@ class _MatchResultViewState extends State<MatchResultView> with SingleTickerProv
                         RefNeutralButton(label: 'ANA MENÜYE DÖN', onTap: widget.onClose),
                         // Ekonomi V2: bu maçın sandığı (kapalıysa yer kaplamaz)
                         MatchChestPanel(matchId: sonuc.matchId),
+                        // Ekonomi V2 (FAZ 4): bu maçta kazanılan sezon XP'si
+                        MatchSeasonXpLine(matchId: sonuc.matchId),
                         if (sonuc.leagueChange != null) ...[
                           const SizedBox(height: Ref.pageGap),
                           LeagueChangePanel(change: sonuc.leagueChange!),

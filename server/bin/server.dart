@@ -14,6 +14,7 @@ import 'package:futbol_card_server/routes/chest_routes.dart';
 import 'package:futbol_card_server/routes/economy_routes.dart';
 import 'package:futbol_card_server/routes/game_routes.dart';
 import 'package:futbol_card_server/routes/item_routes.dart';
+import 'package:futbol_card_server/routes/season_routes.dart';
 import 'package:futbol_card_server/routes/match_routes.dart';
 import 'package:futbol_card_server/routes/progress_routes.dart';
 import 'package:futbol_card_server/routes/sbc_routes.dart';
@@ -119,6 +120,8 @@ Future<void> main(List<String> args) async {
   api.mount('/progress', idempotent.addHandler(progressRoutes(db).call));
   // FAZ 3: item katalogu ve envanter (034)
   api.mount('/items', idempotent.addHandler(itemRoutes(db).call));
+  // Ekonomi V2 (FAZ 4): Battle Pass + gorevler
+  api.mount('/season', idempotent.addHandler(seasonRoutes(db).call));
 
   // ---- 5. WEBSOCKET ----
   // Baglanti adresi: ws://localhost:8080/ws?token=<access_token>

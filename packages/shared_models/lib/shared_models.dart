@@ -28,4 +28,5 @@ export 'src/match_result.dart';
 export 'src/pack_models.dart';
 export 'src/realtime_event.dart';
 export 'src/sbc_models.dart';
+export 'src/season_models.dart';
 export 'src/user_model.dart';

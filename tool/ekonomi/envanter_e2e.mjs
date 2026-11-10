@@ -93,6 +93,10 @@ if (bos < gereken || sandiklar.slots.some((c) => c.status === 'unlocking')) {
   kontrol('anahtarla açılan sandık açılır', acildi.durum === 200, `${acildi.durum} ${acildi.veri?.code ?? ''}`);
   const ikinci = await post('/items/chest_key/use', A, { target: { chest_id: s2 } });
   kontrol('açılmış sandığa anahtar 409', ikinci.durum === 409 || ikinci.durum === 404, `${ikinci.durum} ${ikinci.veri?.code ?? ''}`);
+  // Arkada engel bırakma: hızlandırılıp hazır olan sandık açılır (yoksa
+  // "tek kilit" kuralı sandik_e2e.mjs'nin yeni sayacını engeller)
+  const son = (await istek('/chests', { jeton: A })).slots.find((c) => c.id === s1);
+  if (son?.status === 'ready') await post(`/chests/${s1}/open`, A);
 }
 
 // ---- 4. Enerji içeceği ----

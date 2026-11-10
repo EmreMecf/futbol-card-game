@@ -59,6 +59,8 @@ class TimeoutSweeper {
       // telafi; tetikleyicide hata alan mac sandiklarini yeniden dene
       await _db.scalar('select expire_mailbox_chests()');
       await _db.scalar('select repair_match_chests()');
+      // Ekonomi V2 (035): biten sezonun alinmamis odullerini otomatik ver
+      await _db.scalar('select close_due_seasons()');
     } catch (e) {
       // ignore: avoid_print
       print('[ZAMANLAYICI] Jeton temizligi basarisiz: $e');

@@ -14,6 +14,7 @@ import '../../features/deck/presentation/view/deck_view.dart';
 import '../../features/home/presentation/view/home_view.dart';
 import '../../features/items/presentation/view/inventory_view.dart';
 import '../../features/leaderboard/presentation/view/leaderboard_view.dart';
+import '../../features/season/presentation/view/season_view.dart';
 import '../../features/leaderboard/presentation/view/league_tiers_view.dart';
 import '../../features/match/presentation/view/match_view.dart';
 import '../../features/matchmaking/presentation/view/matchmaking_view.dart';
@@ -128,6 +129,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.inventory,
         builder: (context, state) => const InventoryView(),
+      ),
+      GoRoute(
+        path: AppRoutes.season,
+        builder: (context, state) => const SeasonView(),
       ),
       GoRoute(
         path: AppRoutes.sbc,

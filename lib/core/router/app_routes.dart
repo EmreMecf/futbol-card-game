@@ -37,6 +37,9 @@ class AppRoutes {
   /// Ekonomi V2 (FAZ 3): item envanteri
   static const String inventory = '/envanter';
 
+  /// Ekonomi V2 (FAZ 4): Battle Pass + görevler
+  static const String season = '/sezon';
+
   /// Gorev kadrosu kurma ekrani: /gorevler/{challenge_id}
   static String sbcBuilderWithId(String challengeId) => '$sbc/$challengeId';
 

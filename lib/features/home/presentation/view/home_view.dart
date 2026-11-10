@@ -12,13 +12,14 @@ import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../auth/presentation/viewmodel/auth_view_model.dart';
 import '../../../chests/presentation/widgets/chest_strip.dart';
+import '../../../season/presentation/widgets/season_home_card.dart';
 import '../viewmodel/home_view_model.dart';
 
 /// ANA SAYFA — referans `home()` ekranı.
 ///
 ///   .hero        lig hapı, 🛡️, "ARENA SENİ BEKLİYOR", kupa + seri, MAÇA BAŞLA
 ///   .tilegrid    KADROM · KARTLARIM · PAKETLER
-///   GÜNLÜK GÖREVLER  (sunucuda yok → "YAKINDA"; kart görevlerine yönlendirir)
+///   GÜNLÜK GÖREVLER  (FAZ 4: sezon görevleri; ekonomi kapalıysa "YAKINDA")
 ///   LİG İLERLEMESİ   (referanstaki "SEZON ÖDÜLÜ" bloğu; sezon sistemi yok,
 ///                     yerine GERÇEK lig ilerlemesi)
 ///
@@ -109,7 +110,7 @@ class _DarYerlesim extends StatelessWidget {
           SizedBox(height: Ref.pageGap),
           // Ekonomi V2: sandık şeridi (kapalıysa yer kaplamaz)
           ChestStrip(),
-          _Gorevler(),
+          SeasonHomeCard(fallback: _Gorevler()),
           SizedBox(height: Ref.pageGap),
           _LigIlerlemesi(),
         ],
@@ -135,7 +136,7 @@ class _GenisYerlesim extends StatelessWidget {
               SizedBox(width: 20),
               Expanded(
                 flex: 5,
-                child: Column(children: [ChestStrip(), _Gorevler(), SizedBox(height: Ref.pageGap), _LigIlerlemesi()]),
+                child: Column(children: [ChestStrip(), SeasonHomeCard(fallback: _Gorevler()), SizedBox(height: Ref.pageGap), _LigIlerlemesi()]),
               ),
             ],
           ),
