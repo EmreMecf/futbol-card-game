@@ -75,6 +75,33 @@ language sql as $$
     p_b, (select id from decks where owner_id = p_b and is_active), '{}')
 $$;
 
+-- K6 ile uyumlu TAM MAC: rastgele dagitilan ellerle mac bazen 4. turdan
+-- once biter (5-9 tur tipik, nadiren daha kisa). K6 geregi kisa macta
+-- sandik / XP / gorev / enerji harcamasi YOKTUR; bu yuzden en az 4 turlu
+-- bir mac cikana kadar yeniden denemek testin olctugu degerleri bozmaz.
+-- (GitHub Actions 42822383188: 031 bolum 8 bu varsayim yuzunden kaldi.)
+-- Son denemeden HEMEN ONCEKI altinlar pg_temp mac_oncesi tablosunda.
+create temp table mac_oncesi (user_id uuid primary key, coins int);
+
+create function pg_temp.tam_mac(p_a uuid, p_b uuid) returns uuid
+language plpgsql as $$
+declare
+  v uuid;
+  i int;
+begin
+  for i in 1..15 loop
+    delete from mac_oncesi;
+    insert into mac_oncesi select id, coins from users where id in (p_a, p_b);
+    v := pg_temp.mac(p_a, p_b);
+    perform pg_temp.oyna(v);
+    if (select count(*) from match_rounds where match_id = v) >= 4 then
+      return v;
+    end if;
+  end loop;
+  raise exception 'TEST BASARISIZ: 15 denemede 4+ turlu mac cikmadi';
+end;
+$$;
+
 do $$
 declare
   a uuid; b uuid; yeni uuid;
@@ -119,10 +146,8 @@ begin
 
   -- ================== 2) MAC -> HER OYUNCUYA BIR SANDIK ==================
   select (reward_energy_state(a) ->> 'energy')::int into e_once;
-  v_mac := pg_temp.mac(a, b);
-  select winner_id into kazanan from matches where id = v_mac;  -- henuz null
-  w_once := (select coins from users where id = a);
-  perform pg_temp.oyna(v_mac);
+  v_mac := pg_temp.tam_mac(a, b);
+  w_once := (select coins from mac_oncesi where user_id = a);
   select count(*) into n from user_chests where source_type = 'match' and source_id = v_mac::text;
   perform pg_temp.beklenen('iki oyuncuya birer sandik', n, 2);
   select (reward_energy_state(a) ->> 'energy')::int into e_sonra;
@@ -244,8 +269,7 @@ begin
   delete from user_chests where user_id in (a, b);
   update reward_energy set energy = 0, refill_anchor = now() where user_id = a;
   insert into reward_energy (user_id, energy) values (a, 0) on conflict (user_id) do nothing;
-  v_mac := pg_temp.mac(a, b);
-  perform pg_temp.oyna(v_mac);
+  v_mac := pg_temp.tam_mac(a, b);
   perform pg_temp.beklenen('enerjisiz mac yine bitti', (select status from matches where id = v_mac), 'finished');
   select count(*) into n from user_chests where source_id = v_mac::text and user_id = a;
   perform pg_temp.beklenen('enerjisiz oyuncuya sandik yok', n, 0);

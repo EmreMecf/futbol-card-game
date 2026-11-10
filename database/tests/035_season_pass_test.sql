@@ -66,6 +66,33 @@ language sql as $$
     p_b, (select id from decks where owner_id = p_b and is_active), '{}')
 $$;
 
+-- K6 ile uyumlu TAM MAC: rastgele dagitilan ellerle mac bazen 4. turdan
+-- once biter (5-9 tur tipik, nadiren daha kisa). K6 geregi kisa macta
+-- sandik / XP / gorev / enerji harcamasi YOKTUR; bu yuzden en az 4 turlu
+-- bir mac cikana kadar yeniden denemek testin olctugu degerleri bozmaz.
+-- (GitHub Actions 42822383188: 031 bolum 8 bu varsayim yuzunden kaldi.)
+-- Son denemeden HEMEN ONCEKI altinlar pg_temp mac_oncesi tablosunda.
+create temp table mac_oncesi (user_id uuid primary key, coins int);
+
+create function pg_temp.tam_mac(p_a uuid, p_b uuid) returns uuid
+language plpgsql as $$
+declare
+  v uuid;
+  i int;
+begin
+  for i in 1..15 loop
+    delete from mac_oncesi;
+    insert into mac_oncesi select id, coins from users where id in (p_a, p_b);
+    v := pg_temp.mac(p_a, p_b);
+    perform pg_temp.oyna(v);
+    if (select count(*) from match_rounds where match_id = v) >= 4 then
+      return v;
+    end if;
+  end loop;
+  raise exception 'TEST BASARISIZ: 15 denemede 4+ turlu mac cikmadi';
+end;
+$$;
+
 create function pg_temp.xp(p_user uuid) returns int
 language sql as $$ select coalesce((season_overview(p_user) ->> 'xp')::int, 0) $$;
 
@@ -126,8 +153,7 @@ begin
   perform pg_temp.beklenen('ayni sezon tekrar olusmaz', (_current_season()).id, s1);
 
   -- ================== 3) ENERJILI MAC: XP + gunluk gorev ==================
-  v_mac := pg_temp.mac(a, b);
-  perform pg_temp.oyna(v_mac);
+  v_mac := pg_temp.tam_mac(a, b);
   select * into m from matches where id = v_mac;
   perform pg_temp.beklenen('mac bitti', m.status::text, 'finished');
   if m.is_draw then
@@ -148,8 +174,7 @@ begin
   -- ================== 4) ENERJISIZ MAC: XP %25 ==================
   update reward_energy set energy = 0, refill_anchor = now(), updated_at = now() where user_id in (a, b);
   xa := pg_temp.xp(a);
-  v_mac := pg_temp.mac(a, b);
-  perform pg_temp.oyna(v_mac);
+  v_mac := pg_temp.tam_mac(a, b);
   select * into m from matches where id = v_mac;
   x := case when m.is_draw then 17 when m.winner_id = a then 25 else 15 end;
   perform pg_temp.beklenen('enerjisiz mac XP %25', (season_match_xp(a, v_mac) ->> 'xp')::int, x);
