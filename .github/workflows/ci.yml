@@ -241,6 +241,27 @@ jobs:
       - name: Android SDK Platform 37
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" > /dev/null
 
+      # NDK'yi derlemeden ONCE ve yeniden denemeli kur. Gradle'in otomatik
+      # indirmesi 42832383837'de bozuk arsiv yuzunden kaldi ("Archive is not
+      # a ZIP archive", NDK 28.2.13676358); kod hatasi degildi. Surum
+      # Flutter'in kendi ayarindan okunur (Flutter guncellenince elle
+      # degistirmek gerekmez).
+      - name: Android NDK (yeniden denemeli)
+        run: |
+          FR="${FLUTTER_ROOT:-$(dirname "$(dirname "$(which flutter)")")}"
+          NDK=$(grep -oE 'val ndkVersion: String = "[0-9.]+"' "$FR/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt" | grep -oE '[0-9]+(\.[0-9]+)+')
+          test -n "$NDK" || { echo "NDK surumu okunamadi"; exit 1; }
+          echo "NDK $NDK"
+          for i in 1 2 3; do
+            if yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;$NDK" > /dev/null; then
+              test -f "$ANDROID_HOME/ndk/$NDK/source.properties" && exit 0
+            fi
+            echo "NDK kurulamadi (deneme $i), yeniden deneniyor"
+            rm -rf "$ANDROID_HOME/ndk/$NDK"
+            sleep 15
+          done
+          exit 1
+
       - name: .env olustur
         run: cp .env.example .env
 

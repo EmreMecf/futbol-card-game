@@ -95,7 +95,9 @@ kozmetiğin altına dönmesi ✅. **Bulgu:** 7 itemin oyunda kaynağı yok — s
 ustalık kitabı (Bronz / Gümüş / Elmas / Efsane), gelişim indirimi, etkinlik bileti (yalnız
 geliştirme ucu). Etkinlik biletini kullanan bir mod da yok.
 
-**7. Sezon kapanışı.** Alınmamış ücretsiz/premium ödüller otomatik veriliyor, tekrar
+**7. Sezon kapanışı.** ✅ **036 ile düzeltildi:** `repair_season_rewards()` saatlik işte
+kapanıştan hemen sonra çalışır; hata alan ödülü sorun giderilince tek sefer verir
+(`036_season_repair_test.sql`). Önceki bulgu: alınmamış ücretsiz/premium ödüller otomatik veriliyor, tekrar
 çalıştırma çift vermiyor ✅. **Bulgu (gerçek açık):** kapanışta bir ödül hata verirse
 `economy_errors`'a yazılıyor ama sezon "kapandı" işaretleniyor ve **yeniden deneme yok** —
 denetimde premium 1. kademe forması kalıcı kayboldu.
@@ -115,8 +117,14 @@ sandığı telafiye döner ve tekrar alma çift telafi vermez ✅. Kaynak kaybı
 | R4 | **Acil Kadro aynen kalır** (güvenlik ağı). | Uç durumlar |
 | R5 | **Battle Pass değişmez** (50 × 1000 XP). | Hedefler tutuyor |
 | R6 | **Kaynaksız itemler:** sandık anahtarı ve 4 ustalık kitabı Efsane / Altın sandığa düşük olasılıklı ek ödül olarak, gelişim indirimi haftalık görev ödülü olarak eklenir; etkinlik bileti, etkinlik modu gelene kadar katalogda **pasif** yapılır. Kesin oranlar onaydan sonra simülasyonla belirlenir. | 7 itemin kaynağı yok |
-| R7 | **Sezon kapanışı onarımı (hata düzeltmesi, ekonomi değişikliği değil):** `repair_season_rewards()` — `season_close` hatalarını sezon kapandıktan sonra da yeniden dener (sandıklardaki `repair_match_chests` gibi); saatlik işe eklenir. | §3 kuralı "ödül kaybolmaz" — denetimde kayıp bulundu |
+| R7 ✅ | **(036 ile uygulandı)** **Sezon kapanışı onarımı (hata düzeltmesi, ekonomi değişikliği değil):** `repair_season_rewards()` — `season_close` hatalarını sezon kapandıktan sonra da yeniden dener (sandıklardaki `repair_match_chests` gibi); saatlik işe eklenir. | §3 kuralı "ödül kaybolmaz" — denetimde kayıp bulundu |
 
 **Dokunulan kod:** R1–R3 maç sonu ödül katmanı (031 tetikleyicisi ve maç bitiş kart
 transferi). **Düello motoru, tur çözümü, MMR ve eşleştirme değişmez.** R2 kart transferini
 kaldırdığı için "temel kart düellosu" kapsamında ayrıca açık onayınızı istiyorum.
+
+## 5. Sonraki adım
+
+- R6 (item kaynakları) ve R1–R3 için migration planı: `docs/EKONOMI_V2_UYGULAMA_PLANI.md`.
+- CI 42832383837: Android işi NDK indirmesindeki bozuk arşiv yüzünden kaldı (kod hatası değil);
+  CI'a yeniden denemeli NDK kurulum adımı eklendi.

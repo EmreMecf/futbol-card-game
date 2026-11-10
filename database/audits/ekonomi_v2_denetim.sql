@@ -181,6 +181,9 @@ begin
     exists (select 1 from pg_proc where proname = 'repair_season_rewards'),
     'sezon "kapandı" işaretlenir ve yeniden deneme yok: premium 1. kademe (forma) KALICI KAYIP');
   update item_definitions set is_active = true where slug = 'kit_season1';
+  perform pg_temp.ok('7c2 onarım hata alan ödülü verir (036)',
+    repair_season_rewards() = 1 and _item_qty(u, 'kit_season1') >= 1, 'onarılamadı');
+  perform pg_temp.ok('7c3 ikinci onarım çift ödül vermez', repair_season_rewards() = 0);
   perform pg_temp.ok('7d kapanış tekrar çalışınca çift ödül yok', close_due_seasons() = 0);
   perform pg_temp.ok('7e kapanmış sezona elle alma yeni sezona gider (eskiye dokunmaz)',
     (_current_season()).id <> s1);

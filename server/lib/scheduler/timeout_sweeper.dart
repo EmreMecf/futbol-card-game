@@ -61,6 +61,8 @@ class TimeoutSweeper {
       await _db.scalar('select repair_match_chests()');
       // Ekonomi V2 (035): biten sezonun alinmamis odullerini otomatik ver
       await _db.scalar('select close_due_seasons()');
+      // Ekonomi V2 (036): kapanista hata alan odulleri tek sefer yeniden ver
+      await _db.scalar('select repair_season_rewards()');
     } catch (e) {
       // ignore: avoid_print
       print('[ZAMANLAYICI] Jeton temizligi basarisiz: $e');
