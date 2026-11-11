@@ -138,6 +138,10 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
       - name: Veritabani testleri
         run: bash scripts/db-testleri.sh
+      # 037+ migration'lar gecmis kullanici verisini (transfer, sahiplik,
+      # maclar, sandiklar, defter) DEGISTIRMEMELI
+      - name: Gecmis veri degismedi
+        run: bash scripts/gecmis-veri-kontrolu.sh
 
   # -------------------------------------------------------------------
   uctan_uca:

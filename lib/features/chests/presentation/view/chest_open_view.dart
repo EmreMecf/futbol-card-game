@@ -115,6 +115,16 @@ class _ChestOpenViewState extends State<ChestOpenView> with SingleTickerProvider
                                         style: Ref.bodyText(12, weight: FontWeight.w700)),
                                   ),
                                 ]),
+                              // 038: ek item ödülleri (sandık anahtarı, ustalık kitabı)
+                              if (r.extras.isNotEmpty)
+                                Row(children: [
+                                  const Icon(Icons.card_giftcard_rounded, size: 17, color: Ref.gold),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text('Ek ödül: ${extrasSummary(r.extras)}',
+                                        style: Ref.bodyText(12, weight: FontWeight.w700)),
+                                  ),
+                                ]),
                               ChestHint(_aciklama(r)),
                             ]),
                           ),

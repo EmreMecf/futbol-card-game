@@ -107,6 +107,17 @@ void main() {
       expect(vm.foundMatchId, 'm1');
     });
 
+    test('037 (R2): kart kaybı kapalıysa koruma gönderilmez, başlangıçta açık sayılır', () async {
+      expect(vm.cardLossEnabled, isTrue, reason: 'sorgu yoksa bugünkü davranış');
+      final yeni = MatchmakingViewModel(repo, soket, oturum, cardLossEnabled: () async => false);
+      await yeni.initialize();
+      expect(yeni.cardLossEnabled, isFalse);
+      yeni.toggleProtection('3');
+      await yeni.startSearch();
+      expect(repo.gonderilenKoruma, isEmpty, reason: 'yeni kurallarda koruma anlamsız');
+      yeni.dispose();
+    });
+
     test('korunan kartlar sunucuya gönderilir', () async {
       await vm.initialize();
       vm.toggleProtection('3');

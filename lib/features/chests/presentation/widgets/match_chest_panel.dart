@@ -63,9 +63,12 @@ class _MatchChestPanelState extends State<MatchChestPanel> {
     }
 
     final c = v.chest;
-    if (c == null) return const SizedBox.shrink();
+    final kopya = v.winCopyName;
+    if (c == null) return kopya == null ? const SizedBox.shrink() : _KopyaSatiri(kopya);
     final renk = chestColor(c.chestType);
     final yer = switch (c.location) {
+      // 037 (R1): enerji yoktu ama sandık yine verildi
+      'instant' when v.noEnergy => 'Ödül enerjin yoktu: Bronz sandık (hemen açılır)',
       'instant' => 'Hemen açılabilir',
       'slot' => '${c.slotNo}. yuvaya kondu',
       _ => c.status == ChestStatus.compensated
@@ -73,7 +76,7 @@ class _MatchChestPanelState extends State<MatchChestPanel> {
           : 'Yuvalar dolu: posta kutusunda bekliyor',
     };
 
-    return Padding(
+    final sandik = Padding(
       padding: const EdgeInsets.only(top: Ref.pageGap),
       child: Container(
         padding: const EdgeInsets.all(13),
@@ -98,5 +101,29 @@ class _MatchChestPanelState extends State<MatchChestPanel> {
         ]),
       ),
     );
+    if (kopya == null) return sandik;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [sandik, _KopyaSatiri(kopya)]);
   }
+}
+
+/// 037 (R3): galibiyette kadrodaki bir futbolcuya +1 gelişim kopyası
+class _KopyaSatiri extends StatelessWidget {
+  final String ad;
+  const _KopyaSatiri(this.ad);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: RefCardPanel(children: [
+          Row(children: [
+            const Icon(Icons.trending_up_rounded, size: 20, color: Ref.accent),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text('+1 GELİŞİM KOPYASI: $ad',
+                  maxLines: 2, overflow: TextOverflow.ellipsis, style: Ref.bodyText(13, weight: FontWeight.w800)),
+            ),
+            RefNeutralButton(label: 'GELİŞİM', onTap: () => context.push(AppRoutes.progress)),
+          ]),
+        ]),
+      );
 }

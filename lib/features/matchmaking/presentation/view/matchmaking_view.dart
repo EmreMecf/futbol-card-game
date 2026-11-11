@@ -131,7 +131,8 @@ class _Hazirlik extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _baslik('MAÇA HAZIRLAN', RefPill('KORUMA ${vm.protectedCardIds.length}/${vm.maxProtection}')),
+        _baslik('MAÇA HAZIRLAN',
+            vm.cardLossEnabled ? RefPill('KORUMA ${vm.protectedCardIds.length}/${vm.maxProtection}') : const RefPill('KART KAYBI YOK')),
         const SizedBox(height: Ref.pageGap),
         RefArenaStage(
             stadium: RefStadium(
@@ -159,14 +160,21 @@ class _Hazirlik extends StatelessWidget {
           ],
         ),
         const SizedBox(height: Ref.pageGap),
-        RefSectionHead(
-          'KARTLARINI KORU',
-          trailing: RefNeutralButton(label: 'En iyileri koru', onTap: vm.autoProtectBest),
-        ),
+        // Ekonomi V2 (037, R2): yeni kurallarda kalıcı kart kaybı yok
+        if (vm.cardLossEnabled)
+          RefSectionHead(
+            'KARTLARINI KORU',
+            trailing: RefNeutralButton(label: 'En iyileri koru', onTap: vm.autoProtectBest),
+          )
+        else
+          const RefSectionHead('KADRON'),
         const SizedBox(height: 6),
         Text(
-          'Maçı kaybedersen korumaya ALMADIĞIN kartlardan 3 tanesi rastgele seçilip kalıcı olarak '
-          'rakibe geçer. Her galibiyette 1 koruma hakkı kazanırsın.',
+          vm.cardLossEnabled
+              ? 'Maçı kaybedersen korumaya ALMADIĞIN kartlardan 3 tanesi rastgele seçilip kalıcı olarak '
+                  'rakibe geçer. Her galibiyette 1 koruma hakkı kazanırsın.'
+              : 'Dereceli maçta kart kaybı yok: kartların sende kalır. Kazanırsan kadrondaki bir '
+                  'futbolcu +1 gelişim kopyası alır.',
           style: Ref.bodyText(11, color: Ref.muted, height: 1.4),
         ),
         const SizedBox(height: 10),
@@ -201,9 +209,9 @@ class _Hazirlik extends StatelessWidget {
                       kitSeed: kart.club ?? kart.nationality,
                       imageUrl: kart.imageUrl,
                       width: kk.maxWidth,
-                      isProtected: korunuyor,
-                      isSelected: korunuyor,
-                      onTap: () {
+                      isProtected: korunuyor && vm.cardLossEnabled,
+                      isSelected: korunuyor && vm.cardLossEnabled,
+                      onTap: !vm.cardLossEnabled ? null : () {
                         if (!korunuyor && !vm.canProtectMore) {
                           AppSnackBar.showInfo(context, 'Koruma hakkın doldu. Her galibiyette 1 hak kazanırsın.');
                           return;

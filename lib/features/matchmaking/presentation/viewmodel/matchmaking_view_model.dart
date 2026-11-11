@@ -43,7 +43,15 @@ class MatchmakingViewModel extends BaseViewModel {
   StreamSubscription<RealtimeEvent>? _olayAboneligi;
   Timer? _yoklamaZamanlayici;
 
-  MatchmakingViewModel(this._repository, this._socket, this._session);
+  MatchmakingViewModel(this._repository, this._socket, this._session, {Future<bool> Function()? cardLossEnabled})
+      // ignore: prefer_initializing_formals
+      : _kartKaybiSor = cardLossEnabled;
+
+  /// 037 (R2): dereceli maçta kalıcı kart kaybı açık mı? Kayıt yoksa
+  /// (testler) bugünkü davranış: açık.
+  final Future<bool> Function()? _kartKaybiSor;
+  bool _kartKaybi = true;
+  bool get cardLossEnabled => _kartKaybi;
 
   // ------------------------------------------------------------------
   // DURUM
@@ -107,6 +115,11 @@ class MatchmakingViewModel extends BaseViewModel {
       return;
     }
 
+    final sor = _kartKaybiSor;
+    if (sor != null) {
+      _kartKaybi = await sor();
+      if (!_kartKaybi) _korunanlar.clear();
+    }
     await loadDecks();
   }
 
@@ -203,7 +216,7 @@ class MatchmakingViewModel extends BaseViewModel {
     final sonuc = await run(
       () => _repository.findMatch(
         deckId: deste.id,
-        protectedCardIds: _korunanlar.toList(),
+        protectedCardIds: _kartKaybi ? _korunanlar.toList() : const [],
       ),
       showLoading: false,
     );
@@ -277,7 +290,7 @@ class MatchmakingViewModel extends BaseViewModel {
 
     final sonuc = await _repository.findMatch(
       deckId: deste.id,
-      protectedCardIds: _korunanlar.toList(),
+      protectedCardIds: _kartKaybi ? _korunanlar.toList() : const [],
     );
 
     final veri = sonuc.dataOrNull;

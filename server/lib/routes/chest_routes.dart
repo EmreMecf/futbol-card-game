@@ -62,9 +62,15 @@ Router chestRoutes(Database db) {
     if (id == null || id.isEmpty) throw const ApiException('Kaynak kimligi eksik.');
     final ham = await db.scalar('select get_source_chest(@u::uuid, @t, @i)', params: {'u': userId, 't': tur, 'i': id});
     final harita = ham == null ? const <String, dynamic>{} : RowMappers.asMap(ham);
-    final sonuc = harita.containsKey('skipped')
-        ? SourceChest(skipped: harita['skipped'] as String?)
-        : SourceChest(chest: harita.isEmpty ? null : Chest.fromJson(harita));
+    // 037: enerjisiz Bronz (no_energy) ve galibiyet kopyası (win_copy)
+    final kopya = harita['win_copy'] is Map ? Map<String, dynamic>.from(harita['win_copy'] as Map) : null;
+    final sandikVar = harita.containsKey('id');
+    final sonuc = SourceChest(
+      chest: sandikVar ? Chest.fromJson(harita) : null,
+      skipped: harita['skipped'] as String?,
+      noEnergy: harita['no_energy'] == true,
+      winCopy: kopya,
+    );
     return jsonOk(sonuc.toJson());
   });
 

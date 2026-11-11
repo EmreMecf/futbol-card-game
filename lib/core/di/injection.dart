@@ -23,6 +23,7 @@ import '../../features/match/data/datasources/match_remote_datasource.dart';
 import '../../features/match/data/repositories/match_repository_impl.dart';
 import '../../features/match/domain/repositories/match_repository.dart';
 import '../../features/match/presentation/viewmodel/match_view_model.dart';
+import '../../features/matchmaking/data/ranked_rules.dart';
 import '../../features/matchmaking/data/datasources/matchmaking_remote_datasource.dart';
 import '../../features/matchmaking/data/repositories/matchmaking_repository_impl.dart';
 import '../../features/matchmaking/domain/repositories/matchmaking_repository.dart';
@@ -263,6 +264,8 @@ Future<void> configureDependencies() async {
         getIt<MatchmakingRepository>(),
         getIt<WebSocketService>(),
         getIt<SessionManager>(),
+        // Ekonomi V2 (037): yeni kurallarda koruma bölümü gizlenir
+        cardLossEnabled: () => fetchRankedCardLossEnabled(getIt<ApiClient>()),
       ),
     )
     // MatchViewModel mac kimligini parametre olarak alir.

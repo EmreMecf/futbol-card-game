@@ -139,6 +139,9 @@ abstract class ChestOpenResult with _$ChestOpenResult {
 
     /// Nadirlik -> joker parça adedi
     @Default({}) Map<String, int> jokers,
+
+    /// 038: ek item ödülleri (item slug -> adet), ör. {"chest_key": 1}
+    @Default({}) Map<String, int> extras,
     int? coinsAfter,
     int? ledgerId,
   }) = _ChestOpenResult;
@@ -251,11 +254,20 @@ abstract class SourceChest with _$SourceChest {
 
     /// 'no_energy': ödül enerjisi yoktu, sandık çıkmadı
     String? skipped,
+
+    /// 037 (R1): enerji yoktu, sandık yine verildi (Bronz)
+    @Default(false) bool noEnergy,
+
+    /// 037 (R3): galibiyet gelişim kopyası {card_id, full_name, tier, copies}
+    Map<String, dynamic>? winCopy,
   }) = _SourceChest;
 
   factory SourceChest.fromJson(Map<String, dynamic> json) => _$SourceChestFromJson(json);
 
   bool get skippedNoEnergy => skipped == 'no_energy';
+
+  /// Galibiyet kopyasının futbolcu adı (yoksa null)
+  String? get winCopyName => winCopy?['full_name'] as String?;
 }
 
 /// Acil kadro durumu (032): kadrosu formasyonu karşılamayan oyuncu

@@ -47,7 +47,8 @@ begin
   insert into user_cards (owner_id, card_id) values (u, bronz);
 
   -- 1) Katalog
-  perform pg_temp.beklenen('katalogda 23 item', (select count(*)::int from item_definitions where is_active), 23);
+  -- 038 etkinlik biletini pasif yapar: tanim sayisi 23 kalir (satir silinmez)
+  perform pg_temp.beklenen('katalogda 23 item tanimi', (select count(*)::int from item_definitions), 23);
   perform pg_temp.beklenen('kozmetiklerin yuvasi var',
     (select count(*)::int from item_definitions where kind = 'cosmetic' and cosmetic_slot is null), 0);
 

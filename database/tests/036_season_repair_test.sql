@@ -19,6 +19,7 @@ declare
   n int;
   altin_u int; altin_w int;
   defter int;
+  r jsonb;
 begin
   insert into economy_config_versions (kind, version, payload, note)
   values ('feature_flags', 992, '{"economy_v2_enabled": true}', 'test');
@@ -80,6 +81,28 @@ begin
   perform pg_temp.beklenen('hata kaydi olmayan bosluk da onarilir', repair_season_rewards(), 1);
   -- 2. kademe ucretsiz odul altin: defter anahtari ayni oldugu icin altin IKINCI KEZ eklenmez
   perform pg_temp.beklenen('defter anahtari ikinci altini engeller', (select coins from users where id = w), altin_w);
+
+  -- 60 GUNDEN ESKI SEZON: saatlik onarim dokunmaz; yonetici (037) guvenli onarir
+  update seasons set closed_at = now() - interval '90 days' where id = s1;
+  delete from season_claims where user_id = w and season_id = s1 and tier = 1 and track = 'free';
+  perform pg_temp.beklenen('saatlik onarim 60 gunden eskiye dokunmaz', repair_season_rewards(), 0);
+  r := admin_repair_season_rewards(s1);
+  perform pg_temp.beklenen('yonetici kuru calisma: 1 eksik, 0 verildi',
+    (r ->> 'missing')::int * 10 + (r ->> 'granted')::int, 10);
+  perform pg_temp.beklenen('kuru calisma kayit eklemez', (select count(*)::int from season_claims
+    where user_id = w and season_id = s1 and tier = 1 and track = 'free'), 0);
+  r := admin_repair_season_rewards(s1, false);
+  perform pg_temp.beklenen('yonetici uygular: 1 verildi', (r ->> 'granted')::int, 1);
+  perform pg_temp.beklenen('yonetici tekrar: eksik 0', (admin_repair_season_rewards(s1, false) ->> 'missing')::int, 0);
+  perform pg_temp.beklenen('her kademe/yol hala tek kayit', (select count(*)::int from (
+    select user_id, tier, track from season_claims where season_id = s1 group by 1, 2, 3 having count(*) > 1) x), 0);
+  begin
+    perform admin_repair_season_rewards((_current_season()).id, false);
+    raise exception 'TEST BASARISIZ: acik sezon onarilmamaliydi';
+  exception when others then
+    if position('season_not_closed' in sqlerrm) = 0 then raise; end if;
+    raise notice 'OK  acik sezon yonetici onarimini reddeder';
+  end;
 
   raise notice '036 sezon onarim testleri: HEPSI GECTI';
 end;

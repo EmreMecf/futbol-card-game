@@ -44,7 +44,7 @@ const FORMASYON = [['GK', 1], ['DEF', 4], ['MID', 4], ['FWD', 2]];
 async function kadroyuTamamla(jeton, ad) {
   const { decks } = await istek('/game/decks', { jeton });
   const deste = decks.find((d) => d.is_active);
-  for (let deneme = 0; deneme < 4; deneme++) {
+  for (let deneme = 0; deneme < 10; deneme++) {
     const v = await istek(`/game/decks/${deste.id}/validate`, { jeton });
     if (v.is_valid) return deste;
     const { cards } = await istek('/game/inventory', { jeton });
@@ -79,7 +79,15 @@ async function kadroyuTamamla(jeton, ad) {
         continue;
       }
       console.log(`${ad}: kadro kurulamıyor, acil kadro yok (${JSON.stringify(durum)}) -> standart paket`);
-      await istek('/game/packs/standard/open', { yontem: 'POST', govde: {}, jeton });
+      // Gerçek kilitlenme (eski kural: kart kaybı + acil kadro 24 sa + altın yok).
+      // Test hesabı tıkanmasın: YALNIZ geliştirme ucuyla paket parası eklenir.
+      try {
+        await istek('/game/packs/standard/open', { yontem: 'POST', govde: {}, jeton });
+      } catch (e) {
+        if (!String(e.message).includes('Yeterli coin yok')) throw e;
+        console.log(`${ad}: KİLİTLENME (altın yok, acil kadro beklemede) -> geliştirme ucuyla 500 altın`);
+        await istek('/game/dev/add-coins', { yontem: 'POST', govde: { amount: 500 }, jeton });
+      }
       continue;
     }
     await istek(`/game/decks/${deste.id}`, { yontem: 'PUT', govde: { user_card_ids: secim }, jeton });

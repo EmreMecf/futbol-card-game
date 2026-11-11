@@ -278,6 +278,16 @@ String tierNameTr(String tier) => switch (tier) {
 String jokerSummary(Map<String, int> jokers) =>
     jokers.entries.where((e) => e.value > 0).map((e) => '${tierNameTr(e.key)} ×${e.value}').join(' · ');
 
+/// 038: ek item özeti: "Sandık anahtarı · Ustalık kitabı (Elmas)"
+String extrasSummary(Map<String, int> extras) => extras.entries.where((e) => e.value > 0).map((e) {
+      final ad = switch (e.key) {
+        'chest_key' => 'Sandık anahtarı',
+        final k when k.startsWith('mastery_book_') => 'Ustalık kitabı (${tierNameTr(k.substring(13))})',
+        final k => k,
+      };
+      return e.value > 1 ? '$ad ×${e.value}' : ad;
+    }).join(' · ');
+
 /// Kısa açıklama satırı (referans .note dili)
 class ChestHint extends StatelessWidget {
   final String text;
