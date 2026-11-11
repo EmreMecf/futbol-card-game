@@ -1,0 +1,95 @@
+# Oyun tasarımı V3 — "her gün geri gelinen strateji oyunu" (11 Kasım 2026)
+
+**Durum: TASARIM. Kod değişmedi.** Kararlar (kullanıcı, 11 Kasım 2026):
+1. Maç: iki oyuncu kartını **aynı anda gizli** seçer, tur süresi kısalır. ✅
+2. Seviye: **sınırlı güç (B)**. ✅ — bu, K1'in ("seviye güce etki etmez") yerine geçer.
+3. Sosyal katman (kulüp) şimdilik **yok**; önce tek oyunculu döngü. ✅
+
+Ölçümler: `tool/ekonomi/duello_v3.py` → `tool/ekonomi/duello_v3.md` (4.000 maç / hücre).
+Denetim bulguları: `docs/OYUN_SISTEMI_DENETIMI.md`.
+
+## 1. Maç (kural sürümü 4)
+
+| | Bugün (sürüm 2/3) | V3 (sürüm 4) |
+|---|---|---|
+| Tur akışı | Açan kartını açık oynar, rakip görerek cevaplar | İnisiyatif sahibi yalnız **mevkiyi** seçer (5 sn); iki oyuncu o mevkiden **kart + taktiği aynı anda gizli** seçer (15 sn); birlikte açılır |
+| Uyamama | Mevkide kart yoksa pas, tur kaybedilir | Yok: iki kadro da 1-4-4-2 olduğundan her mevkide eşit kart var |
+| İnisiyatif | Turu kazanan açar; beraberlikte karşıya geçer | Aynı (turu kazanan mevkiyi seçer) |
+| Bitiş | 22 kart bitince | Bir oyuncu **12 kart** topladığında erken biter (çoğunluk) |
+| Süre aşımı | 45 sn + 15 sn, sonra hükmen yenilgi | Seçim yapılmazsa o mevkideki **en zayıf kart taktiksiz** oynanır; üst üste 2 kez olursa hükmen yenilgi |
+| Değişmeyen | Efsane kuralı, kimya, beraberlikte kartların ortada kalması, taktikler ve enerji (2 başlar, +1/tur, en fazla 5) | — |
+
+Savunma Duvarı'nın "savunurken +6 / açarken +2" kuralı aynen: inisiyatifi olmayan +6, olan +2.
+
+**Ölçülen:**
+
+| Ölçü | Bugün | V3 | Hedef |
+|---|---|---|---|
+| İlk inisiyatifin puanı (akıllı oyuncular) | %43,4 | **%47,6** | %45–55 |
+| İlk inisiyatifin puanı (taktiksiz) | %46,0 | **%50,7** | %45–55 |
+| Ortalama tur | 11 | 9,7 (6–11) | — |
+| En uzun maç (süre sınırı) | 16,5 dk | **3,7 dk** | ≤ 4 dk |
+| Tipik maç (sürenin %60'ı) | ~9,9 dk | **~1,9 dk** | 2–3 dk |
+
+**Açık risk:** benzer güçte kadrolarda taktik kullanmayan oyuncu %13 puanda kalıyor
+(bugünkü raporda %32). Taktikler eş zamanlı düzende daha belirleyici; bu bir strateji oyunu
+için istenen şey ama **öğretici zorunlu** (Faz 3) ve taktik sayıları Faz 1'de prototipte
+(`packages/tactics_prototype`) yeniden dengelenmeli.
+
+## 2. Seviye gücü (B) ve adalet
+
+Simülasyon: bütün kartlara +1 güç = %70, +2 = %83, +3 = %93 kazanma (aynı kadro). Yani bonus
+küçük tutulmalı ve **eşleştirme seviyeyi görmeli**.
+
+| Eğri | Seviye 4 | Seviye 7 | Seviye 10 |
+|---|---|---|---|
+| B1: seviye // 2 (en fazla +5) — puana göre eşleşme | %81,5 | %88,9 | %96,8 |
+| **B2: L4 +1, L7 +2, L10 +3** — puana göre eşleşme | %66,1 | %80,0 | %87,8 |
+| B1 — **etkin güce göre** eşleşme | %53,6 | %53,7 | %47,5 |
+| **B2 — etkin güce göre eşleşme** | **%51,4** | **%53,0** | **%53,5** |
+
+**Kural:**
+- Seviye bonusu **B2**: 4. seviyede +1, 7. seviyede +2, 10. seviyede +3 (yalnız o kart).
+- Eşleştirme `combined` moda alınır (024) ve kadro gücü **seviye bonusu dahil** hesaplanır.
+  Seviyeli kadro daha güçlü rakiple eşleşir: oyuncu "güçlendim ve yükseldim" hisseder, ezme olmaz.
+- Lig tavanı: Amatör 4, Usta 7, Master ve üstü 10. Tavanın üstündeki seviye o ligde sayılmaz.
+- Efsane kuralı değişmez (seviye, Efsane olmayan kartın Efsane'yi yenmesini sağlamaz).
+
+## 3. Kupa yolu (lig = ilerleme yolu)
+
+- 12 lig basamağının her biri **bir kez** ödül verir: sandık + altın; lig değişiminde kozmetik.
+- En alt basamak 0 puandan başlar (bugün 1000'in altı tanımsız).
+- Kart havuzu basamakla açılır: Amatör Bronz–Altın, Usta + Elmas, Master + Efsane sandık ihtimali.
+  100 kartlık katalog böylece bir ayda tükenmez.
+- Sezon sonu: Usta ve üstü bir basamak geri (yumuşak sıfırlama) + sezon ligi ödülü. Battle Pass
+  sezonuyla aynı takvim.
+
+## 4. Yeni oyuncu ve tek oyunculu döngü
+
+- **Öğretici:** 3 kısa maç (mevki → gizli seçim → taktik), sonunda bir Gümüş sandık.
+- **Bot rakip:** ilk 5 maç ve 20 sn'de rakip bulunamadığında; kadro gücü oyuncuya denk; puan ve
+  ödül normal (Clash Royale'in düşük kupa botları gibi), bot olduğu belirtilmez.
+- **Antrenman modu:** bota karşı ödülsüz, taktik denemek için.
+- **Günlük döngü:** ücretsiz günlük sandık, günün ilk galibiyeti çift XP, dönen mağaza teklifi.
+- **Hafta sonu etkinliği:** özel kurallı kısa turnuva (yalnız Bronz, çift enerji gibi), giriş
+  etkinlik biletiyle (ölü item canlanır).
+
+## 5. Sadeleştirme
+
+- Paket de sandık kuralına bağlanır: sahip olunan kart → gelişim kopyası (iki ayrı "kopya" biter).
+- Kalıcı kart kaybı kalkar (037 hazır); koruma hakkı ekrandan kalkar.
+- "Ödül enerjisi" adı değişir (taktik enerjisiyle karışmasın).
+- Menü: "Görevler" Sezon Yolu'na gider; kart görevi (SBC) "Kart Takası" olur.
+
+## 6. Fazlar (her biri ayrı test + onay)
+
+| Faz | Kapsam | Düelloya dokunur mu |
+|---|---|---|
+| 0 | Bekleyen 037/038'i tam testle bitirmek | Hayır (yalnız maç sonu) |
+| 1 | Sürüm 4 düello: prototipte denge → migration → sunucu → maç ekranı (gizli seçim, 5+15 sn) | **Evet** |
+| 2 | Seviye bonusu B2 + etkin güce göre eşleştirme + lig tavanı | **Evet** (güç hesabı) |
+| 3 | Öğretici + bot + antrenman | Hayır |
+| 4 | Kupa yolu ödülleri, lig tabanı, sezon sıfırlaması | Hayır |
+| 5 | Günlük döngü, etkinlik, mağaza teklifleri, sadeleştirmeler | Hayır |
+
+Hepsi yeni kural sürümü ve varsayılan kapalı anahtarlarla; süren maçlar eski kuralla biter.
