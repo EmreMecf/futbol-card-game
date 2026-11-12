@@ -113,7 +113,7 @@ jobs:
   # -------------------------------------------------------------------
   veritabani:
     name: Veritabani (izole PostgreSQL)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     services:
       postgres:
@@ -124,7 +124,7 @@ jobs:
           POSTGRES_DB: postgres
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U futbol"
+          --health-cmd "pg_isready -U futbol -d postgres"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
@@ -135,7 +135,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: psql istemcisi
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+        run: |
+          # Ubuntu runner mirror/DNS kesintilerine karsi kontrollu retry.
+          # Paket kurulamadiysa test calismadan is basarisiz kalir.
+          for attempt in 1 2 3; do
+            if sudo apt-get update -o Acquire::Retries=3 -qq &&
+               sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq -o Acquire::Retries=3 postgresql-client; then
+              psql --version
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "PostgreSQL istemcisi 3 denemede de kurulamadi"
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
       - name: Veritabani testleri
         run: bash scripts/db-testleri.sh
       # 037+ migration'lar gecmis kullanici verisini (transfer, sahiplik,
@@ -146,7 +160,7 @@ jobs:
   # -------------------------------------------------------------------
   uctan_uca:
     name: Uctan uca (gercek sunucu)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
       postgres:
@@ -157,7 +171,7 @@ jobs:
           POSTGRES_DB: futbol_card
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U futbol"
+          --health-cmd "pg_isready -U futbol -d postgres"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
@@ -180,7 +194,21 @@ jobs:
           channel: stable
           cache: true
       - name: psql istemcisi
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+        run: |
+          # Ubuntu runner mirror/DNS kesintilerine karsi kontrollu retry.
+          # Paket kurulamadiysa test calismadan is basarisiz kalir.
+          for attempt in 1 2 3; do
+            if sudo apt-get update -o Acquire::Retries=3 -qq &&
+               sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq -o Acquire::Retries=3 postgresql-client; then
+              psql --version
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "PostgreSQL istemcisi 3 denemede de kurulamadi"
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
 
       - name: Migration'lari uygula (her biri tek islemde)
         run: |
