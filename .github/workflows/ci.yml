@@ -110,6 +110,10 @@ jobs:
           dart analyze
           dart test
 
+      # Faz 2 tasarim sayilari (seviye B2, lig tavani, etkin guce gore eslesme)
+      - name: Seviye bonusu + eslestirme tasarim testleri
+        run: python3 -I tool/ekonomi/test_seviye_eslestirme.py -v
+
   # -------------------------------------------------------------------
   veritabani:
     name: Veritabani (izole PostgreSQL)
@@ -155,7 +159,12 @@ jobs:
       # 037+ migration'lar gecmis kullanici verisini (transfer, sahiplik,
       # maclar, sandiklar, defter) DEGISTIRMEMELI
       - name: Gecmis veri degismedi
-        run: bash scripts/gecmis-veri-kontrolu.sh
+        run: |
+          SINIR=037 bash scripts/gecmis-veri-kontrolu.sh
+          SINIR=039 bash scripts/gecmis-veri-kontrolu.sh
+      # 039: ayni maci ayni anda ilerleten oturumlar turu iki kez cozmemeli
+      - name: Es zamanli duello yaris testi
+        run: bash scripts/esz-zamanli-yaris-testi.sh
 
   # -------------------------------------------------------------------
   uctan_uca:

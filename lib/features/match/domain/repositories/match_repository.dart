@@ -24,6 +24,9 @@ abstract interface class MatchRepository {
     MatchTactic tactic = MatchTactic.none,
   });
 
+  /// 039: eş zamanlı düelloda inisiyatif sahibi mevkiyi seçer
+  Future<Result<Map<String, dynamic>>> choosePosition(String matchId, CardPosition position);
+
   /// Rakip AFK ise maci hukmen talep et
   Future<Result<Map<String, dynamic>>> claimTimeout(String matchId);
 

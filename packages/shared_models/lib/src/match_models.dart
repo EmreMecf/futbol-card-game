@@ -132,6 +132,20 @@ abstract class MatchState with _$MatchState {
     /// Eski sunucu alani gondermezse true: 021'den beri varsayilan buydu.
     @Default(true) bool tacticsEnabled,
 
+    /// 039: eş zamanlı düello (kural sürümü 4). Önce inisiyatif sahibi
+    /// mevkiyi seçer ([phase] = position), sonra iki oyuncu aynı anda
+    /// gizli kart + taktik seçer ([phase] = pick).
+    @Default(false) bool simultaneous,
+    String? phase,
+    @Default(false) bool iHavePlayed,
+    @Default(false) bool opponentHasPlayed,
+
+    /// Taktik maliyetleri maçın kural sürümünden (sürüm 4'te duvar 2)
+    @Default({}) Map<String, int> tacticCosts,
+
+    /// Bu kadar kart toplayan maçı erken kazanır (sürüm 4: 12)
+    int? earlyFinishCards,
+
     OpponentInfo? opponent,
 
     String? winnerId,
@@ -146,7 +160,14 @@ abstract class MatchState with _$MatchState {
 
   /// Turu acan tarafta miyim ve henuz kart atmadim mi?
   /// (Bu durumda istedigim pozisyonu secebilirim.)
-  bool get canChoosePosition => isMyTurn && requiredPosition == null;
+  bool get canChoosePosition =>
+      simultaneous ? (!isOver && phase == 'position' && amILead) : isMyTurn && requiredPosition == null;
+
+  /// 039: eş zamanlı düelloda gizli seçim sırası bende mi?
+  bool get canPickSimultaneous => simultaneous && !isOver && phase == 'pick' && !iHavePlayed;
+
+  /// Taktiğin bu maçtaki enerji maliyeti (sunucu göndermezse sabit değer)
+  int tacticCost(MatchTactic t) => tacticCosts[t.code] ?? t.cost;
 
   /// Hamle icin kalan sure.
   ///

@@ -133,6 +133,15 @@ class GoldenLeaderboardRepo implements LeaderboardRepository {
 }
 
 class GoldenMatchRepo implements MatchRepository {
+  /// 039: seçilen mevkiler (testler okuyabilir)
+  final secilenMevkiler = <CardPosition>[];
+
+  @override
+  Future<Result<Map<String, dynamic>>> choosePosition(String matchId, CardPosition position) async {
+    secilenMevkiler.add(position);
+    return const Success({'status': 'ok'});
+  }
+
   @override
   Future<Result<List<MatchHistoryEntry>>> fetchMatchHistoryList({int limit = 20, int offset = 0}) async => Success([
         // Sıra korunur: ilk 4 galibiyet (ana sayfadaki "4 galibiyet" serisi)
@@ -248,6 +257,15 @@ class GoldenSocket implements WebSocketService {
 /// rakip Forvet açtı (Elmas 88 + 2 kimya, taktiği gizli), masada 2 kart,
 /// skor 2-2, enerji 3/5, 31 sn.
 class GoldenArenaRepo implements MatchRepository {
+  /// 039: seçilen mevkiler (testler okuyabilir)
+  final secilenMevkiler = <CardPosition>[];
+
+  @override
+  Future<Result<Map<String, dynamic>>> choosePosition(String matchId, CardPosition position) async {
+    secilenMevkiler.add(position);
+    return const Success({'status': 'ok'});
+  }
+
   @override
   Future<Result<MatchState>> fetchState(String m) async {
     final n = DateTime.now();
@@ -300,6 +318,36 @@ class GoldenArenaRepo implements MatchRepository {
 
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}
+
+/// 039: eş zamanlı düello (kural sürümü 4) — mevki ya da seçim aşaması
+class GoldenArenaV4Repo extends GoldenArenaRepo {
+  final String phase;
+  final bool amILead;
+  final bool iHavePlayed;
+  GoldenArenaV4Repo({required this.phase, this.amILead = true, this.iHavePlayed = false});
+
+  @override
+  Future<Result<MatchState>> fetchState(String m) async {
+    final temel = (await super.fetchState(m)).dataOrNull!;
+    return Success(temel.copyWith(
+      isMyTurn: false,
+      requiredPosition: phase == 'pick' ? CardPosition.forward : null,
+      turnDeadline: temel.serverTime!.add(Duration(seconds: phase == 'pick' ? 12 : 4)),
+      potCount: 0,
+      rulesVersion: 4,
+      simultaneous: true,
+      phase: phase,
+      amILead: amILead,
+      iHavePlayed: iHavePlayed,
+      tacticCosts: const {'high_press': 3, 'counter_attack': 2, 'defensive_wall': 2},
+      earlyFinishCards: 12,
+    ));
+  }
+
+  // Eş zamanlı düelloda rakibin bu turdaki hamlesi sunucudan HİÇ gelmez
+  @override
+  Future<Result<MatchHistory>> fetchHistory(String m) async => const Success(MatchHistory());
 }
 
 // ====================================================================

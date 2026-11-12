@@ -431,6 +431,15 @@ void main() {
 // SAHTE KAYNAKLAR
 // ====================================================================
 class _SahteRepo implements MatchRepository {
+  /// 039: seçilen mevkiler (testler okuyabilir)
+  final secilenMevkiler = <CardPosition>[];
+
+  @override
+  Future<Result<Map<String, dynamic>>> choosePosition(String matchId, CardPosition position) async {
+    secilenMevkiler.add(position);
+    return const Success({'status': 'ok'});
+  }
+
   MatchHistory gecmis = const MatchHistory();
 
   @override

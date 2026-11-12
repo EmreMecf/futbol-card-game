@@ -43,6 +43,9 @@ class MatchRemoteDataSource {
     });
   }
 
+  Future<Map<String, dynamic>> position(String matchId, String position) =>
+      _api.post('/match/$matchId/position', govde: {'position': position});
+
   Future<Map<String, dynamic>> timeout(String matchId) =>
       _api.post('/match/$matchId/timeout');
 

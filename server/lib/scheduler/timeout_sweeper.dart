@@ -17,6 +17,8 @@ class TimeoutSweeper {
   final Database _db;
   Timer? _macTimer;
   Timer? _tokenTimer;
+  Timer? _esZamanliTimer;
+  bool _esZamanliCalisiyor = false;
 
   TimeoutSweeper(this._db);
 
@@ -27,6 +29,12 @@ class TimeoutSweeper {
       (_) => _sweepMatches(),
     );
 
+    // ---- 039: es zamanli maclarda (surum 4) mevki / secim suresi ----
+    // Tur suresi 5-15 sn oldugu icin saniyede bir; sorgu kismi indeksle
+    // yalniz suresi dolmus surum 4 maclarina bakar. Onceki tur bitmeden
+    // yenisi baslamaz.
+    _esZamanliTimer = Timer.periodic(const Duration(seconds: 1), (_) => _esZamanliIlerlet());
+
     // ---- Eski refresh token'lar (saatte bir) ----
     _tokenTimer = Timer.periodic(
       const Duration(hours: 1),
@@ -35,6 +43,19 @@ class TimeoutSweeper {
 
     // ignore: avoid_print
     print('[ZAMANLAYICI] Her ${Env.sweepIntervalSeconds} saniyede bir mac taramasi yapilacak.');
+  }
+
+  Future<void> _esZamanliIlerlet() async {
+    if (_esZamanliCalisiyor) return;
+    _esZamanliCalisiyor = true;
+    try {
+      await _db.scalar('select advance_simultaneous_matches()');
+    } catch (e) {
+      // ignore: avoid_print
+      print('[ZAMANLAYICI] Es zamanli mac ilerletme basarisiz: $e');
+    } finally {
+      _esZamanliCalisiyor = false;
+    }
   }
 
   Future<void> _sweepMatches() async {
@@ -72,5 +93,6 @@ class TimeoutSweeper {
   void stop() {
     _macTimer?.cancel();
     _tokenTimer?.cancel();
+    _esZamanliTimer?.cancel();
   }
 }

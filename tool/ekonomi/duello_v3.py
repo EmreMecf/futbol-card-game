@@ -39,14 +39,18 @@ MALIYET = {'yok': 0, 'pres': 3, 'kontra': 2, 'duvar': 1}
 KIRAR = {'pres': 'duvar', 'duvar': 'kontra', 'kontra': 'pres'}
 
 
+# Taktik sayıları (021 ile aynı). denge_ara.py bunları değiştirerek tarar.
+P = {'pres': 9, 'kontra': 2, 'kontra_pres': 13, 'duvar': 6, 'duvar_ini': 2}
+
+
 def taktik_bonus(benim: str, onun: str, inisiyatif: bool) -> int:
     if benim == 'yok' or KIRAR.get(onun) == benim:
         return 0
     if benim == 'pres':
-        return 9
+        return P['pres']
     if benim == 'kontra':
-        return 13 if onun == 'pres' else 2
-    return 2 if inisiyatif else 6
+        return P['kontra_pres'] if onun == 'pres' else P['kontra']
+    return P['duvar_ini'] if inisiyatif else P['duvar']
 
 
 EGRI = 'b1'   # b1: seviye // 2 (en fazla +5) | b2: L4 +1, L7 +2, L10 +3
@@ -114,6 +118,9 @@ class Taraf:
             return 'yok'
         if self.ajan == 'acgozlu':
             return 'pres' if 'pres' in olur else 'yok'
+        if self.ajan.startswith('hep_'):
+            t = self.ajan[4:]
+            return t if t in olur else 'yok'
         if self.ajan == 'akilli':
             agirlik = {'yok': 30, 'duvar': 25, 'kontra': 25, 'pres': 20}
             return r.choices(olur, weights=[agirlik[t] for t in olur])[0]
@@ -241,6 +248,20 @@ def main():
         p, _, _, _ = olc(n, r, 'v3', a, b)
         L.append(f'| {a} | {b} | {yuzde(p)} |')
         print('v3', a, 'vs', b, yuzde(p))
+
+    # 3b) Saf taktik stratejileri (taş-kağıt-makas korunuyor mu?)
+    saf = ['hep_pres', 'hep_kontra', 'hep_duvar', 'akilli', 'taktiksiz']
+    L += ['', '## 3b. V3 saf taktik stratejileri (satır, sütuna karşı puan)', '',
+          '| | ' + ' | '.join(saf) + ' |', '|---|' + '---|' * len(saf)]
+    for x in saf:
+        satir = []
+        for y in saf:
+            p, _, _, _ = olc(n // 2, r, 'v3', x, y)
+            satir.append(yuzde(p))
+        L.append(f'| **{x}** | ' + ' | '.join(satir) + ' |')
+        print(x, satir)
+    L += ['', 'Aynı ajanlarla V2 kuralında akıllı, taktiksize karşı: ' + yuzde(olc(n // 2, r, 'v2', 'akilli', 'taktiksiz')[0])
+          + ' (karşılaştırma aynı simülatörde yapılmalı; prototip raporundaki %67,7 farklı kadro dağılımıyla ölçülmüştü).']
 
     # 4) Güç farkı duyarlılığı
     L += ['', '## 4. Güç farkı → kazanma (AYNI kadro, A\'nın bütün kartlarına +güç; ikisi de akıllı)', '',

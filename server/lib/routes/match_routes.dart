@@ -19,6 +19,7 @@ import '../utils/row_mappers.dart';
 ///   POST `/api/match/<id>/play`            -> Kart oyna (veya pas)
 ///   POST `/api/match/<id>/timeout`         -> Rakip AFK, maci talep et
 ///   POST `/api/match/<id>/surrender`       -> Teslim ol
+///   POST `/api/match/<id>/position`        -> Mevki sec (es zamanli surum 4)
 Router matchRoutes(Database db) {
   final router = Router();
 
@@ -184,8 +185,16 @@ Router matchRoutes(Database db) {
                else null
              end as tactic
       from match_moves mm
+      join matches mt on mt.id = mm.match_id
       left join cards c on c.id = mm.card_id
       where mm.match_id = @matchId::uuid
+        -- 039 GIZLILIK: es zamanli surumde (4) rakibin bu turdaki hamlesi
+        -- (kart dahil) tur cozulene kadar HIC gonderilmez. Eski surumlerde
+        -- acanin karti zaten acikti; orada yalniz taktik gizli (yukarida).
+        and (mm.user_id = @userId::uuid
+             or not rules_simultaneous(mt.rules_version)
+             or exists (select 1 from match_rounds r
+                        where r.match_id = mm.match_id and r.round_number = mm.round_number))
       order by mm.round_number, mm.is_lead desc
       ''',
       params: {'matchId': matchId, 'userId': userId},
@@ -283,9 +292,38 @@ Router matchRoutes(Database db) {
   // ------------------------------------------------------------------
   router.post('/<matchId>/timeout', (Request request, String matchId) async {
     final userId = requireUserId(request);
+    // 039: es zamanli macta sure asimini zamanlayici yurutur; istemci
+    // ayni islemi hemen tetikleyebilir (yalniz kendi macinda).
+    final esZamanli = await db.scalar(
+      '''select rules_simultaneous(rules_version) from matches
+         where id = @matchId::uuid and (player1_id = @userId::uuid or player2_id = @userId::uuid)''',
+      params: {'matchId': matchId, 'userId': userId},
+    );
+    if (esZamanli == true) {
+      final durum = await db.scalar('select advance_simultaneous_match(@matchId::uuid)', params: {'matchId': matchId});
+      return jsonOk({'status': durum});
+    }
     final sonuc = await db.scalar(
       'select claim_turn_timeout(@userId::uuid, @matchId::uuid)',
       params: {'userId': userId, 'matchId': matchId},
+    );
+    return jsonOk(sonuc);
+  });
+
+  // ------------------------------------------------------------------
+  // MEVKI SEC (039, es zamanli surum 4)
+  // ------------------------------------------------------------------
+  // Govde: { "position": "MID" }. Yalniz inisiyatif sahibi, mevki asamasinda.
+  router.post('/<matchId>/position', (Request request, String matchId) async {
+    final userId = requireUserId(request);
+    final body = await readJsonBody(request);
+    final mevki = requireString(body, 'position', label: 'Mevki');
+    if (!const {'GK', 'DEF', 'MID', 'FWD'}.contains(mevki)) {
+      throw const ApiException('Gecersiz mevki.', status: 400);
+    }
+    final sonuc = await db.scalar(
+      'select choose_position(@userId::uuid, @matchId::uuid, @pos::card_position)',
+      params: {'userId': userId, 'matchId': matchId, 'pos': mevki},
     );
     return jsonOk(sonuc);
   });

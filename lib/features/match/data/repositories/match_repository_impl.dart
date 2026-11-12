@@ -65,6 +65,10 @@ class MatchRepositoryImpl implements MatchRepository {
   }
 
   @override
+  Future<Result<Map<String, dynamic>>> choosePosition(String matchId, CardPosition position) =>
+      Result.guard(() => _remote.position(matchId, position.code));
+
+  @override
   Future<Result<Map<String, dynamic>>> claimTimeout(String matchId) =>
       Result.guard(() => _remote.timeout(matchId));
 

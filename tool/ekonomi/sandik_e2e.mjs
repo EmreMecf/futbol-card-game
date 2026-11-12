@@ -100,12 +100,15 @@ async function kadroyuTamamla(jeton, ad) {
 async function oyna(jeton, ilk) {
   const deste = await kadroyuTamamla(jeton, ilk ? 'A' : 'B');
   let mac = ilk ? await istek('/match/find', { yontem: 'POST', govde: { deck_id: deste.id }, jeton }) : null;
-  for (let i = 0; !mac?.match_id && i < 60; i++) {
-    if (!ilk && i === 0) mac = await istek('/match/find', { yontem: 'POST', govde: { deck_id: deste.id }, jeton });
+  // İstemci gibi 4 sn'de bir yeniden sor: iki test hesabının puan farkı
+  // büyükse eşleştirme aralığı ancak zamanla genişler (10 sn'de +50).
+  for (let i = 0; !mac?.match_id && i < 180; i++) {
+    if (i % 8 === (ilk ? 4 : 0)) mac = await istek('/match/find', { yontem: 'POST', govde: { deck_id: deste.id }, jeton });
     if (mac?.match_id) break;
     await bekle(500);
     mac = await istek('/match/active', { jeton });
   }
+  if (!mac?.match_id) throw new Error(`${ilk ? 'A' : 'B'}: 90 sn içinde eşleşme olmadı`);
   const id = mac.match_id;
   for (let d = 0; d < 400; d++) {
     const s = await istek(`/match/${id}/state`, { jeton });

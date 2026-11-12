@@ -155,7 +155,8 @@ class _MatchBodyState extends State<_MatchBody> {
       const SizedBox(height: Ref.pageGap),
       _VsSatiri(viewModel: vm, secili: seciliKart(vm)),
       const SizedBox(height: Ref.pageGap),
-      _El(state: this, viewModel: vm),
+      // 039: eş zamanlı düelloda önce mevki seçilir
+      if (vm.isPositionPhase) _MevkiSecici(viewModel: vm) else _El(state: this, viewModel: vm),
       if (vm.tacticsEnabled) ...[
         const SizedBox(height: Ref.pageGap),
         _Enerji(viewModel: vm),
@@ -188,7 +189,7 @@ class _MatchBodyState extends State<_MatchBody> {
                 const SizedBox(height: Ref.pageGap),
                 _VsSatiri(viewModel: vm, secili: seciliKart(vm)),
                 const SizedBox(height: Ref.pageGap),
-                _El(state: this, viewModel: vm),
+                if (vm.isPositionPhase) _MevkiSecici(viewModel: vm) else _El(state: this, viewModel: vm),
               ],
             ),
           ),
@@ -367,7 +368,16 @@ class _ArenaPaneli extends StatelessWidget {
     final d = viewModel.matchState!;
     final masada = viewModel.myTableMove != null || viewModel.opponentTableMove != null;
     final String yazi;
-    if (d.roundNumber == 1 && !masada) {
+    if (viewModel.isSimultaneous && !masada) {
+      // 039: eş zamanlı düello
+      if (viewModel.isPositionPhase) {
+        yazi = d.amILead ? 'MEVKİYİ SEÇ!' : 'RAKİP MEVKİ SEÇİYOR';
+      } else if (viewModel.waitingOpponentPick) {
+        yazi = 'RAKİP SEÇİYOR...';
+      } else {
+        yazi = 'KARTINI SEÇ!';
+      }
+    } else if (d.roundNumber == 1 && !masada) {
       yazi = 'İLK DÜDÜK!';
     } else if (masada) {
       yazi = 'KARTLAR SAHADA!';
@@ -445,7 +455,12 @@ class _VsSatiri extends StatelessWidget {
     }
 
     final zorunlu = vm.requiredPosition;
-    final benimBos = !vm.isMyTurn
+    final benimBos = vm.isPositionPhase
+        // 039: eş zamanlı düello
+        ? (vm.isMyTurn ? 'Önce mevkiyi seç' : 'Rakip mevki seçiyor')
+        : vm.waitingOpponentPick
+        ? 'Kartın gizli'
+        : !vm.isMyTurn
         ? 'Sıra rakipte'
         : vm.mustPass
         ? 'Bu mevkide kartın yok'
@@ -480,7 +495,9 @@ class _VsSatiri extends StatelessWidget {
               baslik: 'RAKİP KARTI',
               rakip: true,
               icerik: rakip,
-              bosMetin: vm.isMyTurn && zorunlu == null ? 'Turu sen açıyorsun' : 'Bekleniyor',
+              bosMetin: vm.isSimultaneous
+                  ? (vm.matchState!.opponentHasPlayed ? 'Seçti, gizli' : 'Seçiyor')
+                  : vm.isMyTurn && zorunlu == null ? 'Turu sen açıyorsun' : 'Bekleniyor',
             ),
           ),
         ],
@@ -723,6 +740,7 @@ class _Taktikler extends StatelessWidget {
           Expanded(
             child: _TaktikKarosu(
               taktik: MatchTactic.playable[i],
+              maliyet: vm.tacticCost(MatchTactic.playable[i]),
               secili: vm.selectedTactic == MatchTactic.playable[i],
               etkin: !kilitli && vm.canUseTactic(MatchTactic.playable[i]),
               onTap: () => vm.selectTactic(MatchTactic.playable[i]),
@@ -744,7 +762,16 @@ class _TaktikKarosu extends StatelessWidget {
   final bool etkin;
   final VoidCallback onTap;
 
-  const _TaktikKarosu({required this.taktik, required this.secili, required this.etkin, required this.onTap});
+  /// Bu maçtaki enerji maliyeti (039: sürüm 4'te Savunma Duvarı 2)
+  final int maliyet;
+
+  const _TaktikKarosu({
+    required this.taktik,
+    required this.secili,
+    required this.etkin,
+    required this.onTap,
+    required this.maliyet,
+  });
 
   @override
   Widget build(BuildContext context) => Tooltip(
@@ -753,7 +780,7 @@ class _TaktikKarosu extends StatelessWidget {
       button: true,
       selected: secili,
       enabled: etkin,
-      label: '${taktik.label}, ${taktik.cost} enerji. ${taktik.hint}',
+      label: '${taktik.label}, $maliyet enerji. ${taktik.hint}',
       excludeSemantics: true,
       child: GestureDetector(
         onTap: etkin ? onTap : null,
@@ -789,7 +816,7 @@ class _TaktikKarosu extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text('⚡ ${taktik.cost} enerji', style: Ref.bodyText(9, color: const Color(0xFF8DDAC9))),
+                Text('⚡ $maliyet enerji', style: Ref.bodyText(9, color: const Color(0xFF8DDAC9))),
               ],
             ),
           ),
@@ -813,7 +840,15 @@ class _DurumSatiri extends StatelessWidget {
     final zorunlu = vm.requiredPosition;
     final tur = vm.lastResolvedRound;
     String metin;
-    if (vm.mustPass && vm.isMyTurn) {
+    final d = vm.matchState;
+    if (vm.isSimultaneous && d != null && vm.isPositionPhase) {
+      // 039: eş zamanlı düello, mevki aşaması
+      metin = d.amILead
+          ? 'Mevkiyi sen seçiyorsun. İkiniz de o mevkiden kartınızı aynı anda, gizlice seçeceksiniz.'
+          : 'Rakip mevkiyi seçiyor. Sonra ikiniz aynı anda gizlice kart seçeceksiniz.';
+    } else if (vm.waitingOpponentPick) {
+      metin = 'Kartını oynadın. Rakip seçince ikisi birlikte açılır.';
+    } else if (vm.mustPass && vm.isMyTurn) {
       metin = 'Bu mevkide kartın yok: pas geçmek zorundasın (tur rakibe yazılır).';
     } else if (!vm.isMyTurn) {
       metin = 'Rakip düşünüyor...';
@@ -824,6 +859,8 @@ class _DurumSatiri extends StatelessWidget {
           '${secili!.fullName}: ${secili!.power}'
           '${secili!.hasChemistry ? ' + ${secili!.chemistry} kimya = ${secili!.effectivePower}' : ''}. '
           'Taktik seçip kartı oynayabilirsin.';
+    } else if (zorunlu != null && vm.isSimultaneous) {
+      metin = 'Mevki: ${zorunlu.label.toLowerCase()}. Kartını ve taktiğini gizlice seç; rakip seçimini göremez.';
     } else if (zorunlu != null) {
       metin = 'Rakip ${zorunlu.label.toLowerCase()} açtı: ${zorunlu.label.toLowerCase()} kartı oynamalısın.';
     } else {
@@ -1077,6 +1114,88 @@ class _HataEkrani extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    ),
+  );
+}
+
+// ====================================================================
+// 039: MEVKİ SEÇİCİ (eş zamanlı düello, mevki aşaması)
+// ====================================================================
+/// İnisiyatif sahibi bu turun mevkisini seçer; iki oyuncu da o mevkiden
+/// kartını gizlice seçecek. Rakip seçerken burada bekleme gösterilir.
+class _MevkiSecici extends StatelessWidget {
+  final MatchViewModel viewModel;
+  const _MevkiSecici({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = viewModel;
+    final d = vm.matchState!;
+    final say = vm.positionCounts;
+    final benSecerim = d.amILead;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Row(children: [
+        Expanded(child: Text(benSecerim ? 'MEVKİ SEÇ' : 'RAKİP MEVKİ SEÇİYOR', style: Ref.caps(benSecerim ? Ref.accent : Ref.muted))),
+        Text('${say.values.fold(0, (a, b) => a + b)} KART', style: Ref.caps(Ref.muted)),
+      ]),
+      const SizedBox(height: 8),
+      Row(children: [
+        for (final (i, mevki) in CardPosition.values.indexed) ...[
+          if (i > 0) const SizedBox(width: 7),
+          Expanded(
+            child: _MevkiDugmesi(
+              mevki: mevki,
+              adet: say[mevki] ?? 0,
+              etkin: benSecerim && (say[mevki] ?? 0) > 0 && !vm.isSubmittingMove,
+              onTap: () => vm.choosePosition(mevki),
+            ),
+          ),
+        ],
+      ]),
+    ]);
+  }
+}
+
+class _MevkiDugmesi extends StatelessWidget {
+  final CardPosition mevki;
+  final int adet;
+  final bool etkin;
+  final VoidCallback onTap;
+  const _MevkiDugmesi({required this.mevki, required this.adet, required this.etkin, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    enabled: etkin,
+    label: '${mevki.label}, elinde $adet kart',
+    excludeSemantics: true,
+    child: GestureDetector(
+      onTap: etkin ? onTap : null,
+      child: Opacity(
+        opacity: etkin ? 1 : 0.42,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 76),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(color: etkin ? Ref.accent : const Color(0xFF46637E)),
+            gradient: const LinearGradient(
+              begin: Alignment(-0.42, -0.9),
+              end: Alignment(0.42, 0.9),
+              colors: [Color(0xFF182942), Color(0xFF0E1B30)],
+            ),
+          ),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Text(mevki.code, style: Ref.heading(22, color: etkin ? Ref.accent : Ref.muted)),
+            const SizedBox(height: 2),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(mevki.label, maxLines: 1, style: Ref.bodyText(10, weight: FontWeight.w700)),
+            ),
+            Text('$adet kart', style: Ref.bodyText(9, color: const Color(0xFF8DDAC9))),
+          ]),
+        ),
       ),
     ),
   );

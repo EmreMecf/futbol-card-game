@@ -29,7 +29,12 @@ for m in $(cd "$KOK" && git ls-files 'database/migrations/*.sql' | sort); do
 done
 sql "insert into users (email, password_hash, username) values ('g1@test.local','x','gecmis_1'),('g2@test.local','x','gecmis_2');
      select grant_starter_pack(id) from users where username like 'gecmis_%';" >/dev/null
-sql "insert into economy_config_versions (kind, version, payload, note) values ('feature_flags', 2, '{\"economy_v2_enabled\": true}', 'kontrol');" >/dev/null
+# Ekonomi acik, YENI kural anahtarlari kapali (eski kurallarla oynanir)
+sql "insert into economy_config_versions (kind, version, payload, note)
+     select 'feature_flags', max(version) + 1,
+            (select payload from economy_config_versions where kind = 'feature_flags' order by version desc limit 1)
+              || '{\"economy_v2_enabled\": true}'::jsonb, 'kontrol'
+     from economy_config_versions where kind = 'feature_flags';" >/dev/null
 
 # Eski kurallarla 6 mac (031 testindeki oynatici ile ayni mantik)
 sql "do \$\$

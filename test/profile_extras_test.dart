@@ -224,6 +224,15 @@ class _SahteKoleksiyon implements CollectionRepository {
 }
 
 class _SahteMac implements MatchRepository {
+  /// 039: seçilen mevkiler (testler okuyabilir)
+  final secilenMevkiler = <CardPosition>[];
+
+  @override
+  Future<Result<Map<String, dynamic>>> choosePosition(String matchId, CardPosition position) async {
+    secilenMevkiler.add(position);
+    return const Success({'status': 'ok'});
+  }
+
   @override
   Future<Result<List<MatchHistoryEntry>>> fetchMatchHistoryList({
     int limit = 20,

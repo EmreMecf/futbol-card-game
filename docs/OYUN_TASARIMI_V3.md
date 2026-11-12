@@ -16,7 +16,7 @@ Denetim bulguları: `docs/OYUN_SISTEMI_DENETIMI.md`.
 | Uyamama | Mevkide kart yoksa pas, tur kaybedilir | Yok: iki kadro da 1-4-4-2 olduğundan her mevkide eşit kart var |
 | İnisiyatif | Turu kazanan açar; beraberlikte karşıya geçer | Aynı (turu kazanan mevkiyi seçer) |
 | Bitiş | 22 kart bitince | Bir oyuncu **12 kart** topladığında erken biter (çoğunluk) |
-| Süre aşımı | 45 sn + 15 sn, sonra hükmen yenilgi | Seçim yapılmazsa o mevkideki **en zayıf kart taktiksiz** oynanır; üst üste 2 kez olursa hükmen yenilgi |
+| Süre aşımı | 45 sn + 15 sn, sonra hükmen yenilgi | Mevki seçilmezse en çok kartın olduğu mevki; kart seçilmezse o mevkideki **en zayıf kart taktiksiz** oynanır. **Üst üste 2 turda** kartı otomatik oynanan hükmen kaybeder (otomatik mevki sayılmaz, elle mevki seçmek sayacı sıfırlar) |
 | Değişmeyen | Efsane kuralı, kimya, beraberlikte kartların ortada kalması, taktikler ve enerji (2 başlar, +1/tur, en fazla 5) | — |
 
 Savunma Duvarı'nın "savunurken +6 / açarken +2" kuralı aynen: inisiyatifi olmayan +6, olan +2.
@@ -35,6 +35,26 @@ Savunma Duvarı'nın "savunurken +6 / açarken +2" kuralı aynen: inisiyatifi ol
 (bugünkü raporda %32). Taktikler eş zamanlı düzende daha belirleyici; bu bir strateji oyunu
 için istenen şey ama **öğretici zorunlu** (Faz 3) ve taktik sayıları Faz 1'de prototipte
 (`packages/tactics_prototype`) yeniden dengelenmeli.
+
+**Taktik dengesi (Faz 1 ölçümü, `tool/ekonomi/denge_ara.py`):** eş zamanlı düzende 1 enerjili
+Savunma Duvarı her stratejiyi yeniyordu ("hep duvar" %84 akıllı oyuncuya karşı). **Duvar 2 enerji**
+yapıldı (yalnız sürüm 4): döngü korunuyor (pres > duvar %60, duvar > kontra %88, kontra > pres %75),
+akıllı oyuncu taktiksize karşı %80.
+
+### Faz 1 durumu: ✅ uygulandı (039, anahtar `duel_v4` KAPALI)
+
+- Migration `039_duel_v4.sql` (`tool/ekonomi/migration_uret_039.py` ile mevcut gövdelerden üretildi):
+  kural sürümü 4, `choose_position`, gizli `play_card`, `advance_simultaneous_matches` (sunucu saniyede
+  bir çağırır), 12 kartta erken bitiş. Sürüm 1–3 maçlar aynen.
+- Sunucu: `POST /api/match/<id>/position`; `/moves` sürüm 4'te rakibin bu turdaki hamlesini (kart dahil)
+  tur çözülene kadar **hiç** göndermez.
+- İstemci: mevki seçici, gizli seçim / rakip bekleniyor yazıları, taktik maliyeti maçın sürümünden.
+- Testler: `039_duel_v4_test.sql`, ViewModel (5), ekran görüntüleri (`duello_v4_golden_test.dart`),
+  gerçek sunucuda `tool/ekonomi/duello_v4_e2e.mjs` (REST + WebSocket gizliliği, zamanlayıcı, erken
+  bitiş, ödüller), paralel oturum yarış testi `scripts/esz-zamanli-yaris-testi.sh`.
+- Sunucu/WebSocket/animasyon/süre aşımı tasarımı, staging ve üretim planı:
+  `docs/V3_UYGULAMA_VE_STAGING_PLANI.md`.
+- Açma sırası: `economy_v2_enabled` + `ranked_rewards_v2` + `duel_v4` üçü birlikte açıkken yeni maçlar sürüm 4.
 
 ## 2. Seviye gücü (B) ve adalet
 

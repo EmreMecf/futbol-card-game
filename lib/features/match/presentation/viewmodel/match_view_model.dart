@@ -105,7 +105,37 @@ class MatchViewModel extends BaseViewModel {
   // ------------------------------------------------------------------
   // TÜRETİLMİŞ DEĞERLER
   // ------------------------------------------------------------------
-  bool get isMyTurn => _durum?.isMyTurn ?? false;
+  /// Bir şey yapmam gerekiyor mu? Eş zamanlı düelloda (039) "sıra" yok:
+  /// mevki aşamasında inisiyatif sahibi, seçim aşamasında henüz kartını
+  /// oynamamış İKİ oyuncu da hamle yapabilir.
+  bool get isMyTurn {
+    final d = _durum;
+    if (d == null) return false;
+    if (d.simultaneous) return d.canChoosePosition || d.canPickSimultaneous;
+    return d.isMyTurn;
+  }
+
+  /// 039: eş zamanlı düello mu?
+  bool get isSimultaneous => _durum?.simultaneous ?? false;
+
+  /// 039: mevki aşamasında mıyız (eş zamanlı)?
+  bool get isPositionPhase => isSimultaneous && _durum?.phase == 'position';
+
+  /// 039: bu turda kartımı oynadım, rakibi bekliyorum
+  bool get waitingOpponentPick =>
+      isSimultaneous && (_durum?.phase == 'pick') && (_durum?.iHavePlayed ?? false) && !isOver;
+
+  /// 039: mevki seçiminde her mevkide elimde kaç kart var
+  Map<CardPosition, int> get positionCounts {
+    final say = <CardPosition, int>{};
+    for (final k in _el.where((k) => !k.isPlayed)) {
+      say[k.position] = (say[k.position] ?? 0) + 1;
+    }
+    return say;
+  }
+
+  /// Taktiğin bu maçtaki maliyeti (sürüm 4'te duvar 2)
+  int tacticCost(MatchTactic t) => _durum?.tacticCost(t) ?? t.cost;
   bool get isOver => _durum?.isOver ?? false;
 
   /// Turu ben mi açıyorum? (açıyorsam istediğim pozisyonu seçebilirim)
@@ -116,6 +146,8 @@ class MatchViewModel extends BaseViewModel {
 
   /// Elimdeki oynanabilir kartlar
   List<HandCard> get playableCards {
+    // 039: mevki seçilmeden eş zamanlı düelloda kart oynanmaz
+    if (isPositionPhase) return const [];
     final zorunlu = requiredPosition;
     return _el.where((k) {
       if (k.isPlayed) return false;
@@ -130,7 +162,8 @@ class MatchViewModel extends BaseViewModel {
   /// formasyonunda iki oyuncunun pozisyon dağılımı aynı olduğu için bu
   /// durum normalde oluşmaz; ama kural gereği ele alınıyor.
   bool get mustPass =>
-      isMyTurn && requiredPosition != null && playableCards.isEmpty;
+      // 039: eş zamanlı düelloda pası sunucu yazar
+      !isSimultaneous && isMyTurn && requiredPosition != null && playableCards.isEmpty;
 
   // ------------------------------------------------------------------
   // TAKTİK VE ENERJİ (021_tactics.sql)
@@ -144,7 +177,7 @@ class MatchViewModel extends BaseViewModel {
   MatchTactic get selectedTactic {
     if (!tacticsEnabled) return MatchTactic.none;
     // Enerji düştüyse (ör. tur çözüldü) seçim artık geçersiz olabilir
-    if (!_secilenTaktik.isAffordable(myEnergy)) return MatchTactic.none;
+    if (tacticCost(_secilenTaktik) > myEnergy) return MatchTactic.none;
     return _secilenTaktik;
   }
 
@@ -162,7 +195,8 @@ class MatchViewModel extends BaseViewModel {
       isMyTurn &&
       !isOver &&
       !mustPass &&
-      t.isAffordable(myEnergy);
+      !isPositionPhase &&
+      tacticCost(t) <= myEnergy;
 
   /// Taktiği seçer; aynı taktiğe tekrar dokunmak seçimi kaldırır.
   void selectTactic(MatchTactic t) {
@@ -266,12 +300,16 @@ class MatchViewModel extends BaseViewModel {
   /// Dolduysa maçı hükmen talep edebiliriz.
   bool get canClaimTimeout {
     final d = _durum;
-    if (d == null || d.isOver || d.isMyTurn) return false;
-
+    if (d == null || d.isOver) return false;
     final son = d.turnDeadline;
     if (son == null) return false;
-
     final sunucuSimdi = DateTime.now().add(_saatFarki);
+
+    // 039: eş zamanlı düelloda süreyi sunucu yürütür; süre dolunca
+    // istemci yalnız hemen ilerletmeyi ister (1 sn pay).
+    if (d.simultaneous) return sunucuSimdi.isAfter(son.add(const Duration(seconds: 1)));
+    if (d.isMyTurn) return false;
+
     return sunucuSimdi.isAfter(son.add(GameRules.afkGrace));
   }
 
@@ -438,6 +476,23 @@ class MatchViewModel extends BaseViewModel {
 
     // Taktik bu kartla kullanıldı; sonraki hamle sıfırdan seçilir
     _secilenTaktik = MatchTactic.none;
+    await _tazele();
+    return true;
+  }
+
+  /// 039: eş zamanlı düelloda mevkiyi seçer (yalnız inisiyatif sahibi)
+  Future<bool> choosePosition(CardPosition mevki) async {
+    if (!isPositionPhase || !(_durum?.canChoosePosition ?? false) || _hamleGonderiliyor) return false;
+    _hamleGonderiliyor = true;
+    safeNotify();
+    final sonuc = await _repository.choosePosition(matchId, mevki);
+    _hamleGonderiliyor = false;
+    final hata = sonuc.errorOrNull;
+    if (hata != null) {
+      setError(hata);
+      _gecikmeliTazele();
+      return false;
+    }
     await _tazele();
     return true;
   }

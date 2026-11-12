@@ -478,6 +478,72 @@ void main() {
     expect(session.protectionSlots, 4);
     expect(session.user?.coins, 1100);
   });
+
+  // ==================================================================
+  // 039: ES ZAMANLI DUELLO (kural surumu 4)
+  // ==================================================================
+  group('Es zamanli duello (surum 4)', () {
+    MatchState v4({required String phase, bool lead = true, bool oynadim = false, CardPosition? mevki, int enerji = 2}) =>
+        durum(isMyTurn: false, requiredPosition: mevki, enerji: enerji).copyWith(
+          simultaneous: true,
+          phase: phase,
+          amILead: lead,
+          iHavePlayed: oynadim,
+          tacticCosts: const {'high_press': 3, 'counter_attack': 2, 'defensive_wall': 2},
+          earlyFinishCards: 12,
+        );
+
+    test('mevki asamasi: yalniz inisiyatif sahibi secer, kart oynanamaz', () async {
+      repo.durum = v4(phase: 'position');
+      repo.el = testEli();
+      await vm.initialize();
+      expect(vm.isPositionPhase, isTrue);
+      expect(vm.isMyTurn, isTrue, reason: 'sunucu isMyTurn=false gonderse de mevkiyi ben secerim');
+      expect(vm.playableCards, isEmpty, reason: 'mevki secilmeden kart yok');
+      expect(vm.positionCounts[CardPosition.defender], 2);
+      expect(await vm.choosePosition(CardPosition.defender), isTrue);
+      expect(repo.secilenMevkiler, [CardPosition.defender]);
+    });
+
+    test('mevki asamasi: inisiyatif rakipteyse secemem', () async {
+      repo.durum = v4(phase: 'position', lead: false);
+      await vm.initialize();
+      expect(vm.isMyTurn, isFalse);
+      expect(await vm.choosePosition(CardPosition.goalkeeper), isFalse);
+      expect(repo.secilenMevkiler, isEmpty);
+    });
+
+    test('secim asamasi: inisiyatifsiz oyuncu da oynar; oynayinca bekler', () async {
+      repo.durum = v4(phase: 'pick', lead: false, mevki: CardPosition.defender);
+      repo.el = testEli();
+      await vm.initialize();
+      expect(vm.isMyTurn, isTrue, reason: 'es zamanli: iki oyuncu da secer');
+      expect(vm.playableCards.map((k) => k.userCardId), ['k2', 'k3']);
+      expect(vm.mustPass, isFalse);
+      repo.durum = v4(phase: 'pick', lead: false, mevki: CardPosition.defender, oynadim: true);
+      await vm.refresh();
+      expect(vm.isMyTurn, isFalse);
+      expect(vm.waitingOpponentPick, isTrue);
+    });
+
+    test('surum 4 taktik maliyeti sunucudan: duvar 2 enerji', () async {
+      repo.durum = v4(phase: 'pick', mevki: CardPosition.defender, enerji: 1);
+      await vm.initialize();
+      expect(vm.tacticCost(MatchTactic.defensiveWall), 2);
+      expect(vm.canUseTactic(MatchTactic.defensiveWall), isFalse, reason: '1 enerji yetmez');
+      repo.durum = v4(phase: 'pick', mevki: CardPosition.defender, enerji: 2);
+      await vm.refresh();
+      expect(vm.canUseTactic(MatchTactic.defensiveWall), isTrue);
+    });
+
+    test('eski surumde davranis ayni: sira yoksa oynayamam', () async {
+      repo.durum = durum(isMyTurn: false, requiredPosition: CardPosition.defender);
+      await vm.initialize();
+      expect(vm.isSimultaneous, isFalse);
+      expect(vm.isMyTurn, isFalse);
+      expect(vm.tacticCost(MatchTactic.defensiveWall), 1);
+    });
+  });
 }
 
 // ====================================================================
@@ -485,6 +551,15 @@ void main() {
 // ====================================================================
 
 class _SahteRepository implements MatchRepository {
+  /// 039: seçilen mevkiler (testler okuyabilir)
+  final secilenMevkiler = <CardPosition>[];
+
+  @override
+  Future<Result<Map<String, dynamic>>> choosePosition(String matchId, CardPosition position) async {
+    secilenMevkiler.add(position);
+    return const Success({'status': 'ok'});
+  }
+
   MatchState? durum;
   int durumIstegi = 0;
   List<HandCard> el = const [];
