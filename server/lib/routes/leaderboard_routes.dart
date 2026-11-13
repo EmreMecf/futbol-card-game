@@ -77,6 +77,22 @@ Router leaderboardRoutes(Database db) {
   });
 
   // ------------------------------------------------------------------
+  // KUPA YOLU (043)
+  // ------------------------------------------------------------------
+  // GET /api/leaderboard/trophy-road
+  //
+  // Her basamagin odulu ve oyuncu icin durumu (alindi / acilistan once
+  // ulasilmis / kilitli). Anahtar kapaliysa enabled=false.
+  router.get('/trophy-road', (Request request) async {
+    final userId = requireUserId(request);
+    final durum = await db.scalar(
+      'select trophy_road_overview(@userId::uuid)',
+      params: {'userId': userId},
+    );
+    return jsonOk(TrophyRoad.fromJson(RowMappers.asMap(durum)).toJson());
+  });
+
+  // ------------------------------------------------------------------
   // BASAMAK TANIMLARI
   // ------------------------------------------------------------------
   // GET /api/leaderboard/tiers

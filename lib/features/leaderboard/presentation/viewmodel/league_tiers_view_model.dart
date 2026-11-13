@@ -11,7 +11,18 @@ import '../../domain/repositories/leaderboard_repository.dart';
 class LeagueTiersViewModel extends BaseViewModel {
   final LeaderboardRepository _repository;
 
-  LeagueTiersViewModel(this._repository);
+  LeagueTiersViewModel(this._repository, {Future<TrophyRoad?> Function()? trophyRoad})
+      // ignore: prefer_initializing_formals
+      : _kupaYoluSor = trophyRoad;
+
+  /// 043: kupa yolu (kayıt yoksa ya da anahtar kapalıysa gösterilmez)
+  final Future<TrophyRoad?> Function()? _kupaYoluSor;
+  TrophyRoad? _kupaYolu;
+  TrophyRoad? get trophyRoad => (_kupaYolu?.enabled ?? false) ? _kupaYolu : null;
+
+  /// Bir basamağın kupa yolu bilgisi (yoksa null)
+  TrophyRoadTier? trophyTier(int tierId) =>
+      trophyRoad?.tiers.where((t) => t.tierId == tierId).firstOrNull;
 
   List<LeagueTier> _basamaklar = const [];
   List<LeagueTier> get tiers => _basamaklar;
@@ -30,7 +41,14 @@ class LeagueTiersViewModel extends BaseViewModel {
   Future<void> initialize() async {
     // Basamak listesi asıl içerik; rütbe sadece vurgu için.
     // Rütbe gelmese de liste gösterilebilmeli.
-    await Future.wait([loadTiers(), loadRank()]);
+    await Future.wait([loadTiers(), loadRank(), loadTrophyRoad()]);
+  }
+
+  Future<void> loadTrophyRoad() async {
+    final sor = _kupaYoluSor;
+    if (sor == null) return;
+    _kupaYolu = await sor();
+    safeNotify();
   }
 
   Future<void> loadTiers() async {

@@ -235,3 +235,56 @@ class LeagueGroup {
     ];
   }
 }
+
+/// 043: KUPA YOLU — bir basamağın ödülü ve oyuncu için durumu.
+@freezed
+abstract class TrophyRoadTier with _$TrophyRoadTier {
+  const TrophyRoadTier._();
+
+  const factory TrophyRoadTier({
+    required int tierId,
+    @Default('') String leagueCode,
+    @Default('') String leagueName,
+    @Default(1) int division,
+    @Default(0) int minMmr,
+
+    /// {"chest": "gold", "coins": 100, "cosmetic": "..."}; Amatör 1 için null
+    Map<String, dynamic>? reward,
+
+    /// 'granted' (alındı) | 'reached_before' (açılıştan önce ulaşılmış,
+    /// ödülsüz) | 'locked' (henüz ulaşılmadı)
+    @Default('locked') String status,
+  }) = _TrophyRoadTier;
+
+  factory TrophyRoadTier.fromJson(Map<String, dynamic> json) => _$TrophyRoadTierFromJson(json);
+
+  bool get isGranted => status == 'granted';
+  bool get isLocked => status == 'locked';
+
+  /// Kısa ödül metni: "Altın sandık +100" / "Gümüş sandık +50 · çerçeve"
+  String get rewardText {
+    final r = reward;
+    if (r == null) return '';
+    const sandik = {'bronze': 'Bronz', 'silver': 'Gümüş', 'gold': 'Altın', 'legend': 'Efsane'};
+    final parcalar = <String>[];
+    final s = r['chest'];
+    if (s != null) parcalar.add('${sandik[s] ?? s} sandık');
+    final altin = (r['coins'] as num?)?.toInt() ?? 0;
+    if (altin > 0) parcalar.add('+$altin altın');
+    if (r['cosmetic'] != null) parcalar.add('çerçeve');
+    return parcalar.join(' · ');
+  }
+}
+
+/// 043: KUPA YOLU — oyuncunun bütün basamakları (GET /leaderboard/trophy-road).
+@freezed
+abstract class TrophyRoad with _$TrophyRoad {
+  const factory TrophyRoad({
+    @Default(false) bool enabled,
+    int? currentTier,
+    int? bestTier,
+    @Default([]) List<TrophyRoadTier> tiers,
+  }) = _TrophyRoad;
+
+  factory TrophyRoad.fromJson(Map<String, dynamic> json) => _$TrophyRoadFromJson(json);
+}

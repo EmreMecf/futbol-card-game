@@ -48,8 +48,17 @@ class _Govde extends StatelessWidget {
       ]);
     } else {
       icerik = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        // 043: kupa yolu açıksa basamak ödülleri
+        if (vm.trophyRoad != null) ...[
+          const RefNote(
+            'Her basamağa İLK ulaştığında bir kez ödül alırsın. Sezon sonunda Usta ve üstü bir basamak '
+            'geri iner; geri çıkınca aynı ödül tekrar verilmez. Yeni lige girişte profil çerçevesi.',
+            title: 'Kupa yolu',
+          ),
+          const SizedBox(height: Ref.pageGap),
+        ],
         for (final g in vm.groups) ...[
-          _LigGrubu(group: g, myTierId: vm.myTierId),
+          _LigGrubu(group: g, myTierId: vm.myTierId, kupa: vm.trophyTier),
           const SizedBox(height: Ref.pageGap),
         ],
         const RefNote(
@@ -98,7 +107,8 @@ class _Govde extends StatelessWidget {
 class _LigGrubu extends StatelessWidget {
   final LeagueGroup group;
   final int? myTierId;
-  const _LigGrubu({required this.group, required this.myTierId});
+  final TrophyRoadTier? Function(int tierId) kupa;
+  const _LigGrubu({required this.group, required this.myTierId, required this.kupa});
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +137,13 @@ class _LigGrubu extends StatelessWidget {
         Row(children: [
           for (var i = 0; i < group.tiers.length; i++) ...[
             if (i > 0) const SizedBox(width: 7),
-            Expanded(child: _Basamak(tier: group.tiers[i], benim: group.tiers[i].tierId == myTierId)),
+            Expanded(
+              child: _Basamak(
+                tier: group.tiers[i],
+                benim: group.tiers[i].tierId == myTierId,
+                kupa: kupa(group.tiers[i].tierId),
+              ),
+            ),
           ],
         ]),
       ]),
@@ -138,11 +154,29 @@ class _LigGrubu extends StatelessWidget {
 class _Basamak extends StatelessWidget {
   final LeagueTier tier;
   final bool benim;
-  const _Basamak({required this.tier, required this.benim});
+  final TrophyRoadTier? kupa;
+  const _Basamak({required this.tier, required this.benim, this.kupa});
+
+  /// 043: ödül + durum satırı (✅ alındı, 🔒 kilitli, — açılıştan önce)
+  Widget? _kupaSatiri() {
+    final k = kupa;
+    if (k == null || k.reward == null) return null;
+    final simge = k.isGranted ? '✅' : (k.isLocked ? '🔒' : '—');
+    return Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: Text(
+        '$simge ${k.rewardText}',
+        textAlign: TextAlign.center,
+        maxLines: 3,
+        style: Ref.bodyText(9, color: k.isGranted ? Ref.accent : Ref.muted, weight: FontWeight.w700, height: 1.25),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) => Semantics(
-        label: '${tier.label}, ${tier.minMmr} puan${benim ? ', şu an buradasın' : ''}',
+        label: '${tier.label}, ${tier.minMmr} puan${benim ? ', şu an buradasın' : ''}'
+            '${kupa?.reward != null ? ', ödül ${kupa!.rewardText}${kupa!.isGranted ? ', alındı' : ''}' : ''}',
         excludeSemantics: true,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 9),
@@ -158,6 +192,7 @@ class _Basamak extends StatelessWidget {
               child: Text(trThousands(tier.minMmr), style: Ref.heading(22, color: Ref.statValue, height: 1.2)),
             ),
             Text('puan', style: Ref.bodyText(10, color: Ref.statLabel)),
+            ?_kupaSatiri(),
           ]),
         ),
       );

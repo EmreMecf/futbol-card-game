@@ -60,6 +60,7 @@ import '../../features/leaderboard/data/datasources/leaderboard_remote_datasourc
 import '../../features/leaderboard/data/repositories/leaderboard_repository_impl.dart';
 import '../../features/leaderboard/domain/repositories/leaderboard_repository.dart';
 import '../../features/leaderboard/presentation/viewmodel/leaderboard_view_model.dart';
+import '../../features/leaderboard/data/trophy_road.dart';
 import '../../features/leaderboard/presentation/viewmodel/league_tiers_view_model.dart';
 
 /// Uygulamanin servis konteyneri (Service Locator).
@@ -231,7 +232,11 @@ Future<void> configureDependencies() async {
       (gorev, _) => SbcBuilderViewModel(getIt<SbcRepository>(), challenge: gorev),
     )
     ..registerFactory<LeagueTiersViewModel>(
-      () => LeagueTiersViewModel(getIt<LeaderboardRepository>()),
+      () => LeagueTiersViewModel(
+        getIt<LeaderboardRepository>(),
+        // 043: kupa yolu (anahtar kapalıysa görünmez)
+        trophyRoad: () => fetchTrophyRoad(getIt<ApiClient>()),
+      ),
     )
     ..registerFactory<LeaderboardViewModel>(
       () => LeaderboardViewModel(

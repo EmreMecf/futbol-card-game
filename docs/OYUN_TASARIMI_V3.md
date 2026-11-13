@@ -101,6 +101,35 @@ küçük tutulmalı ve **eşleştirme seviyeyi görmeli**.
 - Sezon sonu: Usta ve üstü bir basamak geri (yumuşak sıfırlama) + sezon ligi ödülü. Battle Pass
   sezonuyla aynı takvim.
 
+### Faz 4 durumu: ✅ uygulandı (043, anahtarlar `trophy_road` ve `league_season_reset` KAPALI)
+
+Kullanıcı kararları (13 Kasım 2026): önerilen ödül tablosu, **geriye dönük ödül yok**, sezon sonu yumuşak
+sıfırlama + ödül, **kart havuzu kuralı şimdilik yok** (sandık şansları değişmedi).
+
+| Basamak | İlk ulaşılınca (bir kez) |
+|---|---|
+| Amatör 1 | Başlangıç, ödülsüz |
+| Amatör 2-3 | Gümüş sandık + 50 altın |
+| Usta 1 | Altın sandık + 100 altın + **Usta çerçevesi** |
+| Usta 2-3 | Altın sandık + 100 altın |
+| Master 1 | Altın sandık + 200 altın + **Master çerçevesi** |
+| Master 2-3 | Altın sandık + 200 altın |
+| Master Class 1 | Efsane sandık + 300 altın + **Master Class çerçevesi** |
+| Master Class 2-3 | Efsane sandık + 300 altın |
+
+- Ödül tablosu `economy_config_versions` (tür `trophy_road`, sürüm 1); ileride yeni sürüm satırıyla değişir.
+- Geriye dönük yok: oyuncunun şimdiye kadar ulaştığı en yüksek basamak (şu anki puan ve maç
+  kayıtlarındaki önce/sonra puanları) ödülsüz sayılır. Düşüp yeniden çıkmak ödül vermez.
+- **Sezon sonu** (Sezon Yolu kapanınca): o sezon en az bir dereceli maç bitiren oyuncu bitiş ligine göre
+  ödül alır (Amatör Gümüş, Usta Altın, Master Altın + 200 altın, Master Class Efsane). Usta ve üstü
+  herkesin puanı bir alt basamağın tabanına iner; Amatör'e dokunulmaz. Her sonuç `season_league_results`'ta.
+- Botlar ödül ve sıfırlama görmez. Maç, MMR ±25, eşleştirme ve sandık şansları değişmedi.
+- Ligler ekranında her basamağın altında ödül ve durum (✅ alındı · 🔒 kilitli · — açılıştan önce).
+- "En alt basamak 0 puandan" maddesi uygulanmadı: `rank_for_mmr` zaten 1000'in altını Amatör 1 sayıyor;
+  eşik tablosunu değiştirmek ilerleme çubuğunu herkes için değiştirirdi.
+- Testler: `database/tests/043_trophy_road_test.sql`, `test/trophy_road_test.dart`, gerçek sunucuda
+  `tool/ekonomi/kupa_yolu_e2e.mjs`.
+
 ## 4. Yeni oyuncu ve tek oyunculu döngü
 
 - **Öğretici:** 3 kısa maç (mevki → gizli seçim → taktik), sonunda bir Gümüş sandık.
@@ -166,7 +195,7 @@ Kullanıcı kararı (13 Kasım 2026) tasarımı şöyle netleştirdi:
 | 1 | Sürüm 4 düello: prototipte denge → migration → sunucu → maç ekranı (gizli seçim, 5+15 sn) | **Evet** |
 | 2 | Seviye bonusu B2 + etkin güce göre eşleştirme + lig tavanı (✅ 040, kapalı) | **Evet** (güç hesabı) |
 | 3 | Öğretici + bot + antrenman (✅ 041 + 042, anahtarlar kapalı) | Hayır |
-| 4 | Kupa yolu ödülleri, lig tabanı, sezon sıfırlaması | Hayır |
+| 4 | Kupa yolu ödülleri, lig tabanı, sezon sıfırlaması (✅ 043, kapalı; kart havuzu kuralı yok) | Hayır |
 | 5 | Günlük döngü, etkinlik, mağaza teklifleri, sadeleştirmeler | Hayır |
 
 Hepsi yeni kural sürümü ve varsayılan kapalı anahtarlarla; süren maçlar eski kuralla biter.
