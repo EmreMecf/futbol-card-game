@@ -317,10 +317,24 @@ jobs:
           dart pub get
           dart run build_runner build --delete-conflicting-outputs
 
-      # key.properties CI'da yok: paket debug anahtariyla imzalanir
-      # (yuklenemez, sadece DERLENEBILIRLIK kontrolu).
-      - name: Release APK
+      # key.properties CI'da yok: APK debug anahtariyla imzalanir.
+      # TEST TELEFONUNA KURULABILIR, Play Store'a yuklenemez.
+      - name: Staging release APK (gercek HTTPS API)
+        if: github.event_name == 'pull_request' && github.head_ref == 'infra/staging-docker-render'
+        run: flutter build apk --release --dart-define=API_BASE_URL=https://futbol-card-staging-api-lzq3.onrender.com
+
+      - name: Release APK derlenebilirlik (diger dallar)
+        if: ${{ !(github.event_name == 'pull_request' && github.head_ref == 'infra/staging-docker-render') }}
         run: flutter build apk --release --dart-define=API_BASE_URL=https://ci.example.invalid
+
+      - name: Staging APK dosyasini indirilebilir artifact olarak sakla
+        if: github.event_name == 'pull_request' && github.head_ref == 'infra/staging-docker-render'
+        uses: actions/upload-artifact@v4
+        with:
+          name: futbol-card-arena-staging-android
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 7
 
       - name: APK icinde INTERNET izni olmali
         run: |
