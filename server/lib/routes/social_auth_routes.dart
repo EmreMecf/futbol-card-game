@@ -108,6 +108,54 @@ Router socialAuthRoutes(Database db, JwtService jwt,
         user: RowMappers.user(user), tokens: tokens).toJson());
   });
 
+  // Existing password-account holders explicitly link a provider only
+  // while authenticated. Identical emails are NEVER enough to link.
+  router.post('/social/link', (Request request) async {
+    final authorization = request.headers['authorization'] ?? '';
+    if (!authorization.startsWith('Bearer ')) {
+      throw const ApiException('Oturum gerekli.', status: 401);
+    }
+    final userId = jwt.verifyAccessToken(authorization.substring(7));
+    if (userId == null) {
+      throw const ApiException('Oturum gecersiz.', status: 401);
+    }
+    final body = await readJsonBody(request);
+    final identity = await verify.verify(
+      provider: requireString(body, 'provider'),
+      idToken: requireString(body, 'id_token'),
+      appleRawNonce: body['raw_nonce'] as String?,
+    );
+    await db.pool.runTx((tx) async {
+      final existing = await tx.execute(Sql.named('''
+        select user_id from user_auth_providers
+        where provider = @provider and provider_subject = @subject
+      '''), parameters: {
+        'provider': identity.provider, 'subject': identity.subject,
+      });
+      if (existing.isNotEmpty &&
+          existing.first.toColumnMap()['user_id'].toString() != userId) {
+        throw const ApiException('Bu sosyal hesap baska oyuncuya bagli.', status: 409);
+      }
+      final providerForUser = await tx.execute(Sql.named('''
+        select provider_subject from user_auth_providers
+        where provider = @provider and user_id = @uid::uuid
+      '''), parameters: {'provider': identity.provider, 'uid': userId});
+      if (providerForUser.isNotEmpty &&
+          providerForUser.first.toColumnMap()['provider_subject'] != identity.subject) {
+        throw const ApiException('Bu oyuncuya farkli bir sosyal hesap bagli.', status: 409);
+      }
+      if (existing.isEmpty) {
+        await tx.execute(Sql.named('''
+          insert into user_auth_providers(provider, provider_subject, user_id)
+          values (@provider, @subject, @uid::uuid)
+        '''), parameters: {
+          'provider': identity.provider, 'subject': identity.subject, 'uid': userId,
+        });
+      }
+    });
+    return jsonOk({'status': 'linked', 'provider': identity.provider});
+  });
+
   return router;
 }
 
