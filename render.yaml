@@ -8,9 +8,8 @@ databases:
     databaseName: futbol_card_staging
     user: futbol_staging
     region: frankfurt
-    plan: basic-1gb
+    plan: free
     postgresMajorVersion: "17"
-    diskSizeGB: 1
     ipAllowList: []
 
 services:
@@ -18,7 +17,7 @@ services:
     name: futbol-card-staging-api
     runtime: docker
     region: frankfurt
-    plan: starter
+    plan: free
     branch: infra/staging-docker-render
     autoDeployTrigger: off
     numInstances: 1
