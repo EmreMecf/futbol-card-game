@@ -327,3 +327,13 @@ jobs:
           AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt | sort -V | tail -1)
           "$AAPT" dump badging build/app/outputs/flutter-apk/app-release.apk | tee badging.txt | grep -E "^package|application-label"
           grep -q "uses-permission: name='android.permission.INTERNET'" badging.txt
+
+  # -------------------------------------------------------------------
+  staging_docker:
+    name: Staging Docker build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Docker staging image
+        run: docker build --pull -f Dockerfile.staging -t futbol-card-staging:ci .
