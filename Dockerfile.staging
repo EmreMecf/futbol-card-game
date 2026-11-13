@@ -11,9 +11,13 @@ RUN dart pub get && dart compile exe bin/server.dart -o /work/futbol-card-server
 
 FROM dart:3.14 AS runtime
 WORKDIR /app
+USER root
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends postgresql-client ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=builder --chown=65532:65532 /work/futbol-card-server /app/futbol-card-server
+COPY --chown=65532:65532 database/migrations/ /app/migrations/
+COPY --chown=65532:65532 scripts/staging-db-bootstrap.sh /app/staging-db-bootstrap.sh
 USER 65532:65532
 ENV ENVIRONMENT=production
 ENV HOST=0.0.0.0
 EXPOSE 10000
-CMD ["/app/futbol-card-server"]
+ENTRYPOINT ["/bin/sh", "/app/staging-db-bootstrap.sh"]
