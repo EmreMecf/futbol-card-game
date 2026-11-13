@@ -31,6 +31,26 @@ class AuthRemoteDataSource {
     );
   }
 
+  Future<Map<String, dynamic>> socialSignIn({
+    required String provider,
+    required String idToken,
+    String? rawNonce,
+  }) => _api.post('/auth/social/', govde: {
+    'provider': provider,
+    'id_token': idToken,
+    if (rawNonce != null) 'raw_nonce': rawNonce,
+  });
+
+  Future<Map<String, dynamic>> linkSocial({
+    required String provider,
+    required String idToken,
+    String? rawNonce,
+  }) => _api.post('/auth/social/link', govde: {
+    'provider': provider,
+    'id_token': idToken,
+    if (rawNonce != null) 'raw_nonce': rawNonce,
+  });
+
   Future<void> signOut(String? refreshToken) async {
     await _api.post('/auth/logout', govde: {'refresh_token': ?refreshToken});
   }
