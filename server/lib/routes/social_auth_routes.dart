@@ -18,7 +18,7 @@ Router socialAuthRoutes(Database db, JwtService jwt,
   final router = Router();
   final verify = verifier ?? SocialTokenVerifier();
 
-  router.post('/social', (Request request) async {
+  router.post('/', (Request request) async {
     final body = await readJsonBody(request);
     final provider = requireString(body, 'provider');
     final token = requireString(body, 'id_token');
@@ -110,7 +110,7 @@ Router socialAuthRoutes(Database db, JwtService jwt,
 
   // Existing password-account holders explicitly link a provider only
   // while authenticated. Identical emails are NEVER enough to link.
-  router.post('/social/link', (Request request) async {
+  router.post('/link', (Request request) async {
     final authorization = request.headers['authorization'] ?? '';
     if (!authorization.startsWith('Bearer ')) {
       throw const ApiException('Oturum gerekli.', status: 401);
