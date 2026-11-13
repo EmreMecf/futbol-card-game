@@ -97,7 +97,13 @@ Future<void> main(List<String> args) async {
     '/auth',
     Pipeline()
         .addMiddleware(rateLimit(authSiniri, trustProxy: Env.trustProxy))
-        .addHandler(_authRouter(db, jwt).call),
+        .addHandler(authRoutes(db, jwt).call),
+  );
+
+  // Provider exchange is under the same auth endpoint rate limits.
+  api.mount('/auth/social',
+    Pipeline().addMiddleware(rateLimit(authSiniri, trustProxy: Env.trustProxy))
+      .addHandler(socialAuthRoutes(db, jwt).call),
   );
 
   // Korumali uc noktalar (jeton GEREKLI)
@@ -224,13 +230,6 @@ Future<Response> _wsGuard(Request request, JwtService jwt, WsHub hub) async {
   );
 
   return handler(request);
-}
-
-Router _authRouter(Database db, JwtService jwt) {
-  final router = Router();
-  router.mount('/', authRoutes(db, jwt).call);
-  router.mount('/', socialAuthRoutes(db, jwt).call);
-  return router;
 }
 
 void _banner() {
