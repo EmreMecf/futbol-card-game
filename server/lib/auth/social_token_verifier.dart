@@ -26,10 +26,13 @@ class SocialTokenVerifier {
     if (provider != 'google' && provider != 'apple') {
       throw const FormatException('Unknown provider');
     }
-    final audience = _env[provider == 'google'
-        ? 'GOOGLE_WEB_CLIENT_ID'
-        : 'APPLE_BUNDLE_ID'];
-    if (audience == null || audience.isEmpty) {
+    final audiencesAllowed = provider == 'google'
+        ? <String>[_env['GOOGLE_WEB_CLIENT_ID'] ?? '']
+        : <String>[
+            _env['APPLE_BUNDLE_ID'] ?? '',
+            _env['APPLE_SERVICE_ID'] ?? '',
+          ].where((v) => v.isNotEmpty).toList();
+    if (audiencesAllowed.every((v) => v.isEmpty)) {
       throw const StateError('Social login provider not configured');
     }
     if (idToken.length > 12000 || idToken.split('.').length != 3) {
@@ -82,8 +85,9 @@ class SocialTokenVerifier {
     final issuedAt = decoded['iat'];
     final now = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
     if (!goodIssuer ||
-        !audiences.contains(audience) ||
-        (audiences.length > 1 && decoded['azp'] != audience) ||
+        !audiences.any(audiencesAllowed.contains) ||
+        (audiences.length > 1 &&
+         !audiencesAllowed.contains(decoded['azp'])) ||
         expiry is! num || expiry.toInt() <= now ||
         issuedAt is! num || issuedAt.toInt() > now + 60 ||
         decoded['sub'] is! String ||
