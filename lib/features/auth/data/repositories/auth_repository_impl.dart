@@ -7,6 +7,7 @@ import '../../../../core/network/websocket_service.dart';
 import '../../../../core/utils/result.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
+import '../social_sign_in_service.dart';
 
 /// [AuthRepository] sozlesmesinin gerceklenmesi.
 ///
@@ -66,6 +67,39 @@ class AuthRepositoryImpl implements AuthRepository {
       return _oturumuKur(AuthResponse.fromJson(json));
     });
   }
+
+  Future<SocialToken> _getToken(String provider) async {
+    final service = SocialSignInService();
+    return switch (provider) {
+      'google' => service.google(),
+      'apple' => service.apple(),
+      _ => throw ArgumentError.value(provider, 'provider'),
+    };
+  }
+
+  @override
+  Future<Result<UserModel>> signInSocial(String provider) =>
+      Result.guard(() async {
+        final token = await _getToken(provider);
+        final json = await _remote.socialSignIn(
+          provider: token.provider, idToken: token.idToken,
+          rawNonce: token.rawNonce,
+        );
+        return _oturumuKur(AuthResponse.fromJson(json));
+      });
+
+  @override
+  Future<Result<void>> linkSocial(String provider) =>
+      Result.guard(() async {
+        if (!_session.isSignedIn) {
+          throw StateError('Hesap baglamak icin giris yapin.');
+        }
+        final token = await _getToken(provider);
+        await _remote.linkSocial(
+          provider: token.provider, idToken: token.idToken,
+          rawNonce: token.rawNonce,
+        );
+      });
 
   @override
   Future<Result<void>> signOut() {
