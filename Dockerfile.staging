@@ -16,6 +16,7 @@ RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends postgre
 COPY --from=builder --chown=65532:65532 /work/futbol-card-server /app/futbol-card-server
 COPY --chown=65532:65532 database/migrations/ /app/migrations/
 COPY --chown=65532:65532 scripts/staging-db-bootstrap.sh /app/staging-db-bootstrap.sh
+COPY --chown=65532:65532 scripts/staging-enable-v3.sql /app/staging-enable-v3.sql
 USER 65532:65532
 ENV ENVIRONMENT=production
 ENV HOST=0.0.0.0
