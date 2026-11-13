@@ -33,7 +33,7 @@ class SocialTokenVerifier {
             _env['APPLE_SERVICE_ID'] ?? '',
           ].where((v) => v.isNotEmpty).toList();
     if (audiencesAllowed.every((v) => v.isEmpty)) {
-      throw const StateError('Social login provider not configured');
+      throw StateError('Social login provider not configured');
     }
     if (idToken.length > 12000 || idToken.split('.').length != 3) {
       throw const FormatException('Invalid token format');
