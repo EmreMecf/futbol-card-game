@@ -12,6 +12,10 @@
 // 3. İkisi oynayınca tur çözülür, kart iki tarafa da açılır
 // 4. Süre aşımı: kimse oynamazsa zamanlayıcı ~15 sn içinde otomatik oynatır
 // 5. Maç sonu: kart transferi yok, iki oyuncuya sandık, ≤ 11 tur
+//
+// SURUM=5 ile (040, seviye gücü): `card_level_power` da açılır; aynı akış
+// sürüm 5'te koşar ve REST'teki el gücü = katalog gücü + seviye bonusu
+// (match_hand_level_bonus) kontrol edilir. Eşleştirme 'combined' olur.
 import { execFileSync } from 'node:child_process';
 import { API, istek, apiGiris } from '../tasarim/api.mjs';
 import { hesapOku } from '../tasarim/hesap.mjs';
@@ -33,6 +37,7 @@ const anahtarlar = (ek) => sql(`insert into economy_config_versions (kind, versi
            || '${JSON.stringify(ek)}'::jsonb, 'duello_v4_e2e'
   from economy_config_versions where kind = 'feature_flags' returning version`);
 
+const SURUM = Number(process.env.SURUM ?? 4);
 const onceki = JSON.parse(sql(`select payload from economy_config_versions where kind = 'feature_flags' order by version desc limit 1`));
 const A = await apiGiris(hesapOku('test-hesabi.local.txt'));
 const B = await apiGiris(hesapOku('test-hesabi-2.local.txt'));
@@ -49,8 +54,9 @@ async function post(yol, jeton, govde = {}) {
 }
 
 try {
-  anahtarlar({ economy_v2_enabled: true, ranked_rewards_v2: true, duel_v4: true });
-  kontrol('yerelde anahtarlar açıldı', sql('select current_rules_version()') === '4');
+  anahtarlar({ economy_v2_enabled: true, ranked_rewards_v2: true, duel_v4: true, card_level_power: SURUM === 5 });
+  kontrol('yerelde anahtarlar açıldı', sql('select current_rules_version()') === String(SURUM));
+  if (SURUM === 5) kontrol('eşleştirme etkin güce göre (combined)', sql('select matchmaking_mode()') === 'combined');
 
   // Kadrolar geçerli mi (önceki testler kart kaybettirmiş olabilir)
   for (const [j, ad] of [[A, 'A'], [B, 'B']]) {
@@ -81,12 +87,26 @@ try {
   const id = mac.match_id;
   console.log('maç:', id);
   let s = await istek(`/match/${id}/state`, { jeton: A });
-  kontrol('maç sürüm 4, mevki aşamasında', s.rules_version === 4 && s.simultaneous && s.phase === 'position',
+  kontrol(`maç sürüm ${SURUM}, mevki aşamasında`, s.rules_version === SURUM && s.simultaneous && s.phase === 'position',
     `sürüm ${s.rules_version}, aşama ${s.phase}`);
   kontrol('durum: duvar 2 enerji, 12 kartta bitiş', s.tactic_costs?.defensive_wall === 2 && s.early_finish_cards === 12);
 
   const lead = s.am_i_lead ? A : B, diger = lead === A ? B : A;
   const el = async (j) => (await istek(`/match/${id}/hand`, { jeton: j })).cards.filter((k) => !k.is_played);
+
+  if (SURUM === 5) {
+    // El gücü = katalog gücü + seviye bonusu (bonus maç kurulurken donduruldu)
+    for (const [j, ad] of [[A, 'A'], [B, 'B']]) {
+      const kartlar = (await istek(`/match/${id}/hand`, { jeton: j })).cards;
+      const bek = JSON.parse(sql(`select json_object_agg(x.user_card_id, c.power + x.bonus)
+        from match_hand_level_bonus x join cards c on c.id = x.card_id where x.match_id = '${id}'`) || '{}');
+      const uyan = kartlar.filter((k) => bek[k.user_card_id] === k.power).length;
+      kontrol(`${ad}: eldeki güç = katalog + seviye bonusu`, kartlar.length > 0 && uyan === kartlar.length,
+        `${uyan}/${kartlar.length}`);
+    }
+    console.log('       bonus dağılımı:', sql(`select string_agg(n || ' kart +' || bonus, ', ' order by bonus)
+      from (select bonus, count(*) n from match_hand_level_bonus where match_id = '${id}' group by bonus) x`));
+  }
 
   // ---- 1. Mevki ----
   const yanlis = await post(`/match/${id}/position`, diger, { position: 'MID' });
@@ -167,6 +187,7 @@ try {
   void idA; void idB;
 } finally {
   anahtarlar({ ranked_rewards_v2: onceki.ranked_rewards_v2 ?? false, duel_v4: onceki.duel_v4 ?? false,
+               card_level_power: onceki.card_level_power ?? false,
                economy_v2_enabled: onceki.economy_v2_enabled ?? false });
   console.log('anahtarlar eski değerlerine döndü: kural sürümü', sql('select current_rules_version()'));
 }

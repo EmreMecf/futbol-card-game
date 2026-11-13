@@ -75,6 +75,23 @@ küçük tutulmalı ve **eşleştirme seviyeyi görmeli**.
 - Lig tavanı: Amatör 4, Usta 7, Master ve üstü 10. Tavanın üstündeki seviye o ligde sayılmaz.
 - Efsane kuralı değişmez (seviye, Efsane olmayan kartın Efsane'yi yenmesini sağlamaz).
 
+### Faz 2 durumu: ✅ uygulandı (040, anahtar `card_level_power` KAPALI)
+
+- Migration `040_level_power.sql`: kural sürümü 5 = sürüm 4 + seviye gücü. Dört anahtar
+  (`economy_v2_enabled`, `ranked_rewards_v2`, `duel_v4`, `card_level_power`) açıkken yeni maçlar sürüm 5.
+- Bonus **tek kaynaktan**: `card_level_bonus(oyuncu, futbolcu, puan)` = B2(min(seviye, lig tavanı)).
+  Hem `deck_power` (eşleştirme) hem maç eli (`match_hands.power`, maç kurulurken dondurulur) bunu kullanır.
+- Lig tavanı maç **kurulurkenki** puana göre; maç içinde seviye atlansa ya da lig değişse de el aynı.
+- Sürüm 5'te eşleştirme kendiliğinden `combined` (MMR + etkin kadro gücü); anahtar kapalıyken
+  `matchmaking_settings.mode` aynen geçerli.
+- `_create_match`, `play_card`, `_resolve_round`, `find_match`, taktik, kimya, Efsane kuralı ve MMR
+  DEĞİŞMEDİ. Bonus bir `match_hands` tetikleyicisiyle eklenir; hangi kartın hangi seviye/tavanla ne aldığı
+  `match_hand_level_bonus` tablosunda (eski `match_hands` satırlarına sütun eklenmedi).
+- Testler: `database/tests/040_level_power_test.sql` (7 kabul şartı + sürüm 5 maçı sonuna kadar),
+  `tool/ekonomi/test_seviye_eslestirme.py`, gerçek sunucuda `SURUM=5 node … duello_v4_e2e.mjs`.
+- İstemci değişmedi: el kartında görünen güç zaten bonus dahil (`get_my_hand` → `match_hands.power`).
+  Kartın üstünde ayrıca "+N" rozeti göstermek ayrı bir arayüz işi.
+
 ## 3. Kupa yolu (lig = ilerleme yolu)
 
 - 12 lig basamağının her biri **bir kez** ödül verir: sandık + altın; lig değişiminde kozmetik.
@@ -107,7 +124,7 @@ küçük tutulmalı ve **eşleştirme seviyeyi görmeli**.
 |---|---|---|
 | 0 | Bekleyen 037/038'i tam testle bitirmek | Hayır (yalnız maç sonu) |
 | 1 | Sürüm 4 düello: prototipte denge → migration → sunucu → maç ekranı (gizli seçim, 5+15 sn) | **Evet** |
-| 2 | Seviye bonusu B2 + etkin güce göre eşleştirme + lig tavanı | **Evet** (güç hesabı) |
+| 2 | Seviye bonusu B2 + etkin güce göre eşleştirme + lig tavanı (✅ 040, kapalı) | **Evet** (güç hesabı) |
 | 3 | Öğretici + bot + antrenman | Hayır |
 | 4 | Kupa yolu ödülleri, lig tabanı, sezon sıfırlaması | Hayır |
 | 5 | Günlük döngü, etkinlik, mağaza teklifleri, sadeleştirmeler | Hayır |

@@ -139,9 +139,10 @@ auto_streak ≥ 2 (üst üste 2 otomatik kart) → hükmen; ikisi birden → kaz
 | `test/match_view_model_test.dart` "Eş zamanlı düello" | 5 test | GEÇTİ |
 | `test/goldens/duello_v4_golden_test.dart` | 7 test (taşma yok, duvar 2 enerji) | GEÇTİ |
 
-## 5. Seviye bonusu × kadro gücü eşleştirmesi (Faz 2 — uygulanmadı, onay bekliyor)
+## 5. Seviye bonusu × kadro gücü eşleştirmesi (Faz 2 — 040 ile uygulandı, anahtar KAPALI)
 
-Faz 2 güç hesabını, dolayısıyla düelloyu değiştirir; **ayrı onay olmadan uygulanmaz**. Hazırlanan testler:
+Onay: kullanıcı, 12 Kasım 2026. Kural sürümü 5, anahtar `card_level_power` (kapalı). Ayrıntı:
+`docs/OYUN_TASARIMI_V3.md` §2 "Faz 2 durumu". Testler:
 
 **Şimdi çalışan (CI'da):** `tool/ekonomi/test_seviye_eslestirme.py` — 6/6 GEÇTİ (3 sn)
 - B2 tablosu: seviye 1–3 → 0, 4–6 → +1, 7–9 → +2, 10 → +3
@@ -151,7 +152,7 @@ Faz 2 güç hesabını, dolayısıyla düelloyu değiştirir; **ayrı onay olmad
 - Temel güce göre eşleşmede seviye 10 > %75 (ölçülen %89) — etkin gücün neden şart olduğunu kilitler
 - Aynı ligde tavanın üstü sayılmaz (seviye 10 ile seviye 4 aynı sonuç)
 
-**040 migration'ı yazılınca eklenecek veritabanı kabul testleri:**
+**Veritabanı kabul testleri — `database/tests/040_level_power_test.sql` (hepsi uygulandı):**
 
 | # | Senaryo | Beklenen |
 |---|---|---|

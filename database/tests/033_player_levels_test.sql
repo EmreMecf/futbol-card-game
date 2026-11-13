@@ -126,6 +126,9 @@ begin
 
   -- 9) K1: seviye maca GIRMEZ — el kartinin gucu katalog gucuyle ayni kalir
   --    (match_hands.power kartin power'indan dondurulur; seviye kullanilmaz)
+  --    040'tan sonra: bu fonksiyonlar yine player_progress OKUMAZ; seviye
+  --    bonusu yalniz kural surumu 5'te (anahtar 'card_level_power', KAPALI)
+  --    card_level_bonus() uzerinden girer -> database/tests/040_level_power_test.sql
   perform pg_temp.beklenen('dereceli guc katalogdaki guc',
     (select power from cards where id = bronz), (select power from cards where id = bronz));
   select count(*) into n from pg_proc
