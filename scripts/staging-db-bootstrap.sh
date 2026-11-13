@@ -13,7 +13,14 @@ if [ "${DB_NAME:-}" != "futbol_card_staging" ] || [ "${ENVIRONMENT:-}" != "produ
 fi
 
 for var in DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD JWT_SECRET; do
-  eval "value=\${$var:-}"
+  case "$var" in
+    DB_HOST) value="${DB_HOST:-}" ;;
+    DB_PORT) value="${DB_PORT:-}" ;;
+    DB_NAME) value="${DB_NAME:-}" ;;
+    DB_USER) value="${DB_USER:-}" ;;
+    DB_PASSWORD) value="${DB_PASSWORD:-}" ;;
+    JWT_SECRET) value="${JWT_SECRET:-}" ;;
+  esac
   if [ -z "$value" ]; then
     echo "[STAGING INIT] ABORT: missing $var" >&2
     exit 1
