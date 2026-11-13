@@ -284,6 +284,17 @@ class PackSummaryView extends StatelessWidget {
                                 runSpacing: 6,
                                 children: [for (final t in seviyeler) _SeviyeSayaci(tier: t, count: dagilim[t]!)],
                               ),
+                              // 044: zaten sahip olunan futbolcular gelişim kopyası / joker oldu
+                              if (result.progress.isNotEmpty) ...[
+                                const SizedBox(height: Ref.pageGap),
+                                RefCardPanel(children: [
+                                  Text('GELİŞİM KOPYASI', style: Ref.caps(Ref.accent)),
+                                  Text(
+                                    progressSummary(result.progress),
+                                    style: Ref.bodyText(11, color: Ref.muted, height: 1.4),
+                                  ),
+                                ]),
+                              ],
                             ],
                           ),
                         ),
@@ -382,4 +393,17 @@ class _SeviyeSayaci extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 044: paketten gelen tekrar futbolcuların özeti (test edilebilir).
+String progressSummary(List<ChestCard> ilerleme) {
+  final kopya = ilerleme.where((k) => k.outcome == 'copy').map((k) => k.fullName).toList();
+  final joker = ilerleme.where((k) => k.outcome == 'joker').length;
+  final parcalar = <String>[];
+  if (kopya.isNotEmpty) {
+    parcalar.add('Zaten sahip olduğun ${kopya.length} futbolcu fiziksel kart yerine gelişim kopyası oldu: '
+        '${kopya.join(', ')}.');
+  }
+  if (joker > 0) parcalar.add('Seviye 10 olan $joker futbolcu joker parçaya dönüştü.');
+  return parcalar.join(' ');
 }

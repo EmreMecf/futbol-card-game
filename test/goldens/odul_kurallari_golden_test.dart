@@ -77,9 +77,9 @@ void main() {
         ),
         const Size(390, 520));
     expect(t.takeException(), isNull);
-    expect(find.text('Ödül enerjin yoktu: Bronz sandık (hemen açılır)'), findsOneWidget);
+    expect(find.text('Sandık hakkın yoktu: Bronz sandık (hemen açılır)'), findsOneWidget);
     expect(find.text('+1 GELİŞİM KOPYASI: Arda Yılmaz'), findsOneWidget);
-    expect(find.text('Ödül enerjin bitmişti'), findsOneWidget, reason: 'eski kural ekranı değişmedi');
+    expect(find.text('Sandık hakkın bitmişti'), findsOneWidget, reason: 'eski kural ekranı değişmedi');
     await esle(t, '36_mac_sonu_bronz_ve_kopya');
     await t.pumpWidget(const SizedBox());
   }, skip: atla != null);

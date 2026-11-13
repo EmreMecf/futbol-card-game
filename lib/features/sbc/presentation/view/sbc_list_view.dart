@@ -54,7 +54,7 @@ class _Govde extends StatelessWidget {
       icerik = [
         const RefNote(
           'Kullanmadığın kartları eritip daha değerli ödüllere çevir. Eritilen kartlar KALICI olarak silinir.',
-          title: 'Kart görevleri',
+          title: 'Kart takası',
         ),
         for (final grup in vm.grouped.entries) ...[
           const SizedBox(height: Ref.pageGap),
@@ -82,9 +82,9 @@ class _Govde extends StatelessWidget {
               child: RefPageEnter(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                   RefSectionHead(
-                    'GÖREVLER',
+                    'KART TAKASI',
                     size: 27,
-                    kicker: 'KART ERİT, ÖDÜL KAZAN',
+                    kicker: 'KARTLARINI TAKAS ET, ÖDÜL KAZAN',
                     trailing: toplam == 0
                         ? null
                         : Text('${vm.completedCount} / $toplam TAMAMLANDI', style: Ref.tiny(Ref.accent)),

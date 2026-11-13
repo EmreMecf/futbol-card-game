@@ -82,7 +82,7 @@ void main() {
     await t.tap(find.text('KULLAN'));
     await t.pump(const Duration(milliseconds: 200));
     expect(itemler.kullanilan, ['energy_drink']);
-    expect(find.text('Ödül enerjin 8 oldu.'), findsOneWidget);
+    expect(find.text('Sandık hakkın 8 oldu.'), findsOneWidget);
     await t.scrollUntilVisible(find.text('GİYİLİ'), 300);
     expect(find.text('GİYİLİ'), findsOneWidget, reason: 'forma giyili');
     expect(find.text('GİY'), findsOneWidget, reason: 'çerçeve giyilebilir');

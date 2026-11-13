@@ -137,7 +137,7 @@ void main() {
         kare: 20,
       );
       expect(t.takeException(), isNull);
-      await t.scrollUntilVisible(find.text(kaynak.skippedNoEnergy ? 'Ödül enerjin bitmişti' : 'SANDIK KAZANDIN'), 200);
+      await t.scrollUntilVisible(find.text(kaynak.skippedNoEnergy ? 'Sandık hakkın bitmişti' : 'SANDIK KAZANDIN'), 200);
       await t.pump(const Duration(milliseconds: 300));
       await esle(t, '${ad}_390x844');
       await t.pumpWidget(const SizedBox());

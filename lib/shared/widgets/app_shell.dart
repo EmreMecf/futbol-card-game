@@ -41,7 +41,9 @@ const kNavDestinations = <NavDestination>[
   NavDestination(label: 'Mağaza', glyph: RefGlyph.shop, sideIcon: '▤', route: AppRoutes.store),
   NavDestination(
       label: 'Ligler / Sıralama', glyph: RefGlyph.sparkle, sideIcon: '♛', route: AppRoutes.leaderboard, sidebarOnly: true),
-  NavDestination(label: 'Görevler', glyph: RefGlyph.sparkle, sideIcon: '✓', route: AppRoutes.sbc, sidebarOnly: true),
+  // 044: "Görevler" Sezon Yolu'na gider (görevler orada); kart görevi "Kart Takası" oldu
+  NavDestination(label: 'Görevler', glyph: RefGlyph.sparkle, sideIcon: '✓', route: AppRoutes.season, sidebarOnly: true),
+  NavDestination(label: 'Kart Takası', glyph: RefGlyph.cards, sideIcon: '⇄', route: AppRoutes.sbc, sidebarOnly: true),
   NavDestination(label: 'Profil', glyph: RefGlyph.smile, sideIcon: '♙', route: AppRoutes.profile, sidebarOnly: true),
 ];
 

@@ -110,7 +110,7 @@ class _MatchSeasonXpLineState extends State<MatchSeasonXpLine> {
           RefNeutralButton(label: 'SEZON YOLU', onTap: () => context.push(AppRoutes.season)),
         ]),
         if (v.noEnergy)
-          Text('Ödül enerjin yoktu: bu maçta XP %25 verildi.', style: Ref.bodyText(11, color: Ref.muted)),
+          Text('Sandık hakkın yoktu: bu maçta XP %25 verildi.', style: Ref.bodyText(11, color: Ref.muted)),
       ]),
     );
   }

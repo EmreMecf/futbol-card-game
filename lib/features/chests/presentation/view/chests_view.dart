@@ -311,15 +311,15 @@ class _EnerjiPaneli extends StatelessWidget {
       Row(children: [
         const Icon(Icons.bolt_rounded, size: 18, color: Color(0xFFFFB648)),
         const SizedBox(width: 6),
-        Expanded(child: Text('Ödül enerjisi', style: Ref.bodyText(13, weight: FontWeight.w700))),
+        Expanded(child: Text('Sandık hakkı', style: Ref.bodyText(13, weight: FontWeight.w700))),
         Text('${e.energy} / ${e.max}', style: Ref.heading(20, color: e.isEmpty ? Ref.red : const Color(0xFFFFB648))),
       ]),
       RefBar(e.max == 0 ? 0 : e.energy / e.max, height: 7,
           gradient: const LinearGradient(colors: [Color(0xFFFF9B3D), Color(0xFFFFD36B)])),
       ChestHint(e.isEmpty
-          ? 'Enerjin bitti. Dereceli maç yine oynanır; altın, puan ve koruma hakkı aynen gelir, yalnız sandık çıkmaz.'
-              '${sonraki != null ? ' Sonraki enerji: ${chestDuration(sonraki)}.' : ''}'
-          : 'Her dereceli maç 1 enerji harcar ve bir sandık kazandırır. Enerji ${e.refillMinutes} dakikada 1 dolar.'
+          ? 'Sandık hakkın bitti. Dereceli maç yine oynanır; altın, puan ve koruma hakkı aynen gelir, yalnız sandık çıkmaz.'
+              '${sonraki != null ? ' Sonraki hak: ${chestDuration(sonraki)}.' : ''}'
+          : 'Her dereceli maç 1 sandık hakkı harcar ve bir sandık kazandırır. Hak ${e.refillMinutes} dakikada 1 dolar.'
               '${sonraki != null ? ' Sonraki: ${chestDuration(sonraki)}.' : ''}'
               ' Maç içi taktik enerjisinden ayrıdır.'),
     ]);

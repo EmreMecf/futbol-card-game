@@ -3,6 +3,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'card_model.dart';
 import 'enums.dart';
 
+import 'chest_models.dart';
+
 part 'pack_models.freezed.dart';
 part 'pack_models.g.dart';
 
@@ -153,6 +155,10 @@ abstract class PackOpenResult with _$PackOpenResult {
     /// Cikan kartlar, en iyiden kotuye sirali.
     /// Acilis animasyonunda sondan basa gostermek carpici olur.
     @Default([]) List<InventoryCard> cards,
+
+    /// 044: sahip olunan futbolcu fiziksel kart yerine gelişim kopyası
+    /// (outcome 'copy') ya da seviye 10'da joker ('joker') oldu.
+    @Default([]) List<ChestCard> progress,
   }) = _PackOpenResult;
 
   factory PackOpenResult.fromJson(Map<String, dynamic> json) =>

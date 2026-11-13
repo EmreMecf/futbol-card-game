@@ -83,8 +83,8 @@ class _Govde extends StatelessWidget {
         ],
         const SizedBox(height: Ref.pageGap),
         const RefNote(
-            'Sezon XP\'si ve ödüller dereceli maçta güç vermez. Kademe başına 1.000 XP. Enerjili maç: '
-            'galibiyet 100, beraberlik 70, yenilgi 60 XP; enerjisiz maçta %25. 4. turdan önce biten maç XP vermez. '
+            'Sezon XP\'si ve ödüller dereceli maçta güç vermez. Kademe başına 1.000 XP. Sandık hakkıyla oynanan maç: '
+            'galibiyet 100, beraberlik 70, yenilgi 60 XP; sandık hakkı yokken %25. 4. turdan önce biten maç XP vermez. '
             'Sezon bitince ulaştığın ama almadığın ödüller otomatik verilir.',
             title: 'Nasıl ilerlerim?'),
       ];

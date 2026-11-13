@@ -3,6 +3,7 @@ import 'package:shared_models/shared_models.dart';
 import '../../../../core/auth/session_manager.dart';
 import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
+import '../../../../core/error/app_exception.dart';
 import '../../domain/repositories/store_repository.dart';
 
 /// Magaza ekraninin beyni.
@@ -10,7 +11,25 @@ class StoreViewModel extends BaseViewModel {
   final StoreRepository _repository;
   final SessionManager _session;
 
-  StoreViewModel(this._repository, this._session);
+  StoreViewModel(
+    this._repository,
+    this._session, {
+    Future<DailyShopStatus?> Function()? dailyOffer,
+    Future<PackOpenResult> Function()? buyDailyOffer,
+  })  // ignore: prefer_initializing_formals
+      : _teklifSor = dailyOffer,
+        // ignore: prefer_initializing_formals
+        _teklifAl = buyDailyOffer;
+
+  // 044: GÜNÜN TEKLİFİ (kayıt yoksa ya da anahtar kapalıysa yok)
+  final Future<DailyShopStatus?> Function()? _teklifSor;
+  final Future<PackOpenResult> Function()? _teklifAl;
+  DailyShopStatus? _teklif;
+  DailyShopStatus? get dailyOffer => (_teklif?.enabled ?? false) ? _teklif : null;
+  bool get canBuyDailyOffer {
+    final t = dailyOffer;
+    return t != null && !t.boughtToday && coins >= t.discountedPrice && _acilanPaket == null;
+  }
 
   List<PackType> _paketler = [];
   List<PackType> get packs => _paketler;
@@ -59,6 +78,40 @@ class StoreViewModel extends BaseViewModel {
       _paketler = liste;
       safeNotify();
     }
+    await loadDailyOffer();
+  }
+
+  Future<void> loadDailyOffer() async {
+    final sor = _teklifSor;
+    if (sor == null) return;
+    _teklif = await sor();
+    safeNotify();
+  }
+
+  /// 044: günün teklifini al; başarılıysa [lastOpening] dolar (aynı açılış).
+  Future<bool> buyDailyOffer() async {
+    final al = _teklifAl;
+    if (al == null || !canBuyDailyOffer) return false;
+    _acilanPaket = dailyOffer!.packSlug;
+    _sonAcilis = null;
+    safeNotify();
+    try {
+      _sonAcilis = await al();
+    } catch (e) {
+      _acilanPaket = null;
+      setError(AppException(message: 'Günün teklifi alınamadı. Tekrar dene.', technicalDetail: '$e', type: AppErrorType.gameRule));
+      safeNotify();
+      return false;
+    }
+    _acilanPaket = null;
+    final kullanici = _session.user;
+    final acilis = _sonAcilis;
+    if (kullanici != null && acilis != null) {
+      await _session.updateUser(kullanici.copyWith(coins: acilis.coinsLeft));
+    }
+    await loadDailyOffer();
+    safeNotify();
+    return true;
   }
 
   /// Paketi acar. Basariliysa [lastOpening] doldurulur.

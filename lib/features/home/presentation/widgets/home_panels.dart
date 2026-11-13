@@ -377,8 +377,8 @@ class HomeShortcutGrid extends StatelessWidget {
         route: AppRoutes.store,
       ),
       const HomeShortcut(
-        title: 'GÖREVLER',
-        subtitle: 'Kart erit, ödül al',
+        title: 'KART TAKASI',
+        subtitle: 'Kart takas et, ödül al',
         icon: Icons.checklist_rounded,
         color: AppColors.emerald,
         route: AppRoutes.sbc,

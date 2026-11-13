@@ -93,5 +93,42 @@ Router economyRoutes(Database db) {
     });
   });
 
+  // ------------------------------------------------------------------
+  // GUNLUK DONGU (044): gunluk sandik (seri) + gunun ilk galibiyeti
+  // ------------------------------------------------------------------
+  router.get('/daily', (Request request) async {
+    final userId = requireUserId(request);
+    final ham = await db.scalar('select daily_status(@u::uuid)', params: {'u': userId});
+    return jsonOk(DailyStatus.fromJson(RowMappers.asMap(ham)).toJson());
+  });
+
+  router.post('/daily/claim', (Request request) async {
+    final userId = requireUserId(request);
+    return withRuleCodes(() async {
+      final ham = await db.scalar('select claim_daily_chest(@u::uuid)', params: {'u': userId});
+      return jsonOk(RowMappers.asMap(ham));
+    });
+  });
+
+  // ------------------------------------------------------------------
+  // GUNUN TEKLIFI (044): indirimli paket, gunde 1
+  // ------------------------------------------------------------------
+  router.get('/daily-shop', (Request request) async {
+    final userId = requireUserId(request);
+    final ham = await db.scalar('select daily_shop_status(@u::uuid)', params: {'u': userId});
+    return jsonOk(DailyShopStatus.fromJson(RowMappers.asMap(ham)).toJson());
+  });
+
+  router.post('/daily-shop/buy', (Request request) async {
+    final userId = requireUserId(request);
+    return withRuleCodes(() async {
+      final ham = RowMappers.asMap(await db.scalar('select buy_daily_offer(@u::uuid)', params: {'u': userId}));
+      return jsonOk({
+        'offer': ham['offer'],
+        'pack': RowMappers.packResult(ham['pack']).toJson(),
+      });
+    });
+  });
+
   return router;
 }

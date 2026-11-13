@@ -211,6 +211,10 @@ class RowMappers {
       cards: kartlar is List
           ? kartlar.map((k) => inventoryCard(asMap(k))).toList()
           : const [],
+      // 044: gelişim kopyası / joker olanlar
+      progress: json['progress'] is List
+          ? (json['progress'] as List).map((k) => ChestCard.fromJson(asMap(k))).toList()
+          : const [],
     );
   }
 

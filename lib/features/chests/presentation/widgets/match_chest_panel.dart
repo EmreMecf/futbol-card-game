@@ -55,9 +55,9 @@ class _MatchChestPanelState extends State<MatchChestPanel> {
           Row(children: [
             const Icon(Icons.bolt_rounded, size: 20, color: Color(0xFFFFB648)),
             const SizedBox(width: 8),
-            Expanded(child: Text('Ödül enerjin bitmişti', style: Ref.bodyText(13, weight: FontWeight.w800))),
+            Expanded(child: Text('Sandık hakkın bitmişti', style: Ref.bodyText(13, weight: FontWeight.w800))),
           ]),
-          const ChestHint('Maç ödüllerin (altın, puan, koruma hakkı) geçerli. Sandık için enerji dolunca oyna.'),
+          const ChestHint('Maç ödüllerin (altın, puan, koruma hakkı) geçerli. Sandık için hakkın dolunca oyna.'),
         ]),
       );
     }
@@ -68,7 +68,7 @@ class _MatchChestPanelState extends State<MatchChestPanel> {
     final renk = chestColor(c.chestType);
     final yer = switch (c.location) {
       // 037 (R1): enerji yoktu ama sandık yine verildi
-      'instant' when v.noEnergy => 'Ödül enerjin yoktu: Bronz sandık (hemen açılır)',
+      'instant' when v.noEnergy => 'Sandık hakkın yoktu: Bronz sandık (hemen açılır)',
       'instant' => 'Hemen açılabilir',
       'slot' => '${c.slotNo}. yuvaya kondu',
       _ => c.status == ChestStatus.compensated

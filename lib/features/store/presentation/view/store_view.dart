@@ -178,16 +178,16 @@ class _GovdeState extends State<_Govde> {
                         const Em('🎁', size: 14),
                         const SizedBox(width: 6),
                         Flexible(
-                          child: Text('GÖREV ÖDÜLLERİ', style: Ref.bodyText(14, weight: FontWeight.w700)),
+                          child: Text('KART TAKASI ÖDÜLLERİ', style: Ref.bodyText(14, weight: FontWeight.w700)),
                         ),
                       ],
                     ),
-                    Text('Kart görevlerini tamamla, ödül paketi kazan.', style: Ref.bodyText(10, color: Ref.muted)),
+                    Text('Kartlarını takas et, ödül paketi kazan.', style: Ref.bodyText(10, color: Ref.muted)),
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              RefSecondaryButton('GÖREVLER', expand: false, onTap: () => context.go(AppRoutes.sbc)),
+              RefSecondaryButton('KART TAKASI', expand: false, onTap: () => context.go(AppRoutes.sbc)),
             ],
           ),
         ],
@@ -205,6 +205,7 @@ class _GovdeState extends State<_Govde> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ...ust,
+          _GununTeklifi(viewModel: vm),
           vitrin,
           const SizedBox(height: Ref.pageGap),
           ...paketler,
@@ -217,6 +218,7 @@ class _GovdeState extends State<_Govde> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ...ust,
+        _GununTeklifi(viewModel: vm),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -641,6 +643,42 @@ class _Karsilastirma extends StatelessWidget {
           ),
         Text('Br Bronz · Gü Gümüş · Al Altın · El Elmas · Ef Efsane', style: Ref.tiny(Ref.muted)),
       ],
+    );
+  }
+}
+
+// ====================================================================
+// GÜNÜN TEKLİFİ (044)
+// ====================================================================
+class _GununTeklifi extends StatelessWidget {
+  final StoreViewModel viewModel;
+  const _GununTeklifi({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = viewModel.dailyOffer;
+    if (t == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Ref.pageGap),
+      child: RefCardPanel(children: [
+        Row(children: [
+          const Em('🏷️', size: 18),
+          const SizedBox(width: 8),
+          Expanded(child: Text('GÜNÜN TEKLİFİ · %${t.discountPct} İNDİRİM', style: Ref.caps(Ref.gold))),
+        ]),
+        Text('${t.name} (${t.cardCount} kart)', style: Ref.bodyText(13, weight: FontWeight.w800)),
+        Text(
+          t.boughtToday
+              ? 'Bugünkü teklifi aldın. Yeni teklif gece yarısı (Türkiye saati).'
+              : '${t.price} yerine ${t.discountedPrice} altın. Günde 1 kez.',
+          style: Ref.bodyText(11, color: Ref.muted, height: 1.4),
+        ),
+        if (!t.boughtToday)
+          RefSecondaryButton(
+            'AL · ${t.discountedPrice} ALTIN',
+            onTap: viewModel.canBuyDailyOffer ? viewModel.buyDailyOffer : null,
+          ),
+      ]),
     );
   }
 }

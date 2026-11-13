@@ -129,6 +129,7 @@ void main() {
         AppRoutes.collection,
         AppRoutes.sbc,
         AppRoutes.leaderboard,
+        AppRoutes.season, // 044: "Görevler" Sezon Yolu'na gider
       };
 
       for (final hedef in kNavDestinations) {

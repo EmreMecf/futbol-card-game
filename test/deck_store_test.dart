@@ -446,6 +446,50 @@ void main() {
       vm = StoreViewModel(repo, session);
     });
 
+    test('044: gunun teklifi kayit yoksa yok, alinamaz', () async {
+      await vm.load();
+      expect(vm.dailyOffer, isNull);
+      expect(await vm.buyDailyOffer(), isFalse);
+    });
+
+    test('044: gunun teklifi indirimli fiyatla alinir, acilis gosterilir', () async {
+      var alindi = false;
+      final yeni = StoreViewModel(
+        repo,
+        session,
+        dailyOffer: () async => DailyShopStatus(
+            enabled: true, packSlug: 'standard', name: 'Standart Paket', cardCount: 5,
+            price: 500, discountPct: 25, discountedPrice: 375, boughtToday: alindi),
+        buyDailyOffer: () async {
+          alindi = true;
+          return const PackOpenResult(packSlug: 'standard', packName: 'Standart Paket', coinsLeft: 625);
+        },
+      );
+      await yeni.load();
+      expect(yeni.dailyOffer?.discountedPrice, 375);
+      expect(yeni.canBuyDailyOffer, isTrue);
+      expect(await yeni.buyDailyOffer(), isTrue);
+      expect(yeni.lastOpening?.packSlug, 'standard');
+      expect(yeni.coins, 625, reason: 'oturumdaki altin sunucunun kalan degeriyle guncellenir');
+      expect(yeni.dailyOffer?.boughtToday, isTrue, reason: 'teklif yeniden yuklenir');
+      expect(yeni.canBuyDailyOffer, isFalse);
+    });
+
+    test('044: altin yetmezse gunun teklifi istenmez', () async {
+      var cagri = 0;
+      await session.updateUser(const UserModel(id: 'u1', username: 'test', coins: 100));
+      final yeni = StoreViewModel(repo, session,
+          dailyOffer: () async => const DailyShopStatus(enabled: true, packSlug: 'standard', discountedPrice: 375),
+          buyDailyOffer: () async {
+            cagri++;
+            return const PackOpenResult(packSlug: 'standard', packName: '');
+          });
+      await yeni.load();
+      expect(yeni.canBuyDailyOffer, isFalse);
+      expect(await yeni.buyDailyOffer(), isFalse);
+      expect(cagri, 0);
+    });
+
     test('paketler yuklenir', () async {
       repo.paketler = [standart];
       await vm.load();

@@ -60,6 +60,7 @@ import '../../features/leaderboard/data/datasources/leaderboard_remote_datasourc
 import '../../features/leaderboard/data/repositories/leaderboard_repository_impl.dart';
 import '../../features/leaderboard/domain/repositories/leaderboard_repository.dart';
 import '../../features/leaderboard/presentation/viewmodel/leaderboard_view_model.dart';
+import '../../features/daily/data/daily_service.dart';
 import '../../features/leaderboard/data/trophy_road.dart';
 import '../../features/leaderboard/presentation/viewmodel/league_tiers_view_model.dart';
 
@@ -183,8 +184,15 @@ Future<void> configureDependencies() async {
     ..registerFactory<DeckViewModel>(
       () => DeckViewModel(getIt<DeckRepository>()),
     )
+    // 044: günlük döngü + günün teklifi (anahtarlar kapalıysa görünmez)
+    ..registerLazySingleton<DailyLoopService>(() => DailyLoopService(getIt<ApiClient>()))
     ..registerFactory<StoreViewModel>(
-      () => StoreViewModel(getIt<StoreRepository>(), getIt<SessionManager>()),
+      () => StoreViewModel(
+        getIt<StoreRepository>(),
+        getIt<SessionManager>(),
+        dailyOffer: () => getIt<DailyLoopService>().shop(),
+        buyDailyOffer: () => getIt<DailyLoopService>().buyOffer(),
+      ),
     )
     ..registerFactory<SbcListViewModel>(
       () => SbcListViewModel(getIt<SbcRepository>()),

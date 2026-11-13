@@ -52,7 +52,7 @@ class ItemsViewModel extends BaseViewModel {
   Future<bool> use(ItemDefinition d) => _eylem(d.slug, 'use:${d.slug}:${_envanter?.quantity(d.slug)}',
       (k) => _repository.use(d.slug, idempotencyKey: k), (sonuc) {
     _bilgi = d.category == 'energy_drink' && sonuc['energy'] != null
-        ? 'Ödül enerjin ${sonuc['energy']} oldu.'
+        ? 'Sandık hakkın ${sonuc['energy']} oldu.'
         : '${d.name} kullanıldı.';
   });
 

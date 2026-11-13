@@ -46,3 +46,46 @@ abstract class LedgerEntry with _$LedgerEntry {
 
   factory LedgerEntry.fromJson(Map<String, dynamic> json) => _$LedgerEntryFromJson(json);
 }
+
+/// 044: GÜNLÜK DÖNGÜ — günlük ücretsiz sandık (seri) + günün ilk galibiyeti.
+@freezed
+abstract class DailyStatus with _$DailyStatus {
+  const DailyStatus._();
+
+  const factory DailyStatus({
+    @Default(false) bool enabled,
+    @Default(false) bool shopEnabled,
+    DateTime? nextResetAt,
+    @Default(false) bool claimedToday,
+
+    /// Art arda kaç gün alındı (bugün alınmadıysa dünkü seri)
+    @Default(0) int streak,
+
+    /// Bugün alınacak / alınan sandık ('bronze' | 'silver')
+    @Default('bronze') String chestType,
+    @Default(false) bool firstWinToday,
+    @Default(2) int firstWinMultiplier,
+  }) = _DailyStatus;
+
+  factory DailyStatus.fromJson(Map<String, dynamic> json) => _$DailyStatusFromJson(json);
+}
+
+/// 044: GÜNÜN TEKLİFİ — herkes için aynı paket, indirimli, günde 1.
+@freezed
+abstract class DailyShopStatus with _$DailyShopStatus {
+  const DailyShopStatus._();
+
+  const factory DailyShopStatus({
+    @Default(false) bool enabled,
+    @Default('') String packSlug,
+    @Default('') String name,
+    @Default(0) int cardCount,
+    @Default(0) int price,
+    @Default(0) int discountPct,
+    @Default(0) int discountedPrice,
+    @Default(false) bool boughtToday,
+    DateTime? nextResetAt,
+  }) = _DailyShopStatus;
+
+  factory DailyShopStatus.fromJson(Map<String, dynamic> json) => _$DailyShopStatusFromJson(json);
+}

@@ -1,3 +1,4 @@
+import '../../../daily/presentation/daily_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -112,6 +113,7 @@ class _DarYerlesim extends StatelessWidget {
           _Karolar(),
           SizedBox(height: Ref.pageGap),
           // Ekonomi V2: sandık şeridi (kapalıysa yer kaplamaz)
+          DailyPanel(),
           ChestStrip(),
           SeasonHomeCard(fallback: _Gorevler()),
           SizedBox(height: Ref.pageGap),
@@ -139,7 +141,7 @@ class _GenisYerlesim extends StatelessWidget {
               SizedBox(width: 20),
               Expanded(
                 flex: 5,
-                child: Column(children: [ChestStrip(), SeasonHomeCard(fallback: _Gorevler()), SizedBox(height: Ref.pageGap), _LigIlerlemesi()]),
+                child: Column(children: [DailyPanel(), ChestStrip(), SeasonHomeCard(fallback: _Gorevler()), SizedBox(height: Ref.pageGap), _LigIlerlemesi()]),
               ),
             ],
           ),
@@ -286,14 +288,14 @@ class _Gorevler extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Günlük görevler yakında', style: Ref.bodyText(11, weight: FontWeight.w700)),
-                      Text('Şimdilik kart görevleri açık: kartlarını birleştir, ödül kazan.',
+                      Text('Şimdilik kart takası açık: kartlarını takas et, ödül kazan.',
                           style: Ref.bodyText(10, color: Ref.muted)),
                     ],
                   ),
                 ),
               ],
             ),
-            RefSecondaryButton('KART GÖREVLERİNE GİT', trailing: RefGlyph.arrowRight, onTap: () => context.go(AppRoutes.sbc)),
+            RefSecondaryButton('KART TAKASINA GİT', trailing: RefGlyph.arrowRight, onTap: () => context.go(AppRoutes.sbc)),
           ]),
         ],
       );

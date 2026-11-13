@@ -187,6 +187,25 @@ Kullanıcı kararı (13 Kasım 2026) tasarımı şöyle netleştirdi:
 - "Ödül enerjisi" adı değişir (taktik enerjisiyle karışmasın).
 - Menü: "Görevler" Sezon Yolu'na gider; kart görevi (SBC) "Kart Takası" olur.
 
+### Faz 5a durumu: ✅ günlük döngü + mağaza teklifi + sadeleştirme (044, anahtarlar KAPALI)
+
+Kullanıcı kararları (13 Kasım 2026):
+
+| | Kural | Anahtar |
+|---|---|---|
+| Günlük sandık | Her gün Bronz; **art arda 3. günde Gümüş** (seri bozulursa baştan). Gün = Türkiye saati | `daily_loop` |
+| Günün ilk galibiyeti | İlk **dereceli** galibiyete ek sezon XP'si = o maçın galibiyet XP'si (çift). Altın değişmez | `daily_loop` |
+| Günün teklifi | Herkes için aynı rastgele paket **%25 indirimli**, kişi başı günde 1, yalnız altın | `daily_shop` |
+| Paket tekrar kartı | Sahip olunan futbolcu → **gelişim kopyası** (seviye 10 → joker; kadroda mevki eksikse fiziksel kart). Başlangıç paketi hariç | `pack_duplicates_v2` |
+
+- Ayarlar `economy_config_versions` (tür `daily_loop`, sürüm 1). Paket şansları ve fiyatları değişmedi.
+- Sadeleştirmeler (anahtarsız, yalnız metin/menü): "Ödül enerjisi" → **"Sandık hakkı"** (taktik
+  enerjisiyle karışmasın; eşya adı "Sandık hakkı paketi"); menüde **"Görevler" Sezon Yolu'na** gider; kart
+  görevi (SBC) **"Kart Takası"** oldu (kendi menü maddesi). 40 ekran görüntüsü testi bu metinlerle yenilendi.
+- **Hafta sonu etkinliği yapılmadı** (ayrı adım: özel kurallı turnuva sistemi).
+- Testler: `database/tests/044_daily_loop_test.sql`, `test/daily_loop_test.dart`, mağaza ViewModel (3),
+  gerçek sunucuda `tool/ekonomi/gunluk_e2e.mjs`.
+
 ## 6. Fazlar (her biri ayrı test + onay)
 
 | Faz | Kapsam | Düelloya dokunur mu |
@@ -196,6 +215,6 @@ Kullanıcı kararı (13 Kasım 2026) tasarımı şöyle netleştirdi:
 | 2 | Seviye bonusu B2 + etkin güce göre eşleştirme + lig tavanı (✅ 040, kapalı) | **Evet** (güç hesabı) |
 | 3 | Öğretici + bot + antrenman (✅ 041 + 042, anahtarlar kapalı) | Hayır |
 | 4 | Kupa yolu ödülleri, lig tabanı, sezon sıfırlaması (✅ 043, kapalı; kart havuzu kuralı yok) | Hayır |
-| 5 | Günlük döngü, etkinlik, mağaza teklifleri, sadeleştirmeler | Hayır |
+| 5 | Günlük döngü, etkinlik, mağaza teklifleri, sadeleştirmeler (✅ 044, kapalı; etkinlik ayrı adım) | Hayır |
 
 Hepsi yeni kural sürümü ve varsayılan kapalı anahtarlarla; süren maçlar eski kuralla biter.

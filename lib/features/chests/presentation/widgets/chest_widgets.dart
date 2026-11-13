@@ -140,7 +140,7 @@ class RewardEnergyPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        label: 'Ödül enerjisi ${energy.energy} / ${energy.max}',
+        label: 'Sandık hakkı ${energy.energy} / ${energy.max}',
         excludeSemantics: true,
         child: RefPill('${energy.energy}/${energy.max}',
             leading: const Icon(Icons.bolt_rounded, size: 13, color: Color(0xFFFFB648)),
