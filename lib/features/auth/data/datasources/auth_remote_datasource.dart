@@ -38,7 +38,7 @@ class AuthRemoteDataSource {
   }) => _api.post('/auth/social/', govde: {
     'provider': provider,
     'id_token': idToken,
-    if (rawNonce != null) 'raw_nonce': rawNonce,
+    'raw_nonce': ?rawNonce,
   });
 
   Future<Map<String, dynamic>> linkSocial({
@@ -48,7 +48,7 @@ class AuthRemoteDataSource {
   }) => _api.post('/auth/social/link', govde: {
     'provider': provider,
     'id_token': idToken,
-    if (rawNonce != null) 'raw_nonce': rawNonce,
+    'raw_nonce': ?rawNonce,
   });
 
   Future<void> signOut(String? refreshToken) async {
