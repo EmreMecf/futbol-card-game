@@ -9,6 +9,7 @@ import 'package:futbol_card_server/db/database.dart';
 import 'package:futbol_card_server/realtime/notification_listener.dart';
 import 'package:futbol_card_server/realtime/ws_hub.dart';
 import 'package:futbol_card_server/routes/auth_routes.dart';
+import 'package:futbol_card_server/routes/social_auth_routes.dart';
 import 'package:futbol_card_server/routes/character_routes.dart';
 import 'package:futbol_card_server/routes/chest_routes.dart';
 import 'package:futbol_card_server/routes/economy_routes.dart';
@@ -96,7 +97,7 @@ Future<void> main(List<String> args) async {
     '/auth',
     Pipeline()
         .addMiddleware(rateLimit(authSiniri, trustProxy: Env.trustProxy))
-        .addHandler(authRoutes(db, jwt).call),
+        .addHandler(_authRouter(db, jwt).call),
   );
 
   // Korumali uc noktalar (jeton GEREKLI)
@@ -223,6 +224,13 @@ Future<Response> _wsGuard(Request request, JwtService jwt, WsHub hub) async {
   );
 
   return handler(request);
+}
+
+Router _authRouter(Database db, JwtService jwt) {
+  final router = Router();
+  router.mount('/', authRoutes(db, jwt).call);
+  router.mount('/', socialAuthRoutes(db, jwt).call);
+  return router;
 }
 
 void _banner() {
