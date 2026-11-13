@@ -108,6 +108,36 @@ Router socialAuthRoutes(Database db, JwtService jwt,
         user: RowMappers.user(user), tokens: tokens).toJson());
   });
 
+  // Apple Android web flow: fixed HTTPS return URL to a fixed Android
+  // package/scheme. Never permit arbitrary redirect destinations.
+  router.post('/apple-callback', (Request request) async {
+    final body = await request.readAsString();
+    if (body.length > 16000 ||
+        !request.headers['content-type'].toString()
+            .contains('application/x-www-form-urlencoded')) {
+      return Response(400, body: 'Invalid Apple callback');
+    }
+    final incoming = Uri.splitQueryString(body);
+    final params = <String, String>{
+      for (final key in ['code', 'id_token', 'state', 'user', 'error'])
+        if (incoming.containsKey(key)) key: incoming[key]!,
+    };
+    if (!params.containsKey('state') ||
+        (!params.containsKey('code') && !params.containsKey('error'))) {
+      return Response(400, body: 'Incomplete Apple callback');
+    }
+    final encoded = Uri(queryParameters: params).query;
+    final redirect = 'intent://callback?$encoded'
+        '#Intent;package=com.futbolcard.futbol_card;'
+        'scheme=signinwithapple;end';
+    return Response(302, headers: {
+      'location': redirect,
+      'cache-control': 'no-store',
+      'referrer-policy': 'no-referrer',
+      'content-security-policy': "default-src 'none'",
+    });
+  });
+
   // Existing password-account holders explicitly link a provider only
   // while authenticated. Identical emails are NEVER enough to link.
   router.post('/link', (Request request) async {
