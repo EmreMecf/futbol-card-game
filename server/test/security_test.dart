@@ -152,6 +152,15 @@ void main() {
       expect(c.headers['x-content-type-options'], 'nosniff');
       expect(c.headers['x-frame-options'], 'DENY');
     });
+
+    test('ön kontrol Idempotency-Key başlığına izin verir (web)', () async {
+      final h = const Pipeline()
+          .addMiddleware(corsHeaders())
+          .addHandler((_) => Response.ok('x'));
+      final c = await h(Request('OPTIONS', Uri.parse('http://localhost/api/economy/daily/claim')));
+      expect(c.statusCode, 200);
+      expect(c.headers['access-control-allow-headers']!.toLowerCase(), contains('idempotency-key'));
+    });
   });
 
   group('Hata cevapları iç ayrıntı sızdırmaz', () {

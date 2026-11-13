@@ -43,7 +43,7 @@ abstract class DeckValidation with _$DeckValidation {
       _$DeckValidationFromJson(json);
 
   /// Gecerliyse bos metin, degilse hata mesaji
-  String get displayMessage => isValid ? 'Kadro hazir' : (message ?? 'Kadro gecersiz');
+  String get displayMessage => isValid ? 'Kadro hazır' : (message ?? 'Kadro geçersiz');
 }
 
 /// Kadro kurma ekraninin durumu.

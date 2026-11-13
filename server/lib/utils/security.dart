@@ -140,7 +140,9 @@ Middleware corsHeaders({String allowOrigin = '*'}) {
   final headers = {
     'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Origin, Content-Type, Authorization',
+    // Idempotency-Key: ekonomi/sandık/enerji POST'ları bu başlığı gönderir;
+    // listede olmazsa tarayıcı ön kontrolde (OPTIONS) isteği engeller.
+    'Access-Control-Allow-Headers': 'Origin, Content-Type, Authorization, Idempotency-Key',
     'Access-Control-Max-Age': '86400',
     if (allowOrigin != '*') 'Vary': 'Origin',
     // Basit güvenlik başlıkları

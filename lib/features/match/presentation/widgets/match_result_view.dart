@@ -130,7 +130,8 @@ class _MatchResultViewState extends State<MatchResultView> with SingleTickerProv
                         MatchChestPanel(matchId: sonuc.matchId),
                         // Ekonomi V2 (FAZ 4): bu maçta kazanılan sezon XP'si
                         MatchSeasonXpLine(matchId: sonuc.matchId),
-                        if (sonuc.leagueChange != null) ...[
+                        // Antrenman / öğreticide puan değişmez: lig paneli gereksiz
+                        if (sonuc.leagueChange != null && sonuc.mode == 'ranked') ...[
                           const SizedBox(height: Ref.pageGap),
                           LeagueChangePanel(change: sonuc.leagueChange!),
                         ],
@@ -148,7 +149,8 @@ class _MatchResultViewState extends State<MatchResultView> with SingleTickerProv
                             kartlar: sonuc.cardsWon,
                             renk: Ref.accent,
                           ),
-                        if (!sonuc.hasCardTransfers) ...[
+                        // Kart kaybı olmayan kuralda üstteki metin zaten söylüyor
+                        if (!sonuc.hasCardTransfers && !sonuc.noCardLossRules) ...[
                           const SizedBox(height: Ref.pageGap),
                           RefCardPanel(children: [
                             Row(children: [
@@ -258,7 +260,7 @@ class _ZaferPaneli extends StatelessWidget {
         ],
         if (onNewMatch != null) ...[
           const SizedBox(height: 15),
-          RefCta('YENİ MAÇ', trailing: RefGlyph.play, onTap: onNewMatch),
+          RefCta(newMatchLabel(sonuc), trailing: RefGlyph.play, onTap: onNewMatch),
         ],
       ],
     );
@@ -288,6 +290,12 @@ class _ZaferPaneli extends StatelessWidget {
   (String, String, Color, String) _gorunum() {
     if (sonuc.isDraw) {
       return ('🤝', 'BERABERLİK', Ref.gold, 'Skor eşit bitti. Kimse kart kaybetmedi.');
+    }
+    // Kart kaybı olmayan kurallarda "koruma" açıklaması yanlış olur
+    if (sonuc.noCardLossRules) {
+      return sonuc.didIWin
+          ? ('🏆', 'ZAFER!', Ref.gold, '${sonuc.myScore} kart topladın, maçı kazandın.')
+          : ('🛡️', 'MÜCADELE BİTTİ', Ref.red, 'Bu maçta kart kaybı yok: kartların sende kaldı.');
     }
     if (sonuc.didIWin) {
       final n = sonuc.cardsWon.length;
@@ -415,4 +423,10 @@ class _KartBolumu extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Sonuç ekranının ana düğmesi: öğreticide sıradaki adıma yönlendirir.
+String newMatchLabel(MatchResultSummary s) {
+  if (s.mode != 'tutorial') return 'YENİ MAÇ';
+  return (s.tutorialStep ?? 1) >= 3 ? 'DERECELİ MAÇA GEÇ' : 'ÖĞRETİCİYE DEVAM';
 }

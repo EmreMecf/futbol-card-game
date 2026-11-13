@@ -287,7 +287,7 @@ class _SatirSandik extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
               Text('${chest.typeName.toUpperTr()} SANDIK',
                   style: Ref.bodyText(12.5, color: chestColor(chest.chestType), weight: FontWeight.w900)),
-              Text(alt ?? (chest.sourceType == 'match' ? 'Maç ödülü' : 'Ödül'), style: Ref.bodyText(10.5, color: Ref.muted)),
+              Text(alt ?? chestSourceLabel(chest.sourceType), style: Ref.bodyText(10.5, color: Ref.muted)),
             ]),
           ),
           mesgul
@@ -325,3 +325,14 @@ class _EnerjiPaneli extends StatelessWidget {
     ]);
   }
 }
+
+/// Sandığın nereden geldiği (liste alt satırı)
+String chestSourceLabel(String kaynak) => switch (kaynak) {
+      'match' => 'Maç ödülü',
+      'daily' => 'Günlük sandık',
+      'tutorial' => 'Öğretici ödülü',
+      'trophy_road' => 'Kupa yolu ödülü',
+      'season_tier' => 'Sezon yolu ödülü',
+      'season_league' => 'Sezon sonu lig ödülü',
+      _ => 'Ödül',
+    };

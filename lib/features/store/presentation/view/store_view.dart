@@ -675,7 +675,8 @@ class _GununTeklifi extends StatelessWidget {
         ),
         if (!t.boughtToday)
           RefSecondaryButton(
-            'AL · ${t.discountedPrice} ALTIN',
+            // Premium paketteki gibi: altın yetmiyorsa nedeni yazılır
+            viewModel.coins < t.discountedPrice ? 'YETERSİZ ALTIN' : 'AL · ${t.discountedPrice} ALTIN',
             onTap: viewModel.canBuyDailyOffer ? viewModel.buyDailyOffer : null,
           ),
       ]),

@@ -121,13 +121,37 @@ class _MatchBodyState extends State<_MatchBody> {
                   child: LayoutBuilder(
                     builder: (context, k) {
                       final genis = k.maxWidth >= 900;
-                      return ListView(
+                      final liste = ListView(
                         padding: Ref.pagePadding,
                         children: [
                           Center(
                             child: ConstrainedBox(
                               constraints: BoxConstraints(maxWidth: genis ? 1180 : 620),
                               child: genis ? _genis(vm) : _dar(vm),
+                            ),
+                          ),
+                        ],
+                      );
+                      if (genis) return liste;
+                      // Telefonda KARTI OYNA ekranın altında sabit durur:
+                      // her turda aşağı kaydırmak gerekmesin.
+                      return Column(
+                        children: [
+                          Expanded(child: liste),
+                          Container(
+                            decoration: const BoxDecoration(
+                              color: Ref.phoneBg,
+                              border: Border(top: BorderSide(color: Color(0xFF223650))),
+                            ),
+                            padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+                            child: SafeArea(
+                              top: false,
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: 620),
+                                  child: _Aksiyonlar(state: this, viewModel: vm),
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -171,8 +195,7 @@ class _MatchBodyState extends State<_MatchBody> {
       ],
       const SizedBox(height: Ref.pageGap),
       _DurumSatiri(viewModel: vm, secili: seciliKart(vm)),
-      const SizedBox(height: Ref.pageGap),
-      _Aksiyonlar(state: this, viewModel: vm),
+      // Düğmeler telefonda alttaki sabit şeritte (build)
       const SizedBox(height: Ref.pageGap),
       _AltNot(state: this, viewModel: vm),
     ],
@@ -370,7 +393,10 @@ class _Baslik extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        RefPill('TUR ${d.roundNumber}/${GameRules.squadSize}'),
+        // 042: öğretici kısa maçta tur üst sınırı yerine hedef gösterilir
+        RefPill(d.isTutorial && d.earlyFinishCards != null
+            ? 'TUR ${d.roundNumber} · HEDEF ${d.earlyFinishCards}'
+            : 'TUR ${d.roundNumber}/${GameRules.squadSize}'),
       ],
     );
   }
@@ -632,9 +658,10 @@ class _El extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = viewModel;
-    final kartlar = vm.hand.where((k) => !k.isPlayed).toList();
-    if (kartlar.isEmpty) return const SizedBox.shrink();
     final zorunlu = vm.requiredPosition;
+    // İstenen mevkinin kartları başa: bulmak için yana kaydırmak gerekmesin
+    final kartlar = handOrder(vm.hand, zorunlu);
+    if (kartlar.isEmpty) return const SizedBox.shrink();
     final secili = state.seciliKart(vm);
     const genislik = 92.0;
     final yukseklik = genislik / RefCardLayout.grid.aspectRatio;
@@ -655,6 +682,8 @@ class _El extends StatelessWidget {
           // Seçili kart büyüdüğünde kesilmesin diye pay
           height: yukseklik + 14,
           child: ListView.separated(
+            // mevki değişince liste en başa döner
+            key: ValueKey('el-sira-${zorunlu?.name}'),
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
             padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 4),
@@ -879,21 +908,22 @@ class _DurumSatiri extends StatelessWidget {
       metin =
           '${secili!.fullName}: ${secili!.power}'
           '${secili!.hasChemistry ? ' + ${secili!.chemistry} kimya = ${secili!.effectivePower}' : ''}. '
-          'Taktik seçip kartı oynayabilirsin.';
+          '${vm.tacticsEnabled ? 'Taktik seçip kartı oynayabilirsin.' : 'Kartı oynayabilirsin.'}';
     } else if (zorunlu != null && vm.isSimultaneous) {
-      metin = 'Mevki: ${zorunlu.label.toLowerCase()}. Kartını ve taktiğini gizlice seç; rakip seçimini göremez.';
+      metin = 'Mevki: ${zorunlu.label.toLowerCase()}. '
+          '${vm.tacticsEnabled ? 'Kartını ve taktiğini' : 'Kartını'} gizlice seç; rakip seçimini göremez.';
     } else if (zorunlu != null) {
       metin = 'Rakip ${zorunlu.label.toLowerCase()} açtı: ${zorunlu.label.toLowerCase()} kartı oynamalısın.';
     } else {
-      metin = 'Taktik seçip kart oynayabilirsin.';
+      metin = vm.tacticsEnabled ? 'Taktik seçip kart oynayabilirsin.' : 'Bir kart seçip oyna.';
     }
     if (tur != null && vm.isMyTurn && secili == null && vm.selectedTactic.isNone) {
       final sonuc = tur.isDraw
-          ? 'berabere'
+          ? 'Son tur berabere bitti.'
           : tur.winnerId == vm.myUserId
-          ? 'senin'
-          : 'rakibin';
-      metin = 'Son tur $sonuc. $metin';
+          ? 'Son turu sen kazandın.'
+          : 'Son turu rakip kazandı.';
+      metin = '$sonuc $metin';
     }
     // .matchlog { font-size:10px; color:#afc6dc; min-height:28px; text-align:center }
     return ConstrainedBox(
@@ -945,6 +975,8 @@ class _Aksiyonlar extends StatelessWidget {
 
     // IntrinsicHeight: iki düğme eşit yükseklikte (kaydırılan listede
     // yükseklik sınırsız olduğu için tek başına "stretch" olmaz)
+    // 042: taktiksiz maçta (öğretici 1-2) yalnız KARTI OYNA
+    if (!vm.tacticsEnabled) return sag;
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -990,7 +1022,9 @@ class _AltNot extends StatelessWidget {
     children: [
       // Referans: "Bu demo, güç + kimya + taktik bonusuyla sonucu hesaplar."
       Text(
-        'Sonucu sunucu hesaplar: güç + kimya + taktik bonusu.',
+        viewModel.tacticsEnabled
+            ? 'Sonucu sunucu hesaplar: güç + kimya + taktik bonusu.'
+            : 'Sonucu sunucu hesaplar: güç + kimya.',
         textAlign: TextAlign.center,
         style: Ref.tiny(Ref.muted),
       ),
@@ -1220,4 +1254,14 @@ class _MevkiDugmesi extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Eldeki oynanmamış kartlar; istenen mevkinin kartları başta
+/// (kendi içinde güce göre, güçlü önce). Diğerleri eski sırasıyla.
+List<HandCard> handOrder(List<HandCard> el, CardPosition? zorunlu) {
+  final kalan = el.where((k) => !k.isPlayed).toList();
+  if (zorunlu == null) return kalan;
+  final uygun = kalan.where((k) => k.position == zorunlu).toList()
+    ..sort((a, b) => b.effectivePower.compareTo(a.effectivePower));
+  return [...uygun, ...kalan.where((k) => k.position != zorunlu)];
 }

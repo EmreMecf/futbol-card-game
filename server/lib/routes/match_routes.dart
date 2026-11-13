@@ -396,12 +396,16 @@ Future<Map<String, dynamic>> _macModuEkle(
   Map<String, dynamic> harita,
 ) async {
   final satir = await db.queryOne(
-    'select mode, tutorial_step from matches where id = @matchId::uuid',
+    'select m.mode, m.tutorial_step, g.card_transfer '
+    'from matches m left join game_rule_versions g on g.version = m.rules_version '
+    'where m.id = @matchId::uuid',
     params: {'matchId': matchId},
   );
   final sonuc = Map<String, dynamic>.from(harita);
   sonuc['mode'] = satir?['mode']?.toString() ?? 'ranked';
   sonuc['tutorial_step'] = satir?['tutorial_step'];
+  // Maçın kural sürümünde kart el değiştirir mi? (sonuç ekranı metni için)
+  sonuc['card_transfer'] = satir?['card_transfer'];
   if (sonuc['mode'] != 'ranked' && sonuc['opponent'] is Map) {
     final rakip = Map<String, dynamic>.from(sonuc['opponent'] as Map);
     rakip['username'] = 'Bot';

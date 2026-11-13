@@ -9,6 +9,10 @@ import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../viewmodel/chests_view_model.dart';
 import 'chest_widgets.dart';
 
+/// Sandık envanteri başka bir yerden değişti (ör. günlük sandık alındı):
+/// değeri artırınca açık sandık şeritleri sunucudan yenilenir.
+final ValueNotifier<int> chestInventoryChanged = ValueNotifier<int>(0);
+
 /// Ana sayfa SANDIK ŞERİDİ: 4 yuva + hazır sandık + posta kutusu +
 /// ödül enerjisi. Ekonomi V2 kapalıysa ya da sandık servisi kayıtlı
 /// değilse (testler) HİÇ yer kaplamaz.
@@ -20,9 +24,39 @@ class ChestStrip extends StatelessWidget {
     if (!getIt.isRegistered<ChestsViewModel>()) return const SizedBox.shrink();
     return ChangeNotifierProvider<ChestsViewModel>(
       create: (_) => getIt<ChestsViewModel>()..load(),
-      child: const _Serit(),
+      child: const _Yenileyici(child: _Serit()),
     );
   }
+}
+
+/// [chestInventoryChanged] sinyalinde şeridi yeniler
+class _Yenileyici extends StatefulWidget {
+  final Widget child;
+  const _Yenileyici({required this.child});
+
+  @override
+  State<_Yenileyici> createState() => _YenileyiciState();
+}
+
+class _YenileyiciState extends State<_Yenileyici> {
+  @override
+  void initState() {
+    super.initState();
+    chestInventoryChanged.addListener(_yenile);
+  }
+
+  void _yenile() {
+    if (mounted) context.read<ChestsViewModel>().refresh();
+  }
+
+  @override
+  void dispose() {
+    chestInventoryChanged.removeListener(_yenile);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _Serit extends StatelessWidget {

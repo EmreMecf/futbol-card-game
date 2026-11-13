@@ -51,6 +51,10 @@ abstract class MatchResultSummary with _$MatchResultSummary {
 
     /// 042: öğretici adımı (yalnız öğretici maçında)
     int? tutorialStep,
+
+    /// Maçın kural sürümünde kart el değiştirir mi? null: eski sunucu
+    /// (bilinmiyor; eski metinler gösterilir).
+    bool? cardTransfer,
   }) = _MatchResultSummary;
 
   factory MatchResultSummary.fromJson(Map<String, dynamic> json) =>
@@ -61,6 +65,10 @@ abstract class MatchResultSummary with _$MatchResultSummary {
 
   /// Kart el degistirdi mi?
   bool get hasCardTransfers => cardsLost.isNotEmpty || cardsWon.isNotEmpty;
+
+  /// Bu maçta kart kaybı kuralı hiç yok muydu? (antrenman, öğretici ya da
+  /// kart transferi olmayan kural sürümü)
+  bool get noCardLossRules => mode != 'ranked' || cardTransfer == false;
 
   /// Kaybedilen kartlarin en degerlisi (ekranda one cikarilir)
   InventoryCard? get mostValuableLoss => _enDegerli(cardsLost);
@@ -81,6 +89,9 @@ abstract class MatchResultSummary with _$MatchResultSummary {
   String get subtitle {
     if (isDraw) {
       return 'Skor esit bitti. Kimse kart kaybetmedi.';
+    }
+    if (noCardLossRules) {
+      return didIWin ? 'Maci kazandin.' : 'Bu macta kart kaybi yok.';
     }
     if (didIWin) {
       final adet = cardsWon.length;

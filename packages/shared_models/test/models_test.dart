@@ -307,7 +307,7 @@ void main() {
     expect(gecersiz.displayMessage, contains('4 defans'));
 
     final gecerli = DeckValidation.fromJson({'is_valid': true, 'message': null});
-    expect(gecerli.displayMessage, 'Kadro hazir');
+    expect(gecerli.displayMessage, 'Kadro hazır');
   });
 }
 
