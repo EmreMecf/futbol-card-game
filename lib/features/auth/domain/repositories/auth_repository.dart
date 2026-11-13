@@ -25,6 +25,9 @@ abstract interface class AuthRepository {
     required String password,
   });
 
+  Future<Result<UserModel>> signInSocial(String provider);
+  Future<Result<void>> linkSocial(String provider);
+
   Future<Result<void>> signOut();
 
   /// Sunucudan guncel profili ve devam eden mac bilgisini ceker.
