@@ -1,0 +1,24 @@
+# Futbol Card Arena — staging Dart API. Build context MUST be repository root.
+# The runtime uses the same Dart SDK family as the builder for compatibility.
+FROM dart:3.14 AS builder
+WORKDIR /work
+COPY packages/shared_models/ /work/packages/shared_models/
+COPY server/ /work/server/
+WORKDIR /work/packages/shared_models
+RUN dart pub get && dart run build_runner build --delete-conflicting-outputs
+WORKDIR /work/server
+RUN dart pub get && dart compile exe bin/server.dart -o /work/futbol-card-server
+
+FROM dart:3.14 AS runtime
+WORKDIR /app
+USER root
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends postgresql-client ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=builder --chown=65532:65532 /work/futbol-card-server /app/futbol-card-server
+COPY --chown=65532:65532 database/migrations/ /app/migrations/
+COPY --chown=65532:65532 scripts/staging-db-bootstrap.sh /app/staging-db-bootstrap.sh
+COPY --chown=65532:65532 scripts/staging-enable-v3.sql /app/staging-enable-v3.sql
+USER 65532:65532
+ENV ENVIRONMENT=production
+ENV HOST=0.0.0.0
+EXPOSE 10000
+ENTRYPOINT ["/bin/sh", "/app/staging-db-bootstrap.sh"]

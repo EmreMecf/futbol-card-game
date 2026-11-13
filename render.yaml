@@ -1,0 +1,58 @@
+# Staging only. This Blueprint has no production resources.
+# Approval of its Render plan is required before any resource is created.
+previews:
+  generation: off
+
+databases:
+  - name: futbol-card-staging-db
+    databaseName: futbol_card_staging
+    user: futbol_staging
+    region: frankfurt
+    plan: free
+    postgresMajorVersion: "17"
+    ipAllowList: []
+
+services:
+  - type: web
+    name: futbol-card-staging-api
+    runtime: docker
+    region: frankfurt
+    plan: free
+    # Tüm çalışma main'de (ayrı dal yok). Otomatik yayın kapalı: panelden elle yayınlanır.
+    branch: main
+    autoDeployTrigger: off
+    numInstances: 1
+    dockerfilePath: ./Dockerfile.staging
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: DB_HOST
+        fromDatabase:
+          name: futbol-card-staging-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: futbol-card-staging-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: futbol-card-staging-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: futbol-card-staging-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: futbol-card-staging-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://staging.invalid
+      - key: TRUST_PROXY
+        value: "false"
