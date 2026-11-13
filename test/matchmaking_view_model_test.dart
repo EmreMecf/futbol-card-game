@@ -118,6 +118,25 @@ void main() {
       yeni.dispose();
     });
 
+    test('041: antrenman anahtarı yoksa kapalı, düğme çalışmaz', () async {
+      await vm.initialize();
+      expect(vm.trainingEnabled, isFalse);
+      await vm.startTraining();
+      expect(repo.antrenmanCagrisi, 0);
+      expect(vm.foundMatchId, isNull);
+    });
+
+    test('041: antrenman açıkken bota karşı maç hemen kurulur (kuyruk yok)', () async {
+      final yeni = MatchmakingViewModel(repo, soket, oturum, trainingEnabled: () async => true);
+      await yeni.initialize();
+      expect(yeni.trainingEnabled, isTrue);
+      await yeni.startTraining();
+      expect(repo.antrenmanCagrisi, 1);
+      expect(yeni.foundMatchId, 'antrenman-1');
+      expect(yeni.stage, MatchmakingStage.found);
+      yeni.dispose();
+    });
+
     test('korunan kartlar sunucuya gönderilir', () async {
       await vm.initialize();
       vm.toggleProtection('3');
@@ -278,6 +297,15 @@ class _Repo implements MatchmakingRepository {
   @override
   Future<Result<MatchFindResult>> cancelMatchmaking() async =>
       Success(iptalSonucu);
+
+  /// 041
+  MatchFindResult antrenmanSonucu = const MatchFindResult(status: MatchmakingStatus.matched, matchId: 'antrenman-1');
+  int antrenmanCagrisi = 0;
+  @override
+  Future<Result<MatchFindResult>> startTraining({required String deckId}) async {
+    antrenmanCagrisi++;
+    return Success(antrenmanSonucu);
+  }
 }
 
 class _Soket implements WebSocketService {

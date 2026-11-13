@@ -20,6 +20,9 @@ abstract interface class MatchmakingRepository {
     List<String> protectedCardIds,
   });
 
+  /// Antrenman maçı başlat (041): bota karşı, ödülsüz ve puansız
+  Future<Result<MatchFindResult>> startTraining({required String deckId});
+
   /// Kuyruktan cik
   Future<Result<MatchFindResult>> cancelMatchmaking();
 

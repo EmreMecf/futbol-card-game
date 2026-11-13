@@ -107,6 +107,28 @@ küçük tutulmalı ve **eşleştirme seviyeyi görmeli**.
 - **Bot rakip:** ilk 5 maç ve 20 sn'de rakip bulunamadığında; kadro gücü oyuncuya denk; puan ve
   ödül normal (Clash Royale'in düşük kupa botları gibi), bot olduğu belirtilmez.
 - **Antrenman modu:** bota karşı ödülsüz, taktik denemek için.
+
+### Faz 3a durumu: ✅ bot + antrenman uygulandı (041, anahtarlar `bots_v1` ve `training_mode` KAPALI)
+
+Kullanıcı kararı (13 Kasım 2026) tasarımı şöyle netleştirdi:
+
+| | Antrenman botu | Eşleştirme botu |
+|---|---|---|
+| Ne zaman | Oyuncu "Antrenman" düğmesine basınca, hemen | Derecelide **20 sn** rakip bulunamazsa |
+| Rakip adı | **"Bot"** (sunucu gösterir) | **Rastgele** kullanıcı adı |
+| Puan / ödül | **Yok** (MMR, altın, G/M/B, sandık, sezon XP'si yok; geçmişe girmez) | **Normal** (±25, altın, sandık, geçmiş) |
+
+- "İlk 5 maç bot" kuralı UYGULANMADI (kullanıcı yalnız "rakip bulunamazsa" dedi).
+- Eşleştirme botu yalnız kart transferi olmayan kural sürümünde (3+) gelir: bota kart kaybetmek ya da
+  bottan üretilmiş kart kazanmak ekonomiyi bozardı.
+- Bot kadrosu her maçta rakibin kadrosuna göre kurulur: aynı mevki ve sınıf, etkin güç ±3.
+- Bot yalnız kendi elini görür, 2-5 sn "düşünür", sunucu zamanlayıcısı saniyede bir `bot_tick()` çağırır.
+  Hem eş zamanlı (sürüm 4/5) hem sıralı (sürüm 2/3) kurallarla oynar.
+- Botlar liderlik tablosunda görünmez; bot havuzu yeniden kullanılır (son 5 rakip tekrar gelmez).
+- `find_match`, `_create_match`, `play_card`, `_resolve_round`, taktik, kimya ve MMR değişmedi. `_finish_match`
+  037 gövdesinden aynen alındı; yalnız antrenman bloğu eklendi.
+- Testler: `database/tests/041_bots_training_test.sql`, ViewModel (2), gerçek sunucuda `tool/ekonomi/bot_e2e.mjs`.
+- **Faz 3b (öğretici: 3 kısa maç + Gümüş sandık) henüz yapılmadı.**
 - **Günlük döngü:** ücretsiz günlük sandık, günün ilk galibiyeti çift XP, dönen mağaza teklifi.
 - **Hafta sonu etkinliği:** özel kurallı kısa turnuva (yalnız Bronz, çift enerji gibi), giriş
   etkinlik biletiyle (ölü item canlanır).
@@ -125,7 +147,7 @@ küçük tutulmalı ve **eşleştirme seviyeyi görmeli**.
 | 0 | Bekleyen 037/038'i tam testle bitirmek | Hayır (yalnız maç sonu) |
 | 1 | Sürüm 4 düello: prototipte denge → migration → sunucu → maç ekranı (gizli seçim, 5+15 sn) | **Evet** |
 | 2 | Seviye bonusu B2 + etkin güce göre eşleştirme + lig tavanı (✅ 040, kapalı) | **Evet** (güç hesabı) |
-| 3 | Öğretici + bot + antrenman | Hayır |
+| 3 | Öğretici + bot + antrenman (✅ 3a bot + antrenman 041, kapalı; 3b öğretici bekliyor) | Hayır |
 | 4 | Kupa yolu ödülleri, lig tabanı, sezon sıfırlaması | Hayır |
 | 5 | Günlük döngü, etkinlik, mağaza teklifleri, sadeleştirmeler | Hayır |
 

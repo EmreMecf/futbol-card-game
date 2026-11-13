@@ -16,3 +16,15 @@ Future<bool> fetchRankedCardLossEnabled(ApiClient api) async {
     return true;
   }
 }
+
+/// 041: antrenman modu (bota karşı, ödülsüz) açık mı? Okunamazsa kapalı:
+/// düğme görünmez, dereceli akış değişmez.
+Future<bool> fetchTrainingEnabled(ApiClient api) async {
+  try {
+    final c = await api.get('/economy/config');
+    final f = c['flags'] is Map ? c['flags'] as Map : const {};
+    return f['training_mode'] == true;
+  } catch (_) {
+    return false;
+  }
+}

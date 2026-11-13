@@ -44,6 +44,9 @@ abstract class MatchResultSummary with _$MatchResultSummary {
     /// Bu macin lig etkisi (022_match_league_change.sql).
     /// null: kayit yok (eski mac) — ekran lig bolumunu hic gostermez.
     MatchLeagueChange? leagueChange,
+
+    /// 041: 'training' ise antrenman maçı (ödül ve puan yok)
+    @Default('ranked') String mode,
   }) = _MatchResultSummary;
 
   factory MatchResultSummary.fromJson(Map<String, dynamic> json) =>

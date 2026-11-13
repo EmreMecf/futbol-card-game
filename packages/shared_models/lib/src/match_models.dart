@@ -150,6 +150,10 @@ abstract class MatchState with _$MatchState {
 
     String? winnerId,
     @Default(false) bool isDraw,
+
+    /// 041: 'ranked' (dereceli) | 'training' (antrenman: bota karşı,
+    /// ödülsüz ve puansız). Eski sunucu göndermezse dereceli.
+    @Default('ranked') String mode,
   }) = _MatchState;
 
   factory MatchState.fromJson(Map<String, dynamic> json) =>
@@ -157,6 +161,9 @@ abstract class MatchState with _$MatchState {
 
   /// Mac bitti mi?
   bool get isOver => status.isOver;
+
+  /// Antrenman maçı mı? (ödül ve puan yok)
+  bool get isTraining => mode == 'training';
 
   /// Turu acan tarafta miyim ve henuz kart atmadim mi?
   /// (Bu durumda istedigim pozisyonu secebilirim.)

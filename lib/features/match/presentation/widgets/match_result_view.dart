@@ -202,7 +202,11 @@ class _ZaferPaneli extends StatelessWidget {
     final d = delta;
     final ust = Column(
       children: [
-        Text('MAÇ SONUCU', style: Ref.caps(Ref.gold)),
+        Text(
+          // 041: antrenman maçında ödül ve puan yok
+          sonuc.mode == 'training' ? 'ANTRENMAN · ÖDÜL VE PUAN YOK' : 'MAÇ SONUCU',
+          style: Ref.caps(Ref.gold),
+        ),
         const SizedBox(height: 15),
         AnimatedBuilder(
           animation: giris,
@@ -231,7 +235,7 @@ class _ZaferPaneli extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: Ref.caps(Ref.muted),
         ),
-        if (d != null) ...[
+        if (d != null && sonuc.mode != 'training') ...[
           const SizedBox(height: 15),
           Row(children: [
             Expanded(child: _OdulKutusu(simge: const CoinGlyph(size: 13), deger: d.coins, etiket: 'Altın')),

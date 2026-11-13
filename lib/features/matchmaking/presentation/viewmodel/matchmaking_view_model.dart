@@ -43,9 +43,21 @@ class MatchmakingViewModel extends BaseViewModel {
   StreamSubscription<RealtimeEvent>? _olayAboneligi;
   Timer? _yoklamaZamanlayici;
 
-  MatchmakingViewModel(this._repository, this._socket, this._session, {Future<bool> Function()? cardLossEnabled})
-      // ignore: prefer_initializing_formals
-      : _kartKaybiSor = cardLossEnabled;
+  MatchmakingViewModel(
+    this._repository,
+    this._socket,
+    this._session, {
+    Future<bool> Function()? cardLossEnabled,
+    Future<bool> Function()? trainingEnabled,
+  })  // ignore: prefer_initializing_formals
+      : _kartKaybiSor = cardLossEnabled,
+        // ignore: prefer_initializing_formals
+        _antrenmanSor = trainingEnabled;
+
+  /// 041: antrenman modu açık mı? Kayıt yoksa (testler) kapalı.
+  final Future<bool> Function()? _antrenmanSor;
+  bool _antrenman = false;
+  bool get trainingEnabled => _antrenman;
 
   /// 037 (R2): dereceli maçta kalıcı kart kaybı açık mı? Kayıt yoksa
   /// (testler) bugünkü davranış: açık.
@@ -120,6 +132,8 @@ class MatchmakingViewModel extends BaseViewModel {
       _kartKaybi = await sor();
       if (!_kartKaybi) _korunanlar.clear();
     }
+    final antrenman = _antrenmanSor;
+    if (antrenman != null) _antrenman = await antrenman();
     await loadDecks();
   }
 
@@ -236,6 +250,21 @@ class MatchmakingViewModel extends BaseViewModel {
 
     // Kuyruga alindik: yoklamayi baslat
     _yoklamayiBaslat();
+  }
+
+  /// 041: bota karşı antrenman (ödülsüz, puansız). Kuyruğa girilmez;
+  /// sunucu maçı hemen kurar.
+  Future<void> startTraining() async {
+    final deste = _seciliDeste;
+    if (deste == null || !_antrenman || !canSearch) return;
+
+    final sonuc = await run(
+      () => _repository.startTraining(deckId: deste.id),
+      showLoading: false,
+    );
+    if (sonuc != null && sonuc.shouldEnterMatch) {
+      _macBulundu(sonuc.matchId!);
+    }
   }
 
   Future<void> cancelSearch() async {

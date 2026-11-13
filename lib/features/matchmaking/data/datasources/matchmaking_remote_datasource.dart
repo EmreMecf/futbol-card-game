@@ -24,6 +24,10 @@ class MatchmakingRemoteDataSource {
     });
   }
 
+  /// 041: bota karşı ödülsüz antrenman maçı
+  Future<Map<String, dynamic>> startTraining({required String deckId}) =>
+      _api.post('/match/training', govde: {'deck_id': deckId});
+
   Future<Map<String, dynamic>> cancel() => _api.post('/match/cancel');
 
   Future<Map<String, dynamic>> active() => _api.get('/match/active');

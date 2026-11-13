@@ -266,6 +266,8 @@ Future<void> configureDependencies() async {
         getIt<SessionManager>(),
         // Ekonomi V2 (037): yeni kurallarda koruma bölümü gizlenir
         cardLossEnabled: () => fetchRankedCardLossEnabled(getIt<ApiClient>()),
+        // 041: antrenman düğmesi yalnız anahtar açıkken
+        trainingEnabled: () => fetchTrainingEnabled(getIt<ApiClient>()),
       ),
     )
     // MatchViewModel mac kimligini parametre olarak alir.

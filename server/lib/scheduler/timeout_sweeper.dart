@@ -50,6 +50,8 @@ class TimeoutSweeper {
     _esZamanliCalisiyor = true;
     try {
       await _db.scalar('select advance_simultaneous_matches()');
+      // 041: bot rakiplerin hamleleri (bot yoksa hicbir sey yapmaz)
+      await _db.scalar('select bot_tick()');
     } catch (e) {
       // ignore: avoid_print
       print('[ZAMANLAYICI] Es zamanli mac ilerletme basarisiz: $e');

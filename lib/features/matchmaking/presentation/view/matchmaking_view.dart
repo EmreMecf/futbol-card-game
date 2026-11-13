@@ -231,6 +231,14 @@ class _Hazirlik extends StatelessWidget {
           trailing: RefGlyph.play,
           onTap: vm.canSearch ? vm.startSearch : null,
         ),
+        // 041: bota karşı antrenman (anahtar kapalıysa görünmez)
+        if (vm.trainingEnabled) ...[
+          const SizedBox(height: 8),
+          RefNeutralButton(
+            label: 'ANTRENMAN: BOTA KARŞI (ÖDÜLSÜZ)',
+            onTap: vm.canSearch ? vm.startTraining : null,
+          ),
+        ],
       ],
     );
   }

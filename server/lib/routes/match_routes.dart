@@ -38,7 +38,7 @@ Router matchRoutes(Database db) {
     // DIKKAT: p_user_id istemciden DEGIL, JWT'den geliyor.
     final sonuc = await db.scalar(
       '''
-      select find_match(
+      select find_match_or_bot(
         @userId::uuid,
         @deckId::uuid,
         case when @prot = '' then '{}'::uuid[]
@@ -54,6 +54,23 @@ Router matchRoutes(Database db) {
 
     // Paylasilan model uzerinden gecirmek, sunucunun urettigi bicimin
     // uygulamanin bekledigi bicimle AYNI oldugunu garanti eder.
+    return jsonOk(MatchFindResult.fromJson(RowMappers.asMap(sonuc)).toJson());
+  });
+
+  // ------------------------------------------------------------------
+  // ANTRENMAN (041): bota karsi, odulsuz ve puansiz
+  // ------------------------------------------------------------------
+  // Govde: { "deck_id": "..." }. Anahtar 'training_mode' kapaliysa
+  // veritabani reddeder (training_disabled).
+  router.post('/training', (Request request) async {
+    final userId = requireUserId(request);
+    final body = await readJsonBody(request);
+    final deckId = requireString(body, 'deck_id', label: 'Deste');
+
+    final sonuc = await db.scalar(
+      'select start_training_match(@userId::uuid, @deckId::uuid)',
+      params: {'userId': userId, 'deckId': deckId},
+    );
     return jsonOk(MatchFindResult.fromJson(RowMappers.asMap(sonuc)).toJson());
   });
 
@@ -124,7 +141,8 @@ Router matchRoutes(Database db) {
 
     // Modelden gecirerek dogruluyoruz: eksik ya da yanlis adlandirilmis
     // bir alan olsaydi burada hemen fark ederdik.
-    return jsonOk(MatchState.fromJson(RowMappers.asMap(durum)).toJson());
+    final harita = await _macModuEkle(db, matchId, RowMappers.asMap(durum));
+    return jsonOk(MatchState.fromJson(harita).toJson());
   });
 
   // ------------------------------------------------------------------
@@ -238,7 +256,9 @@ Router matchRoutes(Database db) {
       params: {'userId': userId, 'matchId': matchId},
     );
 
-    final ozet = RowMappers.matchResult(sonuc);
+    final ozet = RowMappers.matchResult(
+      await _macModuEkle(db, matchId, RowMappers.asMap(sonuc)),
+    );
     return jsonOk(
       ozet
           .copyWith(
@@ -341,4 +361,27 @@ Router matchRoutes(Database db) {
   });
 
   return router;
+}
+
+/// 041: maçın türünü ('ranked' | 'training') yanıta ekler. Antrenmanda
+/// rakip "Bot" olarak gösterilir (kullanıcı kararı); dereceli bottaki
+/// rastgele ad olduğu gibi kalır.
+Future<Map<String, dynamic>> _macModuEkle(
+  Database db,
+  String matchId,
+  Map<String, dynamic> harita,
+) async {
+  final mod = await db.scalar(
+    'select mode from matches where id = @matchId::uuid',
+    params: {'matchId': matchId},
+  );
+  final sonuc = Map<String, dynamic>.from(harita);
+  sonuc['mode'] = mod?.toString() ?? 'ranked';
+  if (sonuc['mode'] == 'training' && sonuc['opponent'] is Map) {
+    final rakip = Map<String, dynamic>.from(sonuc['opponent'] as Map);
+    rakip['username'] = 'Bot';
+    rakip['avatar_url'] = null;
+    sonuc['opponent'] = rakip;
+  }
+  return sonuc;
 }

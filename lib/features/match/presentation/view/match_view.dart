@@ -316,7 +316,12 @@ class _Baslik extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text('DERECELİ KARŞILAŞMA', maxLines: 1, style: Ref.caps(Ref.accent)),
+                      child: Text(
+                        // 041: antrenman maçı ödülsüz ve puansız
+                        d.isTraining ? 'ANTRENMAN · ÖDÜL YOK' : 'DERECELİ KARŞILAŞMA',
+                        maxLines: 1,
+                        style: Ref.caps(Ref.accent),
+                      ),
                     ),
                   ),
                 ],
