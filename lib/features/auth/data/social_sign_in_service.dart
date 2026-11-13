@@ -15,8 +15,14 @@ class SocialToken {
 
 class SocialSignInService {
   static const googleWebClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+  static const googleIosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
+  static const appleServiceId = String.fromEnvironment('APPLE_SERVICE_ID');
+  static const appleRedirectUri = String.fromEnvironment('APPLE_REDIRECT_URI');
 
-  static bool get appleAvailable => !kIsWeb && Platform.isIOS;
+  static bool get appleAvailable => !kIsWeb &&
+      (Platform.isIOS ||
+      (Platform.isAndroid && appleServiceId.isNotEmpty &&
+          appleRedirectUri.isNotEmpty));
   static bool get googleAvailable => !kIsWeb &&
       (Platform.isAndroid || Platform.isIOS);
 
@@ -25,7 +31,11 @@ class SocialSignInService {
       throw StateError('Google Web OAuth Client ID ayarlanmadi.');
     }
     final google = GoogleSignIn.instance;
-    await google.initialize(serverClientId: googleWebClientId);
+    await google.initialize(
+      serverClientId: googleWebClientId,
+      clientId: Platform.isIOS && googleIosClientId.isNotEmpty
+          ? googleIosClientId : null,
+    );
     final account = await google.authenticate();
     final idToken = account.authentication.idToken;
     if (idToken == null || idToken.isEmpty) {
@@ -36,7 +46,7 @@ class SocialSignInService {
 
   Future<SocialToken> apple() async {
     if (!appleAvailable) {
-      throw StateError('Apple ile giris su anda iOS cihazlarda kullanilabilir.');
+      throw StateError('Apple girisi icin Apple Developer Services ID gerekli.');
     }
     final nonce = generateNonce();
     final hashed = sha256.convert(utf8.encode(nonce)).toString();
@@ -46,6 +56,12 @@ class SocialSignInService {
         AppleIDAuthorizationScopes.fullName,
       ],
       nonce: hashed,
+      webAuthenticationOptions: Platform.isAndroid
+          ? WebAuthenticationOptions(
+              clientId: appleServiceId,
+              redirectUri: Uri.parse(appleRedirectUri),
+            )
+          : null,
     );
     final token = credential.identityToken;
     if (token == null || token.isEmpty) {
