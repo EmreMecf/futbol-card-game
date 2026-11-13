@@ -69,12 +69,12 @@ if [ "$count" -lt 43 ]; then
   echo "[STAGING INIT] ABORT: expected at least 43 migration files, saw $count" >&2
   exit 1
 fi
-psql -X -v ON_ERROR_STOP=1 -tAc "SELECT EXISTS (SELECT 1 FROM public.staging_schema_migrations WHERE filename='044_daily_loop.sql')::text" | grep -qx t || {
+psql -X -v ON_ERROR_STOP=1 -tAc "SELECT EXISTS (SELECT 1 FROM public.staging_schema_migrations WHERE filename='044_daily_loop.sql')::text" | grep -qx true || {
   echo "[STAGING INIT] ABORT: latest migration 044 not recorded" >&2
   exit 1
 }
 
-psql -X -v ON_ERROR_STOP=1 -tAc "SELECT (to_regprocedure('public.advance_simultaneous_matches()') IS NOT NULL AND to_regprocedure('public.sweep_timed_out_matches()') IS NOT NULL AND to_regclass('public.users') IS NOT NULL)::text" | grep -qx t || {
+psql -X -v ON_ERROR_STOP=1 -tAc "SELECT (to_regprocedure('public.advance_simultaneous_matches()') IS NOT NULL AND to_regprocedure('public.sweep_timed_out_matches()') IS NOT NULL AND to_regclass('public.users') IS NOT NULL)::text" | grep -qx true || {
   echo "[STAGING INIT] ABORT: critical PvP schema/function missing" >&2
   exit 1
 }
