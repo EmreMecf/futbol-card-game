@@ -3,6 +3,21 @@
 set -eu
 export LC_ALL=C
 
+# Explicit one-shot V3 PvP flag activation; staging database only.
+# Do not enable in production or keep this switch permanently on.
+if [ "${STAGING_ENABLE_V3_ONCE:-false}" = "true" ]; then
+  if [ "${DB_NAME:-}" != "futbol_card_staging" ] || [ "${ENVIRONMENT:-}" != "production" ]; then
+    echo "[STAGING V3] ABORT: invalid database/environment" >&2
+    exit 1
+  fi
+  export PGHOST="${DB_HOST:?}" PGPORT="${DB_PORT:?}" PGDATABASE="${DB_NAME:?}" PGUSER="${DB_USER:?}"
+  export PGPASSWORD="${DB_PASSWORD:?}" PGSSLMODE=require PGCONNECT_TIMEOUT=15
+  echo "[STAGING V3] Enabling simultaneous PvP and level power, staging only"
+  psql -X -v ON_ERROR_STOP=1 -q -f /app/staging-enable-v3.sql
+  echo "[STAGING V3] Rule version verified; starting Dart API"
+  exec /app/futbol-card-server
+fi
+
 if [ "${STAGING_DB_BOOTSTRAP:-false}" != "true" ]; then
   exec /app/futbol-card-server
 fi
