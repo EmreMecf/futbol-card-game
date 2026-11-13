@@ -23,6 +23,9 @@ abstract interface class MatchmakingRepository {
   /// Antrenman maçı başlat (041): bota karşı, ödülsüz ve puansız
   Future<Result<MatchFindResult>> startTraining({required String deckId});
 
+  /// Öğreticinin sıradaki adımını başlat (042): bota karşı kısa maç
+  Future<Result<MatchFindResult>> startTutorial({required String deckId});
+
   /// Kuyruktan cik
   Future<Result<MatchFindResult>> cancelMatchmaking();
 

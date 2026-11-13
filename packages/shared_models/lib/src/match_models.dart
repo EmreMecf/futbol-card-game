@@ -154,6 +154,10 @@ abstract class MatchState with _$MatchState {
     /// 041: 'ranked' (dereceli) | 'training' (antrenman: bota karşı,
     /// ödülsüz ve puansız). Eski sunucu göndermezse dereceli.
     @Default('ranked') String mode,
+
+    /// 042: öğretici adımı (1 mevki, 2 gizli seçim, 3 taktik); öğretici
+    /// maçı değilse null.
+    int? tutorialStep,
   }) = _MatchState;
 
   factory MatchState.fromJson(Map<String, dynamic> json) =>
@@ -164,6 +168,9 @@ abstract class MatchState with _$MatchState {
 
   /// Antrenman maçı mı? (ödül ve puan yok)
   bool get isTraining => mode == 'training';
+
+  /// Öğretici maçı mı? (ödül ve puan yok; 3. adım bitince Gümüş sandık)
+  bool get isTutorial => mode == 'tutorial';
 
   /// Turu acan tarafta miyim ve henuz kart atmadim mi?
   /// (Bu durumda istedigim pozisyonu secebilirim.)
@@ -356,4 +363,28 @@ abstract class PlayCardResult with _$PlayCardResult {
 
   bool get isWaitingOpponent => phase == 'waiting_opponent';
   bool get isRoundResolved => phase == 'round_resolved';
+}
+
+/// 042: öğretici durumu (GET /match/tutorial).
+@freezed
+abstract class TutorialStatus with _$TutorialStatus {
+  const TutorialStatus._();
+
+  const factory TutorialStatus({
+    /// Anahtar açık ve eş zamanlı kurallar canlı mı?
+    @Default(false) bool enabled,
+
+    /// Tamamlanan adım sayısı (0-3)
+    @Default(0) int step,
+
+    /// Sıradaki adım (1-3); bittiyse null
+    int? nextStep,
+    @Default(false) bool completed,
+  }) = _TutorialStatus;
+
+  factory TutorialStatus.fromJson(Map<String, dynamic> json) =>
+      _$TutorialStatusFromJson(json);
+
+  /// Ana ekranda öğretici gösterilmeli mi?
+  bool get shouldOffer => enabled && !completed && nextStep != null;
 }

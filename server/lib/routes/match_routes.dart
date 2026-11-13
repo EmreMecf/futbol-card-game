@@ -75,6 +75,30 @@ Router matchRoutes(Database db) {
   });
 
   // ------------------------------------------------------------------
+  // OGRETICI (042): 3 kisa mac, sonunda Gumus sandik
+  // ------------------------------------------------------------------
+  router.get('/tutorial', (Request request) async {
+    final userId = requireUserId(request);
+    final durum = await db.scalar(
+      'select tutorial_status(@userId::uuid)',
+      params: {'userId': userId},
+    );
+    return jsonOk(TutorialStatus.fromJson(RowMappers.asMap(durum)).toJson());
+  });
+
+  // Govde: { "deck_id": "..." }. Siradaki adimin macini hemen kurar.
+  router.post('/tutorial/start', (Request request) async {
+    final userId = requireUserId(request);
+    final body = await readJsonBody(request);
+    final deckId = requireString(body, 'deck_id', label: 'Deste');
+    final sonuc = await db.scalar(
+      'select start_tutorial_match(@userId::uuid, @deckId::uuid)',
+      params: {'userId': userId, 'deckId': deckId},
+    );
+    return jsonOk(MatchFindResult.fromJson(RowMappers.asMap(sonuc)).toJson());
+  });
+
+  // ------------------------------------------------------------------
   // KUYRUKTAN CIK
   // ------------------------------------------------------------------
   router.post('/cancel', (Request request) async {
@@ -363,21 +387,22 @@ Router matchRoutes(Database db) {
   return router;
 }
 
-/// 041: maçın türünü ('ranked' | 'training') yanıta ekler. Antrenmanda
-/// rakip "Bot" olarak gösterilir (kullanıcı kararı); dereceli bottaki
-/// rastgele ad olduğu gibi kalır.
+/// 041: maçın türünü ('ranked' | 'training' | 'tutorial') yanıta ekler.
+/// Antrenman ve öğreticide rakip "Bot" olarak gösterilir (kullanıcı
+/// kararı); dereceli bottaki rastgele ad olduğu gibi kalır.
 Future<Map<String, dynamic>> _macModuEkle(
   Database db,
   String matchId,
   Map<String, dynamic> harita,
 ) async {
-  final mod = await db.scalar(
-    'select mode from matches where id = @matchId::uuid',
+  final satir = await db.queryOne(
+    'select mode, tutorial_step from matches where id = @matchId::uuid',
     params: {'matchId': matchId},
   );
   final sonuc = Map<String, dynamic>.from(harita);
-  sonuc['mode'] = mod?.toString() ?? 'ranked';
-  if (sonuc['mode'] == 'training' && sonuc['opponent'] is Map) {
+  sonuc['mode'] = satir?['mode']?.toString() ?? 'ranked';
+  sonuc['tutorial_step'] = satir?['tutorial_step'];
+  if (sonuc['mode'] != 'ranked' && sonuc['opponent'] is Map) {
     final rakip = Map<String, dynamic>.from(sonuc['opponent'] as Map);
     rakip['username'] = 'Bot';
     rakip['avatar_url'] = null;

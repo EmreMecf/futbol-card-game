@@ -28,6 +28,10 @@ class MatchmakingRemoteDataSource {
   Future<Map<String, dynamic>> startTraining({required String deckId}) =>
       _api.post('/match/training', govde: {'deck_id': deckId});
 
+  /// 042: öğreticinin sıradaki adımını başlat
+  Future<Map<String, dynamic>> startTutorial({required String deckId}) =>
+      _api.post('/match/tutorial/start', govde: {'deck_id': deckId});
+
   Future<Map<String, dynamic>> cancel() => _api.post('/match/cancel');
 
   Future<Map<String, dynamic>> active() => _api.get('/match/active');

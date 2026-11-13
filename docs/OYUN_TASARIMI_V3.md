@@ -128,7 +128,25 @@ Kullanıcı kararı (13 Kasım 2026) tasarımı şöyle netleştirdi:
 - `find_match`, `_create_match`, `play_card`, `_resolve_round`, taktik, kimya ve MMR değişmedi. `_finish_match`
   037 gövdesinden aynen alındı; yalnız antrenman bloğu eklendi.
 - Testler: `database/tests/041_bots_training_test.sql`, ViewModel (2), gerçek sunucuda `tool/ekonomi/bot_e2e.mjs`.
-- **Faz 3b (öğretici: 3 kısa maç + Gümüş sandık) henüz yapılmadı.**
+
+### Faz 3b durumu: ✅ öğretici uygulandı (042, anahtar `tutorial_v1` KAPALI)
+
+| Adım | Ders | Kural sürümü | Not |
+|---|---|---|---|
+| 1 | Mevki seçimi | 6 (taktiksiz) | İlk mevkiyi oyuncu seçer |
+| 2 | Gizli seçim | 6 (taktiksiz) | |
+| 3 | Taktik | 7 (taktikli) | Bitince **tek sefer Gümüş sandık** |
+
+- Sürüm 6/7 = sürüm 4 akışı, yalnız veri farkı: **6 kartta** biter, mevki 15 sn, seçim 30 sn.
+  Düello kodu değişmedi.
+- Rakip "Bot", kadrosu oyuncununkinden ~6 güç zayıf. Maçlar ödülsüz ve puansız, maç geçmişine girmez.
+- Adım sayılır: maç biter, en az 3 tur oynanır, oyuncu süre aşımıyla düşmez (kaybetmek de sayılır).
+- Yalnız eş zamanlı kurallar canlıyken (sürüm 4/5) açılır.
+- Maç ekranında adıma ve aşamaya göre ipucu paneli; hazırlık ekranında "ÖĞRETİCİ · ADIM n/3" kartı.
+- **041 düzeltmesi:** galibiyet gelişim kopyası (R3) antrenman maçında da veriliyordu; artık yalnız
+  dereceli. Taktiksiz sürümde (6) eş zamanlı akış taktiği kaydetmeden reddediyor.
+- Testler: `database/tests/042_tutorial_test.sql`, ViewModel (3), ipucu (6), gerçek sunucuda
+  `tool/ekonomi/ogretici_e2e.mjs`.
 - **Günlük döngü:** ücretsiz günlük sandık, günün ilk galibiyeti çift XP, dönen mağaza teklifi.
 - **Hafta sonu etkinliği:** özel kurallı kısa turnuva (yalnız Bronz, çift enerji gibi), giriş
   etkinlik biletiyle (ölü item canlanır).
@@ -147,7 +165,7 @@ Kullanıcı kararı (13 Kasım 2026) tasarımı şöyle netleştirdi:
 | 0 | Bekleyen 037/038'i tam testle bitirmek | Hayır (yalnız maç sonu) |
 | 1 | Sürüm 4 düello: prototipte denge → migration → sunucu → maç ekranı (gizli seçim, 5+15 sn) | **Evet** |
 | 2 | Seviye bonusu B2 + etkin güce göre eşleştirme + lig tavanı (✅ 040, kapalı) | **Evet** (güç hesabı) |
-| 3 | Öğretici + bot + antrenman (✅ 3a bot + antrenman 041, kapalı; 3b öğretici bekliyor) | Hayır |
+| 3 | Öğretici + bot + antrenman (✅ 041 + 042, anahtarlar kapalı) | Hayır |
 | 4 | Kupa yolu ödülleri, lig tabanı, sezon sıfırlaması | Hayır |
 | 5 | Günlük döngü, etkinlik, mağaza teklifleri, sadeleştirmeler | Hayır |
 

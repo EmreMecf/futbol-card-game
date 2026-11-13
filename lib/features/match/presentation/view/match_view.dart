@@ -18,6 +18,7 @@ import '../arena/ref_stadium.dart';
 import '../arena/stage2d/duel_stage.dart';
 import '../viewmodel/match_view_model.dart';
 import '../widgets/match_result_view.dart';
+import '../widgets/tutorial_hint.dart';
 import '../widgets/tactic_widgets.dart';
 
 /// MAÇ — referans `arena()` ekranı ("CANLI ARENA").
@@ -151,6 +152,11 @@ class _MatchBodyState extends State<_MatchBody> {
     children: [
       _Baslik(viewModel: vm),
       const SizedBox(height: Ref.pageGap),
+      // 042: öğretici maçında adıma göre ipucu
+      if (vm.matchState?.isTutorial ?? false) ...[
+        TutorialHint(state: vm.matchState!),
+        const SizedBox(height: Ref.pageGap),
+      ],
       _ArenaPaneli(viewModel: vm),
       const SizedBox(height: Ref.pageGap),
       _VsSatiri(viewModel: vm, secili: seciliKart(vm)),
@@ -177,6 +183,11 @@ class _MatchBodyState extends State<_MatchBody> {
     children: [
       _Baslik(viewModel: vm),
       const SizedBox(height: Ref.pageGap),
+      // 042: öğretici maçında adıma göre ipucu
+      if (vm.matchState?.isTutorial ?? false) ...[
+        TutorialHint(state: vm.matchState!),
+        const SizedBox(height: Ref.pageGap),
+      ],
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -255,8 +266,11 @@ class _MatchBodyState extends State<_MatchBody> {
         ),
         title: Text('Teslim olmak istiyor musun?', style: Ref.h3()),
         content: Text(
-          'Teslim olursan maçı kaybetmiş sayılırsın ve korumaya almadığın '
-          '${GameRules.penaltyCardCount} kartın kalıcı olarak rakibe geçer.',
+          // 041/042: antrenman ve öğreticide kayıp yok
+          (vm.matchState?.isTraining ?? false) || (vm.matchState?.isTutorial ?? false)
+              ? 'Teslim olursan maç biter. Antrenman ve öğreticide puan, ödül ve kart kaybı yok.'
+              : 'Teslim olursan maçı kaybetmiş sayılırsın ve korumaya almadığın '
+                  '${GameRules.penaltyCardCount} kartın kalıcı olarak rakibe geçer.',
           style: Ref.bodyText(13, color: Ref.muted),
         ),
         actions: [
@@ -318,7 +332,9 @@ class _Baslik extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         // 041: antrenman maçı ödülsüz ve puansız
-                        d.isTraining ? 'ANTRENMAN · ÖDÜL YOK' : 'DERECELİ KARŞILAŞMA',
+                        d.isTutorial
+                            ? 'ÖĞRETİCİ ${d.tutorialStep ?? 1}/3 · ÖDÜL YOK'
+                            : (d.isTraining ? 'ANTRENMAN · ÖDÜL YOK' : 'DERECELİ KARŞILAŞMA'),
                         maxLines: 1,
                         style: Ref.caps(Ref.accent),
                       ),

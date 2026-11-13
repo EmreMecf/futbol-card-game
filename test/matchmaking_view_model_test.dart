@@ -137,6 +137,34 @@ void main() {
       yeni.dispose();
     });
 
+    test('042: öğretici durumu yoksa kart yok, başlatılamaz', () async {
+      await vm.initialize();
+      expect(vm.tutorial, isNull);
+      await vm.startTutorial();
+      expect(repo.ogreticiCagrisi, 0);
+    });
+
+    test('042: öğretici sunulduğunda sıradaki adım hemen başlar', () async {
+      final yeni = MatchmakingViewModel(repo, soket, oturum,
+          tutorialStatus: () async => const TutorialStatus(enabled: true, step: 1, nextStep: 2));
+      await yeni.initialize();
+      expect(yeni.tutorial?.shouldOffer, isTrue);
+      await yeni.startTutorial();
+      expect(repo.ogreticiCagrisi, 1);
+      expect(yeni.foundMatchId, 'ogretici-1');
+      yeni.dispose();
+    });
+
+    test('042: tamamlanmış öğretici bir daha başlamaz', () async {
+      final yeni = MatchmakingViewModel(repo, soket, oturum,
+          tutorialStatus: () async => const TutorialStatus(enabled: true, step: 3, completed: true));
+      await yeni.initialize();
+      expect(yeni.tutorial?.shouldOffer, isFalse);
+      await yeni.startTutorial();
+      expect(repo.ogreticiCagrisi, 0);
+      yeni.dispose();
+    });
+
     test('korunan kartlar sunucuya gönderilir', () async {
       await vm.initialize();
       vm.toggleProtection('3');
@@ -297,6 +325,14 @@ class _Repo implements MatchmakingRepository {
   @override
   Future<Result<MatchFindResult>> cancelMatchmaking() async =>
       Success(iptalSonucu);
+
+  /// 042
+  int ogreticiCagrisi = 0;
+  @override
+  Future<Result<MatchFindResult>> startTutorial({required String deckId}) async {
+    ogreticiCagrisi++;
+    return const Success(MatchFindResult(status: MatchmakingStatus.matched, matchId: 'ogretici-1'));
+  }
 
   /// 041
   MatchFindResult antrenmanSonucu = const MatchFindResult(status: MatchmakingStatus.matched, matchId: 'antrenman-1');

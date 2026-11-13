@@ -1,3 +1,5 @@
+import 'package:shared_models/shared_models.dart';
+
 import '../../../core/network/api_client.dart';
 
 /// EKONOMİ V2 (037, R2): dereceli maçta kalıcı kart kaybı açık mı?
@@ -26,5 +28,14 @@ Future<bool> fetchTrainingEnabled(ApiClient api) async {
     return f['training_mode'] == true;
   } catch (_) {
     return false;
+  }
+}
+
+/// 042: öğretici durumu. Okunamazsa null: öğretici kartı görünmez.
+Future<TutorialStatus?> fetchTutorialStatus(ApiClient api) async {
+  try {
+    return TutorialStatus.fromJson(await api.get('/match/tutorial'));
+  } catch (_) {
+    return null;
   }
 }

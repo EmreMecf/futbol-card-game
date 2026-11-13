@@ -134,6 +134,11 @@ class _Hazirlik extends StatelessWidget {
         _baslik('MAÇA HAZIRLAN',
             vm.cardLossEnabled ? RefPill('KORUMA ${vm.protectedCardIds.length}/${vm.maxProtection}') : const RefPill('KART KAYBI YOK')),
         const SizedBox(height: Ref.pageGap),
+        // 042: öğretici (yeni oyuncu; tamamlanınca görünmez)
+        if (vm.tutorial?.shouldOffer ?? false) ...[
+          _OgreticiKarti(viewModel: vm, gecerli: gecerli),
+          const SizedBox(height: Ref.pageGap),
+        ],
         RefArenaStage(
             stadium: RefStadium(
                 caption: gecerli ? 'KADRO HAZIR!' : 'KADRO EKSİK',
@@ -239,6 +244,47 @@ class _Hazirlik extends StatelessWidget {
             onTap: vm.canSearch ? vm.startTraining : null,
           ),
         ],
+      ],
+    );
+  }
+}
+
+// ====================================================================
+// ÖĞRETİCİ KARTI (042)
+// ====================================================================
+class _OgreticiKarti extends StatelessWidget {
+  final MatchmakingViewModel viewModel;
+  final bool gecerli;
+  const _OgreticiKarti({required this.viewModel, required this.gecerli});
+
+  static const _adimlar = {
+    1: ('MEVKİ SEÇİMİ', 'Turun mevkisini kimin, nasıl seçtiğini öğren.'),
+    2: ('GİZLİ SEÇİM', 'İki oyuncu kartını aynı anda, gizli seçer.'),
+    3: ('TAKTİK', 'Pres, kontra ve duvarı enerjiyle kullan.'),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final adim = viewModel.tutorial?.nextStep ?? 1;
+    final (baslik, aciklama) = _adimlar[adim] ?? _adimlar[1]!;
+    return RefCardPanel(
+      children: [
+        Row(
+          children: [
+            const Em('🎓', size: 18),
+            const SizedBox(width: 8),
+            Expanded(child: Text('ÖĞRETİCİ · ADIM $adim/3 · $baslik', style: Ref.caps(Ref.gold))),
+          ],
+        ),
+        Text(
+          '$aciklama Bota karşı kısa maç (6 kart), puan ve ödül yok. '
+          '3 adımı bitirince Gümüş sandık kazanırsın.',
+          style: Ref.bodyText(11, color: Ref.muted, height: 1.4),
+        ),
+        RefNeutralButton(
+          label: 'ÖĞRETİCİYİ BAŞLAT',
+          onTap: gecerli && viewModel.canSearch ? viewModel.startTutorial : null,
+        ),
       ],
     );
   }

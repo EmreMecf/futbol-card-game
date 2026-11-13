@@ -60,6 +60,13 @@ class MatchmakingRepositoryImpl implements MatchmakingRepository {
   }
 
   @override
+  Future<Result<MatchFindResult>> startTutorial({required String deckId}) {
+    return Result.guard(() async {
+      return MatchFindResult.fromJson(await _remote.startTutorial(deckId: deckId));
+    });
+  }
+
+  @override
   Future<Result<MatchFindResult>> cancelMatchmaking() {
     return Result.guard(() async {
       return MatchFindResult.fromJson(await _remote.cancel());

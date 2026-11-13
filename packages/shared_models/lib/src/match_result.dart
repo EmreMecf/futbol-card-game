@@ -46,7 +46,11 @@ abstract class MatchResultSummary with _$MatchResultSummary {
     MatchLeagueChange? leagueChange,
 
     /// 041: 'training' ise antrenman maçı (ödül ve puan yok)
+    /// 042: 'tutorial' ise öğretici maçı
     @Default('ranked') String mode,
+
+    /// 042: öğretici adımı (yalnız öğretici maçında)
+    int? tutorialStep,
   }) = _MatchResultSummary;
 
   factory MatchResultSummary.fromJson(Map<String, dynamic> json) =>

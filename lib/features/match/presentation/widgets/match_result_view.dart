@@ -204,7 +204,9 @@ class _ZaferPaneli extends StatelessWidget {
       children: [
         Text(
           // 041: antrenman maçında ödül ve puan yok
-          sonuc.mode == 'training' ? 'ANTRENMAN · ÖDÜL VE PUAN YOK' : 'MAÇ SONUCU',
+          sonuc.mode == 'tutorial'
+              ? 'ÖĞRETİCİ ${sonuc.tutorialStep ?? 1}/3 · ÖDÜL VE PUAN YOK'
+              : (sonuc.mode == 'training' ? 'ANTRENMAN · ÖDÜL VE PUAN YOK' : 'MAÇ SONUCU'),
           style: Ref.caps(Ref.gold),
         ),
         const SizedBox(height: 15),
@@ -235,7 +237,16 @@ class _ZaferPaneli extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: Ref.caps(Ref.muted),
         ),
-        if (d != null && sonuc.mode != 'training') ...[
+        // 042: öğreticinin son adımı: Gümüş sandık (sunucu tek sefer verir)
+        if (sonuc.mode == 'tutorial' && sonuc.tutorialStep == 3) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Öğretici tamamlandı! Gümüş sandığın Sandıklar ekranında.',
+            textAlign: TextAlign.center,
+            style: Ref.bodyText(12, color: Ref.gold, weight: FontWeight.w800),
+          ),
+        ],
+        if (d != null && sonuc.mode == 'ranked') ...[
           const SizedBox(height: 15),
           Row(children: [
             Expanded(child: _OdulKutusu(simge: const CoinGlyph(size: 13), deger: d.coins, etiket: 'Altın')),

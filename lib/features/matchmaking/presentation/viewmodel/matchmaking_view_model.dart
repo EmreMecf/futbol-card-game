@@ -49,10 +49,18 @@ class MatchmakingViewModel extends BaseViewModel {
     this._session, {
     Future<bool> Function()? cardLossEnabled,
     Future<bool> Function()? trainingEnabled,
+    Future<TutorialStatus?> Function()? tutorialStatus,
   })  // ignore: prefer_initializing_formals
       : _kartKaybiSor = cardLossEnabled,
         // ignore: prefer_initializing_formals
-        _antrenmanSor = trainingEnabled;
+        _antrenmanSor = trainingEnabled,
+        // ignore: prefer_initializing_formals
+        _ogreticiSor = tutorialStatus;
+
+  /// 042: öğretici durumu. Kayıt yoksa (testler) yok sayılır.
+  final Future<TutorialStatus?> Function()? _ogreticiSor;
+  TutorialStatus? _ogretici;
+  TutorialStatus? get tutorial => _ogretici;
 
   /// 041: antrenman modu açık mı? Kayıt yoksa (testler) kapalı.
   final Future<bool> Function()? _antrenmanSor;
@@ -134,6 +142,8 @@ class MatchmakingViewModel extends BaseViewModel {
     }
     final antrenman = _antrenmanSor;
     if (antrenman != null) _antrenman = await antrenman();
+    final ogretici = _ogreticiSor;
+    if (ogretici != null) _ogretici = await ogretici();
     await loadDecks();
   }
 
@@ -260,6 +270,21 @@ class MatchmakingViewModel extends BaseViewModel {
 
     final sonuc = await run(
       () => _repository.startTraining(deckId: deste.id),
+      showLoading: false,
+    );
+    if (sonuc != null && sonuc.shouldEnterMatch) {
+      _macBulundu(sonuc.matchId!);
+    }
+  }
+
+  /// 042: öğreticinin sıradaki adımı (bota karşı kısa maç, ödülsüz;
+  /// 3. adım bitince Gümüş sandık). Kuyruğa girilmez.
+  Future<void> startTutorial() async {
+    final deste = _seciliDeste;
+    if (deste == null || !(_ogretici?.shouldOffer ?? false) || !canSearch) return;
+
+    final sonuc = await run(
+      () => _repository.startTutorial(deckId: deste.id),
       showLoading: false,
     );
     if (sonuc != null && sonuc.shouldEnterMatch) {

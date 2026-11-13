@@ -268,6 +268,8 @@ Future<void> configureDependencies() async {
         cardLossEnabled: () => fetchRankedCardLossEnabled(getIt<ApiClient>()),
         // 041: antrenman düğmesi yalnız anahtar açıkken
         trainingEnabled: () => fetchTrainingEnabled(getIt<ApiClient>()),
+        // 042: öğretici durumu (kapalıysa kart görünmez)
+        tutorialStatus: () => fetchTutorialStatus(getIt<ApiClient>()),
       ),
     )
     // MatchViewModel mac kimligini parametre olarak alir.
