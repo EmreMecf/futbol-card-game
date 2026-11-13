@@ -29,6 +29,16 @@ class AuthViewModel extends BaseViewModel {
     return kullanici != null;
   }
 
+  Future<bool> socialSignIn(String provider) async {
+    final user = await run(() => _repository.signInSocial(provider));
+    return user != null;
+  }
+
+  Future<bool> linkSocial(String provider) async {
+    final result = await run(() => _repository.linkSocial(provider));
+    return result != null && !hasError;
+  }
+
   // ------------------------------------------------------------------
   // KAYIT
   // ------------------------------------------------------------------
