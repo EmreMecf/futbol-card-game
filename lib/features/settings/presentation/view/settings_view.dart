@@ -10,6 +10,7 @@ import '../../../../core/theme/ref_tokens.dart';
 import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
 import '../../../auth/presentation/viewmodel/auth_view_model.dart';
+import '../../../auth/data/social_sign_in_service.dart';
 import '../viewmodel/settings_view_model.dart';
 
 /// Ayarlar.
@@ -132,6 +133,18 @@ class _SettingsBody extends StatelessWidget {
                         title: 'E-posta',
                         value: kullanici?.email.isNotEmpty == true ? kullanici!.email : '—',
                       ),
+                      if (SocialSignInService.googleAvailable)
+                        _GecisSatiri(
+                          emoji: '🔗',
+                          title: 'Google hesabını bağla',
+                          onTap: () => _linkProvider(context, 'google'),
+                        ),
+                      if (SocialSignInService.appleAvailable)
+                        _GecisSatiri(
+                          emoji: '🔗',
+                          title: 'Apple hesabını bağla',
+                          onTap: () => _linkProvider(context, 'apple'),
+                        ),
                     ]),
                     const SizedBox(height: Ref.pageGap),
                     const RefNote(
@@ -175,6 +188,17 @@ class _SettingsBody extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _linkProvider(BuildContext context, String provider) async {
+  final auth = context.read<AuthViewModel>();
+  final success = await auth.linkSocial(provider);
+  if (!context.mounted) return;
+  final msg = success
+      ? '${provider == 'google' ? 'Google' : 'Apple'} hesabı bağlandı.'
+      : auth.errorMessage ?? 'Hesap bağlanamadı.';
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  auth.clearError();
 }
 
 /// Bir ayar grubu: küçük başlık + .card-panel içinde ayraçlı satırlar
