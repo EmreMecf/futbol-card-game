@@ -12,8 +12,11 @@ design-reference
 docs
 tool
 test
-database
-scripts
+database/tests
+database/audits
+database/data
+scripts/*.ps1
+scripts/*.bat
 android
 ios
 web
