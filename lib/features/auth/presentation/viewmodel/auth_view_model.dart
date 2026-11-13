@@ -35,8 +35,8 @@ class AuthViewModel extends BaseViewModel {
   }
 
   Future<bool> linkSocial(String provider) async {
-    final result = await run(() => _repository.linkSocial(provider));
-    return result != null && !hasError;
+    await run(() => _repository.linkSocial(provider));
+    return !hasError;
   }
 
   // ------------------------------------------------------------------
