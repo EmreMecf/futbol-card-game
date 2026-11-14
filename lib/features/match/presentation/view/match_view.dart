@@ -100,7 +100,8 @@ class _MatchBodyState extends State<_MatchBody> {
         result: vm.result,
         rewardDelta: vm.rewardDelta,
         onClose: () => context.go(AppRoutes.home),
-        onNewMatch: () => context.go(AppRoutes.matchmaking),
+        onNewMatch: () => context.go(vm.matchState?.isFriendly == true
+            ? AppRoutes.friends : AppRoutes.matchmaking),
       );
     }
 
@@ -290,8 +291,8 @@ class _MatchBodyState extends State<_MatchBody> {
         title: Text('Teslim olmak istiyor musun?', style: Ref.h3()),
         content: Text(
           // 041/042: antrenman ve öğreticide kayıp yok
-          (vm.matchState?.isTraining ?? false) || (vm.matchState?.isTutorial ?? false)
-              ? 'Teslim olursan maç biter. Antrenman ve öğreticide puan, ödül ve kart kaybı yok.'
+          (vm.matchState?.isTraining ?? false) || (vm.matchState?.isTutorial ?? false) || (vm.matchState?.isFriendly ?? false)
+              ? 'Teslim olursan maç biter. Bu modda puan, ödül ve kart kaybı yok.'
               : 'Teslim olursan maçı kaybetmiş sayılırsın ve korumaya almadığın '
                   '${GameRules.penaltyCardCount} kartın kalıcı olarak rakibe geçer.',
           style: Ref.bodyText(13, color: Ref.muted),
@@ -355,7 +356,9 @@ class _Baslik extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         // 041: antrenman maçı ödülsüz ve puansız
-                        d.isTutorial
+                        d.isFriendly
+                            ? 'ARKADAŞ MAÇI · ÖDÜL YOK'
+                            : d.isTutorial
                             ? 'ÖĞRETİCİ ${d.tutorialStep ?? 1}/3 · ÖDÜL YOK'
                             : (d.isTraining ? 'ANTRENMAN · ÖDÜL YOK' : 'DERECELİ KARŞILAŞMA'),
                         maxLines: 1,
