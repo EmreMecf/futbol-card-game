@@ -1,5 +1,7 @@
 -- 046: Population-aware adaptive matchmaking; opt-in, safe rollback to 'mmr'.
 -- Does not touch matches, inventories, coins or registered players.
+-- Candidate ranking considers BOTH MMR and existing deck_power; never rejects the
+-- sole available human solely due to squad strength after the wait window expands.
 -- Existing 'mmr' and 'combined' modes remain available and unchanged.
 -- Enable only after CI + staging acceptance: update matchmaking_settings set mode='adaptive' where id=1;
 -- Rollback: update matchmaking_settings set mode='mmr' where id=1;
@@ -135,6 +137,9 @@ begin
     case when v_mode = 'combined'
          then abs(q.mmr - v_mmr) / 100.0
               + abs(coalesce(q.deck_power, v_power) - v_power) / 1.5
+         when v_mode = 'adaptive'
+         then abs(q.mmr - v_mmr) / 100.0
+              + abs(coalesce(q.deck_power, v_power) - v_power) / 2.0
          else abs(q.mmr - v_mmr) end asc,
     q.created_at asc
   limit 1
