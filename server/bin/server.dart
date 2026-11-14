@@ -16,6 +16,7 @@ import 'package:futbol_card_server/routes/game_routes.dart';
 import 'package:futbol_card_server/routes/item_routes.dart';
 import 'package:futbol_card_server/routes/season_routes.dart';
 import 'package:futbol_card_server/routes/match_routes.dart';
+import 'package:futbol_card_server/routes/friend_routes.dart';
 import 'package:futbol_card_server/routes/progress_routes.dart';
 import 'package:futbol_card_server/routes/sbc_routes.dart';
 import 'package:futbol_card_server/scheduler/timeout_sweeper.dart';
@@ -105,6 +106,7 @@ Future<void> main(List<String> args) async {
   api.mount('/me', korumali.addHandler(meRoutes(db).call));
   api.mount('/game', korumali.addHandler(gameRoutes(db).call));
   api.mount('/match', korumali.addHandler(matchRoutes(db).call));
+  api.mount('/friends', korumali.addHandler(friendRoutes(db).call));
   api.mount('/sbc', korumali.addHandler(sbcRoutes(db).call));
   api.mount('/leaderboard', korumali.addHandler(leaderboardRoutes(db).call));
   api.mount('/characters', korumali.addHandler(characterRoutes(db).call));
