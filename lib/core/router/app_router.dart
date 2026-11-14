@@ -39,6 +39,7 @@ import 'app_routes.dart';
 /// ekranina yonlendirilir.
 class AppRouter {
   final SessionManager _session;
+  String? _pendingInvitePath;
 
   AppRouter(this._session);
 
@@ -206,10 +207,19 @@ class AppRouter {
         konum == AppRoutes.login || konum == AppRoutes.register;
 
     // Giris yapilmamis ve korunan bir ekrana gidiliyorsa -> giris
-    if (!girisYapildi && !girisEkranindaMi) return AppRoutes.login;
+    if (!girisYapildi && !girisEkranindaMi) {
+      if (konum.startsWith('${AppRoutes.friendInvite}/')) {
+        _pendingInvitePath = state.uri.path;
+      }
+      return AppRoutes.login;
+    }
 
     // Giris yapilmis ama giris/kayit ekranina gidiliyorsa -> ana sayfa
-    if (girisYapildi && girisEkranindaMi) return AppRoutes.home;
+    if (girisYapildi && girisEkranindaMi) {
+      final next = _pendingInvitePath;
+      _pendingInvitePath = null;
+      return next ?? AppRoutes.home;
+    }
 
     return null;
   }
