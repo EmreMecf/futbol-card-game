@@ -64,7 +64,7 @@ jobs:
 
   testflight:
     name: Signed IPA and manual TestFlight upload
-    if: github.event_name == 'workflow_dispatch' && inputs.publish_testflight
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_testflight && github.ref == 'refs/heads/main'
     runs-on: macos-26
     timeout-minutes: 60
     environment: ios-testflight
