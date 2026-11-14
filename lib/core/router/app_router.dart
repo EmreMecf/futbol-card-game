@@ -18,6 +18,7 @@ import '../../features/season/presentation/view/season_view.dart';
 import '../../features/leaderboard/presentation/view/league_tiers_view.dart';
 import '../../features/match/presentation/view/match_view.dart';
 import '../../features/matchmaking/presentation/view/matchmaking_view.dart';
+import '../../features/friends/friend_room_view.dart';
 import '../../features/profile/presentation/view/profile_view.dart';
 import '../../features/progress/presentation/view/progress_view.dart';
 import '../../features/sbc/presentation/view/sbc_builder_view.dart';
@@ -71,6 +72,10 @@ class AppRouter {
         path: AppRoutes.deck,
         builder: (context, state) => const DeckView(),
       ),
+      GoRoute(path: AppRoutes.friends,
+        builder: (context, state) => const FriendRoomView()),
+      GoRoute(path: '${AppRoutes.friendInvite}/:code',
+        builder: (context, state) => FriendRoomView(inviteCode: state.pathParameters['code'])),
       GoRoute(
         path: AppRoutes.matchmaking,
         builder: (context, state) => const MatchmakingView(),
