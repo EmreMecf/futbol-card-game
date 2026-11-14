@@ -33,11 +33,15 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
     super.initState();
     _inviteSubscription = AppLinks().uriLinkStream.listen((uri) {
       if (uri.scheme != 'futbolcard' || uri.pathSegments.length != 2 ||
-          uri.pathSegments[0] != 'davet') return;
+          uri.pathSegments[0] != 'davet') {
+        return;
+      }
       final code = uri.pathSegments[1].toLowerCase();
       const allowed = '0123456789abcdef';
       if (code.length != 30 ||
-          code.split('').any((ch) => !allowed.contains(ch))) return;
+          code.split('').any((ch) => !allowed.contains(ch))) {
+        return;
+      }
       getIt<AppRouter>().router.go(AppRoutes.friendInviteWithCode(code));
     });
   }
