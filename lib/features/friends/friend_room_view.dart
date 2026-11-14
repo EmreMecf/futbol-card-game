@@ -160,7 +160,7 @@ class _FriendRoomViewState extends State<FriendRoomView> {
     final room = _room;
     final status = room?['status']?.toString();
     final isHost = room?['is_host'] == true;
-    final myReady = isHost ? room?['host_ready'] == true : room?['guest_ready'] == true;
+    final myReady = isHost ? (room?['host_ready'] == true) : (room?['guest_ready'] == true);
     final guestPresent = room?['guest_name'] != null;
     return Scaffold(
       appBar: AppBar(title: const Text('ARKADASINLA OYNA')),
