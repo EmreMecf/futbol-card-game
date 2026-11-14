@@ -42,6 +42,12 @@ class MatchmakingViewModel extends BaseViewModel {
 
   StreamSubscription<RealtimeEvent>? _olayAboneligi;
   Timer? _yoklamaZamanlayici;
+  // Polling errors must not leave both devices on an endlessly silent screen.
+  bool _pollInFlight = false;
+  int _consecutivePollFailures = 0;
+  String? _searchWarning;
+  String? get searchWarning => _searchWarning;
+
 
   MatchmakingViewModel(
     this._repository,
@@ -232,6 +238,8 @@ class MatchmakingViewModel extends BaseViewModel {
     if (deste == null) return;
 
     _asama = MatchmakingStage.searching;
+    _consecutivePollFailures = 0;
+    _searchWarning = null;
     _aramaBaslangici = DateTime.now();
     safeNotify();
 
@@ -337,22 +345,49 @@ class MatchmakingViewModel extends BaseViewModel {
   }
 
   Future<void> _yokla() async {
-    if (_asama != MatchmakingStage.searching) return;
-
+    if (_asama != MatchmakingStage.searching || _pollInFlight) return;
     final deste = _seciliDeste;
     if (deste == null) return;
 
-    final sonuc = await _repository.findMatch(
-      deckId: deste.id,
-      protectedCardIds: _kartKaybi ? _korunanlar.toList() : const [],
-    );
+    _pollInFlight = true;
+    try {
+      final sonuc = await _repository.findMatch(
+        deckId: deste.id,
+        protectedCardIds: _kartKaybi ? _korunanlar.toList() : const [],
+      );
 
-    final veri = sonuc.dataOrNull;
-    if (veri != null && veri.shouldEnterMatch) {
-      _macBulundu(veri.matchId!);
-    } else {
-      // Sayacin ekranda ilerlemesi icin
+      // HTTP may complete after websocket has already navigated to a match.
+      if (_asama != MatchmakingStage.searching) return;
+      final veri = sonuc.dataOrNull;
+      if (veri != null) {
+        _consecutivePollFailures = 0;
+        _searchWarning = null;
+        if (veri.shouldEnterMatch) {
+          _macBulundu(veri.matchId!);
+          return;
+        }
+      } else {
+        _consecutivePollFailures++;
+        AppLogger.warning(
+          'Eslestirme kontrolu basarisiz ($_consecutivePollFailures)',
+          tag: 'ESLESME',
+        );
+        if (_consecutivePollFailures >= 2) {
+          _searchWarning =
+              'Sunucuya baglanti kontrol ediliyor. Rakip arama otomatik suruyor.';
+        }
+        // Recover from a missed WebSocket notification after a timeout/
+        // failed find request. Never clear or recreate the queue here.
+        final active = await _repository.activeMatchId();
+        if (_asama == MatchmakingStage.searching &&
+            active.dataOrNull != null) {
+          _macBulundu(active.dataOrNull!);
+          return;
+        }
+      }
       safeNotify();
+    } finally {
+      _pollInFlight = false;
     }
   }
 
