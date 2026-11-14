@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -32,45 +31,13 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
   @override
   void initState() {
     super.initState();
-    // AppLinks delivers both the initial cold-start link and resumed links.
     _inviteSubscription = AppLinks().uriLinkStream.listen((uri) {
       if (uri.scheme != 'futbolcard' || uri.pathSegments.length != 2 ||
           uri.pathSegments[0] != 'davet') return;
       final code = uri.pathSegments[1].toLowerCase();
-      if (!RegExp(r'^[0-9a-f]{30}
-    final appRouter = getIt<AppRouter>();
-
-    return MultiProvider(
-      providers: [
-        // Oturum durumu: her ekran kullanici adini, coin'ini buradan okur
-        ChangeNotifierProvider<SessionManager>.value(
-          value: getIt<SessionManager>(),
-        ),
-        ChangeNotifierProvider<AuthViewModel>(
-          create: (_) => getIt<AuthViewModel>(),
-        ),
-      ],
-      child: MaterialApp.router(
-        title: 'Futbol Kart',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark,
-        darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.dark,
-        routerConfig: appRouter.router,
-
-        // Uygulama dili Turkce
-        locale: const Locale('tr', 'TR'),
-        supportedLocales: const [Locale('tr', 'TR')],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-      ),
-    );
-  }
-}
-).hasMatch(code)) return;
+      const allowed = '0123456789abcdef';
+      if (code.length != 30 ||
+          code.split('').any((ch) => !allowed.contains(ch))) return;
       getIt<AppRouter>().router.go(AppRoutes.friendInviteWithCode(code));
     });
   }
