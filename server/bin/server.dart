@@ -141,9 +141,30 @@ Future<void> main(List<String> args) async {
   // HTTPS invitation landing page. Native scheme works without a verified
   // associated domain; iOS/Android universal app links require separate
   // domain-association setup before true one-tap launch can be guaranteed.
+  // Public HTTPS invitation landing. No room details are exposed.
   root.get('/invite/<code>', (Request request, String code) {
-    if (!RegExp(r'^[0-9a-f]{30}\
-
+    if (!RegExp(r'^[0-9a-f]{30}$').hasMatch(code)) {
+      return Response.notFound('Invalid invitation.');
+    }
+    final deepLink = 'futbolcard:///davet/$code';
+    final page = '''
+<!doctype html><html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Futbol Card Arena - Arkadasinla Oyna</title></head>
+<body style="background:#0c1427;color:white;font-family:system-ui;text-align:center;padding:48px 16px">
+<h1>Futbol Card Arena</h1><p>Arkadasin seni ozel maca davet ediyor.</p>
+<p><a href="$deepLink" style="display:inline-block;background:#f5b942;color:#111;padding:16px 28px;border-radius:12px;text-decoration:none;font-weight:bold">Oyunda ac</a></p>
+<p>Oyun yuklu degilse kurduktan sonra bu davet koduyla katil:</p>
+<code style="overflow-wrap:anywhere">$code</code>
+<script>window.location.href = "$deepLink";</script>
+</body></html>''';
+    return Response.ok(page, headers: {
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'no-store',
+      'referrer-policy': 'no-referrer',
+      'x-content-type-options': 'nosniff',
+    });
+  });
   root.all('/<ignored|.*>', (Request request) {
     return jsonError('Boyle bir uc nokta yok.', status: 404);
   });
