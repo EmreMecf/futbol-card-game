@@ -139,130 +139,18 @@ Future<void> main(List<String> args) async {
   root.get('/ws', (Request request) => _wsGuard(request, jwt, hub));
 
   root.get('/invite/<code>', (Request request, String code) {
-    if (!RegExp(r'^[0-9a-f]{30}
-
-  root.all('/<ignored|.*>', (Request request) {
-    return jsonError('Boyle bir uc nokta yok.', status: 404);
-  });
-
-  final handler = Pipeline()
-      .addMiddleware(requestLogger())
-      .addMiddleware(corsHeaders(allowOrigin: Env.corsOrigin))
-      .addMiddleware(errorHandler())
-      .addHandler(root.call);
-
-  final server = await shelf_io.serve(handler, Env.host, Env.port);
-  server.autoCompress = true;
-
-  // ignore: avoid_print
-  print('');
-  // ignore: avoid_print
-  print('  Sunucu hazir!');
-  // ignore: avoid_print
-  print('  HTTP      -> http://${Env.host}:${Env.port}/api');
-  // ignore: avoid_print
-  print('  WebSocket -> ws://${Env.host}:${Env.port}/ws?token=<access_token>');
-  // ignore: avoid_print
-  print('  Saglik    -> http://localhost:${Env.port}/api/health');
-  // ignore: avoid_print
-  print('');
-
-  // ---- 7. DUZGUN KAPANIS ----
-  // Ctrl+C'ye basildiginda baglantilari duzgunce kapat.
-  ProcessSignal.sigint.watch().listen((_) async {
-    // ignore: avoid_print
-    print('\nKapaniyor...');
-    sweeper.stop();
-    await listener.stop();
-    await hub.closeAll();
-    await server.close(force: true);
-    await db.close();
-    exit(0);
-  });
-}
-
-/// WebSocket baglantisini dogrular ve kurar.
-///
-/// ONEMLI TASARIM NOTU:
-/// Baglanti geri cagrisi (onConnection), HTTP cevabi yazildiktan SONRA
-/// calisir. Bu yuzden kullanici kimligini gecici bir degiskende tutmak
-/// ISE YARAMAZ - geri cagri tetiklendiginde degisken coktan temizlenmis
-/// olur. Cozum: her baglanti icin kimligi kapanis (closure) icinde
-/// yakalayan yeni bir handler uretmek.
-Future<Response> _wsGuard(Request request, JwtService jwt, WsHub hub) async {
-  final token = request.url.queryParameters['token'];
-
-  if (token == null || token.isEmpty) {
-    return jsonError('WebSocket baglantisi icin jeton gerekli.', status: 401);
-  }
-
-  final userId = jwt.verifyAccessToken(token);
-  if (userId == null) {
-    return jsonError('Jeton gecersiz veya suresi dolmus.', status: 401);
-  }
-
-  // userId burada kapanis icinde yakalaniyor -> geri cagri calistiginda hazir.
-  final handler = webSocketHandler(
-    (WebSocketChannel socket, String? subprotocol) {
-      hub.add(userId, socket);
-
-      socket.sink.add(jsonEncode({
-        'type': 'connected',
-        'user_id': userId,
-        'at': DateTime.now().toUtc().toIso8601String(),
-      }));
-
-      socket.stream.listen(
-        (dynamic mesaj) {
-          // Istemciden gelen tek mesaj tipi: baglantiyi canli tutan ping
-          if (mesaj == 'ping') {
-            socket.sink.add(jsonEncode({'type': 'pong'}));
-          }
-        },
-        onDone: () => hub.remove(userId, socket),
-        onError: (Object e) => hub.remove(userId, socket),
-        cancelOnError: true,
-      );
-    },
-    pingInterval: const Duration(seconds: 30),
-  );
-
-  return handler(request);
-}
-
-void _banner() {
-  // ignore: avoid_print
-  print('''
-=====================================================
-  FUTBOL KART - SUNUCU
-  Ortam    : ${Env.isProduction ? 'URETIM' : 'GELISTIRME'}
-  Veritabani: ${Env.dbHost}:${Env.dbPort}/${Env.dbName}
-=====================================================''');
-
-  if (!Env.isProduction && Env.jwtSecret == Env.devJwtSecret) {
-    // ignore: avoid_print
-    print('  UYARI: Varsayilan JWT anahtari kullaniliyor.');
-    // ignore: avoid_print
-    print('         Yayina cikmadan once JWT_SECRET ortam degiskenini ayarla.');
-    // ignore: avoid_print
-    print('');
-  }
-}
-).hasMatch(code)) {
+    const allowed = '0123456789abcdef';
+    if (code.length != 30 || code.split('').any((ch) => !allowed.contains(ch))) {
       return Response.notFound('Invalid invitation.');
     }
-    final deepLink = 'futbolcard:///davet/$code';
-    final page = '''
-<!doctype html><html lang="tr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Futbol Card Arena - Arkadasinla Oyna</title></head>
-<body style="background:#0c1427;color:white;font-family:system-ui;text-align:center;padding:48px 16px">
-<h1>Futbol Card Arena</h1><p>Arkadasin seni ozel maca davet ediyor.</p>
-<p><a href="$deepLink" style="display:inline-block;background:#f5b942;color:#111;padding:16px 28px;border-radius:12px;text-decoration:none;font-weight:bold">Oyunda ac</a></p>
-<p>Oyun yuklu degilse kurduktan sonra bu davet koduyla katil:</p>
-<code>$code</code>
-<script>window.location.href = "$deepLink";</script>
-</body></html>''';
+    final deepLink = 'futbolcard:///davet/' + code;
+    final page = '<!doctype html><html lang="tr"><head><meta charset="utf-8">'
+      + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+      + '<title>Futbol Card Arena</title></head><body>'
+      + '<h1>Futbol Card Arena</h1><p>Arkadasin seni ozel maca davet ediyor.</p>'
+      + '<p><a href="' + deepLink + '">Oyunda ac</a></p>'
+      + '<p>Oyun yuklu degilse davet kodunu oyun icinde girin: ' + code + '</p>'
+      + '<script>window.location.href="' + deepLink + '";</script></body></html>';
     return Response.ok(page, headers: {
       'content-type': 'text/html; charset=utf-8',
       'cache-control': 'no-store',
@@ -270,6 +158,7 @@ void _banner() {
       'x-content-type-options': 'nosniff',
     });
   });
+
 
   root.all('/<ignored|.*>', (Request request) {
     return jsonError('Boyle bir uc nokta yok.', status: 404);
