@@ -199,8 +199,10 @@ class _FriendRoomViewState extends State<FriendRoomView> {
                   TextButton.icon(
                     onPressed: () async {
                       await Clipboard.setData(ClipboardData(text: FriendRoomApi.inviteUrl(_code!)));
-                      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Davet linki kopyalandi')));
+                      if (context.mounted) {
+                         ScaffoldMessenger.of(context).showSnackBar(
+                           const SnackBar(content: Text('Davet linki kopyalandi')));
+                       }
                     },
                     icon: const Icon(Icons.copy), label: const Text('Linki kopyala')),
                   const Divider(height: 35),
