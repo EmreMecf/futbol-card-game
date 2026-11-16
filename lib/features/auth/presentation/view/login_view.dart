@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../data/social_sign_in_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -57,6 +58,19 @@ class _LoginViewState extends State<LoginView> {
     } else {
       setState(() => _hata = viewModel.error);
       viewModel.clearError();
+    }
+  }
+
+  Future<void> _social(String provider) async {
+    setState(() => _hata = null);
+    final vm = context.read<AuthViewModel>();
+    final success = await vm.socialSignIn(provider);
+    if (!mounted) return;
+    if (success) {
+      context.go(AppRoutes.home);
+    } else {
+      setState(() => _hata = vm.error);
+      vm.clearError();
     }
   }
 
@@ -147,6 +161,33 @@ class _LoginViewState extends State<LoginView> {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
+          if (SocialSignInService.googleAvailable ||
+              SocialSignInService.appleAvailable) ...[
+            Row(children: [
+              const Expanded(child: Divider()),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text('VEYA', style: Ref.bodyText(11, color: Ref.muted)),
+              ),
+              const Expanded(child: Divider()),
+            ]),
+            const SizedBox(height: AppSpacing.md),
+            if (SocialSignInService.googleAvailable)
+              OutlinedButton.icon(
+                onPressed: viewModel.isBusy ? null : () => _social('google'),
+                icon: const Icon(Icons.account_circle_outlined),
+                label: const Text('Google ile devam et'),
+              ),
+            if (SocialSignInService.appleAvailable) ...[
+              const SizedBox(height: AppSpacing.sm),
+              OutlinedButton.icon(
+                onPressed: viewModel.isBusy ? null : () => _social('apple'),
+                icon: const Icon(Icons.apple),
+                label: const Text('Apple ile devam et'),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+          ],
           // Wrap: dar ekranda ya da büyük yazı boyutunda alt satıra geçer
           Wrap(
             alignment: WrapAlignment.center,

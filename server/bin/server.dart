@@ -9,6 +9,7 @@ import 'package:futbol_card_server/db/database.dart';
 import 'package:futbol_card_server/realtime/notification_listener.dart';
 import 'package:futbol_card_server/realtime/ws_hub.dart';
 import 'package:futbol_card_server/routes/auth_routes.dart';
+import 'package:futbol_card_server/routes/social_auth_routes.dart';
 import 'package:futbol_card_server/routes/character_routes.dart';
 import 'package:futbol_card_server/routes/chest_routes.dart';
 import 'package:futbol_card_server/routes/economy_routes.dart';
@@ -97,6 +98,12 @@ Future<void> main(List<String> args) async {
     Pipeline()
         .addMiddleware(rateLimit(authSiniri, trustProxy: Env.trustProxy))
         .addHandler(authRoutes(db, jwt).call),
+  );
+
+  // Provider exchange is under the same auth endpoint rate limits.
+  api.mount('/auth/social',
+    Pipeline().addMiddleware(rateLimit(authSiniri, trustProxy: Env.trustProxy))
+      .addHandler(socialAuthRoutes(db, jwt).call),
   );
 
   // Korumali uc noktalar (jeton GEREKLI)
