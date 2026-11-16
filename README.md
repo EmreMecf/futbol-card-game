@@ -394,7 +394,6 @@ Sunucu `wss://` (TLS) arkasında çalışmalı: WebSocket jetonu adreste taşın
 
 | Eksik | Neden benim kararım değil |
 |---|---|
-| Uygulama ikonu | Hâlâ varsayılan Flutter ikonu. Marka tasarımı gerekiyor. |
 | Üretim sunucusu ve alan adı | Barındırma seçimi ve maliyeti senin kararın. |
 | Yükleme anahtarı (keystore) | Senin saklaman gereken gizli bilgi; kaybedilirse uygulama güncellenemez. |
 | Gizlilik politikası sayfası | Play Store ve App Store zorunlu tutuyor (e-posta topluyoruz). |
