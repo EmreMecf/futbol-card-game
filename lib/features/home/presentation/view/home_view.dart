@@ -214,6 +214,12 @@ class _ArenaHero extends StatelessWidget {
             trailing: RefGlyph.play,
             onTap: () => context.go(AppRoutes.matchmaking),
           ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: () => context.go(AppRoutes.friends),
+            icon: const Icon(Icons.group_add_outlined),
+            label: const Text('ARKADAŞINLA OYNA'),
+          ),
         ],
       ),
     );

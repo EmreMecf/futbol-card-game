@@ -16,6 +16,7 @@ import 'package:futbol_card_server/routes/game_routes.dart';
 import 'package:futbol_card_server/routes/item_routes.dart';
 import 'package:futbol_card_server/routes/season_routes.dart';
 import 'package:futbol_card_server/routes/match_routes.dart';
+import 'package:futbol_card_server/routes/friend_routes.dart';
 import 'package:futbol_card_server/routes/progress_routes.dart';
 import 'package:futbol_card_server/routes/sbc_routes.dart';
 import 'package:futbol_card_server/scheduler/timeout_sweeper.dart';
@@ -105,6 +106,7 @@ Future<void> main(List<String> args) async {
   api.mount('/me', korumali.addHandler(meRoutes(db).call));
   api.mount('/game', korumali.addHandler(gameRoutes(db).call));
   api.mount('/match', korumali.addHandler(matchRoutes(db).call));
+  api.mount('/friends', korumali.addHandler(friendRoutes(db).call));
   api.mount('/sbc', korumali.addHandler(sbcRoutes(db).call));
   api.mount('/leaderboard', korumali.addHandler(leaderboardRoutes(db).call));
   api.mount('/characters', korumali.addHandler(characterRoutes(db).call));
@@ -135,6 +137,28 @@ Future<void> main(List<String> args) async {
   final root = Router();
   root.mount('/api', api.call);
   root.get('/ws', (Request request) => _wsGuard(request, jwt, hub));
+
+  root.get('/invite/<code>', (Request request, String code) {
+    const allowed = '0123456789abcdef';
+    if (code.length != 30 || code.split('').any((ch) => !allowed.contains(ch))) {
+      return Response.notFound('Invalid invitation.');
+    }
+    final deepLink = 'futbolcard:///davet/' + code;
+    final page = '<!doctype html><html lang="tr"><head><meta charset="utf-8">'
+      + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+      + '<title>Futbol Card Arena</title></head><body>'
+      + '<h1>Futbol Card Arena</h1><p>Arkadasin seni ozel maca davet ediyor.</p>'
+      + '<p><a href="' + deepLink + '">Oyunda ac</a></p>'
+      + '<p>Oyun yuklu degilse davet kodunu oyun icinde girin: ' + code + '</p>'
+      + '<script>window.location.href="' + deepLink + '";</script></body></html>';
+    return Response.ok(page, headers: {
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'no-store',
+      'referrer-policy': 'no-referrer',
+      'x-content-type-options': 'nosniff',
+    });
+  });
+
 
   root.all('/<ignored|.*>', (Request request) {
     return jsonError('Boyle bir uc nokta yok.', status: 404);
