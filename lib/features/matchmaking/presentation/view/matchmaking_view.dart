@@ -323,6 +323,13 @@ class _Arama extends StatelessWidget {
             ),
           ],
         ),
+        if (viewModel.searchWarning != null) ...[
+          const SizedBox(height: 10),
+          Text(
+            viewModel.searchWarning!,
+            style: Ref.bodyText(11, color: Ref.red),
+          ),
+        ],
         const SizedBox(height: Ref.pageGap),
         RefNeutralButton(label: 'ARAMAYI İPTAL ET', onTap: viewModel.cancelSearch),
       ],
