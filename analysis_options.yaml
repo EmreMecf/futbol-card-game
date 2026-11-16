@@ -16,7 +16,6 @@ analyzer:
     # icin yuzlerce sahte "tanimsiz" hatasi veriyordu (ilk CI calismasi).
     - "server/**"
     - "packages/**"
-    - "supabase/**"
 
 linter:
   rules:

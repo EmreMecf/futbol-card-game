@@ -56,7 +56,6 @@ flutter run
 | `lib/shared/widgets/walkout/` | Görkemli paket açılışı: spot ışığı, bayrak, arma, konfeti |
 | `database/` | PostgreSQL şeması ve oyun kuralları — [README](database/README.md) |
 | `scripts/` | Veritabanı ve sunucu başlatma betikleri |
-| `supabase/` | **Ölü kod** — eski Supabase şeması, silinebilir |
 
 ---
 
