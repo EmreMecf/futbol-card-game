@@ -1,7 +1,7 @@
 # Futbol Card Arena — V2.1 Flutter UI dönüşümü: ilerleme raporu
 
 **Faz:** 1–3 (ilk görev + Koleksiyon), Faz 2 (temel tasarım sistemi, §10), Faz 3 (Kadrom, Mağaza, Sezon, §11), Faz 4 (iç ekranlar, §12), Faz 5 (paket, sandık, kart, maç sonu, §13), Faz 6 (sıralama, kadro kurma, olasılıklar, maç sonu panelleri, §14), Faz 7 (öğretici ipucu, kadro uyarısı, walkout, açılış, §15), Faz 8 (Maça Hazırlan, rakip arama, canlı arena, §16), hedef platform: yalnız telefon/tablet dikey (§17) · **Dal:** `feature/ui-v21-rebuild` · **Tarih:** 2026-11-17
-**Durum:** Commit edilmedi. Değişiklikler yerelde duruyor; GitHub Desktop'tan commit edilecek.
+**Durum:** V2.1 değişiklikleri `feature/ui-v21-rebuild` dalına commit edildi ve PR #7 açıldı. Güvenlik / yayın denetimi PR #8 üzerinden yürütülüyor; `main` dalına birleştirme ve gerçek cihaz kabul testleri henüz tamamlanmadı.
 
 Bu fazın kapsamı: referans HTML'nin envanteri, mevcut ekranlarla eşleşme tablosu, `lib/ui_v21/` altında bağımsız V2.1 tasarım sistemi (8 temel bileşen + 2 yardımcı bileşen) ve gerçek sunucu verisiyle çalışan **V2.1 Ana Sayfa** ile **V2.1 Koleksiyon (KARTLARIM)**. Eski Ref arayüzü silinmedi.
 
