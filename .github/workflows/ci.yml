@@ -323,19 +323,19 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: flutter build apk --release --dart-define=API_BASE_URL=https://futbol-card-staging-api-lzq3.onrender.com
 
-      # PR #8: V21 guvenlik dalindan staging sunucusuna baglanan test APK'si.
+      # PR #8 and integration branch: downloadable staging APK for Android testing.
       # Main'e birlestirme yapmadan iki telefonda V21 dogrulamasi icindir.
       - name: V21 staging test APK (PR #8)
-        if: ${{ github.event_name == 'pull_request' && github.head_ref == 'fix/v21-security-and-release-readiness' }}
+        if: ${{ github.event_name == 'pull_request' && (github.head_ref == 'fix/v21-security-and-release-readiness' || github.head_ref == 'integration/v21-matchmaking-friends-staging') }}
         run: flutter build apk --release --dart-define=API_BASE_URL=https://futbol-card-staging-api-lzq3.onrender.com
 
       # Diger PR'lar: yalniz derlenebilirlik.
       - name: Release APK derlenebilirlik (diger PR ve dallar)
-        if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') && !(github.event_name == 'pull_request' && github.head_ref == 'fix/v21-security-and-release-readiness') }}
+        if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') && !(github.event_name == 'pull_request' && (github.head_ref == 'fix/v21-security-and-release-readiness' || github.head_ref == 'integration/v21-matchmaking-friends-staging')) }}
         run: flutter build apk --release --dart-define=API_BASE_URL=https://ci.example.invalid
 
       - name: Staging APK dosyasini indirilebilir artifact olarak sakla
-        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.head_ref == 'fix/v21-security-and-release-readiness') }}
+        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && (github.head_ref == 'fix/v21-security-and-release-readiness' || github.head_ref == 'integration/v21-matchmaking-friends-staging')) }}
         uses: actions/upload-artifact@v4
         with:
           name: futbol-card-arena-staging-android
