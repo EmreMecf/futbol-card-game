@@ -29,7 +29,7 @@ import '../home/v21_home_nav.dart';
 ///
 /// VERİ VE KURALLAR: `MatchmakingViewModel` (değişmedi). Kadro doğrulaması,
 /// koruma, arama, iptal, antrenman, öğretici ve eşleşince maça geçiş
-/// eskisiyle aynı. "ARKADAŞINLA OYNA" PR #6 birleşince eklenecek.
+/// eskisiyle aynı. Arkadaş maçı ayrıca özel oda ekranını kullanır.
 class V21MatchmakingScreen extends StatelessWidget {
   const V21MatchmakingScreen({super.key});
 
@@ -166,7 +166,7 @@ class _BodyState extends State<_Body> {
               if (searching)
                 _Search(
                   vm: vm,
-                  phase: searchPhaseFor(vm.searchDuration, online: _online),
+                  phase: searchPhaseFor(vm.searchDuration, online: _online && vm.searchWarning == null),
                   scale: k,
                   onTrain: () => _trainInstead(vm),
                 )
@@ -233,6 +233,15 @@ class _Prep extends StatelessWidget {
           status: checking || v == null ? V21ButtonStatus.disabled : V21ButtonStatus.normal,
           onPressed: onFind,
         ),
+        V21GameButton(
+          label: 'ARKADAŞINLA OYNA',
+          tone: V21ButtonTone.purple,
+          leadingIcon: Icons.person_add_alt_1_rounded,
+          scale: k,
+          semanticsLabel: 'Arkadaşınla özel ve ödülsüz maç aç',
+          onPressed: () => context.push(AppRoutes.friends),
+        ),
+        SizedBox(height: 10 * k),
         if (vm.trainingEnabled) ...[
           SizedBox(height: 10 * k),
           V21GameButton(
@@ -594,6 +603,11 @@ class _Search extends StatelessWidget {
             style: V21Type.label(14 * k, weight: FontWeight.w800, color: const Color(0xFFE6DBFF), height: 1.35),
           ),
         ),
+        if (vm.searchWarning != null) ...[
+          SizedBox(height: 8 * k),
+          Text(vm.searchWarning!, textAlign: TextAlign.center,
+            style: V21Type.label(12 * k, weight: FontWeight.w700, color: const Color(0xFFFFB0B0))),
+        ],
         SizedBox(height: 6 * k),
         Text(
           vm.cardLossEnabled ? '${vm.protectedCardIds.length} kart korumada' : 'Kart kaybı yok',
