@@ -93,5 +93,19 @@ psql -X -v ON_ERROR_STOP=1 -tAc "SELECT (to_regprocedure('public.advance_simulta
   echo "[STAGING INIT] ABORT: critical PvP schema/function missing" >&2
   exit 1
 }
+# Staging-only opt-in after migrations have been recorded and verified.
+if [ "${STAGING_ADAPTIVE_MATCHMAKING:-false}" = "true" ]; then
+  if [ "${DB_NAME:-}" != "futbol_card_staging" ] || [ "${ENVIRONMENT:-}" != "production" ]; then
+    echo "[STAGING MATCHMAKING] ABORT: invalid isolated staging database" >&2
+    exit 1
+  fi
+  psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE matchmaking_settings SET mode='adaptive' WHERE id=1 AND mode <> 'adaptive'"
+  psql -X -v ON_ERROR_STOP=1 -tAc "SELECT mode FROM matchmaking_settings WHERE id=1" | grep -qx adaptive || {
+    echo "[STAGING MATCHMAKING] ABORT: adaptive mode not activated" >&2
+    exit 1
+  }
+  echo "[STAGING MATCHMAKING] Adaptive mode enabled (staging only)"
+fi
+
 echo "[STAGING INIT] Schema ready: $count migrations verified. Starting Dart API."
 exec /app/futbol-card-server
