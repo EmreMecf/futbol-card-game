@@ -1,4 +1,3 @@
-import 'package:futbol_card/core/config/app_config.dart';
 import 'package:futbol_card/core/network/api_client.dart';
 
 /// Small API client for private 2-player rooms.
@@ -26,6 +25,7 @@ class FriendRoomApi {
     return null;
   }
 
-  static String inviteUrl(String code) =>
-      '${AppConfig.apiBaseUrl}/invite/$code';
+  // A plain HTTPS API URL cannot open the app until verified App Links are set up.
+  // The Android/iOS manifests register this custom scheme for test builds.
+  static String inviteUrl(String code) => 'futbolcard:///davet/$code';
 }
