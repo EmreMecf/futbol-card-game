@@ -149,9 +149,9 @@ class _MatchResultViewState extends State<MatchResultView> with SingleTickerProv
                         const SizedBox(height: Ref.pageGap),
                         RefNeutralButton(label: 'ANA MENÜYE DÖN', onTap: widget.onClose),
                         // Ekonomi V2: bu maçın sandığı (kapalıysa yer kaplamaz)
-                        MatchChestPanel(matchId: sonuc.matchId),
+                        if (sonuc.mode == 'ranked') MatchChestPanel(matchId: sonuc.matchId),
                         // Ekonomi V2 (FAZ 4): bu maçta kazanılan sezon XP'si
-                        MatchSeasonXpLine(matchId: sonuc.matchId),
+                        if (sonuc.mode == 'ranked') MatchSeasonXpLine(matchId: sonuc.matchId),
                         // Antrenman / öğreticide puan değişmez: lig paneli gereksiz
                         if (sonuc.leagueChange != null && sonuc.mode == 'ranked') ...[
                           const SizedBox(height: Ref.pageGap),
