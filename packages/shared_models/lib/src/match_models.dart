@@ -169,6 +169,9 @@ abstract class MatchState with _$MatchState {
   /// Antrenman maçı mı? (ödül ve puan yok)
   bool get isTraining => mode == 'training';
 
+  /// 047: private friend rooms have no ranked rewards or card transfer.
+  bool get isFriendly => mode == 'friendly';
+
   /// Öğretici maçı mı? (ödül ve puan yok; 3. adım bitince Gümüş sandık)
   bool get isTutorial => mode == 'tutorial';
 
