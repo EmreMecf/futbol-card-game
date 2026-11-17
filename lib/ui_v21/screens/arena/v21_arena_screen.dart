@@ -168,13 +168,13 @@ class _BodyState extends State<_Body> {
 
   Future<void> _surrender(MatchViewModel vm) async {
     final d = vm.matchState;
-    final free = (d?.isTraining ?? false) || (d?.isTutorial ?? false);
+    final free = d?.mode == 'friendly' || (d?.isTraining ?? false) || (d?.isTutorial ?? false);
     final ok = await V21GameDialog.show<bool>(
       context,
       subtitle: free ? null : 'GERİ ALINAMAZ',
       title: 'TESLİM OL?',
       message: free
-          ? 'Teslim olursan maç biter. Antrenman ve öğreticide puan, ödül ve kart kaybı yok.'
+          ? 'Teslim olursan maç biter. Bu modda puan, ödül ve kart kaybı yok.'
           : 'Teslim olursan maçı kaybetmiş sayılırsın ve korumaya almadığın '
                 '${GameRules.penaltyCardCount} kartın kalıcı olarak rakibe geçer.',
       actions: const [
@@ -220,7 +220,7 @@ class _BodyState extends State<_Body> {
         result: vm.result,
         rewardDelta: vm.rewardDelta,
         onClose: () => context.go(AppRoutes.home),
-        onNewMatch: () => context.go(AppRoutes.matchmaking),
+        onNewMatch: () => context.go(vm.matchState?.mode == 'friendly' ? '/arkadaslar' : AppRoutes.matchmaking),
       );
     }
 
@@ -361,7 +361,7 @@ class _Scoreboard extends StatelessWidget {
     final round = d.isTutorial && d.earlyFinishCards != null
         ? 'TUR ${d.roundNumber} · HEDEF ${d.earlyFinishCards}'
         : 'TUR ${d.roundNumber}/${GameRules.squadSize}';
-    final mode = d.isTutorial ? 'ÖĞRETİCİ · ÖDÜLSÜZ' : (d.isTraining ? 'ANTRENMAN · ÖDÜLSÜZ' : 'DERECELİ');
+    final mode = d.mode == 'friendly' ? 'ARKADAŞ MAÇI · ÖDÜL YOK' : (d.isTutorial ? 'ÖĞRETİCİ · ÖDÜLSÜZ' : (d.isTraining ? 'ANTRENMAN · ÖDÜLSÜZ' : 'DERECELİ'));
     return Semantics(
       container: true,
       label: 'Skor: sen ${d.myScore}, $opp ${d.opponentScore}. $round. $mode',
@@ -404,8 +404,8 @@ class _Scoreboard extends StatelessWidget {
           SizedBox(height: 4 * k),
           V21Tag(
             text: mode,
-            background: d.isTutorial || d.isTraining ? const Color(0xFF3B2F66) : const Color(0xCC1B0A57),
-            foreground: d.isTutorial || d.isTraining ? V21Colors.textMuted : V21Colors.goldTop,
+            background: d.mode != 'ranked' ? const Color(0xFF3B2F66) : const Color(0xCC1B0A57),
+            foreground: d.mode != 'ranked' ? V21Colors.textMuted : V21Colors.goldTop,
             scale: k,
             fontSize: 10,
           ),
