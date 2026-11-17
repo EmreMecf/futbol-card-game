@@ -18,6 +18,7 @@ import '../../features/season/presentation/view/season_view.dart';
 import '../../features/leaderboard/presentation/view/league_tiers_view.dart';
 import '../../features/match/presentation/view/match_view.dart';
 import '../../features/matchmaking/presentation/view/matchmaking_view.dart';
+import '../../features/friends/friend_room_view.dart';
 import '../../features/profile/presentation/view/profile_view.dart';
 import '../../features/progress/presentation/view/progress_view.dart';
 import '../../features/sbc/presentation/view/sbc_builder_view.dart';
@@ -46,6 +47,7 @@ import 'app_routes.dart';
 /// ekranina yonlendirilir.
 class AppRouter {
   final SessionManager _session;
+  String? _pendingInvitePath;
 
   AppRouter(this._session);
 
@@ -79,6 +81,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.deck,
         builder: (context, state) => const DeckView(),
+      ),
+      GoRoute(
+        path: AppRoutes.friends,
+        builder: (context, state) => const FriendRoomView(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.friendInvite}/:code',
+        builder: (context, state) => FriendRoomView(inviteCode: state.pathParameters['code']),
       ),
       GoRoute(
         path: AppRoutes.matchmaking,
@@ -210,10 +220,19 @@ class AppRouter {
         konum == AppRoutes.login || konum == AppRoutes.register;
 
     // Giris yapilmamis ve korunan bir ekrana gidiliyorsa -> giris
-    if (!girisYapildi && !girisEkranindaMi) return AppRoutes.login;
+    if (!girisYapildi && !girisEkranindaMi) {
+      if (konum.startsWith('${AppRoutes.friendInvite}/')) {
+        _pendingInvitePath = state.uri.path;
+      }
+      return AppRoutes.login;
+    }
 
     // Giris yapilmis ama giris/kayit ekranina gidiliyorsa -> ana sayfa
-    if (girisYapildi && girisEkranindaMi) return AppRoutes.home;
+    if (girisYapildi && girisEkranindaMi) {
+      final next = _pendingInvitePath;
+      _pendingInvitePath = null;
+      return next ?? AppRoutes.home;
+    }
 
     return null;
   }
