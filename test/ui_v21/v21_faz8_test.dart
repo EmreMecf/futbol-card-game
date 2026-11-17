@@ -39,6 +39,15 @@ class _PlayRepo extends GoldenArenaRepo {
   }
 }
 
+/// Uses the same server match model as ranked games but in no-reward friend mode.
+class _FriendlyRepo extends GoldenArenaRepo {
+  @override
+  Future<Result<MatchState>> fetchState(String m) async {
+    final base = (await super.fetchState(m)).dataOrNull!;
+    return Success(base.copyWith(mode: 'friendly'));
+  }
+}
+
 class _V4Repo extends GoldenArenaV4Repo {
   _V4Repo({required super.phase, super.amILead, super.iHavePlayed});
 }
@@ -266,6 +275,17 @@ void main() {
       await pump(t, const V21ArenaScreen(matchId: 'm'), const Size(390, 844));
       expect(find.text('MAÇA YENİDEN BAĞLANILIYOR'), findsOneWidget);
       expect(find.text('TEKRAR DENE'), findsOneWidget);
+      await unmount(t);
+    });
+
+    testWidgets('arkadaş maçı ödülsüz gösterilir ve teslim olma uyarısı kart kaybı söylemez', (t) async {
+      matchRepo = _FriendlyRepo();
+      await pump(t, const V21ArenaScreen(matchId: 'm'), const Size(390, 844));
+      expect(find.text('ARKADAŞ MAÇI · ÖDÜL YOK'), findsOneWidget);
+      await tapText(t, 'Teslim ol');
+      expect(find.textContaining('Bu modda puan, ödül ve kart kaybı yok.'), findsOneWidget);
+      expect(find.textContaining('kalıcı olarak rakibe geçer'), findsNothing);
+      await tapText(t, 'DEVAM ET');
       await unmount(t);
     });
 
