@@ -80,3 +80,8 @@ test/goldens/failures/
 design-reference/gercek/pvp/*
 !design-reference/gercek/pvp/*_seri.png
 !design-reference/gercek/pvp/*_kaydi.txt
+
+# Yerel veritabani sifreleri ve test hesabi dosyalari (asla takip etme)
+/database/.yerel_postgres_sifresi
+/database/.yerel_test_hesabi
+/database/.yerel_*
