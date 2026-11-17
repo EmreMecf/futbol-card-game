@@ -13,6 +13,8 @@ import '../../../items/cosmetics/equipped_cosmetics.dart';
 import '../../../season/presentation/widgets/season_home_card.dart';
 import '../viewmodel/match_view_model.dart';
 import 'league_change_widgets.dart';
+import '../../../../ui_v21/screens/rewards/v21_match_result.dart';
+import '../../../../ui_v21/v21_flags.dart';
 
 /// MAÇ SONUCU — referans `result()` ekranı.
 ///
@@ -40,7 +42,15 @@ class MatchResultView extends StatefulWidget {
     required this.onClose,
     this.rewardDelta,
     this.onNewMatch,
+    this.forceLegacy = false,
   });
+
+  /// Eski (Ref) sonuç ekranını zorla (testler). Varsayılan: V2.1
+  /// `V21MatchResultView` (`kV21MatchResult`).
+  final bool forceLegacy;
+
+  /// V2.1 sonuç ekranı mı çizilecek?
+  bool get _v21 => kV21MatchResult && !forceLegacy;
 
   @override
   State<MatchResultView> createState() => _MatchResultViewState();
@@ -86,6 +96,18 @@ class _MatchResultViewState extends State<MatchResultView> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    // V2.1 sonuç ekranı. Geçiş burada, match_view.dart'ta değil: açık PR #6
+    // o dosyada sonuç ekranının kurulduğu satırı değiştiriyor.
+    if (widget._v21) {
+      final r = widget.result;
+      return V21MatchResultView(
+        result: r,
+        rewardDelta: widget.rewardDelta,
+        onClose: widget.onClose,
+        onNewMatch: widget.onNewMatch,
+        newMatchLabel: r == null ? 'YENİ MAÇ' : newMatchLabel(r),
+      );
+    }
     final sonuc = widget.result;
     if (sonuc == null) {
       return const Scaffold(

@@ -112,6 +112,10 @@ flutter:
     - assets/icons/
     - assets/animations/
     - assets/fonts/
+    # V2.1 arayüz görselleri (lib/ui_v21). assets/v21/screens/ tam ekran
+    # referans PNG'leridir; uygulamaya PAKETLENMEZ.
+    - assets/v21/illustrations/
+    - assets/v21/icons/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

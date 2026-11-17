@@ -96,7 +96,7 @@ void main() {
         (tester) async {
       await ac(
         tester,
-        MatchResultView(
+        MatchResultView(forceLegacy: true,
           result: MatchResultSummary(
             matchId: 'm',
             didIWin: true,
@@ -129,7 +129,7 @@ void main() {
     testWidgets('mağlubiyet: kaybedilen kartlar ve eksi puan', (tester) async {
       await ac(
         tester,
-        MatchResultView(
+        MatchResultView(forceLegacy: true,
           result: MatchResultSummary(
             matchId: 'm',
             myScore: 3,
@@ -161,7 +161,7 @@ void main() {
     testWidgets('beraberlik', (tester) async {
       await ac(
         tester,
-        MatchResultView(
+        MatchResultView(forceLegacy: true,
           result: const MatchResultSummary(matchId: 'm', isDraw: true),
           onClose: () {},
         ),
@@ -174,7 +174,7 @@ void main() {
         (tester) async {
       await ac(
         tester,
-        MatchResultView(
+        MatchResultView(forceLegacy: true,
           result: const MatchResultSummary(matchId: 'm', didIWin: true),
           onClose: () {},
         ),
@@ -187,7 +187,7 @@ void main() {
     testWidgets('sonuç gelene kadar yükleniyor', (tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: AppTheme.dark,
-        home: MatchResultView(result: null, onClose: () {}),
+        home: MatchResultView(forceLegacy: true, result: null, onClose: () {}),
       ));
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
@@ -196,7 +196,7 @@ void main() {
       var anaSayfa = 0, yeniMac = 0;
       await ac(
         tester,
-        MatchResultView(
+        MatchResultView(forceLegacy: true,
           result: const MatchResultSummary(matchId: 'm', isDraw: true),
           onClose: () => anaSayfa++,
           onNewMatch: () => yeniMac++,
@@ -258,7 +258,7 @@ void main() {
         (tester) async {
       await ac(
         tester,
-        MatchResultView(
+        MatchResultView(forceLegacy: true,
           result: MatchResultSummary(
             matchId: 'm',
             didIWin: true,
@@ -289,7 +289,7 @@ void main() {
         (tester) async {
       await ac(
         tester,
-        MatchResultView(
+        MatchResultView(forceLegacy: true,
           result: MatchResultSummary(
             matchId: 'm',
             didIWin: true,
@@ -308,7 +308,7 @@ void main() {
     testWidgets('düşüş: "SEVİYE DÜŞTÜ", kutlama yok', (tester) async {
       await ac(
         tester,
-        MatchResultView(
+        MatchResultView(forceLegacy: true,
           result: MatchResultSummary(
             matchId: 'm',
             myScore: 2,
@@ -328,7 +328,7 @@ void main() {
     testWidgets('sunucu kaydı yoksa lig bölümü hiç çizilmez', (tester) async {
       await ac(
         tester,
-        MatchResultView(
+        MatchResultView(forceLegacy: true,
           result: const MatchResultSummary(matchId: 'm', didIWin: true),
           onClose: () {},
         ),

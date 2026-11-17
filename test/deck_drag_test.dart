@@ -56,7 +56,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.dark, home: const DeckView()),
+      MaterialApp(theme: AppTheme.dark, home: const DeckView(forceLegacy: true)),
     );
     await tester.pumpAndSettle();
   }

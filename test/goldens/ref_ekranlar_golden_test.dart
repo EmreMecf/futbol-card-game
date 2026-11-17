@@ -76,7 +76,7 @@ void main() {
     }, skip: atla != null);
 
     testWidgets('kadro ${sizeName(boyut)}', (t) async {
-      await ac(t, const DeckView(), boyut);
+      await ac(t, const DeckView(forceLegacy: true), boyut);
       expect(t.takeException(), isNull, reason: 'taşma veya çizim hatası');
       // Bütün oyuncu kutuları sahanın İÇİNDE (kullanıcının bildirdiği
       // "sahadan taşan kartlar" hatası)
@@ -105,7 +105,7 @@ void main() {
   }, skip: atla != null);
 
   testWidgets('kadro alt kısım 390x844', (t) async {
-    await ac(t, const DeckView(), const Size(390, 844));
+    await ac(t, const DeckView(forceLegacy: true), const Size(390, 844));
     await t.drag(find.byType(Scrollable).first, const Offset(0, -700));
     await t.pump(const Duration(milliseconds: 300));
     await esle(t, '04b_kadro_alt_390x844');
@@ -113,7 +113,7 @@ void main() {
 
   for (final boyut in [const Size(390, 844), const Size(320, 568)]) {
     testWidgets('kadro kart seçimi ${sizeName(boyut)}', (t) async {
-      await ac(t, const DeckView(), boyut);
+      await ac(t, const DeckView(forceLegacy: true), boyut);
       // Kaleci yuvasına dokun → o mevkiye uygun kartlar
       await t.tap(find.byType(SquadSlotTile).last);
       for (var i = 0; i < 8; i++) {

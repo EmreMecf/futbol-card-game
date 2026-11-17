@@ -1,0 +1,1319 @@
+[
+  {
+    "id": "login",
+    "title": "Giriş",
+    "group": "Hesap",
+    "kind": "figma",
+    "filename": "V2 · Giriş.png",
+    "asset": "assets/v21/screens/login.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 385178,
+    "hotspots": [
+      [
+        0.08,
+        0.855,
+        0.84,
+        0.095,
+        "home",
+        "Giriş yap (demo)"
+      ],
+      [
+        0.1,
+        0.68,
+        0.8,
+        0.07,
+        "home",
+        "Giriş yap (demo)"
+      ]
+    ]
+  },
+  {
+    "id": "home",
+    "title": "Ana Sayfa",
+    "group": "Ana Akış",
+    "kind": "figma",
+    "filename": "V2 · Ana Sayfa.png",
+    "asset": "assets/v21/screens/home.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 531628,
+    "hotspots": [
+      [
+        0.1,
+        0.64,
+        0.8,
+        0.09,
+        "matchPrep",
+        "Maça başla"
+      ],
+      [
+        0.7,
+        0.035,
+        0.2,
+        0.07,
+        "profile",
+        "Profil"
+      ],
+      [
+        0.04,
+        0.78,
+        0.26,
+        0.12,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.29,
+        0.78,
+        0.21,
+        0.12,
+        "chests",
+        "Sandık"
+      ],
+      [
+        0.56,
+        0.78,
+        0.18,
+        0.12,
+        "league",
+        "Lig"
+      ],
+      [
+        0.75,
+        0.78,
+        0.21,
+        0.12,
+        "season",
+        "Sezon"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "collection",
+    "title": "Koleksiyon",
+    "group": "Kartlar",
+    "kind": "figma",
+    "filename": "V2 · Koleksiyon.png",
+    "asset": "assets/v21/screens/collection.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 374775,
+    "hotspots": [
+      [
+        0.06,
+        0.19,
+        0.9,
+        0.65,
+        "cardModal",
+        "Kart detaylarını incele"
+      ],
+      [
+        0.1,
+        0.08,
+        0.8,
+        0.09,
+        "progress",
+        "Gelişim"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "deck",
+    "title": "Kadrom",
+    "group": "Kartlar",
+    "kind": "figma",
+    "filename": "V2 · Kadro.png",
+    "asset": "assets/v21/screens/deck.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 265318,
+    "hotspots": [
+      [
+        0.1,
+        0.25,
+        0.8,
+        0.56,
+        "deckModal",
+        "Oyuncu değiştir"
+      ],
+      [
+        0.16,
+        0.89,
+        0.68,
+        0.08,
+        "matchPrep",
+        "Otomatik diz / Maça hazırla"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "arena",
+    "title": "Canlı Arena",
+    "group": "PvP",
+    "kind": "figma",
+    "filename": "V2 · Maç · Kart seçimi.png",
+    "asset": "assets/v21/screens/arena.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 406982,
+    "hotspots": [
+      [
+        0.16,
+        0.38,
+        0.65,
+        0.23,
+        "hf8",
+        "Kart seçimi"
+      ],
+      [
+        0.09,
+        0.66,
+        0.82,
+        0.17,
+        "hf9",
+        "Taktik seçimi"
+      ],
+      [
+        0.04,
+        0.88,
+        0.93,
+        0.08,
+        "hf10",
+        "Hamleyi kilitle"
+      ]
+    ]
+  },
+  {
+    "id": "win",
+    "title": "Zafer",
+    "group": "PvP",
+    "kind": "figma",
+    "filename": "V2 · Maç sonucu · Zafer.png",
+    "asset": "assets/v21/screens/win.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 375512,
+    "hotspots": [
+      [
+        0.05,
+        0.88,
+        0.43,
+        0.09,
+        "home",
+        "Ana menü"
+      ],
+      [
+        0.5,
+        0.88,
+        0.45,
+        0.09,
+        "matchPrep",
+        "Yeni maç"
+      ]
+    ]
+  },
+  {
+    "id": "store",
+    "title": "Mağaza",
+    "group": "Ekonomi",
+    "kind": "figma",
+    "filename": "V2 · Mağaza.png",
+    "asset": "assets/v21/screens/store.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 330674,
+    "hotspots": [
+      [
+        0.14,
+        0.21,
+        0.75,
+        0.5,
+        "packSeal",
+        "Paket satın al / aç"
+      ],
+      [
+        0.02,
+        0.76,
+        0.29,
+        0.11,
+        "chests",
+        "Sandıklar"
+      ],
+      [
+        0.35,
+        0.76,
+        0.3,
+        0.11,
+        "sbc",
+        "Kart takası"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "chests",
+    "title": "Sandıklar",
+    "group": "Ekonomi",
+    "kind": "figma",
+    "filename": "V2 · Sandıklar.png",
+    "asset": "assets/v21/screens/chests.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 317667,
+    "hotspots": [
+      [
+        0.04,
+        0.21,
+        0.91,
+        0.44,
+        "packSeal",
+        "Sandık aç"
+      ],
+      [
+        0.2,
+        0.74,
+        0.7,
+        0.13,
+        "packSeal",
+        "Sandığı aç"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "packSeal",
+    "title": "Paket Mührü",
+    "group": "Ekonomi",
+    "kind": "figma",
+    "filename": "V2 · Paket · Mühür.png",
+    "asset": "assets/v21/screens/packSeal.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 265427,
+    "hotspots": [
+      [
+        0.05,
+        0.24,
+        0.9,
+        0.6,
+        "packLegend",
+        "Paketi aç"
+      ]
+    ]
+  },
+  {
+    "id": "packLegend",
+    "title": "Efsane Açılış",
+    "group": "Ekonomi",
+    "kind": "figma",
+    "filename": "V2 · Paket açılışı · Efsane.png",
+    "asset": "assets/v21/screens/packLegend.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 311878,
+    "hotspots": [
+      [
+        0.06,
+        0.88,
+        0.88,
+        0.08,
+        "store",
+        "Devam et"
+      ]
+    ]
+  },
+  {
+    "id": "league",
+    "title": "Lig Yolu",
+    "group": "İlerleme",
+    "kind": "figma",
+    "filename": "V2 · Ligler.png",
+    "asset": "assets/v21/screens/league.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 298511,
+    "hotspots": [
+      [
+        0.1,
+        0.2,
+        0.8,
+        0.67,
+        "season",
+        "Sezon yolu"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "profile",
+    "title": "Profil",
+    "group": "Oyuncu",
+    "kind": "figma",
+    "filename": "V2 · Profil.png",
+    "asset": "assets/v21/screens/profile.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 255794,
+    "hotspots": [
+      [
+        0.1,
+        0.83,
+        0.8,
+        0.12,
+        "settings",
+        "Ayarlar"
+      ],
+      [
+        0.09,
+        0.28,
+        0.8,
+        0.34,
+        "league",
+        "Lig istatistikleri"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "settings",
+    "title": "Ayarlar",
+    "group": "Oyuncu",
+    "kind": "figma",
+    "filename": "V2 · Ayarlar.png",
+    "asset": "assets/v21/screens/settings.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 223438,
+    "hotspots": [
+      [
+        0.08,
+        0.8,
+        0.83,
+        0.12,
+        "login",
+        "Çıkış yap"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "season",
+    "title": "Sezon Yolu",
+    "group": "İlerleme",
+    "kind": "figma",
+    "filename": "V2 · Sezon Yolu.png",
+    "asset": "assets/v21/screens/season.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 267490,
+    "hotspots": [
+      [
+        0.13,
+        0.17,
+        0.76,
+        0.2,
+        "chests",
+        "Ödül al"
+      ],
+      [
+        0.03,
+        0.82,
+        0.9,
+        0.11,
+        "league",
+        "Ligler"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "progress",
+    "title": "Kart Gelişimi",
+    "group": "Kartlar",
+    "kind": "figma",
+    "filename": "V2 · Gelişim.png",
+    "asset": "assets/v21/screens/progress.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 317007,
+    "hotspots": [
+      [
+        0.15,
+        0.22,
+        0.76,
+        0.56,
+        "cardModal",
+        "Kart seviyesi"
+      ],
+      [
+        0.15,
+        0.8,
+        0.8,
+        0.12,
+        "collection",
+        "Koleksiyona dön"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "inventory",
+    "title": "Envanter",
+    "group": "Ekonomi",
+    "kind": "figma",
+    "filename": "V2 · Envanter.png",
+    "asset": "assets/v21/screens/inventory.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 250847,
+    "hotspots": [
+      [
+        0.13,
+        0.22,
+        0.76,
+        0.52,
+        "itemModal",
+        "Eşya ayrıntısı"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "sbc",
+    "title": "Kart Takası",
+    "group": "Ekonomi",
+    "kind": "figma",
+    "filename": "V2 · Kart Takası.png",
+    "asset": "assets/v21/screens/sbc.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 336382,
+    "hotspots": [
+      [
+        0.12,
+        0.18,
+        0.77,
+        0.53,
+        "sbcModal",
+        "Kart takası onayı"
+      ],
+      [
+        0.0,
+        0.945,
+        0.2,
+        0.055,
+        "home",
+        "Ana Sayfa"
+      ],
+      [
+        0.2,
+        0.945,
+        0.2,
+        0.055,
+        "collection",
+        "Kartlar"
+      ],
+      [
+        0.4,
+        0.945,
+        0.2,
+        0.055,
+        "deck",
+        "Kadro"
+      ],
+      [
+        0.6,
+        0.945,
+        0.2,
+        0.055,
+        "matchPrep",
+        "Arena"
+      ],
+      [
+        0.8,
+        0.945,
+        0.2,
+        0.055,
+        "store",
+        "Mağaza"
+      ]
+    ]
+  },
+  {
+    "id": "hf0",
+    "title": "Arkadaşınla Oyna — Giriş",
+    "group": "P0 · Arkadaşlar",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_183831_980ce0e6-5ec1-4db0-b72c-f9e4095f3d23.png",
+    "hotspots": [
+      [
+        0.07,
+        0.52,
+        0.87,
+        0.18,
+        "hf1",
+        "Davet oluştur"
+      ],
+      [
+        0.07,
+        0.72,
+        0.87,
+        0.13,
+        "hf2",
+        "Oda kodu ile katıl"
+      ]
+    ]
+  },
+  {
+    "id": "hf1",
+    "title": "Özel Maç — Oda Sahibi",
+    "group": "P0 · Arkadaşlar",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184015_2d67dd8c-a85c-4934-8538-069825521c0f.png",
+    "hotspots": [
+      [
+        0.08,
+        0.45,
+        0.85,
+        0.2,
+        "hf2",
+        "Bağlantıyı paylaş"
+      ],
+      [
+        0.08,
+        0.71,
+        0.85,
+        0.17,
+        "hf2",
+        "Hazırım"
+      ]
+    ]
+  },
+  {
+    "id": "hf2",
+    "title": "Özel Maç — Misafir",
+    "group": "P0 · Arkadaşlar",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184013_304fece5-473c-4823-a143-1d10e17f496e.png",
+    "hotspots": [
+      [
+        0.07,
+        0.68,
+        0.86,
+        0.19,
+        "hf7",
+        "Hazırım, maça başla"
+      ]
+    ]
+  },
+  {
+    "id": "hf3",
+    "title": "Rakip Aranıyor — İlk 10 sn",
+    "group": "P0 · Eşleştirme",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184150_49fa2800-2d86-48d3-a34f-174f0695c096.png",
+    "hotspots": [
+      [
+        0.05,
+        0.75,
+        0.9,
+        0.19,
+        "hf4",
+        "Aramaya devam et"
+      ]
+    ]
+  },
+  {
+    "id": "hf4",
+    "title": "Arama Genişletildi — 20–30 sn",
+    "group": "P0 · Eşleştirme",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184150_075531fc-9c9e-4123-8f6b-8aa819c5a55f.png",
+    "hotspots": [
+      [
+        0.07,
+        0.68,
+        0.85,
+        0.2,
+        "hf5",
+        "Bot / aramaya devam"
+      ]
+    ]
+  },
+  {
+    "id": "hf5",
+    "title": "Rakip Bulunamadı — 60 sn",
+    "group": "P0 · Eşleştirme",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184149_452ea25c-fdf7-4875-b33d-7e6e600f34d6.png",
+    "hotspots": [
+      [
+        0.08,
+        0.62,
+        0.85,
+        0.2,
+        "hf3",
+        "Yeniden dene"
+      ]
+    ]
+  },
+  {
+    "id": "hf6",
+    "title": "Bağlantı Kontrol Ediliyor",
+    "group": "P0 · Eşleştirme",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184150_3aea3729-1a7f-4852-af39-44f239d4f078.png",
+    "hotspots": [
+      [
+        0.08,
+        0.62,
+        0.85,
+        0.23,
+        "hf3",
+        "Bağlantıyı yeniden dene"
+      ]
+    ]
+  },
+  {
+    "id": "hf7",
+    "title": "PvP — Mevki Seçimi",
+    "group": "P0 · PvP",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184240_05585807-2418-42b5-b1d5-ea1f5aeed937.png",
+    "hotspots": [
+      [
+        0.07,
+        0.67,
+        0.87,
+        0.24,
+        "hf8",
+        "Mevki seçildi"
+      ]
+    ]
+  },
+  {
+    "id": "hf8",
+    "title": "PvP — Gizli Kart Seçimi",
+    "group": "P0 · PvP",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184239_4db43dc2-2664-4f0a-8bfd-ad4e017b1d3a.png",
+    "hotspots": [
+      [
+        0.08,
+        0.7,
+        0.85,
+        0.21,
+        "hf9",
+        "Kart seçildi"
+      ]
+    ]
+  },
+  {
+    "id": "hf9",
+    "title": "PvP — Taktik ve Enerji",
+    "group": "P0 · PvP",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184239_6140f5c2-c9e0-4888-91e3-df957dd07073.png",
+    "hotspots": [
+      [
+        0.08,
+        0.7,
+        0.85,
+        0.22,
+        "hf10",
+        "Taktik seçildi"
+      ]
+    ]
+  },
+  {
+    "id": "hf10",
+    "title": "PvP — Rakip Bekleniyor",
+    "group": "P0 · PvP",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184506_20de430c-a7a9-4ce0-adbf-3c65b8d57e19.png",
+    "hotspots": [
+      [
+        0.08,
+        0.69,
+        0.85,
+        0.22,
+        "win",
+        "Tur tamamlandı"
+      ]
+    ]
+  },
+  {
+    "id": "hf11",
+    "title": "PvP — Maça Yeniden Bağlanma",
+    "group": "P0 · PvP",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184238_fe4d16a0-ef4d-43f2-8c51-8fc5ced42c02.png",
+    "hotspots": [
+      [
+        0.08,
+        0.63,
+        0.85,
+        0.23,
+        "hf7",
+        "Maça dön"
+      ]
+    ]
+  },
+  {
+    "id": "hf12",
+    "title": "Öğretici — Mevki (1/3)",
+    "group": "P1 · Öğretici",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184555_d3b782a7-18f0-4686-8e16-8d290eddd6c0.png",
+    "hotspots": [
+      [
+        0.08,
+        0.71,
+        0.84,
+        0.19,
+        "hf13",
+        "Öğretici devam"
+      ]
+    ]
+  },
+  {
+    "id": "hf13",
+    "title": "Öğretici — Kart (2/3)",
+    "group": "P1 · Öğretici",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184556_bd8ad3fa-d6ee-4e0c-9830-48f420c690f9.png",
+    "hotspots": [
+      [
+        0.08,
+        0.71,
+        0.84,
+        0.19,
+        "hf14",
+        "Öğretici devam"
+      ]
+    ]
+  },
+  {
+    "id": "hf14",
+    "title": "Öğretici — Taktik (3/3)",
+    "group": "P1 · Öğretici",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184557_b3000b4e-72c9-4c54-a419-ac0f280138d0.png",
+    "hotspots": [
+      [
+        0.08,
+        0.71,
+        0.84,
+        0.19,
+        "home",
+        "Öğreticiyi bitir"
+      ]
+    ]
+  },
+  {
+    "id": "hf17",
+    "title": "Kadro — Geçersiz Kadro Uyarısı",
+    "group": "P1 · Kadro",
+    "kind": "higgsfield",
+    "status": "cloud",
+    "remote": "https://d8j0ntlcm91z4.cloudfront.net/user_3EasIJmgTbWUJWatAaShnJbgi8S/hf_20261116_184555_5e6b958d-1391-4d54-be44-722e49beaba7.png",
+    "hotspots": [
+      [
+        0.08,
+        0.71,
+        0.84,
+        0.19,
+        "deck",
+        "Kadroyu düzenle"
+      ]
+    ]
+  },
+  {
+    "id": "matchPrep",
+    "title": "MAÇA HAZIRLAN",
+    "group": "Gezilebilir demo",
+    "kind": "mock",
+    "remote": "",
+    "hotspots": []
+  },
+  {
+    "id": "cardModal",
+    "title": "OYUNCU KARTI",
+    "group": "Gezilebilir demo",
+    "kind": "mock",
+    "remote": "",
+    "hotspots": []
+  },
+  {
+    "id": "deckModal",
+    "title": "OYUNCU DEĞİŞTİR",
+    "group": "Gezilebilir demo",
+    "kind": "mock",
+    "remote": "",
+    "hotspots": []
+  },
+  {
+    "id": "itemModal",
+    "title": "ENVANTER",
+    "group": "Gezilebilir demo",
+    "kind": "mock",
+    "remote": "",
+    "hotspots": []
+  },
+  {
+    "id": "sbcModal",
+    "title": "KART TAKASI",
+    "group": "Gezilebilir demo",
+    "kind": "mock",
+    "remote": "",
+    "hotspots": []
+  }
+]

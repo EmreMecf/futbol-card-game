@@ -127,7 +127,7 @@ void main() {
       depo.matchChest = kaynak;
       await ac(
         t,
-        MatchResultView(
+        MatchResultView(forceLegacy: true,
           result: const MatchResultSummary(matchId: 'm', didIWin: true, myScore: 7, opponentScore: 4),
           rewardDelta: const MatchRewardDelta(coins: 100, rating: 25, protectionSlots: 1),
           onClose: () {},
@@ -145,7 +145,7 @@ void main() {
   }
 
   testWidgets('kadro ekranında acil kadro uyarısı 390x844', (t) async {
-    await ac(t, const DeckView(), const Size(390, 844));
+    await ac(t, const DeckView(forceLegacy: true), const Size(390, 844));
     // Sahte kadro tam; uyarı yalnız kadro eksikken görünür -> burada YOK
     expect(find.text('Kadron kurulamıyor'), findsNothing);
     await t.pumpWidget(const SizedBox());

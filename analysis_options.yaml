@@ -16,6 +16,9 @@ analyzer:
     # icin yuzlerce sahte "tanimsiz" hatasi veriyordu (ilk CI calismasi).
     - "server/**"
     - "packages/**"
+    - android/**
+    - ios/**
+    - web/**
 
 linter:
   rules:

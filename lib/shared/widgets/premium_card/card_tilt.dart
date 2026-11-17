@@ -106,10 +106,10 @@ class CardTiltController extends ValueNotifier<Offset> {
 
   /// Jiroskop ile egilme (telefonu egdikce kart doner).
   ///
-  /// NOT: Masaustu ve web'de jiroskop yoktur; bu durumda sessizce
-  /// devre disi kalir ve dokunmayla egilme calismaya devam eder.
+  /// NOT: Oyun yalniz Android ve iOS'ta yayinlanir. Baska bir ortamda
+  /// (or. bilgisayardaki test) jiroskop yoktur; sessizce devre disi kalir
+  /// ve dokunmayla egilme calismaya devam eder.
   void enableGyroscope() {
-    if (kIsWeb) return;
     if (defaultTargetPlatform != TargetPlatform.android &&
         defaultTargetPlatform != TargetPlatform.iOS) {
       return;

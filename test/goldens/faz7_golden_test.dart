@@ -86,13 +86,13 @@ void main() {
     '06_ligler': () => const LeaderboardView(),
     '06l_lig_basamaklari': () => const LeagueTiersView(),
     '07_profil': () => const ProfileView(),
-    '08_mac_sonucu': () => MatchResultView(
+    '08_mac_sonucu': () => MatchResultView(forceLegacy: true,
           result: zafer,
           rewardDelta: const MatchRewardDelta(coins: 150, rating: 25, protectionSlots: 1),
           onClose: () {},
           onNewMatch: () {},
         ),
-    '08m_mac_sonucu_maglubiyet': () => MatchResultView(
+    '08m_mac_sonucu_maglubiyet': () => MatchResultView(forceLegacy: true,
           result: maglubiyet,
           rewardDelta: const MatchRewardDelta(coins: 0, rating: -25, protectionSlots: 0),
           onClose: () {},

@@ -2,6 +2,14 @@
 
 Gerçek zamanlı, çok oyunculu futbol kart/strateji oyunu.
 
+**Hedef platformlar: yalnız telefon ve tablet (Android, iOS/iPadOS), her
+ikisinde de dikey.** Web ve masaüstü sürümü yok (`web/` klasörü kaldırıldı).
+Yön üç yerde kilitli: `lib/main.dart`, `ios/Runner/Info.plist` (iPad'de
+`UIRequiresFullScreen`) ve `android/app/src/main/AndroidManifest.xml`
+(`sensorPortrait`; Android 16 tabletleri için geçici muafiyet özelliğiyle).
+Aşağıdaki "masaüstü" düzen anlatımları yalnız eski (Ref) arayüze aittir;
+V2.1 arayüzü tablette telefon düzenini ortalar.
+
 ```
 Flutter  ──HTTP/JSON──▶  Dart Sunucu  ──SQL──▶  PostgreSQL
    ▲                          │                     │
@@ -358,8 +366,9 @@ testler atlanır, başarısız olmaz.
 
 ## Yayına hazırlık
 
-FAZ 7 kalite kontrolünde `flutter build apk --release` ve
-`flutter build web --release` gerçekten çalıştırıldı ve başarılı.
+FAZ 7 kalite kontrolünde `flutter build apk --release` gerçekten
+çalıştırıldı ve başarılı. (O dönemde web derlemesi de denenmişti; web
+artık hedef değil ve `web/` klasörü kaldırıldı.)
 
 ### Yayın derlemesi
 
@@ -384,7 +393,7 @@ flutter build appbundle --release --dart-define=API_BASE_URL=https://api.ornek.c
 | `ENVIRONMENT=production` | Varsayılan JWT anahtarı / geliştirme DB şifresiyle sunucu **açılmaz** |
 | `JWT_SECRET` | En az 32 karakter, rastgele |
 | `DB_PASSWORD` | Geliştirme şifresi kabul edilmez |
-| `CORS_ORIGIN` | Web sürümünün adresi (varsayılan `*`) |
+| `CORS_ORIGIN` | Yalnız tarayıcı istemcileri için (varsayılan `*`). Mobil uygulama CORS'a tabi değildir; web sürümü olmadığı için oyun bu değere bağlı değil. |
 | `TRUST_PROXY=true` | Sadece nginx / yük dengeleyici arkasındaysa |
 | `AUTH_RATE_LIMIT` | `/auth` uçlarına IP başına dakikada istek (varsayılan 20) |
 

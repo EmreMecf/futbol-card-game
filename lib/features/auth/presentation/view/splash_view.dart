@@ -9,6 +9,8 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../shared/widgets/game/game_ui.dart';
 import '../../../../shared/widgets/walkout/spotlight_backdrop.dart';
+import '../../../../ui_v21/screens/auth/v21_splash_art.dart';
+import '../../../../ui_v21/v21_flags.dart';
 
 /// Açılış ekranı (MD bölüm 4-A): stadyum ışıkları yanar, logo belirir,
 /// sonra cihazdaki oturuma göre doğru ekrana geçilir.
@@ -68,6 +70,15 @@ class _SplashViewState extends State<SplashView>
 
   @override
   Widget build(BuildContext context) {
+    // V2.1 görünüm: yalnız çizim değişir, süre ve yönlendirme aynı
+    if (kV21Splash) {
+      return Scaffold(
+        body: AnimatedBuilder(
+          animation: _kontrolcu,
+          builder: (context, _) => V21SplashArt(progress: _kontrolcu.value),
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: AppColors.background,
       body: AnimatedBuilder(

@@ -26,6 +26,14 @@ import '../../features/settings/presentation/view/design_system_view.dart';
 import '../../features/settings/presentation/view/settings_view.dart';
 import '../../features/store/presentation/view/store_view.dart';
 import '../../shared/widgets/ref/ref_ui.dart';
+import '../../ui_v21/screens/arena/v21_arena_screen.dart';
+import '../../ui_v21/screens/arena/v21_matchmaking_screen.dart';
+import '../../ui_v21/screens/collection/v21_collection_screen.dart';
+import '../../ui_v21/screens/home/v21_home_screen.dart';
+import '../../ui_v21/screens/inner/v21_inner_screens.dart';
+import '../../ui_v21/screens/season/v21_season_screen.dart';
+import '../../ui_v21/screens/store/v21_store_screen.dart';
+import '../../ui_v21/v21_flags.dart';
 import '../auth/session_manager.dart';
 import '../theme/ref_tokens.dart';
 import 'app_routes.dart';
@@ -61,11 +69,12 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const HomeView(),
+        // V2.1 ana sayfası; eski Ref ana sayfası kV21Home=false ile döner
+        builder: (context, state) => kV21Home ? const V21HomeScreen() : const HomeView(),
       ),
       GoRoute(
         path: AppRoutes.collection,
-        builder: (context, state) => const CollectionView(),
+        builder: (context, state) => kV21Collection ? const V21CollectionScreen() : const CollectionView(),
       ),
       GoRoute(
         path: AppRoutes.deck,
@@ -73,29 +82,29 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.matchmaking,
-        builder: (context, state) => const MatchmakingView(),
+        builder: (context, state) => kV21Arena ? const V21MatchmakingScreen() : const MatchmakingView(),
       ),
       GoRoute(
         path: '${AppRoutes.match}/:matchId',
-        builder: (context, state) => MatchView(
-          matchId: state.pathParameters['matchId']!,
-        ),
+        builder: (context, state) => kV21Arena
+            ? V21ArenaScreen(matchId: state.pathParameters['matchId']!)
+            : MatchView(matchId: state.pathParameters['matchId']!),
       ),
       GoRoute(
         path: AppRoutes.profile,
-        builder: (context, state) => const ProfileView(),
+        builder: (context, state) => kV21Inner ? const V21ProfileScreen() : const ProfileView(),
       ),
       GoRoute(
         path: AppRoutes.leaderboard,
-        builder: (context, state) => const LeaderboardView(),
+        builder: (context, state) => kV21Inner ? const V21LeaderboardScreen() : const LeaderboardView(),
       ),
       GoRoute(
         path: AppRoutes.leagueTiers,
-        builder: (context, state) => const LeagueTiersView(),
+        builder: (context, state) => kV21Inner ? const V21LeagueScreen() : const LeagueTiersView(),
       ),
       GoRoute(
         path: AppRoutes.settings,
-        builder: (context, state) => const SettingsView(),
+        builder: (context, state) => kV21Inner ? const V21SettingsScreen() : const SettingsView(),
       ),
       GoRoute(
         path: AppRoutes.designSystem,
@@ -111,32 +120,32 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.store,
-        builder: (context, state) => const StoreView(),
+        builder: (context, state) => kV21Store ? const V21StoreScreen() : const StoreView(),
       ),
       // Ekonomi V2 (FAZ 1): sandıklar ve olasılıklar
       GoRoute(
         path: AppRoutes.chests,
-        builder: (context, state) => const ChestsView(),
+        builder: (context, state) => kV21Inner ? const V21ChestsScreen() : const ChestsView(),
       ),
       GoRoute(
         path: AppRoutes.chestOdds,
-        builder: (context, state) => const ChestOddsView(),
+        builder: (context, state) => kV21Inner ? const V21ChestOddsScreen() : const ChestOddsView(),
       ),
       GoRoute(
         path: AppRoutes.progress,
-        builder: (context, state) => const ProgressView(),
+        builder: (context, state) => kV21Inner ? const V21ProgressScreen() : const ProgressView(),
       ),
       GoRoute(
         path: AppRoutes.inventory,
-        builder: (context, state) => const InventoryView(),
+        builder: (context, state) => kV21Inner ? const V21InventoryScreen() : const InventoryView(),
       ),
       GoRoute(
         path: AppRoutes.season,
-        builder: (context, state) => const SeasonView(),
+        builder: (context, state) => kV21Season ? const V21SeasonScreen() : const SeasonView(),
       ),
       GoRoute(
         path: AppRoutes.sbc,
-        builder: (context, state) => const SbcListView(),
+        builder: (context, state) => kV21Inner ? const V21SbcScreen() : const SbcListView(),
         routes: [
           GoRoute(
             path: ':challengeId',
@@ -148,7 +157,7 @@ class AppRouter {
                 // Dogrudan bu adrese gelinmisse (derin baglanti) listeye don
                 return const SbcListView();
               }
-              return SbcBuilderView(challenge: gorev);
+              return kV21Inner ? V21SbcBuilderScreen(challenge: gorev) : SbcBuilderView(challenge: gorev);
             },
           ),
         ],
