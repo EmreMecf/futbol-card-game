@@ -323,13 +323,19 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: flutter build apk --release --dart-define=API_BASE_URL=https://futbol-card-staging-api-lzq3.onrender.com
 
-      # main'e push: staging APK (indirilebilir); PR'lar: yalniz derlenebilirlik
-      - name: Release APK derlenebilirlik (PR ve diger dallar)
-        if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+      # PR #8: V21 guvenlik dalindan staging sunucusuna baglanan test APK'si.
+      # Main'e birlestirme yapmadan iki telefonda V21 dogrulamasi icindir.
+      - name: V21 staging test APK (PR #8)
+        if: ${{ github.event_name == 'pull_request' && github.head_ref == 'fix/v21-security-and-release-readiness' }}
+        run: flutter build apk --release --dart-define=API_BASE_URL=https://futbol-card-staging-api-lzq3.onrender.com
+
+      # Diger PR'lar: yalniz derlenebilirlik.
+      - name: Release APK derlenebilirlik (diger PR ve dallar)
+        if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') && !(github.event_name == 'pull_request' && github.head_ref == 'fix/v21-security-and-release-readiness') }}
         run: flutter build apk --release --dart-define=API_BASE_URL=https://ci.example.invalid
 
       - name: Staging APK dosyasini indirilebilir artifact olarak sakla
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.head_ref == 'fix/v21-security-and-release-readiness') }}
         uses: actions/upload-artifact@v4
         with:
           name: futbol-card-arena-staging-android
