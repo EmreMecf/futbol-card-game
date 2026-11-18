@@ -7,6 +7,7 @@ import '../../shared/widgets/avatar2d/avatar_spec.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_painters.dart';
+import 'v21_tap.dart';
 
 /// Nadirlik görünümü (referans Koleksiyon ekranı kenar ve zemin renkleri)
 @immutable
@@ -269,7 +270,7 @@ class V21PlayerCard extends StatelessWidget {
       selected: selected,
       label: '${position.label}, ${r.name}, güç $power, $name${favorite ? ', favori' : ''}${locked ? ', kilitli' : ''}',
       excludeSemantics: true,
-      child: GestureDetector(onTap: onTap, behavior: HitTestBehavior.opaque, child: full),
+      child: V21Tap(onTap: onTap, behavior: HitTestBehavior.opaque, child: full),
     );
   }
 

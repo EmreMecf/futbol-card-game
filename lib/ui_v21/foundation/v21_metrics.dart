@@ -7,8 +7,25 @@ abstract final class V21Metrics {
   static const double designWidth = 390;
   static const double designHeight = 844;
 
-  /// Telefon içeriği tablette en fazla bu kadar yayılır
+  /// Odak ekranları (sonuç, paket açılışı) ve telefon içeriği en fazla bu kadar yayılır
   static const double maxContentWidth = 520;
+
+  // ---- Duyarlı yerleşim ----
+  static const double mediumBreakpoint = 600;
+  static const double expandedBreakpoint = 900;
+
+  /// Bu genişlikten geniş ve [shortWideMaxHeight]'tan kısa pencere yan menü kullanır
+  static const double shortWideMinWidth = 640;
+  static const double shortWideMaxHeight = 500;
+
+  /// Dikey tablette içerik genişliği
+  static const double mediumContentWidth = 720;
+
+  /// Yatay tablet ve masaüstünde içerik genişliği
+  static const double expandedContentWidth = 960;
+
+  /// Yan menü genişliği
+  static const double sideNavWidth = 216;
 
   // ---- Köşe yarıçapları ----
   static const double radiusS = 6;

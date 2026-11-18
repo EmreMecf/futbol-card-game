@@ -21,11 +21,15 @@ import 'features/settings/presentation/viewmodel/settings_view_model.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Oyun dikey modda oynanir
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  // Telefon dikey kalir; tablet ve web her yonde calisir
+  final ekran = WidgetsBinding.instance.platformDispatcher.views.first;
+  final kisaKenar = ekran.physicalSize.shortestSide / ekran.devicePixelRatio;
+  if (!kIsWeb && kisaKenar < 600) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
 
   try {
     await dotenv.load(fileName: '.env');

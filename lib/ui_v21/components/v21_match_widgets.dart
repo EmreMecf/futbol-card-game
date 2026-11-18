@@ -8,6 +8,7 @@ import '../../shared/widgets/avatar2d/avatar_spec.dart';
 import '../animations/v21_motion.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
+import 'v21_tap.dart';
 
 /// V2.1 OYUNCU AVATARI (referans Arena "SEN" / "RAKİP": çap 44, 3 px
 /// lacivert halka). Onaylı görsel ([imageUrl]) yoksa projenin 2D
@@ -253,7 +254,7 @@ class V21BackButton extends StatelessWidget {
       button: true,
       label: 'Geri',
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onPressed,
         behavior: HitTestBehavior.opaque,
         child: Container(

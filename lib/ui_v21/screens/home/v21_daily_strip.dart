@@ -23,11 +23,14 @@ import '../../ui_v21.dart';
 class V21DailyStrip extends StatefulWidget {
   final double scale;
 
+  /// Yan boşluk (geniş yerleşimde sütun zaten dar: 0)
+  final double? sidePadding;
+
   /// Yalnız testler: sunucuya gitmeden gösterilecek durum
   @visibleForTesting
   final DailyStatus? debugStatus;
 
-  const V21DailyStrip({super.key, required this.scale, this.debugStatus});
+  const V21DailyStrip({super.key, required this.scale, this.sidePadding, this.debugStatus});
 
   @override
   State<V21DailyStrip> createState() => _V21DailyStripState();
@@ -76,7 +79,12 @@ class _V21DailyStripState extends State<V21DailyStrip> {
     final k = widget.scale;
     final (ust, alt) = v21DailyLines(d);
     return Padding(
-      padding: EdgeInsets.fromLTRB(V21Metrics.primaryButtonSide * k, 8 * k, V21Metrics.primaryButtonSide * k, 0),
+      padding: EdgeInsets.fromLTRB(
+        widget.sidePadding ?? V21Metrics.primaryButtonSide * k,
+        8 * k,
+        widget.sidePadding ?? V21Metrics.primaryButtonSide * k,
+        0,
+      ),
       child: V21GamePanel(
         style: V21PanelStyle.slot,
         scale: k,

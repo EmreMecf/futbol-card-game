@@ -67,6 +67,8 @@ jobs:
       # zinciri 'uctan_uca' isinde AYRICA test ediliyor.
       - name: Flutter testleri
         run: flutter test
+      - name: Web derlenebilirlik
+        run: flutter build web --release --dart-define=API_BASE_URL=https://ci.example.invalid
 
   # -------------------------------------------------------------------
   paketler:

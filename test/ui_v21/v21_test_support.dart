@@ -70,4 +70,26 @@ const kV21Sizes = <Size>[
   Size(1024, 1366),
 ];
 
+/// Yalnız taşma denetlenen ek boyutlar: katlanır telefon, yatay telefon,
+/// yatay tablet ve masaüstü web. Görüntüleri depoda tutulmaz.
+const kV21ExtraSizes = <Size>[
+  Size(280, 653),
+  Size(600, 960),
+  Size(844, 390),
+  Size(915, 412),
+  Size(1024, 768),
+  Size(1180, 820),
+  Size(1280, 720),
+  Size(1366, 768),
+  Size(1440, 900),
+  Size(1920, 1080),
+  Size(2560, 1440),
+];
+
+/// Taşma denetiminin çalıştığı bütün boyutlar
+const kV21AllSizes = <Size>[...kV21Sizes, ...kV21ExtraSizes];
+
+/// Bu boyutun görüntüsü karşılaştırılır mı? (V21_TUM_GOLDEN=1: hepsi)
+bool v21GoldenFor(Size s) => kV21Sizes.contains(s) || Platform.environment['V21_TUM_GOLDEN'] == '1';
+
 String v21SizeName(Size s) => '${s.width.toInt()}x${s.height.toInt()}';

@@ -6,6 +6,7 @@ import '../foundation/v21_colors.dart';
 import '../foundation/v21_metrics.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_game_panel.dart';
+import 'v21_tap.dart';
 
 /// Sandık yuvasının görünür durumu (sunucu durumundan türetilir)
 enum V21ChestSlotState {
@@ -84,7 +85,7 @@ class V21ChestSlot extends StatelessWidget {
       button: onTap != null,
       label: semanticsLabel,
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: Column(

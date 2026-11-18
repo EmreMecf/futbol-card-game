@@ -88,7 +88,7 @@ void main() {
     }
   }
 
-  for (final boyut in kV21Sizes) {
+  for (final boyut in kV21AllSizes) {
     testWidgets('günlük şerit ${v21SizeName(boyut)} taşmaz', (t) async {
       await kur(t, boyut);
       expect(t.takeException(), isNull);
@@ -97,7 +97,7 @@ void main() {
       await expectLater(
         find.byKey(const Key('ekran')),
         matchesGoldenFile('goldens/v21_home_daily_${v21SizeName(boyut)}.png'),
-        skip: v21GoldenSkipReason != null,
+        skip: v21GoldenSkipReason != null || !v21GoldenFor(boyut),
       );
       await t.pumpWidget(const SizedBox.shrink());
     });

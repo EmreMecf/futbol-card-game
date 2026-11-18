@@ -123,7 +123,7 @@ class _V21WalkoutScreenState extends State<V21WalkoutScreen> with SingleTickerPr
       body: LayoutBuilder(
         builder: (context, box) {
           final k = V21Scale.forSize(box.biggest).s;
-          final cardW = (230 * k).clamp(160.0, box.maxHeight * 0.36);
+          final cardW = (230 * k).clamp(96.0, (box.maxHeight * 0.36).clamp(96.0, 230.0 * k));
           return Semantics(
             label: _done
                 ? '${r.name} kart: ${card.fullName}, ${card.position.label}, ${card.power} güç. Devam etmek için dokun.'

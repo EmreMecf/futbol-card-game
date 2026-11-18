@@ -8,6 +8,7 @@ import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_game_panel.dart';
 import 'v21_player_card.dart';
+import 'v21_tap.dart';
 
 /// V2.1 KADRO SAHASI (referans Kadrom: 364×448, 3 px lacivert kenar, köşe 16).
 ///
@@ -139,7 +140,7 @@ class V21SquadPitch extends StatelessWidget {
               ? '${position.label} yuvası boş, kart seç'
               : '${position.label}: ${card.fullName}, güç ${card.power}, değiştirmek için dokun',
           excludeSemantics: true,
-          child: GestureDetector(
+          child: V21Tap(
             onTap: () => onTapSlot(slot),
             onLongPressStart: (_) => onHighlight(slot),
             onLongPressEnd: (_) => onHighlight(null),

@@ -136,14 +136,19 @@ class _BodyState extends State<_Body> {
           ],
         ),
         SizedBox(height: 12 * k),
-        V21SquadPitch(
-          cardAt: vm.cardAt,
-          links: vm.chemistry.links,
-          scale: k,
-          highlighted: _highlighted,
-          dragging: null,
-          onTapSlot: (s) => _pick(vm, s),
-          onHighlight: (s) => setState(() => _highlighted = s),
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: V21SquadPitch(
+              cardAt: vm.cardAt,
+              links: vm.chemistry.links,
+              scale: k,
+              highlighted: _highlighted,
+              dragging: null,
+              onTapSlot: (s) => _pick(vm, s),
+              onHighlight: (s) => setState(() => _highlighted = s),
+            ),
+          ),
         ),
         SizedBox(height: 14 * k),
         if (ev.blockingError != null) ...[

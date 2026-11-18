@@ -225,7 +225,7 @@ void main() {
   });
 
   group('duyarlı yerleşim', () {
-    for (final size in kV21Sizes) {
+    for (final size in kV21AllSizes) {
       testWidgets('${v21SizeName(size)} taşmaz', (t) async {
         await pump(t, size);
         expect(t.takeException(), isNull);
@@ -238,7 +238,7 @@ void main() {
           find.byKey(const Key('screen')),
           matchesGoldenFile('goldens/v21_collection_${v21SizeName(size)}.png'),
         );
-      }, skip: skipGolden != null);
+      }, skip: skipGolden != null || !v21GoldenFor(size));
     }
   });
 

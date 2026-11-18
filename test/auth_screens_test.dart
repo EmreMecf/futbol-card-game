@@ -13,6 +13,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import 'ui_v21/v21_test_support.dart';
+
 /// FAZ 3 — Giriş ve kayıt ekranları.
 void main() {
   // ==================================================================
@@ -66,8 +68,8 @@ void main() {
     vm = AuthViewModel(repo);
   });
 
-  Future<void> ac(WidgetTester tester, Widget ekran) async {
-    tester.view.physicalSize = const Size(390, 900);
+  Future<void> ac(WidgetTester tester, Widget ekran, {Size boyut = const Size(390, 900)}) async {
+    tester.view.physicalSize = boyut;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
@@ -96,6 +98,19 @@ void main() {
   }
 
   Finder alan(String etiket) => find.widgetWithText(TextFormField, etiket);
+
+  group('Giriş ve kayıt her ekran boyutunda taşmaz', () {
+    for (final boyut in kV21AllSizes) {
+      testWidgets('giriş ${v21SizeName(boyut)}', (tester) async {
+        await ac(tester, const LoginView(), boyut: boyut);
+        expect(tester.takeException(), isNull);
+      });
+      testWidgets('kayıt ${v21SizeName(boyut)}', (tester) async {
+        await ac(tester, const RegisterView(), boyut: boyut);
+        expect(tester.takeException(), isNull);
+      });
+    }
+  });
 
   group('LoginView', () {
     testWidgets('Türkçe karakterlerle ve taşmadan çizilir', (tester) async {

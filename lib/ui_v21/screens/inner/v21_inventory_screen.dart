@@ -88,7 +88,9 @@ class _Body extends StatelessWidget {
             LayoutBuilder(
               builder: (context, c) {
                 final gap = 12 * k;
-                final w = (c.maxWidth - gap) / 2;
+                // Telefonda 2 sütun; genişledikçe sütun artar
+                final columns = ((c.maxWidth + gap) / (178 * k + gap)).floor().clamp(2, 4);
+                final w = (c.maxWidth - gap * (columns - 1)) / columns;
                 return Wrap(
                   spacing: gap,
                   runSpacing: gap,

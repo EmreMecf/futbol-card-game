@@ -5,6 +5,7 @@ import '../foundation/v21_colors.dart';
 import '../foundation/v21_metrics.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_painters.dart';
+import 'v21_tap.dart';
 
 /// Alt menü maddesi
 @immutable
@@ -102,7 +103,7 @@ class V21BottomNavigation extends StatelessWidget {
             bottom: bottomInset,
             child: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: V21Metrics.maxContentWidth * k),
+                constraints: const BoxConstraints(maxWidth: V21Metrics.mediumContentWidth),
                 child: Row(
                   children: [
                     for (var i = 0; i < items.length; i++)
@@ -160,7 +161,7 @@ class _NavButton extends StatelessWidget {
       selected: active,
       label: item.label,
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: active

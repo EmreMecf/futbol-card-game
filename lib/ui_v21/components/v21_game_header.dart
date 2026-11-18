@@ -4,6 +4,7 @@ import '../foundation/v21_colors.dart';
 import '../foundation/v21_metrics.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_progress_bar.dart';
+import 'v21_tap.dart';
 
 /// V2.1 ORTAK ÜST BAŞLIK (referans 0..390 × 14..58).
 ///
@@ -43,7 +44,7 @@ class V21GameHeader extends StatelessWidget {
       button: onProfileTap != null,
       label: ['Profil: $username', if (level != null) '$levelMeaning $level'].join(', '),
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onProfileTap,
         behavior: HitTestBehavior.opaque,
         child: Row(

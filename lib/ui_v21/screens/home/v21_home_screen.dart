@@ -117,6 +117,57 @@ class _HomeContent extends StatelessWidget {
     // Ekonomi kapalıysa ya da sandık servisi yoksa şerit hiç çizilmez
     final showChests = chests != null && (env == null ? chests.isLoading : env.enabled);
 
+    // Yatay tablet ve masaüstü: solda kahraman ve düğme, sağda günlük + sandıklar
+    if (V21Scale.of(context).isExpanded) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(16 * k, 0, 16 * k, 16 * k),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const _Header(),
+            SizedBox(height: 8 * k),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Align(alignment: Alignment.centerLeft, child: _League()),
+                        SizedBox(height: 8 * k),
+                        Expanded(
+                          child: ClipRRect(borderRadius: BorderRadius.circular(16 * k), child: const _Hero()),
+                        ),
+                        SizedBox(height: 10 * k),
+                        _PlayButton(scale: k),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 16 * k),
+                  SizedBox(
+                    width: 350 * k,
+                    child: Center(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            V21DailyStrip(scale: k, sidePadding: 0),
+                            if (showChests) ...[SizedBox(height: 12 * k), _ChestRow(vm: chests, scale: k)],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final column = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

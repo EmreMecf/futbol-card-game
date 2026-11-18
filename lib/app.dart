@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ import 'core/router/app_router.dart';
 import 'core/router/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/viewmodel/auth_view_model.dart';
+import 'ui_v21/theme/v21_scroll_behavior.dart';
 
 /// Uygulamanin kok widget'i.
 ///
@@ -31,6 +33,8 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
   @override
   void initState() {
     super.initState();
+    // Webde davet adresi doğrudan rotaya gelir; uygulama bağlantısı eklentisi yok
+    if (kIsWeb) return;
     _inviteSubscription = AppLinks().uriLinkStream.listen((uri) {
       if (uri.scheme != 'futbolcard' || uri.pathSegments.length != 2 ||
           uri.pathSegments[0] != 'davet') {
@@ -67,12 +71,19 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
         ),
       ],
       child: MaterialApp.router(
-        title: 'Futbol Kart',
+        title: 'Futbol Card Arena',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         darkTheme: AppTheme.dark,
         themeMode: ThemeMode.dark,
         routerConfig: appRouter.router,
+        scrollBehavior: const V21ScrollBehavior(),
+        // Sistem yazı boyutu çok büyükse yerleşim taşmasın
+        builder: (context, child) => MediaQuery.withClampedTextScaling(
+          minScaleFactor: 0.9,
+          maxScaleFactor: 1.2,
+          child: child ?? const SizedBox.shrink(),
+        ),
 
         // Uygulama dili Turkce
         locale: const Locale('tr', 'TR'),

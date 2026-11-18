@@ -271,7 +271,9 @@ class _SlotGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, c) {
         final gap = 10 * k;
-        final w = (c.maxWidth - gap) / 2;
+        // Telefonda 2 sütun; genişledikçe 4 yuva yan yana
+        final columns = ((c.maxWidth + gap) / (178 * k + gap)).floor().clamp(2, 4);
+        final w = (c.maxWidth - gap * (columns - 1)) / columns;
         // Kart 178×184 tasarım ölçüsünde; genişliğe sığdırılır
         final s = w / 178;
         return Wrap(

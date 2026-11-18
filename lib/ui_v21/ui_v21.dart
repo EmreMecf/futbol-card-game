@@ -8,6 +8,8 @@ library;
 export 'animations/v21_card_motion.dart';
 export 'animations/v21_motion.dart';
 export 'components/v21_bottom_navigation.dart';
+export 'components/v21_side_navigation.dart';
+export 'components/v21_tap.dart';
 export 'components/v21_card_back.dart';
 export 'components/v21_celebration.dart';
 export 'components/v21_chest_slot.dart';

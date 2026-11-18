@@ -7,6 +7,7 @@ import '../utilities/v21_format.dart';
 import 'v21_chest_slot.dart';
 import 'v21_game_panel.dart';
 import 'v21_painters.dart';
+import 'v21_tap.dart';
 
 /// V2.1 ÖDÜL KARTI (referans Zafer "ÖDÜLLERİN": 108×116 karo).
 ///
@@ -213,7 +214,7 @@ class V21ChestCard extends StatelessWidget {
       button: onTap != null,
       label: semanticsLabel,
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: SizedBox(width: 178 * k, height: 184 * k, child: body),

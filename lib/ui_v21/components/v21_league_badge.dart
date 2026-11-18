@@ -6,6 +6,7 @@ import '../foundation/v21_typography.dart';
 import '../utilities/v21_format.dart';
 import 'v21_painters.dart';
 import 'v21_progress_bar.dart';
+import 'v21_tap.dart';
 
 /// V2.1 LİG ROZETİ (referans 62..315 × 72..143):
 /// mor kalkan ("M2") + altın panel (lig adı, puan, ilerleme).
@@ -162,7 +163,7 @@ class V21LeagueBadge extends StatelessWidget {
           ? 'Lig bilgisi yükleniyor'
           : ['Lig: $title', if (points != null) '${V21Format.thousands(points!)} puan', ?detail].join(', '),
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: SizedBox(

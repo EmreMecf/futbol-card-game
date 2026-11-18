@@ -5,6 +5,7 @@ import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_game_button.dart';
 import 'v21_game_panel.dart';
+import 'v21_tap.dart';
 
 /// Diyalog düğmesi tanımı
 @immutable
@@ -82,7 +83,8 @@ class V21GameDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
+      // Kısa pencerede diyalog kesilmez, kaydırılır
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 360),
@@ -246,7 +248,7 @@ class V21NetworkStatus extends StatelessWidget {
       button: onRetry != null,
       label: onRetry == null ? status.label : '${status.label}. Yeniden denemek için dokun',
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onRetry,
         behavior: HitTestBehavior.opaque,
         child: Container(

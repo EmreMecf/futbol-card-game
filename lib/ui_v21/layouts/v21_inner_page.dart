@@ -82,7 +82,8 @@ class V21InnerPage extends StatelessWidget {
       data: V21Theme.data(context),
       child: V21ScreenLayout(
         background: background,
-        bottomNavigation: showNavigation
+        // Geniş ekranda yan menü her iç sayfada kalır
+        bottomNavigation: showNavigation || V21Scale.of(context).isExpanded
             ? (context, sc) => V21HomeNav(currentRoute: route, highlightRoute: highlightRoute, scale: sc.s)
             : null,
         body: (context, sc) {

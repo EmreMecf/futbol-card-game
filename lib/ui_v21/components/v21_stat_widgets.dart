@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
+import 'v21_tap.dart';
 
 /// V2.1 İSTATİSTİK DAİRESİ (referans Kadrom: GÜÇ · KİMYA · KADRO, çap 70,
 /// 4 px lacivert halka, renkli dolgu, altında etiket).
@@ -115,7 +116,7 @@ class V21Toggle extends StatelessWidget {
       enabled: enabled,
       label: semanticsLabel,
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: enabled ? () => onChanged!(!value) : null,
         behavior: HitTestBehavior.opaque,
         child: Opacity(

@@ -4,6 +4,7 @@ import '../animations/v21_motion.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_match_widgets.dart';
+import 'v21_tap.dart';
 
 /// V2.1 SAYFA BAŞLIĞI (referans Koleksiyon: "KARTLARIM" 16..180 × 22..53,
 /// sağda kaynak hapı). Sekme sayfalarında geri düğmesi yok.
@@ -120,7 +121,7 @@ class V21FilterPill extends StatelessWidget {
       selected: selected,
       label: semanticsLabel ?? label,
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
@@ -184,7 +185,7 @@ class V21RarityChip extends StatelessWidget {
       selected: selected,
       label: semanticsLabel,
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: AnimatedScale(
@@ -320,7 +321,7 @@ class V21IconPill extends StatelessWidget {
       selected: selected,
       label: semanticsLabel,
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(

@@ -313,12 +313,12 @@ void main() {
       'arena_reconnect': (() => const V21ArenaScreen(matchId: 'm'), () => socket = _OfflineSocket()),
     };
     for (final e in screens.entries) {
-      for (final size in kV21Sizes) {
+      for (final size in kV21AllSizes) {
         testWidgets('${e.key} ${v21SizeName(size)}', (t) async {
           e.value.$2();
           await pump(t, e.value.$1(), size);
           expect(t.takeException(), isNull, reason: 'taşma olmamalı');
-          if (skipGolden == null) {
+          if (skipGolden == null && v21GoldenFor(size)) {
             await expectLater(
               find.byKey(const Key('screen')),
               matchesGoldenFile('goldens/v21_${e.key}_${v21SizeName(size)}.png'),
@@ -329,12 +329,12 @@ void main() {
       }
     }
 
-    for (final size in kV21Sizes) {
+    for (final size in kV21AllSizes) {
       testWidgets('matchmaking_search ${v21SizeName(size)}', (t) async {
         await pump(t, const V21MatchmakingScreen(), size);
         await tapText(t, 'RAKİP BUL');
         expect(t.takeException(), isNull, reason: 'taşma olmamalı');
-        if (skipGolden == null) {
+        if (skipGolden == null && v21GoldenFor(size)) {
           await expectLater(
             find.byKey(const Key('screen')),
             matchesGoldenFile('goldens/v21_matchmaking_search_${v21SizeName(size)}.png'),

@@ -327,12 +327,12 @@ void main() {
       'match_win': () => V21MatchResultView(result: _win, rewardDelta: _delta, onClose: () {}, onNewMatch: () {}),
     };
     for (final e in screens.entries) {
-      for (final size in kV21Sizes) {
+      for (final size in kV21AllSizes) {
         testWidgets('${e.key} ${v21SizeName(size)}', (t) async {
           await pump(t, e.value(), size: size, reduce: true);
           await t.pump(const Duration(milliseconds: 300));
           expect(t.takeException(), isNull, reason: 'taşma olmamalı');
-          if (skipGolden == null) {
+          if (skipGolden == null && v21GoldenFor(size)) {
             await expectLater(
               find.byKey(const Key('screen')),
               matchesGoldenFile('goldens/v21_${e.key}_${v21SizeName(size)}.png'),

@@ -5,10 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../core/di/injection.dart';
-import '../../../core/error/app_exception.dart';
-import '../../../core/network/api_client.dart';
-import '../../../core/router/app_routes.dart';
+import '../../core/di/injection.dart';
+import '../../core/error/app_exception.dart';
+import '../../core/network/api_client.dart';
+import '../../core/router/app_routes.dart';
+import '../../ui_v21/ui_v21.dart';
 import 'friend_room_api.dart';
 
 /// Sunucunun kural mesajını gösterir ('Oda dolu.' gibi); bağlantı hatası ayrıdır.
@@ -169,78 +170,123 @@ class _FriendRoomViewState extends State<FriendRoomView> {
     final isHost = room?['is_host'] == true;
     final myReady = isHost ? (room?['host_ready'] == true) : (room?['guest_ready'] == true);
     final guestPresent = room?['guest_name'] != null;
-    return Scaffold(
-      appBar: AppBar(title: const Text('ARKADAŞINLA OYNA')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 460),
-            child: ListView(
-              padding: const EdgeInsets.all(22),
-              children: [
-                const Icon(Icons.sports_soccer, size: 58),
-                const SizedBox(height: 14),
-                Text('Özel maç', textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 12),
-                const Text('Arkadaşını davet et. Dereceli puanın ve kartların etkilenmez.',
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 24),
-                if (_code == null) ...[
-                  FilledButton.icon(onPressed: _busy ? null : _create,
-                    icon: const Icon(Icons.add_link), label: const Text('DAVET OLUŞTUR')),
-                  const SizedBox(height: 18),
-                  TextField(controller: _codeController,
-                    decoration: const InputDecoration(labelText: 'Davet kodu',
-                      border: OutlineInputBorder()),
-                    textCapitalization: TextCapitalization.none),
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: _busy ? null : () => _join(_codeController.text),
-                    icon: const Icon(Icons.login), label: const Text('ODA KODUYLA KATIL')),
-                ] else ...[
-                  SelectableText('Davet kodu: ${_code!}', textAlign: TextAlign.center),
-                  const SizedBox(height: 12),
-                  FilledButton.icon(onPressed: _busy ? null : _share,
-                      icon: const Icon(Icons.share), label: const Text('BAĞLANTIYI PAYLAŞ')),
-                  TextButton.icon(
-                    onPressed: () async {
-                      await Clipboard.setData(ClipboardData(text: FriendRoomApi.inviteUrl(_code!)));
-                      if (context.mounted) {
-                         ScaffoldMessenger.of(context).showSnackBar(
-                           const SnackBar(content: Text('Davet bağlantısı kopyalandı')));
-                       }
-                    },
-                    icon: const Icon(Icons.copy), label: const Text('Bağlantıyı kopyala')),
-                  const Divider(height: 35),
-                  Text('Oda sahibi: ${room?['host_name'] ?? 'Bağlanıyor...'}'),
-                  Text('Rakip: ${room?['guest_name'] ?? 'Bekleniyor...'}'),
-                  const SizedBox(height: 12),
-                  Text('Sen: ${myReady ? 'Hazırsın' : 'Hazır değilsin'}'),
-                  const SizedBox(height: 10),
-                  if (status == 'waiting') ...[
-                    FilledButton(onPressed: _busy || (!isHost && !guestPresent) || myReady
-                        ? null : _ready, child: Text(myReady ? 'RAKİP BEKLENİYOR...' : 'HAZIRIM')),
-                    const SizedBox(height: 10),
-                    OutlinedButton(onPressed: _busy ? null : _leave,
-                      child: const Text('ODADAN ÇIK')),
-                  ] else ...[
-                    Text(status == 'expired' ? 'Davetin süresi doldu.' :
-                      status == 'cancelled' ? 'Oda kapatıldı.' : 'Oda durumu: $status'),
-                    OutlinedButton(onPressed: _leave, child: const Text('GERİ DÖN')),
+    return V21InnerPage(
+      title: 'ARKADAŞINLA OYNA',
+      route: AppRoutes.friends,
+      fallbackRoute: AppRoutes.home,
+      children: (context, k) {
+        final govde = V21Type.label(14 * k, weight: FontWeight.w700, height: 1.35);
+        Widget dugme(
+          String etiket,
+          VoidCallback? eylem, {
+          V21ButtonTone ton = V21ButtonTone.purple,
+          IconData? simge,
+        }) => Padding(
+          padding: EdgeInsets.only(bottom: 10 * k),
+          child: V21GameButton(
+            label: etiket,
+            tone: ton,
+            size: V21ButtonSize.medium,
+            leadingIcon: simge,
+            scale: k,
+            status: eylem == null ? V21ButtonStatus.disabled : V21ButtonStatus.normal,
+            onPressed: eylem,
+          ),
+        );
+        return [
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: V21GamePanel(
+                scale: k,
+                padding: EdgeInsets.all(16 * k),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Icon(Icons.sports_soccer_rounded, size: 52 * k, color: V21Colors.goldTop),
+                    SizedBox(height: 8 * k),
+                    Text('ÖZEL MAÇ', textAlign: TextAlign.center, style: V21Type.title(26 * k)),
+                    SizedBox(height: 6 * k),
+                    Text(
+                      'Arkadaşını davet et. Dereceli puanın ve kartların etkilenmez.',
+                      textAlign: TextAlign.center,
+                      style: V21Type.label(13 * k, weight: FontWeight.w700, color: V21Colors.textMuted, height: 1.35),
+                    ),
+                    SizedBox(height: 16 * k),
+                    if (_code == null) ...[
+                      dugme('DAVET OLUŞTUR', _busy ? null : _create, ton: V21ButtonTone.gold, simge: Icons.add_link_rounded),
+                      SizedBox(height: 6 * k),
+                      TextField(
+                        controller: _codeController,
+                        style: govde,
+                        decoration: const InputDecoration(labelText: 'Davet kodu', border: OutlineInputBorder()),
+                        textCapitalization: TextCapitalization.none,
+                      ),
+                      SizedBox(height: 10 * k),
+                      dugme(
+                        'ODA KODUYLA KATIL',
+                        _busy ? null : () => _join(_codeController.text),
+                        simge: Icons.login_rounded,
+                      ),
+                    ] else ...[
+                      SelectableText('Davet kodu: ${_code!}', textAlign: TextAlign.center, style: govde),
+                      SizedBox(height: 12 * k),
+                      dugme('BAĞLANTIYI PAYLAŞ', _busy ? null : _share, ton: V21ButtonTone.blue, simge: Icons.share_rounded),
+                      dugme('BAĞLANTIYI KOPYALA', () async {
+                        await Clipboard.setData(ClipboardData(text: FriendRoomApi.inviteUrl(_code!)));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Davet bağlantısı kopyalandı')),
+                          );
+                        }
+                      }, simge: Icons.copy_rounded),
+                      Divider(height: 24 * k, color: V21Colors.pillBorder),
+                      Text('Oda sahibi: ${room?['host_name'] ?? 'Bağlanıyor...'}', style: govde),
+                      Text('Rakip: ${room?['guest_name'] ?? 'Bekleniyor...'}', style: govde),
+                      SizedBox(height: 6 * k),
+                      Text('Sen: ${myReady ? 'Hazırsın' : 'Hazır değilsin'}', style: govde),
+                      SizedBox(height: 12 * k),
+                      if (status == 'waiting') ...[
+                        dugme(
+                          myReady ? 'RAKİP BEKLENİYOR...' : 'HAZIRIM',
+                          _busy || (!isHost && !guestPresent) || myReady ? null : _ready,
+                          ton: V21ButtonTone.green,
+                        ),
+                        dugme('ODADAN ÇIK', _busy ? null : _leave),
+                      ] else ...[
+                        Text(
+                          status == 'expired'
+                              ? 'Davetin süresi doldu.'
+                              : status == 'cancelled'
+                              ? 'Oda kapatıldı.'
+                              : 'Oda durumu: $status',
+                          style: govde,
+                        ),
+                        SizedBox(height: 10 * k),
+                        dugme('GERİ DÖN', _leave),
+                      ],
+                    ],
+                    if (_busy)
+                      Padding(
+                        padding: EdgeInsets.all(12 * k),
+                        child: const Center(child: CircularProgressIndicator(color: V21Colors.goldTop)),
+                      ),
+                    if (_error != null)
+                      Padding(
+                        padding: EdgeInsets.only(top: 8 * k),
+                        child: Text(
+                          _error!,
+                          textAlign: TextAlign.center,
+                          style: V21Type.label(13 * k, weight: FontWeight.w800, color: const Color(0xFFFFB27A)),
+                        ),
+                      ),
                   ],
-                ],
-                if (_busy) const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: CircularProgressIndicator())),
-                if (_error != null) Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text(_error!, style: const TextStyle(color: Colors.orangeAccent))),
-              ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        ];
+      },
     );
   }
 }

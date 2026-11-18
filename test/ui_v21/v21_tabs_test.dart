@@ -341,11 +341,11 @@ void main() {
       'deck': () => const V21DeckScreen(),
     };
     for (final e in screens.entries) {
-      for (final size in kV21Sizes) {
+      for (final size in kV21AllSizes) {
         testWidgets('${e.key} ${v21SizeName(size)}', (t) async {
           await pump(t, e.value(), size);
           expect(t.takeException(), isNull, reason: 'taşma olmamalı');
-          if (skipGolden == null) {
+          if (skipGolden == null && v21GoldenFor(size)) {
             await expectLater(
               find.byKey(const Key('screen')),
               matchesGoldenFile('goldens/v21_${e.key}_${v21SizeName(size)}.png'),

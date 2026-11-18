@@ -1,12 +1,12 @@
 {
-    "name": "Futbol Card",
-    "short_name": "Futbol Card",
+    "name": "Futbol Card Arena",
+    "short_name": "Card Arena",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#2A0A63",
+    "background_color": "#0F1130",
     "theme_color": "#2A0A63",
-    "description": "Futbol Card: gercek zamanli futbol kart strateji oyunu.",
-    "orientation": "portrait-primary",
+    "description": "Futbol Card Arena: gerçek zamanlı futbol kart strateji oyunu.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

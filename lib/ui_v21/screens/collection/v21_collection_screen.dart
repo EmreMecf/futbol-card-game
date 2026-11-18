@@ -303,8 +303,8 @@ class _Content extends StatelessWidget {
       builder: (context, c) {
         final side = 22 * k;
         final gap = 18 * k;
-        // Telefon/tablette 2 sütun (referans); içerik genişse 3
-        final columns = c.maxWidth >= 600 ? 3 : 2;
+        // Telefonda 2 sütun (referans); genişledikçe sütun artar, kart büyümez
+        final columns = ((c.maxWidth - side * 2 + gap) / (168 * k + gap)).floor().clamp(2, 6);
         final cardW = (c.maxWidth - side * 2 - gap * (columns - 1)) / columns;
         return RefreshIndicator(
           color: V21Colors.goldTop,

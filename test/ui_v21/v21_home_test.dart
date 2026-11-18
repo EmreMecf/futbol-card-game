@@ -139,7 +139,7 @@ void main() {
   });
 
   group('V2.1 ana sayfa: duyarlı yerleşim', () {
-    for (final size in kV21Sizes) {
+    for (final size in kV21AllSizes) {
       testWidgets('${v21SizeName(size)} taşmaz', (t) async {
         await pumpHome(t, size);
         expect(t.takeException(), isNull, reason: 'RenderFlex taşması olmamalı');
@@ -147,7 +147,7 @@ void main() {
         final button = t.getRect(find.byType(V21GameButton));
         expect(button.bottom, lessThanOrEqualTo(size.height));
         expect(button.height, greaterThanOrEqualTo(48), reason: 'dokunma hedefi');
-        expect(find.byType(V21BottomNavigation), findsOneWidget);
+        expect(find.byType(V21Scale.forSize(size).isExpanded ? V21SideNavigation : V21BottomNavigation), findsOneWidget);
         await unmount(t);
       });
 
@@ -158,7 +158,7 @@ void main() {
           matchesGoldenFile('goldens/v21_home_${v21SizeName(size)}.png'),
         );
         await unmount(t);
-      }, skip: skipGolden != null);
+      }, skip: skipGolden != null || !v21GoldenFor(size));
     }
   });
 

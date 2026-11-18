@@ -8,19 +8,11 @@
         android:label="Futbol Card"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <!-- Yalnız telefon ve tablet, her ikisinde de dikey. Android 16 (hedef SDK 36)
-             büyük ekranda (tablet) yön kilidini yok sayar; bu özellik o sürüm için
-             resmi geçici muafiyettir. Hedef SDK 37+ olunca geçersizdir: o zaman
-             tablette yatay düzen de desteklenmeli. -->
-        <property
-            android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
-            android:value="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
-            android:screenOrientation="sensorPortrait"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"

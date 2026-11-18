@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -174,45 +176,76 @@ class _BodyState extends State<_Body> {
         ],
       );
     } else {
-      content = ListView(
-        padding: EdgeInsets.fromLTRB(12 * k, 0, 12 * k, 20 * k),
-        children: [
-          // Ekonomi V2 (032): koleksiyon formasyonu kuramıyorsa acil kadro
-          if (!vm.isComplete) EmergencySquadBanner(onClaimed: vm.load),
-          V21SquadPitch(
-            cardAt: vm.cardAt,
-            links: vm.links,
-            scale: k,
-            highlighted: _dragging ?? _highlighted,
-            dragging: _dragging,
-            onTapSlot: (s) => _pick(vm, s),
-            onHighlight: (s) => setState(() => _highlighted = s),
-            onDrag: (s) => setState(() => _dragging = s),
-            onDrop: (from, to) {
-              vm.swapSlots(from, to);
-              GameFeedback.haptic(HapticStrength.light);
-            },
-          ),
-          SizedBox(height: 18 * k),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              V21StatOrb(value: '${vm.averagePower}', label: 'GÜÇ', color: V21StatOrb.red, scale: k),
-              V21StatOrb(value: '${vm.chemistry.total}', label: 'KİMYA', color: V21StatOrb.green, scale: k),
-              V21StatOrb(
-                value: '${vm.totalSelected}/${GameRules.squadSize}',
-                label: 'KADRO',
-                color: V21StatOrb.blue,
-                scale: k,
-              ),
-            ],
-          ),
-          SizedBox(height: 14 * k),
-          _HintPanel(vm: vm, scale: k),
-          SizedBox(height: 12 * k),
-          _Actions(vm: vm, scale: k, onSave: () => _save(vm)),
-        ],
+      final pitch = V21SquadPitch(
+        cardAt: vm.cardAt,
+        links: vm.links,
+        scale: k,
+        highlighted: _dragging ?? _highlighted,
+        dragging: _dragging,
+        onTapSlot: (s) => _pick(vm, s),
+        onHighlight: (s) => setState(() => _highlighted = s),
+        onDrag: (s) => setState(() => _dragging = s),
+        onDrop: (from, to) {
+          vm.swapSlots(from, to);
+          GameFeedback.haptic(HapticStrength.light);
+        },
       );
+      final details = <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            V21StatOrb(value: '${vm.averagePower}', label: 'GÜÇ', color: V21StatOrb.red, scale: k),
+            V21StatOrb(value: '${vm.chemistry.total}', label: 'KİMYA', color: V21StatOrb.green, scale: k),
+            V21StatOrb(
+              value: '${vm.totalSelected}/${GameRules.squadSize}',
+              label: 'KADRO',
+              color: V21StatOrb.blue,
+              scale: k,
+            ),
+          ],
+        ),
+        SizedBox(height: 14 * k),
+        _HintPanel(vm: vm, scale: k),
+        SizedBox(height: 12 * k),
+        _Actions(vm: vm, scale: k, onSave: () => _save(vm)),
+      ];
+      // Ekonomi V2 (032): koleksiyon formasyonu kuramıyorsa acil kadro
+      final banner = [if (!vm.isComplete) EmergencySquadBanner(onClaimed: vm.load)];
+      if (V21Scale.of(context).isExpanded) {
+        // Yatay tablet ve masaüstü: saha pencereye sığar, bilgiler yanında
+        content = LayoutBuilder(
+          builder: (context, box) {
+            final byHeight = (box.maxHeight - 24 * k) * 364 / 448;
+            final pitchWidth = math.min(box.maxWidth * 0.6, math.max(byHeight, 300.0));
+            return ListView(
+              padding: EdgeInsets.fromLTRB(12 * k, 0, 12 * k, 20 * k),
+              children: [
+                ...banner,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: pitchWidth, child: pitch),
+                    SizedBox(width: 16 * k),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: details)),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        content = ListView(
+          padding: EdgeInsets.fromLTRB(12 * k, 0, 12 * k, 20 * k),
+          children: [
+            ...banner,
+            Center(
+              child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 560), child: pitch),
+            ),
+            SizedBox(height: 18 * k),
+            ...details,
+          ],
+        );
+      }
     }
 
     return Column(

@@ -5,6 +5,7 @@ import '../foundation/v21_metrics.dart';
 import '../foundation/v21_typography.dart';
 import '../utilities/v21_format.dart';
 import 'v21_painters.dart';
+import 'v21_tap.dart';
 
 /// Kaynak hapı (altın, elmas, kart sayısı…). Referans (268..388 × 18..54).
 ///
@@ -60,7 +61,7 @@ class V21ResourcePill extends StatelessWidget {
       label:
           semanticsLabel ?? (this.text == null && value == null ? '$semanticsName yükleniyor' : '$text $semanticsName'),
       excludeSemantics: true,
-      child: GestureDetector(
+      child: V21Tap(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: Container(

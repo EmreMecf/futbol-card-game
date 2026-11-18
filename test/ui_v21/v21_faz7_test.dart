@@ -241,11 +241,11 @@ void main() {
       'splash': (() => const Scaffold(body: V21SplashArt(progress: 1)), false),
     };
     for (final e in screens.entries) {
-      for (final size in kV21Sizes) {
+      for (final size in kV21AllSizes) {
         testWidgets('${e.key} ${v21SizeName(size)}', (t) async {
           await pump(t, e.value.$1(), size, reduced: e.value.$2);
           expect(t.takeException(), isNull, reason: 'taşma olmamalı');
-          if (skipGolden == null) {
+          if (skipGolden == null && v21GoldenFor(size)) {
             await expectLater(
               find.byKey(const Key('screen')),
               matchesGoldenFile('goldens/v21_${e.key}_${v21SizeName(size)}.png'),
@@ -256,7 +256,7 @@ void main() {
       }
     }
 
-    for (final size in kV21Sizes) {
+    for (final size in kV21AllSizes) {
       testWidgets('squad_warning ${v21SizeName(size)}', (t) async {
         await pump(
           t,
@@ -284,7 +284,7 @@ void main() {
         await t.pump();
         await t.pump(const Duration(milliseconds: 600));
         expect(t.takeException(), isNull, reason: 'taşma olmamalı');
-        if (skipGolden == null) {
+        if (skipGolden == null && v21GoldenFor(size)) {
           await expectLater(
             find.byType(MaterialApp),
             matchesGoldenFile('goldens/v21_squad_warning_${v21SizeName(size)}.png'),
