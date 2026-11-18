@@ -5,6 +5,8 @@ import 'package:futbol_card_server/utils/api_response.dart';
 import 'package:futbol_card_server/utils/middlewares.dart';
 import 'package:futbol_card_server/utils/security.dart';
 import 'package:shelf/shelf.dart';
+import 'package:futbol_card_server/routes/friend_routes.dart';
+import 'package:futbol_card_server/routes/match_routes.dart';
 import 'package:test/test.dart';
 
 /// FAZ 7 — Güvenlik ara katmanları.
@@ -171,6 +173,22 @@ void main() {
       final c = await h(Request('GET', Uri.parse('http://localhost/api/x')));
       expect(c.statusCode, 500);
       expect(await c.readAsString(), isNot(contains('users')));
+    });
+  });
+
+  group('Arkadaş maçı', () {
+    test('rakip adı yalnız antrenman ve öğreticide gizlenir', () {
+      expect(opponentNameHidden('training'), isTrue);
+      expect(opponentNameHidden('tutorial'), isTrue);
+      expect(opponentNameHidden('friendly'), isFalse);
+      expect(opponentNameHidden('ranked'), isFalse);
+    });
+
+    test('davet sayfası oyunu açan bağlantıyı içerir', () {
+      final kod = 'a' * 30;
+      final sayfa = inviteLandingPage(kod);
+      expect(sayfa, contains('futbolcard:///davet/$kod'));
+      expect(sayfa, contains('Oyunda aç'));
     });
   });
 

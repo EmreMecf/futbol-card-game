@@ -489,7 +489,7 @@ class _EgilebilirKartState extends State<_EgilebilirKart>
   void initState() {
     super.initState();
     _kontrolcu = CardTiltController();
-    // Masaüstü ve web'de sessizce devre dışı kalır
+    // Android/iOS dışında (bilgisayardaki test) sessizce devre dışı kalır
     _kontrolcu.enableGyroscope();
   }
 

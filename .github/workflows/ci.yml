@@ -167,6 +167,9 @@ jobs:
           SINIR=042 bash scripts/gecmis-veri-kontrolu.sh
           SINIR=043 bash scripts/gecmis-veri-kontrolu.sh
           SINIR=044 bash scripts/gecmis-veri-kontrolu.sh
+          SINIR=046 bash scripts/gecmis-veri-kontrolu.sh
+          SINIR=047 bash scripts/gecmis-veri-kontrolu.sh
+          SINIR=048 bash scripts/gecmis-veri-kontrolu.sh
       # 039: ayni maci ayni anda ilerleten oturumlar turu iki kez cozmemeli
       - name: Es zamanli duello yaris testi
         run: bash scripts/esz-zamanli-yaris-testi.sh
@@ -323,7 +326,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: flutter build apk --release --dart-define=API_BASE_URL=https://futbol-card-staging-api-lzq3.onrender.com
 
-      # main'e push: staging APK (indirilebilir); PR'lar: yalniz derlenebilirlik
+      # PR'lar: yalniz derlenebilirlik
       - name: Release APK derlenebilirlik (PR ve diger dallar)
         if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') }}
         run: flutter build apk --release --dart-define=API_BASE_URL=https://ci.example.invalid

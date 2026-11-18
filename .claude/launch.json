@@ -2,20 +2,6 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "futbol-kart-web",
-      "runtimeExecutable": "flutter",
-      "runtimeArgs": [
-        "run",
-        "-d",
-        "web-server",
-        "--web-port",
-        "5580",
-        "--web-hostname",
-        "127.0.0.1"
-      ],
-      "port": 5580
-    },
-    {
       "name": "tasarim-referansi",
       "runtimeExecutable": "python",
       "runtimeArgs": [
@@ -30,18 +16,10 @@
       "port": 5590
     },
     {
-      "name": "futbol-kart-yayin",
-      "runtimeExecutable": "python",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "5581",
-        "--bind",
-        "127.0.0.1",
-        "--directory",
-        "build/web"
-      ],
-      "port": 5581
+      "name": "v21-referans",
+      "runtimeExecutable": "dart",
+      "runtimeArgs": ["run", "tool/v21/serve_reference.dart", "5591"],
+      "port": 5591
     }
   ]
 }

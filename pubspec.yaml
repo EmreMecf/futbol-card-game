@@ -54,6 +54,8 @@ dependencies:
   flutter_secure_storage: ^11.0.0
   web_socket_channel: ^3.0.3
   sensors_plus: ^7.1.0
+  share_plus: ^13.3.1
+  app_links: ^7.2.2
 
 dev_dependencies:
   flutter_test:
@@ -112,6 +114,10 @@ flutter:
     - assets/icons/
     - assets/animations/
     - assets/fonts/
+    # V2.1 arayüz görselleri (lib/ui_v21). assets/v21/screens/ tam ekran
+    # referans PNG'leridir; uygulamaya PAKETLENMEZ.
+    - assets/v21/illustrations/
+    - assets/v21/icons/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

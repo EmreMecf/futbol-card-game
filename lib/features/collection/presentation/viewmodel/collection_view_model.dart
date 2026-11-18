@@ -191,6 +191,34 @@ class CollectionViewModel extends BaseViewModel {
     }
   }
 
+  // ------------------------------------------------------------------
+  // KATALOG İLERLEMESİ (V2.1 "12 / 100")
+  // ------------------------------------------------------------------
+  int? _katalogBoyutu;
+
+  /// Oyundaki toplam farklı kart sayısı (sunucu kataloğu). Bilinmiyorsa null.
+  int? get catalogSize => _katalogBoyutu;
+
+  /// Koleksiyondaki FARKLI kart sayısı (kopyalar bir sayılır)
+  int get uniqueOwned => _tumKartlar.map((k) => k.cardId).toSet().length;
+
+  /// Kataloğun ne kadarı toplandı (0..1). Katalog bilinmiyorsa null.
+  double? get catalogProgress {
+    final n = _katalogBoyutu;
+    if (n == null || n <= 0) return null;
+    return (uniqueOwned / n).clamp(0.0, 1.0);
+  }
+
+  /// Katalog boyutunu yükler. Başarısız olursa sessizce bilinmiyor kalır
+  /// (ekran sayıyı uydurmaz, yalnız sahip olunanı gösterir).
+  Future<void> loadCatalogSize() async {
+    final katalog = await run(() => _repository.fetchCatalog(), showLoading: false);
+    if (katalog != null) {
+      _katalogBoyutu = katalog.map((k) => k.cardId).toSet().length;
+      safeNotify();
+    }
+  }
+
   /// SADECE GELISTIRME: katalogdaki tum kartlari hesaba ekler
   Future<bool> devGrantAllCards() async {
     final sonuc = await run(() => _repository.devGrantAllCards());

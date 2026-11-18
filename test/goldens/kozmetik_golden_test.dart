@@ -177,7 +177,7 @@ void main() {
   testWidgets('35 zafer: havai fişek konfetinin yerine geçer', (t) async {
     await ac(
       t,
-      MatchResultView(
+      MatchResultView(forceLegacy: true,
         result: const MatchResultSummary(matchId: 'm', didIWin: true, myScore: 7, opponentScore: 4),
         rewardDelta: const MatchRewardDelta(coins: 100, rating: 25, protectionSlots: 1),
         onClose: () {},
@@ -195,7 +195,7 @@ void main() {
     await t.pumpWidget(const SizedBox());
     await ac(
       t,
-      MatchResultView(
+      MatchResultView(forceLegacy: true,
         result: const MatchResultSummary(matchId: 'm', didIWin: true, myScore: 7, opponentScore: 4),
         rewardDelta: const MatchRewardDelta(coins: 100, rating: 25, protectionSlots: 1),
         onClose: () {},

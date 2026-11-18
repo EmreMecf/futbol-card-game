@@ -158,6 +158,9 @@ abstract class MatchState with _$MatchState {
     /// 042: öğretici adımı (1 mevki, 2 gizli seçim, 3 taktik); öğretici
     /// maçı değilse null.
     int? tutorialStep,
+
+    /// Maçın kural sürümünde kart el değiştirir mi? null: eski sunucu.
+    bool? cardTransfer,
   }) = _MatchState;
 
   factory MatchState.fromJson(Map<String, dynamic> json) =>
@@ -168,6 +171,9 @@ abstract class MatchState with _$MatchState {
 
   /// Antrenman maçı mı? (ödül ve puan yok)
   bool get isTraining => mode == 'training';
+
+  /// 047: arkadaş maçı: puan, ödül ve kart transferi yok.
+  bool get isFriendly => mode == 'friendly';
 
   /// Öğretici maçı mı? (ödül ve puan yok; 3. adım bitince Gümüş sandık)
   bool get isTutorial => mode == 'tutorial';

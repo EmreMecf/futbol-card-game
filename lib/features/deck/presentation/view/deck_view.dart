@@ -9,6 +9,8 @@ import '../../../../core/theme/ref_tokens.dart';
 import '../../../../shared/widgets/app_shell.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../../ui_v21/screens/deck/v21_deck_screen.dart';
+import '../../../../ui_v21/v21_flags.dart';
 import '../../../chests/presentation/widgets/emergency_squad_banner.dart';
 import '../viewmodel/deck_view_model.dart';
 import '../widgets/card_picker_sheet.dart';
@@ -30,10 +32,16 @@ import '../widgets/formation_pitch.dart';
 ///   * basılı tut → o kartın kimya bağları vurgulanır
 ///   * kaydedilmemiş değişiklikle çıkışta onay
 class DeckView extends StatelessWidget {
-  const DeckView({super.key});
+  const DeckView({super.key, this.forceLegacy = false});
+
+  /// Eski (Ref) kadro ekranını zorla (testler ve karşılaştırma)
+  final bool forceLegacy;
 
   @override
   Widget build(BuildContext context) {
+    // V2.1 Kadrom. Geçiş burada, rota dosyasında değil: açık PR #6
+    // app_router.dart'ta kadro rotasının hemen yanını değiştiriyor.
+    if (kV21Deck && !forceLegacy) return const V21DeckScreen();
     return ChangeNotifierProvider<DeckViewModel>(
       create: (_) => getIt<DeckViewModel>()..load(),
       child: const _DeckBody(),

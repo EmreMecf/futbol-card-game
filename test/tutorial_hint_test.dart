@@ -52,7 +52,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SingleChildScrollView(child: TutorialHint(state: _durum(adim: 3, asama: 'pick')))),
+      home: Scaffold(body: SingleChildScrollView(child: TutorialHint(state: _durum(adim: 3, asama: 'pick'), forceLegacy: true))),
     ));
     expect(find.textContaining('ÖĞRETİCİ 3/3'), findsOneWidget);
     expect(tester.takeException(), isNull);

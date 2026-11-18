@@ -115,7 +115,7 @@ void main() {
   final ekranlar = <String, Widget Function()>{
     'Ana sayfa': () => const HomeView(),
     'Koleksiyon': () => const CollectionView(),
-    'Kadro': () => const DeckView(),
+    'Kadro': () => const DeckView(forceLegacy: true),
     'Maç hazırlığı': () => const MatchmakingView(),
     'Arena (maç)': () => const MatchView(matchId: 'm'),
     'Mağaza': () => const StoreView(),

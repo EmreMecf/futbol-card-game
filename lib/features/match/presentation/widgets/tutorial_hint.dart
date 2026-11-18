@@ -3,6 +3,8 @@ import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/theme/ref_tokens.dart';
 import '../../../../shared/widgets/ref/ref_ui.dart';
+import '../../../../ui_v21/screens/match/v21_tutorial_hint.dart';
+import '../../../../ui_v21/v21_flags.dart';
 
 /// 042: ÖĞRETİCİ İPUCU — öğretici maçında başlığın altında, adıma ve
 /// aşamaya göre tek kısa açıklama.
@@ -13,7 +15,9 @@ import '../../../../shared/widgets/ref/ref_ui.dart';
 /// 021, maliyetler sürüm 7: pres 3, kontra 2, duvar 2 enerji).
 class TutorialHint extends StatelessWidget {
   final MatchState state;
-  const TutorialHint({super.key, required this.state});
+  /// Eski Ref görünümünü zorlar (eski testler)
+  final bool forceLegacy;
+  const TutorialHint({super.key, required this.state, this.forceLegacy = false});
 
   /// (başlık, açıklama) — test edilebilsin diye ayrı
   static (String, String) textFor(MatchState s) {
@@ -44,6 +48,7 @@ class TutorialHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (kV21Tutorial && !forceLegacy) return V21TutorialHint(state: state, textFor: textFor);
     final (baslik, aciklama) = textFor(state);
     return RefCardPanel(
       children: [

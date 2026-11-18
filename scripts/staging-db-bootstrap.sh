@@ -1,10 +1,10 @@
 #!/bin/sh
-# Staging-only database bootstrap. NEVER run against production.
+# Yalnız staging veritabanı kurulumu. ÜRETİMDE ASLA çalıştırılmaz.
 set -eu
 export LC_ALL=C
 
-# Explicit one-shot V3 PvP flag activation; staging database only.
-# Do not enable in production or keep this switch permanently on.
+# V3 PvP anahtarlarını bir kez açar; yalnız staging veritabanında.
+# Üretimde açılmaz, staging'de de açık bırakılmaz.
 if [ "${STAGING_ENABLE_V3_ONCE:-false}" = "true" ]; then
   if [ "${DB_NAME:-}" != "futbol_card_staging" ] || [ "${ENVIRONMENT:-}" != "production" ]; then
     echo "[STAGING V3] ABORT: invalid database/environment" >&2
@@ -48,7 +48,7 @@ export PGCONNECT_TIMEOUT=15
 PSQL="psql -X -v ON_ERROR_STOP=1 -q"
 
 echo "[STAGING INIT] Verifying isolated staging database..."
-# Never initialize on top of an untracked, nonempty schema.
+# Geçmişi bilinmeyen dolu bir şemanın üzerine asla kurulum yapılmaz.
 has_history=$(psql -X -v ON_ERROR_STOP=1 -tAc "SELECT CASE WHEN to_regclass('public.staging_schema_migrations') IS NULL THEN 'no' ELSE 'yes' END")
 if [ "$has_history" = "no" ]; then
   tables=$(psql -X -v ON_ERROR_STOP=1 -tAc "SELECT COUNT(*) FROM pg_catalog.pg_tables WHERE schemaname='public'")
@@ -72,20 +72,19 @@ for file in /app/migrations/[0-9][0-9][0-9]_*.sql; do
     fi
   else
     echo "[STAGING INIT] Applying $name"
-    # -1 wraps the SQL migration AND its history record in one transaction.
+    # -1: migration ve geçmiş kaydı tek işlemde yazılır.
     psql -X -v ON_ERROR_STOP=1 -q -1 -f "$file" -c "INSERT INTO public.staging_schema_migrations(filename, sha256) VALUES ('$name', '$hash')"
   fi
   count=$((count+1))
 done
 
-# Migration numbering intentionally skips 020. Verify the latest expected
-# migration is present and recorded, rather than assuming count == 044.
-if [ "$count" -lt 43 ]; then
-  echo "[STAGING INIT] ABORT: expected at least 43 migration files, saw $count" >&2
+# Numaralar 020 ve 045'i atlar: dosya sayısı yerine son migration'ın kaydı denetlenir.
+if [ "$count" -lt 46 ]; then
+  echo "[STAGING INIT] ABORT: expected at least 46 migration files, saw $count" >&2
   exit 1
 fi
-psql -X -v ON_ERROR_STOP=1 -tAc "SELECT EXISTS (SELECT 1 FROM public.staging_schema_migrations WHERE filename='044_daily_loop.sql')::text" | grep -qx true || {
-  echo "[STAGING INIT] ABORT: latest migration 044 not recorded" >&2
+psql -X -v ON_ERROR_STOP=1 -tAc "SELECT EXISTS (SELECT 1 FROM public.staging_schema_migrations WHERE filename='048_matchmaking_friend_fixes.sql')::text" | grep -qx true || {
+  echo "[STAGING INIT] ABORT: latest migration 048 not recorded" >&2
   exit 1
 }
 
@@ -93,5 +92,19 @@ psql -X -v ON_ERROR_STOP=1 -tAc "SELECT (to_regprocedure('public.advance_simulta
   echo "[STAGING INIT] ABORT: critical PvP schema/function missing" >&2
   exit 1
 }
+# Yalnız staging: migration'lar doğrulandıktan sonra uyarlanabilir eşleştirmeyi açar.
+if [ "${STAGING_ADAPTIVE_MATCHMAKING:-false}" = "true" ]; then
+  if [ "${DB_NAME:-}" != "futbol_card_staging" ] || [ "${ENVIRONMENT:-}" != "production" ]; then
+    echo "[STAGING MATCHMAKING] ABORT: invalid isolated staging database" >&2
+    exit 1
+  fi
+  psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE matchmaking_settings SET mode='adaptive' WHERE id=1 AND mode <> 'adaptive'"
+  psql -X -v ON_ERROR_STOP=1 -tAc "SELECT mode FROM matchmaking_settings WHERE id=1" | grep -qx adaptive || {
+    echo "[STAGING MATCHMAKING] ABORT: adaptive mode not activated" >&2
+    exit 1
+  }
+  echo "[STAGING MATCHMAKING] Adaptive mode enabled (staging only)"
+fi
+
 echo "[STAGING INIT] Schema ready: $count migrations verified. Starting Dart API."
 exec /app/futbol-card-server

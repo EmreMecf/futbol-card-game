@@ -4,6 +4,8 @@ import '../constants/app_colors.dart';
 import 'app_tokens.dart';
 import 'app_typography.dart';
 import 'ref_tokens.dart';
+import '../../ui_v21/animations/v21_card_motion.dart';
+import '../../ui_v21/v21_flags.dart';
 
 /// Uygulamanin gorsel kimligi.
 /// Oyun karanlik tema uzerine kuruludur (stadyum gece atmosferi).
@@ -15,6 +17,8 @@ class AppTheme {
 
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.background,
+      // V2.1: bütün rotalarda aynı ekran geçişi (animasyon azaltmaya uyar)
+      pageTransitionsTheme: kV21Transitions ? V21PageTransitionsBuilder.theme : base.pageTransitionsTheme,
 
       // ThemeData.copyWith fontFamily KABUL ETMEZ (sadece yapici alir).
       // Bu yuzden aile, metin olceginin her satirina tek tek yaziliyor.

@@ -95,7 +95,7 @@ void main() {
     direction: 'promoted',
   );
 
-  Widget macSonucu() => MatchResultView(
+  Widget macSonucu() => MatchResultView(forceLegacy: true,
         result: MatchResultSummary(
           matchId: 'm',
           didIWin: true,

@@ -406,7 +406,7 @@ Future<Map<String, dynamic>> _macModuEkle(
   sonuc['tutorial_step'] = satir?['tutorial_step'];
   // Maçın kural sürümünde kart el değiştirir mi? (sonuç ekranı metni için)
   sonuc['card_transfer'] = satir?['card_transfer'];
-  if (sonuc['mode'] != 'ranked' && sonuc['opponent'] is Map) {
+  if (opponentNameHidden(sonuc['mode'].toString()) && sonuc['opponent'] is Map) {
     final rakip = Map<String, dynamic>.from(sonuc['opponent'] as Map);
     rakip['username'] = 'Bot';
     rakip['avatar_url'] = null;
@@ -414,3 +414,7 @@ Future<Map<String, dynamic>> _macModuEkle(
   }
   return sonuc;
 }
+
+/// Rakibin adı gizlenip "Bot" mu yazılır? Antrenman ve öğreticide rakip
+/// gerçekten bottur; dereceli ve arkadaş maçında gerçek ad görünür.
+bool opponentNameHidden(String mode) => mode == 'training' || mode == 'tutorial';

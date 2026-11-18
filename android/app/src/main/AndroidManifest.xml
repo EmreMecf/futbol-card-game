@@ -8,11 +8,19 @@
         android:label="Futbol Card"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Yalnız telefon ve tablet, her ikisinde de dikey. Android 16 (hedef SDK 36)
+             büyük ekranda (tablet) yön kilidini yok sayar; bu özellik o sürüm için
+             resmi geçici muafiyettir. Hedef SDK 37+ olunca geçersizdir: o zaman
+             tablette yatay düzen de desteklenmeli. -->
+        <property
+            android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+            android:value="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
+            android:screenOrientation="sensorPortrait"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
@@ -21,6 +29,7 @@
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
                  to determine the Window background behind the Flutter UI. -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
@@ -28,6 +37,13 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Private match invitations. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="futbolcard"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

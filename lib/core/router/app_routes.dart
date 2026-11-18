@@ -12,6 +12,9 @@ class AppRoutes {
   static const String collection = '/koleksiyon';
   static const String deck = '/kadro';
   static const String matchmaking = '/eslesme';
+  static const String friends = '/arkadaslar';
+  static const String friendInvite = '/davet';
+  static String friendInviteWithCode(String code) => '$friendInvite/$code';
   static const String match = '/mac';
   static const String profile = '/profil';
   static const String settings = '/ayarlar';
