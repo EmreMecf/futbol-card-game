@@ -1,95 +1,91 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import '../../ui_v21.dart';
 
-/// V2.1 AÇILIŞ GÖRSELİ (giriş referansının üst yarısı; login.png).
+/// V2.1 YÜKLEME EKRANI: tam ekran görsel + altta ilerleme çubuğu.
 ///
-///          FUTBOL
-///        CARD ARENA        ← logo kodla çizilir
-///     (üç kahraman, stadyum)
-///            ◌             ← yükleniyor
+/// Telefonda görsel ekranı doldurur (yanlardan az kırpılır). Tablet gibi
+/// görselden geniş ekranlarda logo ve top kesilmesin diye görselin tamamı
+/// ortada gösterilir, kenarları görselin bulanık hâliyle dolar.
 ///
-/// Yalnız görüntü: yönlendirme ve süre `SplashView`'de (900 ms) değişmedi.
-/// [progress] 0→1: logo büyüyerek, kahramanlar aşağıdan gelir. Kart
-/// animasyonları kapalıysa çağıran 1 verir (son hâl).
+/// Yalnız görüntü: süre ve yönlendirme `SplashView`'de. [progress] 0→1 çubuğu
+/// doldurur; kart animasyonları kapalıysa çağıran 1 verir.
 class V21SplashArt extends StatelessWidget {
   final double progress;
   const V21SplashArt({super.key, required this.progress});
 
+  static const double _gorselOrani = 380 / 679;
+
+  /// Görselin alt kenar rengi (yerel açılış ekranıyla aynı)
+  static const Color zemin = Color(0xFF0F1130);
+
   @override
   Widget build(BuildContext context) {
-    final t = progress.clamp(0.0, 1.0);
-    final logoT = Curves.easeOutBack.transform(((t - 0.2) / 0.8).clamp(0.0, 1.0));
-    final heroT = Curves.easeOutCubic.transform((t / 0.7).clamp(0.0, 1.0));
+    final t = Curves.easeOut.transform(progress.clamp(0.0, 1.0));
     return Semantics(
       label: 'Futbol Card Arena yükleniyor',
+      excludeSemantics: true,
       child: ColoredBox(
-        color: const Color(0xFF120830),
+        color: zemin,
         child: LayoutBuilder(
           builder: (context, box) {
             final k = V21Scale.forSize(box.biggest).s;
-            final w = box.maxWidth.clamp(0.0, V21Metrics.maxContentWidth * k * 1.2);
+            final genis = box.maxWidth / box.maxHeight > _gorselOrani + 0.02;
             return Stack(
               fit: StackFit.expand,
               children: [
-                const DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Color(0xFF3A1C8E), Color(0xFF221060), Color(0xFF120830)],
-                      stops: [0, 0.55, 1],
-                    ),
+                if (genis) ...[
+                  ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                    child: _gorsel(BoxFit.cover),
                   ),
-                ),
+                  const ColoredBox(color: Color(0x66000000)),
+                ],
+                _gorsel(genis ? BoxFit.contain : BoxFit.cover),
                 SafeArea(
-                  child: Column(
-                    children: [
-                      SizedBox(height: 28 * k),
-                      Opacity(
-                        opacity: logoT.clamp(0.0, 1.0),
-                        child: Transform.scale(
-                          scale: 0.82 + 0.18 * logoT,
-                          child: V21Logo(scale: k),
-                        ),
-                      ),
-                      SizedBox(height: 12 * k),
-                      Expanded(
-                        child: Align(
-                          alignment: const Alignment(0, -0.5),
-                          child: Opacity(
-                            opacity: heroT,
-                            child: Transform.translate(
-                              offset: Offset(0, 40 * k * (1 - heroT)),
-                              child: SizedBox(
-                                width: w,
-                                child: ShaderMask(
-                                  // Alt kenar zemine yumuşakça kaybolur
-                                  blendMode: BlendMode.dstIn,
-                                  shaderCallback: (r) => const LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [Colors.transparent, Colors.white, Colors.white, Colors.transparent],
-                                    stops: [0, 0.14, 0.78, 1],
-                                  ).createShader(r),
-                                  child: Image.asset(
-                                    V21Assets.loginHeroes,
-                                    fit: BoxFit.fitWidth,
-                                    filterQuality: FilterQuality.medium,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 18 * k),
+                      child: SizedBox(
+                        width: 230 * k,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'YÜKLENİYOR',
+                              style: V21Type.title(15 * k, letterSpacing: 1.4, shadows: V21Type.inkShadow(k)),
+                            ),
+                            SizedBox(height: 6 * k),
+                            Container(
+                              height: 10 * k,
+                              padding: EdgeInsets.all(2 * k),
+                              decoration: BoxDecoration(
+                                color: V21Colors.trackDark,
+                                borderRadius: BorderRadius.circular(6 * k),
+                                border: Border.all(color: V21Colors.goldEdge.withValues(alpha: 0.7)),
+                              ),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: FractionallySizedBox(
+                                  key: const Key('yukleme-cubugu'),
+                                  widthFactor: t,
+                                  heightFactor: 1,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(colors: [V21Colors.goldBottom, V21Colors.goldTop]),
+                                      borderRadius: BorderRadius.circular(4 * k),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                      SizedBox(
-                        width: 30 * k,
-                        height: 30 * k,
-                        child: CircularProgressIndicator(strokeWidth: 3.2 * k, color: V21Colors.goldTop),
-                      ),
-                      SizedBox(height: 40 * k),
-                    ],
+                    ),
                   ),
                 ),
               ],
@@ -99,6 +95,14 @@ class V21SplashArt extends StatelessWidget {
       ),
     );
   }
+
+  Widget _gorsel(BoxFit fit) => Image.asset(
+    V21Assets.loadingSplash,
+    fit: fit,
+    filterQuality: FilterQuality.medium,
+    gaplessPlayback: true,
+    excludeFromSemantics: true,
+  );
 }
 
 /// "FUTBOL / CARD ARENA" logosu (referans giriş ekranı: beyaz + altın,

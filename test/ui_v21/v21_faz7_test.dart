@@ -211,14 +211,23 @@ void main() {
   });
 
   group('Açılış', () {
-    testWidgets('logo ve yükleniyor; başta logo görünmez', (t) async {
+    testWidgets('yükleme görseli ve çubuk; çubuk ilerlemeyle dolar', (t) async {
       await pump(t, const Scaffold(body: V21SplashArt(progress: 1)), const Size(390, 844));
-      expect(find.text('FUTBOL'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      final gorsel = t.widget<Image>(find.byType(Image)).image as AssetImage;
+      expect(gorsel.assetName, V21Assets.loadingSplash);
+      expect(find.text('YÜKLENİYOR'), findsOneWidget);
       expect(find.bySemanticsLabel('Futbol Card Arena yükleniyor'), findsOneWidget);
+      double cubuk() => t.widget<FractionallySizedBox>(find.byKey(const Key('yukleme-cubugu'))).widthFactor!;
+      expect(cubuk(), 1);
       await t.pumpWidget(const MaterialApp(home: Scaffold(body: V21SplashArt(progress: 0))));
-      final o = t.widget<Opacity>(find.ancestor(of: find.text('FUTBOL'), matching: find.byType(Opacity)).first);
-      expect(o.opacity, 0);
+      expect(cubuk(), 0);
+      await unmount(t);
+    });
+
+    testWidgets('tablette görselin tamamı görünür', (t) async {
+      await pump(t, const Scaffold(body: V21SplashArt(progress: 1)), const Size(768, 1024));
+      final fitler = t.widgetList<Image>(find.byType(Image)).map((i) => i.fit).toList();
+      expect(fitler, containsAll([BoxFit.cover, BoxFit.contain]));
       await unmount(t);
     });
   });

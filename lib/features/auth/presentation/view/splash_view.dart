@@ -9,6 +9,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../shared/widgets/game/game_ui.dart';
 import '../../../../shared/widgets/walkout/spotlight_backdrop.dart';
+import '../../../../ui_v21/foundation/v21_assets.dart';
 import '../../../../ui_v21/screens/auth/v21_splash_art.dart';
 import '../../../../ui_v21/v21_flags.dart';
 
@@ -16,11 +17,10 @@ import '../../../../ui_v21/v21_flags.dart';
 /// sonra cihazdaki oturuma göre doğru ekrana geçilir.
 ///
 /// ===================================================================
-/// SÜRE NEDEN UZATILMADI?
+/// SÜRE
 /// ===================================================================
-/// Bekleme önceden olduğu gibi 900 ms. Animasyon 700 ms'de bitiyor ve
-/// bu sürenin İÇİNE sığıyor. Açılış ekranı ne kadar güzel olursa olsun
-/// oyuncu her açılışta onu bekler; MD de "kısa ve etkileyici" diyor.
+/// V2.1 yükleme görseli 1,6 sn görünür: çubuk 1,4 sn'de dolar, görsel
+/// fark edilecek kadar ekranda kalır. Eski görünümde süre 900 ms'dir.
 ///
 /// Oyuncu ayarlardan kart animasyonlarını kapattıysa ışıklar ve logo
 /// doğrudan son hâliyle çizilir.
@@ -33,7 +33,7 @@ class SplashView extends StatefulWidget {
 
 class _SplashViewState extends State<SplashView>
     with SingleTickerProviderStateMixin {
-  static const Duration bekleme = Duration(milliseconds: 900);
+  static const Duration bekleme = Duration(milliseconds: kV21Splash ? 1600 : 900);
 
   late final AnimationController _kontrolcu;
 
@@ -42,7 +42,7 @@ class _SplashViewState extends State<SplashView>
     super.initState();
     _kontrolcu = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: kV21Splash ? 1400 : 700),
     );
 
     if (GameFeedback.cardAnimationsEnabled) {
@@ -52,6 +52,13 @@ class _SplashViewState extends State<SplashView>
     }
 
     _yonlendir();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Görsel ilk karede hazır olsun
+    if (kV21Splash) precacheImage(const AssetImage(V21Assets.loadingSplash), context);
   }
 
   @override

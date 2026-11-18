@@ -23,6 +23,9 @@ abstract final class V21Assets {
   /// kodla çizilir, kırpımda yok)
   static const String loginHeroes = '$_root/illustrations/login_heroes.png';
 
+  /// Yükleme ekranı: logo, maskot ve stadyum tek görselde (380×679)
+  static const String loadingSplash = '$_root/illustrations/loading_splash.webp';
+
   /// Altın sandık (saydam zemin). home.png 2. yuva.
   static const String chestGold = '$_root/icons/chest_gold.png';
 
@@ -41,6 +44,7 @@ abstract final class V21Assets {
     homeHero,
     victoryMascot,
     loginHeroes,
+    loadingSplash,
     chestGold,
     chestGoldLarge,
     navSquadPortrait,
