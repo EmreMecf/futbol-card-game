@@ -14,6 +14,8 @@ import '../../../features/matchmaking/presentation/viewmodel/matchmaking_view_mo
 import '../../../shared/widgets/error_snackbar.dart';
 import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
+import '../../web/web_kit.dart';
+import '../../web/web_screens.dart';
 
 /// V2.1 MAÇA HAZIRLAN + RAKİP ARAMA (referans matchPrep, hf3–hf6).
 ///
@@ -140,6 +142,27 @@ class _BodyState extends State<_Body> {
 
     final searching = vm.stage == MatchmakingStage.searching;
     _syncTicker(searching);
+
+    if (v21IsWeb(context)) {
+      return PopScope(
+        canPop: !searching,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) vm.cancelSearch();
+        },
+        child: WebReady(
+          vm: vm,
+          onFind: () => _findOpponent(vm),
+          search: searching
+              ? _Search(
+                  vm: vm,
+                  phase: searchPhaseFor(vm.searchDuration, online: _online && vm.searchWarning == null),
+                  scale: 1.1,
+                  onTrain: () => _trainInstead(vm),
+                )
+              : null,
+        ),
+      );
+    }
 
     return PopScope(
       // Aramadayken çıkış "iptal" demektir (kuyrukta unutulmasın)

@@ -6,6 +6,8 @@ import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/progress/presentation/viewmodel/progress_view_model.dart';
 import '../../ui_v21.dart';
+import '../../web/web_kit.dart';
+import '../../web/web_screens.dart';
 
 /// V2.1 GELİŞİM (referans `assets/v21/screens/progress.png`).
 ///
@@ -46,6 +48,7 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<ProgressViewModel>();
     final o = vm.overview;
+    if (v21IsWeb(context) && o != null && o.enabled) return WebProgress(vm: vm, overview: o);
     return V21InnerPage(
       title: 'GELİŞİM',
       route: AppRoutes.progress,

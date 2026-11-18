@@ -10,6 +10,8 @@ import '../rewards/v21_card_sheets.dart';
 import '../../../features/progress/domain/progress_repository.dart';
 import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
+import '../../web/web_kit.dart';
+import '../../web/web_screens.dart';
 
 /// V2.1 KOLEKSİYON — "KARTLARIM" (referans `assets/v21/screens/collection.png`).
 ///
@@ -35,11 +37,26 @@ class V21CollectionScreen extends StatelessWidget {
         ..loadCatalogSize(),
       child: Theme(
         data: V21Theme.data(context),
-        child: V21ScreenLayout(
-          background: V21Background.page,
-          body: (context, sc) => _Body(scale: sc.s),
-          bottomNavigation: (context, sc) => V21HomeNav(currentRoute: AppRoutes.collection, scale: sc.s),
-        ),
+        child: v21IsWeb(context)
+            ? Builder(
+                builder: (context) {
+                  final vm = context.watch<CollectionViewModel>();
+                  return WebCollection(
+                    vm: vm,
+                    onDetail: (c) => V21CardDetailSheet.show(
+                      context,
+                      c,
+                      isFavorite: vm.isFavorite(c),
+                      onToggleFavorite: () => vm.toggleFavorite(c),
+                    ),
+                  );
+                },
+              )
+            : V21ScreenLayout(
+                background: V21Background.page,
+                body: (context, sc) => _Body(scale: sc.s),
+                bottomNavigation: (context, sc) => V21HomeNav(currentRoute: AppRoutes.collection, scale: sc.s),
+              ),
       ),
     );
   }

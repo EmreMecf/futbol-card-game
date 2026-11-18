@@ -11,6 +11,8 @@ import '../rewards/v21_pack_opening.dart';
 import '../../../shared/widgets/error_snackbar.dart';
 import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
+import '../../web/web_kit.dart';
+import '../../web/web_screens.dart';
 
 /// V2.1 MAĞAZA (referans `assets/v21/screens/store.png`).
 ///
@@ -52,6 +54,24 @@ class _Root extends StatelessWidget {
     final opening = vm.lastOpening;
     if (opening != null) {
       return V21PackOpening(result: opening, onClose: vm.clearOpening);
+    }
+    if (v21IsWeb(context)) {
+      void hata() {
+        final msg = vm.errorMessage;
+        if (msg == null || !context.mounted) return;
+        AppSnackBar.showError(context, msg);
+        vm.clearError();
+      }
+
+      return WebStore(
+        vm: vm,
+        onBuy: (p) async {
+          if (!await vm.openPack(p)) hata();
+        },
+        onBuyOffer: () async {
+          if (!await vm.buyDailyOffer()) hata();
+        },
+      );
     }
     return V21ScreenLayout(
       background: V21Background.page,

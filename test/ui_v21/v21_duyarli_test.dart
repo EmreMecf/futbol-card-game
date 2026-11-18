@@ -11,6 +11,8 @@ import 'v21_test_support.dart';
 
 /// Pencere sınıfları, ölçek sınırları ve bağımsız ekranlar.
 void main() {
+  setUpAll(loadV21Fonts);
+
   group('pencere sınıfı', () {
     test('telefon, tablet ve masaüstü doğru sınıfa düşer', () {
       expect(V21Scale.classOf(const Size(280, 653)), V21WindowClass.compact);
@@ -45,6 +47,9 @@ void main() {
         await t.pump();
         expect(t.takeException(), isNull);
         expect(find.text('DAVET OLUŞTUR'), findsOneWidget);
+        if (boyut == const Size(1672, 941) && v21GoldenFor(boyut)) {
+          await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/v21_friends_1672x941.png'));
+        }
       });
     }
   });

@@ -118,6 +118,7 @@ flutter:
     # referans PNG'leridir; uygulamaya PAKETLENMEZ.
     - assets/v21/illustrations/
     - assets/v21/icons/
+    - assets/v21/web/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -11,6 +11,7 @@ import 'package:futbol_card/features/collection/presentation/viewmodel/collectio
 import 'package:futbol_card/ui_v21/screens/rewards/v21_card_sheets.dart';
 import 'package:futbol_card/ui_v21/screens/collection/v21_collection_screen.dart';
 import 'package:futbol_card/ui_v21/ui_v21.dart';
+import 'package:futbol_card/ui_v21/web/web_kit.dart' show WCard;
 import 'package:shared_models/shared_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -229,7 +230,7 @@ void main() {
       testWidgets('${v21SizeName(size)} taşmaz', (t) async {
         await pump(t, size);
         expect(t.takeException(), isNull);
-        expect(find.byType(V21PlayerCard), findsWidgets);
+        expect(find.byType(size.width >= 1100 && size.height >= 600 ? WCard : V21PlayerCard), findsWidgets);
       });
 
       testWidgets('${v21SizeName(size)} golden', (t) async {

@@ -82,6 +82,7 @@ const kV21ExtraSizes = <Size>[
   Size(1280, 720),
   Size(1366, 768),
   Size(1440, 900),
+  Size(1672, 941),
   Size(1920, 1080),
   Size(2560, 1440),
 ];

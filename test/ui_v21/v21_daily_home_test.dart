@@ -92,8 +92,10 @@ void main() {
     testWidgets('günlük şerit ${v21SizeName(boyut)} taşmaz', (t) async {
       await kur(t, boyut);
       expect(t.takeException(), isNull);
-      expect(find.text('Gümüş sandık hazır · Seri 2'), findsOneWidget);
-      expect(find.text('MAÇA BAŞLA'), findsOneWidget);
+      // Web tasarımında günlük sandık Sandıklar başlığındadır
+      final web = boyut.width >= 1100 && boyut.height >= 600;
+      expect(find.text(web ? 'GÜNLÜK SANDIK AL' : 'Gümüş sandık hazır · Seri 2'), findsOneWidget);
+      if (!web) expect(find.text('MAÇA BAŞLA'), findsOneWidget);
       await expectLater(
         find.byKey(const Key('ekran')),
         matchesGoldenFile('goldens/v21_home_daily_${v21SizeName(boyut)}.png'),

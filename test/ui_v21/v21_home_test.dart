@@ -143,6 +143,12 @@ void main() {
       testWidgets('${v21SizeName(size)} taşmaz', (t) async {
         await pumpHome(t, size);
         expect(t.takeException(), isNull, reason: 'RenderFlex taşması olmamalı');
+        // Web tasarımı ayrı yerleşimdir: burada yalnız taşma denetlenir
+        if (size.width >= 1100 && size.height >= 600) {
+          expect(find.text('SANDIKLAR'), findsOneWidget);
+          await unmount(t);
+          return;
+        }
         // Ana eylem ve menü her boyutta görünür ve ekran içinde
         final button = t.getRect(find.byType(V21GameButton));
         expect(button.bottom, lessThanOrEqualTo(size.height));

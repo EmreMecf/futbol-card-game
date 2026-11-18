@@ -8,6 +8,8 @@ import '../../../core/router/app_routes.dart';
 import '../rewards/v21_chest_opening.dart';
 import '../../../features/chests/presentation/viewmodel/chests_view_model.dart';
 import '../../ui_v21.dart';
+import '../../web/web_kit.dart';
+import '../../web/web_screens.dart';
 
 /// V2.1 SANDIKLAR (referans `assets/v21/screens/chests.png`).
 ///
@@ -36,6 +38,21 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<ChestsViewModel>();
     final env = vm.inventory;
+    if (v21IsWeb(context) && env != null && env.enabled) {
+      final unlocking = env.slots.any((c) => c.isUnlocking);
+      return WebChests(
+        vm: vm,
+        env: env,
+        onOpen: (c) => openChest(context, vm, c),
+        actionOf: (c) {
+          if (vm.busyChestId == c.id) return null;
+          if (c.isReady) return () => openChest(context, vm, c);
+          if (vm.canUseKey(c) || vm.canSpeedUp(c)) return () => _options(context, vm, c, unlocking);
+          if (c.isSealed && !unlocking) return () => vm.startUnlock(c);
+          return null;
+        },
+      );
+    }
     return V21InnerPage(
       title: 'SANDIKLAR',
       route: AppRoutes.chests,

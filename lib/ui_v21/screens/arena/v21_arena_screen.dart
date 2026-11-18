@@ -19,6 +19,8 @@ import '../../../features/match/presentation/widgets/tutorial_hint.dart';
 import '../../../shared/widgets/avatar2d/avatar_spec.dart';
 import '../../../shared/widgets/error_snackbar.dart';
 import '../../ui_v21.dart';
+import '../../web/web_arena.dart';
+import '../../web/web_kit.dart';
 
 /// V2.1 CANLI ARENA (referans arena.png, hf7–hf11).
 ///
@@ -223,6 +225,33 @@ class _BodyState extends State<_Body> {
     }
 
     final selected = _selected(vm);
+    if (v21IsWeb(context)) {
+      final steps = arenaSteps(vm, cardSelected: selected != null);
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) _surrender(vm);
+        },
+        child: WebArena(
+          vm: vm,
+          selected: selected,
+          pickedPosition: _pickedPosition,
+          stepLabels: steps.labels,
+          stepCurrent: steps.current,
+          status: arenaStatus(vm, selected),
+          onSelect: _select,
+          onPickPosition: (p) => setState(() => _pickedPosition = p),
+          onPlay: () => _play(vm),
+          onConfirmPosition: () => _confirmPosition(vm),
+          onSurrender: () => _surrender(vm),
+          tutorial: vm.matchState!.isTutorial ? TutorialHint(state: vm.matchState!) : null,
+          overlays: [
+            if (!_online && vm.currentClash == null) _Reconnecting(onRetry: vm.refresh),
+            _ClashLayer(vm: vm),
+          ],
+        ),
+      );
+    }
     return PopScope(
       // Maçtan kaçış yok: geri tuşu teslim olma onayı sorar
       canPop: false,

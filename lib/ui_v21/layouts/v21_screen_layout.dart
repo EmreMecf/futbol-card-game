@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_metrics.dart';
 import '../utilities/v21_scale.dart';
+import '../web/web_kit.dart';
 
 /// V2.1 gece-stadyum zemini (referans üst #100B50 → alt #1B0F4B,
 /// ortada mor ışık halkası).
@@ -43,6 +45,14 @@ class V21Background extends StatelessWidget {
   );
 }
 
+String _currentPath(BuildContext context) {
+  try {
+    return GoRouterState.of(context).uri.path;
+  } catch (_) {
+    return ''; // Testlerde yönlendirici yok
+  }
+}
+
 /// Menü yan sütunda mı çiziliyor? [V21ScreenLayout] menü oluşturucusuna bildirir.
 class V21NavPlacement extends InheritedWidget {
   final bool side;
@@ -78,6 +88,28 @@ class V21ScreenLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final scale = V21Scale.of(context);
     final navBuilder = bottomNavigation;
+    // Web: tasarımı olan ekranlar kendi yerleşimini çizer; diğer sayfalar
+    // (Sezon, Sıralama, Profil, Ayarlar...) aynı menü ve üst çubukla açılır.
+    if (navBuilder != null && v21IsWeb(context)) {
+      return WebShell(
+        route: _currentPath(context),
+        children: [
+          wBox(264, 92, kWebCanvas.width, kWebCanvas.height, background),
+          wBox(
+            264,
+            92,
+            kWebCanvas.width,
+            kWebCanvas.height,
+            Center(
+              child: SizedBox(
+                width: V21Metrics.expandedContentWidth,
+                child: body(context, const V21Scale.fixed(1.1, V21Metrics.expandedContentWidth)),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final content = SafeArea(
       bottom: false,

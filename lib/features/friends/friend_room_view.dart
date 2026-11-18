@@ -11,6 +11,8 @@ import '../../core/network/api_client.dart';
 import '../../core/router/app_routes.dart';
 import '../../ui_v21/ui_v21.dart';
 import 'friend_room_api.dart';
+import '../../ui_v21/web/web_kit.dart';
+import '../../ui_v21/web/web_screens.dart';
 
 /// Sunucunun kural mesajını gösterir ('Oda dolu.' gibi); bağlantı hatası ayrıdır.
 String friendRoomErrorText(Object e) => e is AppException
@@ -170,6 +172,26 @@ class _FriendRoomViewState extends State<FriendRoomView> {
     final isHost = room?['is_host'] == true;
     final myReady = isHost ? (room?['host_ready'] == true) : (room?['guest_ready'] == true);
     final guestPresent = room?['guest_name'] != null;
+    if (v21IsWeb(context)) {
+      return WebFriends(
+        code: _code,
+        room: room,
+        error: _error,
+        busy: _busy,
+        codeController: _codeController,
+        onCreate: _create,
+        onJoin: () => _join(_codeController.text),
+        onReady: _ready,
+        onLeave: _code == null ? () => context.go(AppRoutes.home) : _leave,
+        onShare: _share,
+        onCopy: () async {
+          await Clipboard.setData(ClipboardData(text: _code ?? ''));
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Davet kodu kopyalandı')));
+          }
+        },
+      );
+    }
     return V21InnerPage(
       title: 'ARKADAŞINLA OYNA',
       route: AppRoutes.friends,

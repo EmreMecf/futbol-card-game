@@ -14,6 +14,8 @@ import '../rewards/v21_card_sheets.dart';
 import '../../../shared/widgets/error_snackbar.dart';
 import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
+import '../../web/web_kit.dart';
+import '../../web/web_screens.dart';
 
 /// V2.1 KADROM (referans `assets/v21/screens/deck.png`).
 ///
@@ -51,11 +53,13 @@ class _Root extends StatelessWidget {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _confirmLeave(context);
       },
-      child: V21ScreenLayout(
-        background: V21Background.page,
-        body: (context, sc) => _Body(scale: sc.s),
-        bottomNavigation: (context, sc) => V21HomeNav(currentRoute: AppRoutes.deck, scale: sc.s),
-      ),
+      child: v21IsWeb(context)
+          ? const _Body(scale: 1)
+          : V21ScreenLayout(
+              background: V21Background.page,
+              body: (context, sc) => _Body(scale: sc.s),
+              bottomNavigation: (context, sc) => V21HomeNav(currentRoute: AppRoutes.deck, scale: sc.s),
+            ),
     );
   }
 }
@@ -140,6 +144,17 @@ class _BodyState extends State<_Body> {
   Widget build(BuildContext context) {
     final k = widget.scale;
     final vm = context.watch<DeckViewModel>();
+    if (v21IsWeb(context)) {
+      return WebDeck(
+        vm: vm,
+        onPick: (s) => _pick(vm, s),
+        onSave: () => _save(vm),
+        onDrop: (from, to) {
+          vm.swapSlots(from, to);
+          GameFeedback.haptic(HapticStrength.light);
+        },
+      );
+    }
 
     final header = Padding(
       padding: EdgeInsets.fromLTRB(12 * k, 12 * k, 8 * k, 0),

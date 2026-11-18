@@ -14,6 +14,8 @@ import '../../../features/season/presentation/viewmodel/season_view_model.dart';
 import '../../ui_v21.dart';
 import 'v21_daily_strip.dart';
 import 'v21_home_nav.dart';
+import '../../web/web_kit.dart';
+import '../../web/web_screens.dart';
 
 /// V2.1 ANA SAYFA (referans `assets/v21/screens/home.png`, 390×844).
 ///
@@ -98,6 +100,7 @@ class _HomeBodyState extends State<_HomeBody> {
 
   @override
   Widget build(BuildContext context) {
+    if (v21IsWeb(context)) return const WebHome();
     return V21ScreenLayout(
       body: (context, sc) => _HomeContent(scale: sc.s),
       bottomNavigation: (context, sc) => V21HomeNav(currentRoute: AppRoutes.home, scale: sc.s),
