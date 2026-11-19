@@ -51,6 +51,22 @@ GOOGLE_CLIENT_IDS=<web istemci kimliği>,<iOS istemci kimliği>
 APPLE_CLIENT_IDS=com.futbolcard.futbolCard,<Services ID>
 ```
 
+## Bu projenin kimlikleri
+
+| Ad | Değer |
+|---|---|
+| Google Web istemcisi | `438252320232-herv722ro3g44n91rsjs65j76fhhankb.apps.googleusercontent.com` |
+| Google iOS istemcisi | `438252320232-f8a1sodjhq4lddij8kgnnslpu4a24hvb.apps.googleusercontent.com` |
+
+CI'daki staging APK derlemesine ve `ios/Runner/Info.plist` URL şemasına eklendi.
+Render'da sunucuya girilecek satır:
+
+```
+GOOGLE_CLIENT_IDS=438252320232-herv722ro3g44n91rsjs65j76fhhankb.apps.googleusercontent.com,438252320232-f8a1sodjhq4lddij8kgnnslpu4a24hvb.apps.googleusercontent.com
+```
+
+Eksik: Android istemcisi (sabit yayın anahtarının SHA-1'i gerekir) ve Apple.
+
 ## 5. Yayından önce dene
 
 - [ ] Android, iOS ve web'de yeni hesap: ad seçimi ve başlangıç paketi

@@ -327,7 +327,11 @@ jobs:
       # TEST TELEFONUNA KURULABILIR, Play Store'a yuklenemez.
       - name: Staging release APK (gercek HTTPS API)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: flutter build apk --release --dart-define=API_BASE_URL=https://futbol-card-staging-api-lzq3.onrender.com
+        run: >-
+          flutter build apk --release
+          --dart-define=API_BASE_URL=https://futbol-card-staging-api-lzq3.onrender.com
+          --dart-define=GOOGLE_WEB_CLIENT_ID=438252320232-herv722ro3g44n91rsjs65j76fhhankb.apps.googleusercontent.com
+          --dart-define=GOOGLE_IOS_CLIENT_ID=438252320232-f8a1sodjhq4lddij8kgnnslpu4a24hvb.apps.googleusercontent.com
 
       # PR'lar: yalniz derlenebilirlik
       - name: Release APK derlenebilirlik (PR ve diger dallar)
