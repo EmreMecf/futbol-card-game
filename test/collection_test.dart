@@ -1,9 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/collection/domain/repositories/collection_repository.dart';
 import 'package:futbol_card/features/collection/presentation/viewmodel/collection_view_model.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
 /// Koleksiyon ekraninin 100 kartlik kadro ile dogru calistigini dogrular.

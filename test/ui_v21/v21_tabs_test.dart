@@ -10,7 +10,6 @@ import 'package:futbol_card/ui_v21/screens/deck/v21_deck_screen.dart';
 import 'package:futbol_card/features/deck/presentation/viewmodel/deck_view_model.dart';
 import 'package:futbol_card/features/season/presentation/viewmodel/season_view_model.dart';
 import 'package:futbol_card/features/store/presentation/viewmodel/store_view_model.dart';
-import 'package:futbol_card/ui_v21/screens/deck/v21_deck_screen.dart';
 import 'package:futbol_card/ui_v21/screens/season/v21_season_screen.dart';
 import 'package:futbol_card/ui_v21/screens/store/v21_store_screen.dart';
 import 'package:futbol_card/ui_v21/screens/rewards/v21_card_sheets.dart';

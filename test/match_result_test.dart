@@ -1,28 +1,16 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/auth/session_manager.dart';
 import 'package:futbol_card/core/network/websocket_service.dart';
 import 'package:futbol_card/core/storage/token_storage.dart';
-import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/match/domain/repositories/match_repository.dart';
 import 'package:futbol_card/features/match/presentation/viewmodel/match_view_model.dart';
-import 'package:futbol_card/ui_v21/screens/rewards/v21_match_result.dart';
 import 'package:shared_models/shared_models.dart';
 
 /// FAZ 4 — Maç sonucu ekranı.
 void main() {
   setUpAll(() => dotenv.loadFromString(envString: 'ENABLE_LOGGING=false'));
-
-  InventoryCard kart(String id, CardTier t) => InventoryCard(
-        userCardId: id,
-        cardId: 'c$id',
-        fullName: 'Oyuncu $id',
-        position: CardPosition.defender,
-        tier: t,
-        power: 70,
-      );
 
   // ==================================================================
   // ÖDÜL FARKI — iki sayı da sunucudan
@@ -91,47 +79,6 @@ void main() {
   // ==================================================================
   // FAZ 6 — LİG DEĞİŞİMİ (sunucunun 022 kaydı)
   // ==================================================================
-  PlayerRank rank(String kod, String ad, int seviye, int tier, int mmr,
-          {double ilerleme = 0.2, String? sonrakiAd, int? sonrakiSeviye}) =>
-      PlayerRank(
-        mmr: mmr,
-        tierId: tier,
-        leagueCode: kod,
-        leagueName: ad,
-        division: seviye,
-        color: '#22D3EE',
-        progress: ilerleme,
-        nextTierMmr: mmr + 80,
-        nextLeagueName: sonrakiAd ?? ad,
-        nextDivision: sonrakiSeviye ?? seviye + 1,
-      );
-
-  MatchLeagueChange degisim(String yon) => switch (yon) {
-        'promoted' => MatchLeagueChange(
-            mmrBefore: 1290,
-            mmrAfter: 1315,
-            mmrDelta: 25,
-            rankBefore: rank('amateur', 'Amatör', 3, 3, 1290, ilerleme: 0.9),
-            rankAfter: rank('usta', 'Usta', 1, 4, 1315, ilerleme: 0.15),
-            direction: 'promoted',
-          ),
-        'demoted' => MatchLeagueChange(
-            mmrBefore: 1305,
-            mmrAfter: 1280,
-            mmrDelta: -25,
-            rankBefore: rank('usta', 'Usta', 1, 4, 1305, ilerleme: 0.05),
-            rankAfter: rank('amateur', 'Amatör', 3, 3, 1280, ilerleme: 0.8),
-            direction: 'demoted',
-          ),
-        _ => MatchLeagueChange(
-            mmrBefore: 1400,
-            mmrAfter: 1425,
-            mmrDelta: 25,
-            rankBefore: rank('usta', 'Usta', 2, 5, 1400, ilerleme: 0),
-            rankAfter: rank('usta', 'Usta', 2, 5, 1425, ilerleme: 0.25),
-          ),
-      };
-
   group('Lig değişimi', () {
 
 

@@ -16,7 +16,7 @@ class AuthViewModel extends BaseViewModel {
 
   final SocialAuthRepository? _social;
 
-  AuthViewModel(this._repository, {SocialAuthRepository? social}) : _social = social;
+  AuthViewModel(this._repository, {this._social});
 
   UserModel? get currentUser => _repository.currentUser;
   bool get isSignedIn => _repository.isSignedIn;

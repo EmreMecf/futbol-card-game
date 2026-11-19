@@ -17,6 +17,12 @@ const _kimlik = SocialCredential(provider: SocialProvider.google, idToken: 'jeto
 
 class _Sosyal implements SocialAuthRepository {
   @override
+  Future<Result<Set<SocialProvider>>> linkedProviders() async => const Success(<SocialProvider>{});
+
+  @override
+  Future<Result<void>> link(SocialCredential credential) async => const Success(null);
+
+  @override
   bool googleAvailable = true;
   @override
   bool appleAvailable = true;

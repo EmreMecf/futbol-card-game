@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/error/app_exception.dart';
-import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/home/presentation/viewmodel/home_view_model.dart';
 import 'package:futbol_card/features/leaderboard/domain/repositories/leaderboard_repository.dart';
@@ -122,23 +120,6 @@ void main() {
   // ==================================================================
   // PANELLER
   // ==================================================================
-  Widget sarmala(Widget c) => MaterialApp(
-        theme: AppTheme.dark,
-        home: Scaffold(
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: c,
-          ),
-        ),
-      );
-
-  const kullanici = UserModel(
-    id: 'u1',
-    username: 'Emre',
-    mmr: 1825,
-    coins: 2450,
-  );
-
   group('ArenaHeroPanel', () {
 
 

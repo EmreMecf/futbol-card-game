@@ -1,8 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/features/store/presentation/viewmodel/pack_opening_view_model.dart';
-import 'package:futbol_card/features/store/domain/pack_texts.dart';
 import 'package:shared_models/shared_models.dart';
 
 /// FAZ 6 — Mühürlü paket (dokunarak açma) ve paket sonucu ekranı.
@@ -47,18 +44,6 @@ void main() {
     test('boş pakette mühür sahnesi yok', () {
       expect(PackOpeningViewModel(paket(const [])).isSealed, isFalse);
     });
-  });
-
-  Future<void> ac(WidgetTester t, Widget w, {Size boyut = const Size(390, 844)}) async {
-    t.view.physicalSize = boyut;
-    t.view.devicePixelRatio = 1;
-    addTearDown(t.view.reset);
-    await t.pumpWidget(MaterialApp(theme: AppTheme.dark, home: w));
-    await t.pump();
-  }
-
-  group('Akış', () {
-
   });
 
   group('Paket sonucu ekranı', () {

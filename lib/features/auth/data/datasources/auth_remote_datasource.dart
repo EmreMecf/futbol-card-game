@@ -31,6 +31,14 @@ class AuthRemoteDataSource {
     );
   }
 
+  /// Hesaba bağlı Google/Apple sağlayıcıları
+  Future<Map<String, dynamic>> socialLinks() => _api.get('/me/social');
+
+  /// Giriş yapmış oyuncunun Google/Apple hesabını bağlar
+  Future<Map<String, dynamic>> linkSocial({required String provider, required String idToken, String? nonce}) {
+    return _api.post('/me/social/link', govde: {'provider': provider, 'id_token': idToken, 'nonce': ?nonce});
+  }
+
   Future<void> signOut(String? refreshToken) async {
     await _api.post('/auth/logout', govde: {'refresh_token': ?refreshToken});
   }

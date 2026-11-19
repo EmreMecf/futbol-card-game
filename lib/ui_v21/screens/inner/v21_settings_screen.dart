@@ -8,6 +8,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../features/auth/presentation/viewmodel/auth_view_model.dart';
 import '../../../features/settings/presentation/viewmodel/settings_view_model.dart';
 import '../../ui_v21.dart';
+import '../../../features/auth/presentation/widgets/social_links_panel.dart';
 
 /// V2.1 AYARLAR (referans `assets/v21/screens/settings.png`; alt menü yok).
 ///
@@ -141,6 +142,7 @@ class _Body extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 14 * k),
+              SocialLinksPanel(scale: k),
               Text(
                 'Ad ve şifre değiştirme yakında eklenecek.',
                 style: V21Type.label(13 * k, weight: FontWeight.w600, color: V21Colors.textMuted),

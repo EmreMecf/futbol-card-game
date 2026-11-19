@@ -1,5 +1,4 @@
 // 042: öğretici ipucu metinleri adıma ve aşamaya göre doğru mu?
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/ui_v21/screens/match/v21_tutorial_hint.dart';
 import 'package:shared_models/shared_models.dart';

@@ -10,7 +10,6 @@ import 'package:futbol_card/ui_v21/screens/rewards/v21_match_result.dart';
 import 'package:futbol_card/ui_v21/screens/rewards/v21_walkout.dart';
 import 'package:futbol_card/ui_v21/screens/rewards/v21_card_sheets.dart';
 import 'package:futbol_card/ui_v21/screens/rewards/v21_chest_opening.dart';
-import 'package:futbol_card/ui_v21/screens/rewards/v21_match_result.dart';
 import 'package:futbol_card/ui_v21/screens/rewards/v21_pack_opening.dart';
 import 'package:futbol_card/ui_v21/ui_v21.dart';
 import 'package:provider/provider.dart';

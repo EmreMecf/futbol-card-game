@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/ui_v21/screens/match/v21_tutorial_hint.dart';
 import 'package:futbol_card/ui_v21/screens/auth/v21_splash_art.dart';
-import 'package:futbol_card/ui_v21/screens/match/v21_tutorial_hint.dart';
 import 'package:futbol_card/ui_v21/screens/rewards/v21_walkout.dart';
 import 'package:futbol_card/ui_v21/ui_v21.dart';
 import 'package:shared_models/shared_models.dart';

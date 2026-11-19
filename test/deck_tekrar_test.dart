@@ -16,7 +16,7 @@ InventoryCard _kopya(InventoryCard k, String id, {int? guc}) =>
 class _Repo extends GoldenDeckRepo {
   final List<InventoryCard> envanter;
   final kayitlar = <List<String>>[];
-  _Repo(Map<int, InventoryCard> slotlar, this.envanter) : super(slotlar);
+  _Repo(Map<int, InventoryCard> super.slotlar, this.envanter);
 
   @override
   Future<Result<List<InventoryCard>>> fetchInventory() async => Success(envanter);

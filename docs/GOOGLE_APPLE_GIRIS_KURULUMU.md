@@ -58,3 +58,11 @@ APPLE_CLIENT_IDS=com.futbolcard.futbolCard,<Services ID>
 - [ ] E-postayla açılmış hesaba aynı e-postanın Google hesabıyla giriş
 - [ ] Apple'da "E-postamı gizle" seçeneği
 - [ ] Giriş ekranında vazgeçme: hata görünmemeli
+
+## Hesap bağlama (güvenlik)
+
+Google/Apple ile girişte aynı e-postalı mevcut hesaba **kendiliğinden bağlanılmaz**
+(kayıtta e-posta sahipliği doğrulanmıyor; başkası o adresle önceden hesap açmış
+olabilir). Sunucu `409 social_link_required` döner. Oyuncu önce e-posta ve şifresiyle
+giriş yapar, sonra **Ayarlar → HESAP → BAĞLI HESAPLAR** bölümünden bağlar
+(`POST /api/me/social/link`).

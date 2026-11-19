@@ -151,8 +151,11 @@ Router authRoutes(Database db, JwtService jwt, {SocialTokenVerifier? socialVerif
   // ------------------------------------------------------------------
   // GOOGLE / APPLE ILE GIRIS
   // ------------------------------------------------------------------
-  // Sira: bagli kimlik -> dogrulanmis ayni e-posta (hesaba baglanir) -> yeni hesap.
-  // Yeni oyuncu ad gondermediyse hesap acilmaz, `needs_username` doner.
+  // Sira: bagli kimlik -> yeni hesap. Ayni e-postali hesap varsa KENDILIGINDEN
+  // baglanmaz: kayitta e-posta sahipligi dogrulanmadigi icin baskasi o adresle
+  // onceden hesap acmis olabilir. Oyuncu once kendi hesabina girer, sonra
+  // Ayarlar'dan baglar (/me/social/link). Yeni oyuncu ad gondermediyse hesap
+  // acilmaz, `needs_username` doner.
   router.post('/social', (Request request) async {
     final body = await readJsonBody(request);
     final provider = SocialProvider.fromName(requireString(body, 'provider', label: 'Saglayici'));
@@ -183,28 +186,16 @@ Router authRoutes(Database db, JwtService jwt, {SocialTokenVerifier? socialVerif
         throw const ApiException('Bu hesabin e-postasi dogrulanmamis. Baska bir yontemle giris yapin.', status: 403);
       }
 
-      kullanici = await db.queryOne(
-        '''
-        select id, email, username, coins, protection_slots, mmr,
-               wins, losses, draws, avatar_url, is_banned, ban_reason, created_at
-        from users where email = @email
-        ''',
+      final ayniEposta = await db.queryOne(
+        'select 1 as var from users where email = @email',
         params: {'email': email},
       );
-
-      if (kullanici != null) {
-        await db.query(
-          '''
-          insert into user_identities (user_id, provider, provider_subject, email)
-          values (@userId::uuid, @provider, @subject, @email)
-          on conflict do nothing
-          ''',
-          params: {
-            'userId': kullanici['id'].toString(),
-            'provider': provider.name,
-            'subject': kimlik.subject,
-            'email': email,
-          },
+      if (ayniEposta != null) {
+        throw const ApiException(
+          'Bu e-postayla kayıtlı bir hesap var. Önce e-posta ve şifrenle giriş yap, '
+          'sonra Ayarlar\'dan bu hesabı bağla.',
+          status: 409,
+          code: 'social_link_required',
         );
       }
     }
@@ -346,8 +337,59 @@ Router authRoutes(Database db, JwtService jwt, {SocialTokenVerifier? socialVerif
 }
 
 /// Korumali profil uc noktasi (ayri router, requireAuth ile sarilir)
-Router meRoutes(Database db) {
+///
+///   GET  /api/me              -> Profil + devam eden mac
+///   GET  /api/me/social       -> Bagli Google/Apple hesaplari
+///   POST /api/me/social/link  -> Giris yapmis oyuncu Google/Apple hesabini baglar
+Router meRoutes(Database db, {SocialTokenVerifier? socialVerifier}) {
   final router = Router();
+  final social = socialVerifier ?? SocialTokenVerifier.fromEnv();
+
+  router.get('/social', (Request request) async {
+    final userId = requireUserId(request);
+    final satirlar = await db.query(
+      'select provider from user_identities where user_id = @id::uuid order by provider',
+      params: {'id': userId},
+    );
+    return jsonOk({'providers': [for (final r in satirlar) r['provider'].toString()]});
+  });
+
+  router.post('/social/link', (Request request) async {
+    final userId = requireUserId(request);
+    final body = await readJsonBody(request);
+    final provider = SocialProvider.fromName(requireString(body, 'provider', label: 'Saglayici'));
+    if (provider == null) throw const ApiException('Gecersiz giris yontemi.');
+    final nonce = body['nonce'];
+    final kimlik = await social.verify(
+      provider,
+      requireString(body, 'id_token', label: 'Kimlik jetonu'),
+      rawNonce: nonce is String ? nonce : null,
+    );
+
+    final sahibi = await db.queryOne(
+      'select user_id from user_identities where provider = @provider and provider_subject = @subject',
+      params: {'provider': provider.name, 'subject': kimlik.subject},
+    );
+    if (sahibi != null) {
+      if (sahibi['user_id'].toString() == userId) return jsonOk({'linked': provider.name});
+      throw const ApiException('Bu hesap başka bir oyuncuya bağlı.', status: 409, code: 'social_already_linked');
+    }
+    final mevcut = await db.queryOne(
+      'select 1 as var from user_identities where user_id = @id::uuid and provider = @provider',
+      params: {'id': userId, 'provider': provider.name},
+    );
+    if (mevcut != null) {
+      throw const ApiException('Hesabına zaten bu türde bir hesap bağlı.', status: 409, code: 'social_provider_taken');
+    }
+    await db.query(
+      '''
+      insert into user_identities (user_id, provider, provider_subject, email)
+      values (@id::uuid, @provider, @subject, @email)
+      ''',
+      params: {'id': userId, 'provider': provider.name, 'subject': kimlik.subject, 'email': kimlik.email},
+    );
+    return jsonOk({'linked': provider.name}, status: 201);
+  });
 
   router.get('/', (Request request) async {
     final userId = requireUserId(request);

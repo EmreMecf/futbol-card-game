@@ -1,13 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:futbol_card/core/di/injection.dart';
 import 'package:futbol_card/core/error/app_exception.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/chests/domain/chest_messages.dart';
-import 'package:futbol_card/features/chests/domain/chest_repository.dart';
 import 'package:futbol_card/features/chests/presentation/viewmodel/chests_view_model.dart';
-import 'package:futbol_card/ui_v21/screens/deck/v21_emergency_banner.dart';
 import 'package:shared_models/shared_models.dart';
 
 import 'goldens/sahte_veri.dart';

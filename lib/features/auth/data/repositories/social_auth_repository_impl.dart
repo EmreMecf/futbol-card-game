@@ -131,6 +131,25 @@ class SocialAuthRepositoryImpl implements SocialAuthRepository {
     });
   }
 
+  @override
+  Future<Result<Set<SocialProvider>>> linkedProviders() {
+    return Result.guard(() async {
+      final json = await _remote.socialLinks();
+      return {
+        for (final p in (json['providers'] as List? ?? const []))
+          for (final s in SocialProvider.values)
+            if (s.name == p) s,
+      };
+    });
+  }
+
+  @override
+  Future<Result<void>> link(SocialCredential credential) {
+    return Result.guard(() async {
+      await _remote.linkSocial(provider: credential.provider.name, idToken: credential.idToken, nonce: credential.nonce);
+    });
+  }
+
   static String _randomNonce() {
     final random = Random.secure();
     return base64Url.encode(List<int>.generate(32, (_) => random.nextInt(256))).replaceAll('=', '');

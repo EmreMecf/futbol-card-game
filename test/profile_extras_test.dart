@@ -1,11 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/auth/session_manager.dart';
 import 'package:futbol_card/core/error/app_exception.dart';
 import 'package:futbol_card/core/storage/favorites_store.dart';
 import 'package:futbol_card/core/storage/token_storage.dart';
-import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/auth/domain/repositories/auth_repository.dart';
 import 'package:futbol_card/features/collection/domain/repositories/collection_repository.dart';
@@ -169,15 +167,6 @@ void main() {
   // ÇİZİM
   // ==================================================================
   group('Başarım karosu', () {
-    Widget sarmala(Widget c) => MaterialApp(
-          theme: AppTheme.dark,
-          home: Scaffold(
-            body: Center(child: SizedBox(width: 170, height: 112, child: c)),
-          ),
-        );
-
-
-
   });
 }
 

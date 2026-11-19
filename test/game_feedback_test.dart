@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/di/injection.dart';
 import 'package:futbol_card/core/feedback/game_feedback.dart';
 import 'package:futbol_card/features/settings/presentation/viewmodel/settings_view_model.dart';
-import 'package:shared_models/shared_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Ayarların GERÇEKTEN uygulandığını doğrular.

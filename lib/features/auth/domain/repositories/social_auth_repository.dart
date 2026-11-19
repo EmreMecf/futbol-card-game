@@ -29,4 +29,10 @@ abstract interface class SocialAuthRepository {
 
   /// Kimliği sunucuya gönderir. `true`: oturum açıldı, `false`: yeni oyuncu ad seçmeli.
   Future<Result<bool>> exchange(SocialCredential credential, {String? username});
+
+  /// Giriş yapmış oyuncunun hesabına bağlı sağlayıcılar
+  Future<Result<Set<SocialProvider>>> linkedProviders();
+
+  /// Giriş yapmış oyuncunun hesabına Google/Apple bağlar
+  Future<Result<void>> link(SocialCredential credential);
 }
