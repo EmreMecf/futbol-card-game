@@ -14,16 +14,9 @@ abstract interface class AuthRepository {
 
   UserModel? get currentUser;
 
-  Future<Result<UserModel>> signUp({
-    required String email,
-    required String password,
-    required String username,
-  });
+  Future<Result<UserModel>> signUp({required String email, required String password, required String username});
 
-  Future<Result<UserModel>> signIn({
-    required String email,
-    required String password,
-  });
+  Future<Result<UserModel>> signIn({required String email, required String password});
 
   Future<Result<void>> signOut();
 

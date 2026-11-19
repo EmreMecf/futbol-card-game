@@ -43,7 +43,6 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
   flutter_dotenv: ^6.0.1
-  cached_network_image: ^3.4.1
   shared_preferences: ^2.5.5
   intl: ^0.20.2
 
@@ -53,9 +52,12 @@ dependencies:
     path: packages/shared_models
   flutter_secure_storage: ^11.0.0
   web_socket_channel: ^3.0.3
-  sensors_plus: ^7.1.0
   share_plus: ^13.3.1
   app_links: ^7.2.2
+  google_sign_in: ^7.2.0
+  google_sign_in_web: ^1.1.3
+  sign_in_with_apple: ^8.2.0
+  crypto: ^3.0.6
 
 dev_dependencies:
   flutter_test:
@@ -116,6 +118,7 @@ flutter:
     - assets/fonts/
     # V2.1 arayüz görselleri (lib/ui_v21). assets/v21/screens/ tam ekran
     # referans PNG'leridir; uygulamaya PAKETLENMEZ.
+    - assets/v21/characters/
     - assets/v21/illustrations/
     - assets/v21/icons/
     - assets/v21/web/

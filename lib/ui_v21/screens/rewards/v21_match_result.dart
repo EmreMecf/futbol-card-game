@@ -6,8 +6,8 @@ import '../../../core/auth/session_manager.dart';
 import '../../../core/feedback/game_feedback.dart';
 import '../../../features/items/cosmetics/equipped_cosmetics.dart';
 import '../../../features/match/presentation/viewmodel/match_view_model.dart' show MatchRewardDelta;
-import '../../../shared/widgets/cosmetics/cosmetic_art.dart' show FireworksOverlay;
-import '../../../shared/widgets/walkout/confetti_overlay.dart';
+import '../../../ui_v21/components/v21_cosmetics.dart';
+import '../../../ui_v21/components/v21_confetti.dart';
 import '../../ui_v21.dart';
 import 'v21_match_panels.dart';
 
@@ -345,6 +345,7 @@ class _ScorePanel extends StatelessWidget {
             V21PlayerAvatar(
               seed: 'oyuncu-${me?.id ?? me?.username ?? 'ben'}',
               semanticsLabel: 'Sen',
+              name: me?.username,
               size: 52 * k,
               background: const Color(0xFF7FC0FF),
             ),
@@ -359,6 +360,7 @@ class _ScorePanel extends StatelessWidget {
             V21PlayerAvatar(
               seed: 'oyuncu-${opp?.id ?? opp?.username ?? 'rakip'}',
               semanticsLabel: 'Rakip',
+              name: opp?.username,
               size: 52 * k,
               background: const Color(0xFFFF8A9B),
             ),
@@ -385,9 +387,6 @@ class _CardsRow extends StatelessWidget {
       position: c.position,
       tier: c.tier,
       power: c.power,
-      seed: c.cardId,
-      kitSeed: c.club ?? c.nationality,
-      imageUrl: c.imageUrl,
       width: w,
     ),
   );
@@ -444,4 +443,10 @@ class _CardsRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Sonuç ekranının ana düğmesi: öğreticide sıradaki adıma yönlendirir.
+String newMatchLabel(MatchResultSummary s) {
+  if (s.mode != 'tutorial') return 'YENİ MAÇ';
+  return (s.tutorialStep ?? 1) >= 3 ? 'DERECELİ MAÇA GEÇ' : 'ÖĞRETİCİYE DEVAM';
 }

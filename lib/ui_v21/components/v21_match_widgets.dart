@@ -1,29 +1,27 @@
 import 'dart:math' as math;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/widgets/avatar2d/avatar_painter.dart';
-import '../../shared/widgets/avatar2d/avatar_spec.dart';
 import '../animations/v21_motion.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_tap.dart';
 
 /// V2.1 OYUNCU AVATARI (referans Arena "SEN" / "RAKİP": çap 44, 3 px
-/// lacivert halka). Onaylı görsel ([imageUrl]) yoksa projenin 2D
-/// karakter çizicisi [seed]'den üretir. [level] verilirse sağ altta rozet.
+/// lacivert halka). Oyuncu adının baş harfi gösterilir; renk [seed]'den
+/// seçilir. Kart karakterleri yalnız futbolcu kartlarında kullanılır. [level] verilirse sağ altta rozet.
 class V21PlayerAvatar extends StatelessWidget {
   final String seed;
-  final String? imageUrl;
-  final AvatarSpec? spec;
   final double size;
 
   /// Halka rengi (varsayılan lacivert; rakip/kendin vurgusu için)
   final Color ringColor;
 
   /// Arka zemin (mavi "SEN", kırmızı "RAKİP")
-  final Color background;
+  final Color? background;
+
+  /// Baş harfi gösterilecek ad (yoksa [semanticsLabel])
+  final String? name;
   final int? level;
   final String semanticsLabel;
 
@@ -31,22 +29,32 @@ class V21PlayerAvatar extends StatelessWidget {
     super.key,
     required this.seed,
     required this.semanticsLabel,
-    this.imageUrl,
-    this.spec,
     this.size = 44,
     this.ringColor = V21Colors.ink,
-    this.background = const Color(0xFF7FC0FF),
+    this.background,
+    this.name,
     this.level,
   });
+
+  static const _palette = [
+    Color(0xFF2E7BFF),
+    Color(0xFF8A3FE0),
+    Color(0xFFE0397F),
+    Color(0xFF16A34A),
+    Color(0xFFE8891A),
+    Color(0xFF0EA5B7),
+  ];
+
+  String get _initial {
+    final text = (name ?? semanticsLabel).trim();
+    if (text.isEmpty) return '?';
+    final first = String.fromCharCode(text.runes.first);
+    return first == 'i' ? 'İ' : (first == 'ı' ? 'I' : first.toUpperCase());
+  }
 
   @override
   Widget build(BuildContext context) {
     final ring = math.max(2.0, size * 0.07);
-    final url = imageUrl;
-    final face = AvatarPortrait(spec: spec ?? AvatarSpec.generate(seed), size: size, headshot: true);
-    final Widget portrait = url != null && (url.startsWith('http://') || url.startsWith('https://'))
-        ? CachedNetworkImage(imageUrl: url, fit: BoxFit.cover, errorWidget: (_, _, _) => face)
-        : face;
     return Semantics(
       label: level == null ? semanticsLabel : '$semanticsLabel, seviye $level',
       excludeSemantics: true,
@@ -63,10 +71,14 @@ class V21PlayerAvatar extends StatelessWidget {
               decoration: BoxDecoration(color: ringColor, shape: BoxShape.circle),
               child: ClipOval(
                 child: ColoredBox(
-                  color: background,
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox.square(dimension: size, child: portrait),
+                  color: background ?? _palette[seed.codeUnits.fold<int>(0, (a, b) => a + b) % _palette.length],
+                  child: Center(
+                    child: FittedBox(
+                      child: Padding(
+                        padding: EdgeInsets.all(size * 0.14),
+                        child: Text(_initial, style: V21Type.title(size * 0.6, shadows: V21Type.inkShadow(size / 44))),
+                      ),
+                    ),
                   ),
                 ),
               ),

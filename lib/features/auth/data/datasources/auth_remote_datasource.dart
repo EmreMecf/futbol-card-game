@@ -10,24 +10,24 @@ class AuthRemoteDataSource {
 
   AuthRemoteDataSource(this._api);
 
-  Future<Map<String, dynamic>> signUp({
-    required String email,
-    required String password,
-    required String username,
-  }) {
-    return _api.post(
-      '/auth/register',
-      govde: {'email': email, 'password': password, 'username': username},
-    );
+  Future<Map<String, dynamic>> signUp({required String email, required String password, required String username}) {
+    return _api.post('/auth/register', govde: {'email': email, 'password': password, 'username': username});
   }
 
-  Future<Map<String, dynamic>> signIn({
-    required String email,
-    required String password,
+  Future<Map<String, dynamic>> signIn({required String email, required String password}) {
+    return _api.post('/auth/login', govde: {'email': email, 'password': password});
+  }
+
+  /// Google/Apple kimlik jetonunu sunucuda dogrular
+  Future<Map<String, dynamic>> socialSignIn({
+    required String provider,
+    required String idToken,
+    String? nonce,
+    String? username,
   }) {
     return _api.post(
-      '/auth/login',
-      govde: {'email': email, 'password': password},
+      '/auth/social',
+      govde: {'provider': provider, 'id_token': idToken, 'nonce': ?nonce, 'username': ?username},
     );
   }
 
@@ -38,6 +38,5 @@ class AuthRemoteDataSource {
   /// Profil + devam eden mac bilgisi
   Future<Map<String, dynamic>> me() => _api.get('/me');
 
-  Future<Map<String, dynamic>> grantStarterPack() =>
-      _api.post('/game/starter-pack');
+  Future<Map<String, dynamic>> grantStarterPack() => _api.post('/game/starter-pack');
 }

@@ -1,128 +1,174 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/ref_tokens.dart';
-import '../../../../shared/widgets/ref/ref_ui.dart';
-import '../../../../shared/widgets/walkout/spotlight_backdrop.dart';
+import '../../../../ui_v21/screens/auth/v21_splash_art.dart';
+import '../../../../ui_v21/ui_v21.dart';
 
-/// Giriş ve kayıt ekranlarının ortak iskeleti: gece stadyumu zemini,
-/// ortalanmış ve genişliği sınırlanmış içerik.
-///
-/// ZEMİN NEDEN ANİMASYONSUZ?
-/// Walkout sahnesindeki ışık huzmeleri burada SABİT (ilerleme 1,
-/// salınım sabit). Oyuncu bu ekranda yazı yazıyor; arkada sürekli
-/// kıpırdayan ışık dikkat dağıtır ve klavye açıkken boşuna kare
-/// harcar. Zemin bir kez çizilip `RepaintBoundary` içinde kalıyor.
+/// Giriş ve kayıt ekranlarının ortak iskeleti (referans login.png):
+/// stadyum, logo, üç karakter ve altta form paneli.
 class AuthScaffold extends StatelessWidget {
+  final String title;
+  final String subtitle;
   final Widget child;
 
-  /// Üstte geri butonu (kayıt ekranında)
+  /// Üstte geri düğmesi (kayıt ekranında)
   final bool showBack;
 
-  const AuthScaffold({super.key, required this.child, this.showBack = false});
+  const AuthScaffold({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.child,
+    this.showBack = false,
+  });
 
-  /// Formun en fazla genişliği. Tablet ve masaüstünde form ekranın
-  /// tamamına yayılırsa satırlar okunmaz uzunluğa çıkar.
+  /// Formun en fazla genişliği
   static const double maxFormWidth = 420;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Ref.phoneBg,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const SpotlightBackdrop(
-            progress: 1,
-            sway: 0.25,
-            color: Ref.accent,
-          ),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xxl,
-                  vertical: AppSpacing.xxxl,
-                ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: maxFormWidth),
-                  child: child,
-                ),
-              ),
-            ),
-          ),
-          // Align ŞART: Stack(fit: expand) konumlanmamış çocukları TAM
-          // EKRANA yayar. Align olmadan geri butonu bütün ekranı kaplıyor,
-          // formdaki her dokunuş "geri" oluyordu.
-          if (showBack)
-            Align(
-              alignment: Alignment.topLeft,
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  // Referans .neutral-button (lig basamakları ekranındaki geri ile aynı)
-                  child: Tooltip(
-                    message: 'Geri',
-                    child: RefNeutralButton(
-                      padding: const EdgeInsets.all(9),
-                      semanticLabel: 'Geri',
-                      onTap: () => Navigator.of(context).maybePop(),
-                      child: const Icon(Icons.arrow_back_rounded, size: 18, color: Ref.neutralText),
+      backgroundColor: V21Colors.inkDeep,
+      body: LayoutBuilder(
+        builder: (context, box) {
+          final k = V21Scale.forSize(box.biggest).s;
+          final heroH = (box.maxHeight * 0.3).clamp(0.0, 300.0);
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              const V21StadiumScene(horizon: 0.42),
+              SafeArea(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(16 * k, 12 * k, 16 * k, 20 * k),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: maxFormWidth),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Center(child: V21Logo(scale: k * 0.82)),
+                          if (box.maxHeight >= 640)
+                            SizedBox(
+                              height: heroH,
+                              child: ExcludeSemantics(
+                                child: ShaderMask(
+                                  blendMode: BlendMode.dstIn,
+                                  shaderCallback: (r) => const LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [Colors.transparent, Colors.white, Colors.white],
+                                    stops: [0, 0.16, 1],
+                                  ).createShader(r),
+                                  child: Image.asset(
+                                    V21Assets.loginHeroes,
+                                    fit: BoxFit.cover,
+                                    alignment: Alignment.topCenter,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          V21GamePanel(
+                            scale: k,
+                            radius: 18,
+                            padding: EdgeInsets.all(16 * k),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  title,
+                                  textAlign: TextAlign.center,
+                                  style: V21Type.title(28 * k, shadows: V21Type.inkShadow(k)),
+                                ),
+                                SizedBox(height: 2 * k),
+                                Text(
+                                  subtitle,
+                                  textAlign: TextAlign.center,
+                                  style: V21Type.label(12.5 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
+                                ),
+                                SizedBox(height: 14 * k),
+                                child,
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-        ],
+              if (showBack)
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: EdgeInsets.all(8 * k),
+                      child: V21BackButton(scale: k, onPressed: () => Navigator.of(context).maybePop()),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-/// Formun içindeki hata şeridi. SnackBar yerine formun İÇİNDE:
-/// SnackBar birkaç saniye sonra kaybolur ve klavye açıkken çoğu zaman
-/// klavyenin arkasında kalıyordu; oyuncu neden giriş yapamadığını
-/// göremiyordu.
+/// Giriş ve kayıt alanının ortak görünümü
+InputDecoration authFieldDecoration(String label, IconData icon, {String? helper, Widget? suffix}) => InputDecoration(
+  labelText: label,
+  helperText: helper,
+  counterText: '',
+  prefixIcon: Icon(icon, color: V21Colors.textMuted),
+  suffixIcon: suffix,
+  filled: true,
+  fillColor: const Color(0xFF241552),
+  labelStyle: V21Type.label(14, weight: FontWeight.w700, color: V21Colors.textMuted),
+  helperStyle: V21Type.label(11, weight: FontWeight.w600, color: V21Colors.textMuted),
+  errorStyle: V21Type.label(11.5, weight: FontWeight.w800, color: const Color(0xFFFF8A9B)),
+  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+  enabledBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12),
+    borderSide: const BorderSide(color: V21Colors.pillBorder, width: 2),
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12),
+    borderSide: const BorderSide(color: V21Colors.goldTop, width: 2),
+  ),
+);
+
+/// Formun içindeki hata şeridi: SnackBar klavyenin arkasında kalıyordu
 class AuthErrorBanner extends StatelessWidget {
   final String message;
 
   /// Bağlantı hatası mı? (farklı simge ve ek açıklama)
   final bool isConnection;
 
-  const AuthErrorBanner({
-    super.key,
-    required this.message,
-    this.isConnection = false,
-  });
+  const AuthErrorBanner({super.key, required this.message, this.isConnection = false});
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       liveRegion: true,
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Ref.red.withValues(alpha: 0.10),
+          color: V21Colors.danger.withValues(alpha: 0.16),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Ref.red.withValues(alpha: 0.45)),
+          border: Border.all(color: V21Colors.danger, width: 1.5),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
-              isConnection
-                  ? Icons.wifi_off_rounded
-                  : Icons.error_outline_rounded,
-              color: Ref.red,
+              isConnection ? Icons.wifi_off_rounded : Icons.error_outline_rounded,
+              color: const Color(0xFFFF8A9B),
               size: 18,
             ),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
-                isConnection
-                    ? '$message\nİnternet bağlantını kontrol edip tekrar dene.'
-                    : message,
-                style: Ref.bodyText(12.5, height: 1.4),
+                isConnection ? '$message\nİnternet bağlantını kontrol edip tekrar dene.' : message,
+                style: V21Type.label(12.5, weight: FontWeight.w700, color: Colors.white, height: 1.4),
               ),
             ),
           ],

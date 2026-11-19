@@ -1,10 +1,9 @@
 // Arayüz incelemesi düzeltmeleri: maç eli sırası, sonuç metinleri,
 // öğretici düğmesi, sandık kaynağı ve günlük panel metni.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:futbol_card/features/chests/presentation/view/chests_view.dart';
-import 'package:futbol_card/features/daily/presentation/daily_panel.dart';
-import 'package:futbol_card/features/match/presentation/view/match_view.dart';
-import 'package:futbol_card/features/match/presentation/widgets/match_result_view.dart';
+import 'package:futbol_card/features/daily/domain/daily_texts.dart';
+import 'package:futbol_card/features/match/domain/hand_order.dart';
+import 'package:futbol_card/ui_v21/screens/rewards/v21_match_result.dart';
 import 'package:shared_models/shared_models.dart';
 
 HandCard _kart(String id, CardPosition p, int guc, {bool oynandi = false}) => HandCard(
@@ -66,12 +65,6 @@ void main() {
       expect(newMatchLabel(const MatchResultSummary(matchId: 'm', mode: 'tutorial', tutorialStep: 1)), 'ÖĞRETİCİYE DEVAM');
       expect(newMatchLabel(const MatchResultSummary(matchId: 'm', mode: 'tutorial', tutorialStep: 3)), 'DERECELİ MAÇA GEÇ');
     });
-  });
-
-  test('sandık kaynağı okunur adla', () {
-    expect(chestSourceLabel('daily'), 'Günlük sandık');
-    expect(chestSourceLabel('match'), 'Maç ödülü');
-    expect(chestSourceLabel('bilinmeyen'), 'Ödül');
   });
 
   test('günlük panel: yeni oyuncuya "Seri: 0 gün" yazılmaz', () {

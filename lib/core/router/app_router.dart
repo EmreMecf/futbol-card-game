@@ -2,31 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../features/characters/presentation/character_preview_view.dart';
-import '../../features/characters/presentation/style_prototype_view.dart';
 import '../../features/auth/presentation/view/login_view.dart';
 import '../../features/auth/presentation/view/register_view.dart';
 import '../../features/auth/presentation/view/splash_view.dart';
-import '../../features/chests/presentation/view/chest_odds_view.dart';
-import '../../features/chests/presentation/view/chests_view.dart';
-import '../../features/collection/presentation/view/collection_view.dart';
-import '../../features/deck/presentation/view/deck_view.dart';
-import '../../features/home/presentation/view/home_view.dart';
-import '../../features/items/presentation/view/inventory_view.dart';
-import '../../features/leaderboard/presentation/view/leaderboard_view.dart';
-import '../../features/season/presentation/view/season_view.dart';
-import '../../features/leaderboard/presentation/view/league_tiers_view.dart';
-import '../../features/match/presentation/view/match_view.dart';
-import '../../features/matchmaking/presentation/view/matchmaking_view.dart';
 import '../../features/friends/friend_room_view.dart';
-import '../../features/profile/presentation/view/profile_view.dart';
-import '../../features/progress/presentation/view/progress_view.dart';
-import '../../features/sbc/presentation/view/sbc_builder_view.dart';
-import '../../features/sbc/presentation/view/sbc_list_view.dart';
-import '../../features/settings/presentation/view/design_system_view.dart';
-import '../../features/settings/presentation/view/settings_view.dart';
-import '../../features/store/presentation/view/store_view.dart';
-import '../../shared/widgets/ref/ref_ui.dart';
 import '../../ui_v21/screens/arena/v21_arena_screen.dart';
 import '../../ui_v21/screens/arena/v21_matchmaking_screen.dart';
 import '../../ui_v21/screens/collection/v21_collection_screen.dart';
@@ -34,9 +13,9 @@ import '../../ui_v21/screens/home/v21_home_screen.dart';
 import '../../ui_v21/screens/inner/v21_inner_screens.dart';
 import '../../ui_v21/screens/season/v21_season_screen.dart';
 import '../../ui_v21/screens/store/v21_store_screen.dart';
-import '../../ui_v21/v21_flags.dart';
+import '../../ui_v21/screens/deck/v21_deck_screen.dart';
+import '../../ui_v21/ui_v21.dart';
 import '../auth/session_manager.dart';
-import '../theme/ref_tokens.dart';
 import 'app_routes.dart';
 
 /// Uygulamanin yonlendirme (navigasyon) yapisi.
@@ -47,7 +26,6 @@ import 'app_routes.dart';
 /// ekranina yonlendirilir.
 class AppRouter {
   final SessionManager _session;
-  String? _pendingInvitePath;
 
   AppRouter(this._session);
 
@@ -71,16 +49,15 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.home,
-        // V2.1 ana sayfası; eski Ref ana sayfası kV21Home=false ile döner
-        builder: (context, state) => kV21Home ? const V21HomeScreen() : const HomeView(),
+        builder: (context, state) => const V21HomeScreen(),
       ),
       GoRoute(
         path: AppRoutes.collection,
-        builder: (context, state) => kV21Collection ? const V21CollectionScreen() : const CollectionView(),
+        builder: (context, state) => const V21CollectionScreen(),
       ),
       GoRoute(
         path: AppRoutes.deck,
-        builder: (context, state) => const DeckView(),
+        builder: (context, state) => const V21DeckScreen(),
       ),
       GoRoute(
         path: AppRoutes.friends,
@@ -92,70 +69,56 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.matchmaking,
-        builder: (context, state) => kV21Arena ? const V21MatchmakingScreen() : const MatchmakingView(),
+        builder: (context, state) => const V21MatchmakingScreen(),
       ),
       GoRoute(
         path: '${AppRoutes.match}/:matchId',
-        builder: (context, state) => kV21Arena
-            ? V21ArenaScreen(matchId: state.pathParameters['matchId']!)
-            : MatchView(matchId: state.pathParameters['matchId']!),
+        builder: (context, state) => V21ArenaScreen(matchId: state.pathParameters['matchId']!),
       ),
       GoRoute(
         path: AppRoutes.profile,
-        builder: (context, state) => kV21Inner ? const V21ProfileScreen() : const ProfileView(),
+        builder: (context, state) => const V21ProfileScreen(),
       ),
       GoRoute(
         path: AppRoutes.leaderboard,
-        builder: (context, state) => kV21Inner ? const V21LeaderboardScreen() : const LeaderboardView(),
+        builder: (context, state) => const V21LeaderboardScreen(),
       ),
       GoRoute(
         path: AppRoutes.leagueTiers,
-        builder: (context, state) => kV21Inner ? const V21LeagueScreen() : const LeagueTiersView(),
+        builder: (context, state) => const V21LeagueScreen(),
       ),
       GoRoute(
         path: AppRoutes.settings,
-        builder: (context, state) => kV21Inner ? const V21SettingsScreen() : const SettingsView(),
-      ),
-      GoRoute(
-        path: AppRoutes.designSystem,
-        builder: (context, state) => const DesignSystemView(),
-      ),
-      GoRoute(
-        path: AppRoutes.characterPreview,
-        builder: (context, state) => const CharacterPreviewView(),
-      ),
-      GoRoute(
-        path: AppRoutes.stylePrototype,
-        builder: (context, state) => const StylePrototypeView(),
+        builder: (context, state) => const V21SettingsScreen(),
       ),
       GoRoute(
         path: AppRoutes.store,
-        builder: (context, state) => kV21Store ? const V21StoreScreen() : const StoreView(),
+        builder: (context, state) => const V21StoreScreen(),
       ),
       // Ekonomi V2 (FAZ 1): sandıklar ve olasılıklar
       GoRoute(
         path: AppRoutes.chests,
-        builder: (context, state) => kV21Inner ? const V21ChestsScreen() : const ChestsView(),
+        builder: (context, state) => const V21ChestsScreen(),
       ),
       GoRoute(
         path: AppRoutes.chestOdds,
-        builder: (context, state) => kV21Inner ? const V21ChestOddsScreen() : const ChestOddsView(),
+        builder: (context, state) => const V21ChestOddsScreen(),
       ),
       GoRoute(
         path: AppRoutes.progress,
-        builder: (context, state) => kV21Inner ? const V21ProgressScreen() : const ProgressView(),
+        builder: (context, state) => const V21ProgressScreen(),
       ),
       GoRoute(
         path: AppRoutes.inventory,
-        builder: (context, state) => kV21Inner ? const V21InventoryScreen() : const InventoryView(),
+        builder: (context, state) => const V21InventoryScreen(),
       ),
       GoRoute(
         path: AppRoutes.season,
-        builder: (context, state) => kV21Season ? const V21SeasonScreen() : const SeasonView(),
+        builder: (context, state) => const V21SeasonScreen(),
       ),
       GoRoute(
         path: AppRoutes.sbc,
-        builder: (context, state) => kV21Inner ? const V21SbcScreen() : const SbcListView(),
+        builder: (context, state) => const V21SbcScreen(),
         routes: [
           GoRoute(
             path: ':challengeId',
@@ -165,9 +128,9 @@ class AppRouter {
               final gorev = state.extra;
               if (gorev is! SbcChallenge) {
                 // Dogrudan bu adrese gelinmisse (derin baglanti) listeye don
-                return const SbcListView();
+                return const V21SbcScreen();
               }
-              return kV21Inner ? V21SbcBuilderScreen(challenge: gorev) : SbcBuilderView(challenge: gorev);
+              return V21SbcBuilderScreen(challenge: gorev);
             },
           ),
         ],
@@ -176,29 +139,15 @@ class AppRouter {
     // Bilinmeyen adres (eski bağlantı, elle yazılmış yol): referans
     // dilinde boş durum + oyuncuyu çıkmazda bırakmayan ana sayfa düğmesi.
     errorBuilder: (context, state) => Scaffold(
-      backgroundColor: Ref.phoneBg,
+      backgroundColor: V21Colors.inkDeep,
       body: SafeArea(
         child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            // Kaydırılabilir alan: panel içeriği kadar yer kaplar (Center
-            // içinde tam ekrana uzuyordu) ve çok küçük ekranda taşmaz.
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: RefCardPanel(
-                padding: const EdgeInsets.all(20),
-                children: [
-                  const Center(child: Em('🧭', size: 46)),
-                  Text('SAYFA BULUNAMADI', textAlign: TextAlign.center, style: Ref.h2()),
-                  Text(
-                    'Bu adreste bir ekran yok. Bağlantı eskimiş ya da yanlış yazılmış olabilir.',
-                    textAlign: TextAlign.center,
-                    style: Ref.bodyText(12, color: Ref.muted),
-                  ),
-                  RefCta('ANA SAYFAYA DÖN', fontSize: 19, onTap: () => context.go(AppRoutes.home)),
-                ],
-              ),
-            ),
+          child: V21EmptyState(
+            icon: Icons.explore_off_rounded,
+            title: 'SAYFA BULUNAMADI',
+            message: 'Bu adreste bir ekran yok. Bağlantı eskimiş ya da yanlış yazılmış olabilir.',
+            actionLabel: 'ANA SAYFAYA DÖN',
+            onAction: () => context.go(AppRoutes.home),
           ),
         ),
       ),
@@ -220,19 +169,10 @@ class AppRouter {
         konum == AppRoutes.login || konum == AppRoutes.register;
 
     // Giris yapilmamis ve korunan bir ekrana gidiliyorsa -> giris
-    if (!girisYapildi && !girisEkranindaMi) {
-      if (konum.startsWith('${AppRoutes.friendInvite}/')) {
-        _pendingInvitePath = state.uri.path;
-      }
-      return AppRoutes.login;
-    }
+    if (!girisYapildi && !girisEkranindaMi) return AppRoutes.loginFor(state.uri.path);
 
     // Giris yapilmis ama giris/kayit ekranina gidiliyorsa -> ana sayfa
-    if (girisYapildi && girisEkranindaMi) {
-      final next = _pendingInvitePath;
-      _pendingInvitePath = null;
-      return next ?? AppRoutes.home;
-    }
+    if (girisYapildi && girisEkranindaMi) return AppRoutes.afterAuth(state.uri);
 
     return null;
   }

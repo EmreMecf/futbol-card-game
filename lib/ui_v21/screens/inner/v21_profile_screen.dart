@@ -9,7 +9,7 @@ import '../../../features/items/cosmetics/equipped_cosmetics.dart';
 import '../../../features/items/domain/items_repository.dart';
 import '../../../features/profile/domain/achievements.dart';
 import '../../../features/profile/presentation/viewmodel/profile_view_model.dart';
-import '../../../shared/widgets/cosmetics/cosmetic_art.dart';
+import '../../../ui_v21/components/v21_cosmetics.dart';
 import '../../ui_v21.dart';
 
 /// V2.1 PROFİL (referans `assets/v21/screens/profile.png`).
@@ -157,6 +157,7 @@ class _IdentityCard extends StatelessWidget {
     final avatar = V21PlayerAvatar(
       seed: 'oyuncu-${u?.id ?? u?.username ?? '?'}',
       semanticsLabel: 'Avatar',
+      name: u?.username,
       size: 108 * k,
       ringColor: const Color(0xFFFFC832),
       background: const Color(0xFFFF9F5A),

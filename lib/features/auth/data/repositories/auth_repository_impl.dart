@@ -38,11 +38,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Result<UserModel>> signUp({
-    required String email,
-    required String password,
-    required String username,
-  }) {
+  Future<Result<UserModel>> signUp({required String email, required String password, required String username}) {
     return Result.guard(() async {
       final json = await _remote.signUp(
         email: email.trim().toLowerCase(),
@@ -54,15 +50,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Result<UserModel>> signIn({
-    required String email,
-    required String password,
-  }) {
+  Future<Result<UserModel>> signIn({required String email, required String password}) {
     return Result.guard(() async {
-      final json = await _remote.signIn(
-        email: email.trim().toLowerCase(),
-        password: password,
-      );
+      final json = await _remote.signIn(email: email.trim().toLowerCase(), password: password);
       return _oturumuKur(AuthResponse.fromJson(json));
     });
   }
@@ -91,8 +81,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> grantStarterPack() =>
-      Result.guard(() => _remote.grantStarterPack());
+  Future<Result<Map<String, dynamic>>> grantStarterPack() => Result.guard(() => _remote.grantStarterPack());
 
   // ------------------------------------------------------------------
   /// Giris/kayit cevabindan jetonlari kaydeder ve WebSocket'i acar.

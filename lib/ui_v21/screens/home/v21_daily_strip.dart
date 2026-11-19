@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../../../core/di/injection.dart';
-import '../../../features/chests/presentation/widgets/chest_strip.dart' show chestInventoryChanged;
+import '../../../features/chests/domain/chest_texts.dart';
 import '../../../features/daily/data/daily_service.dart';
-import '../../../features/daily/presentation/daily_panel.dart' show DailyPanelTexts;
+import '../../../features/daily/domain/daily_texts.dart';
 import '../../../shared/widgets/error_snackbar.dart';
 import '../../ui_v21.dart';
 

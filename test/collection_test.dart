@@ -3,9 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/collection/domain/repositories/collection_repository.dart';
 import 'package:futbol_card/features/collection/presentation/viewmodel/collection_view_model.dart';
-import 'package:futbol_card/shared/widgets/game/tier_badge.dart';
-import 'package:futbol_card/features/collection/presentation/widgets/collection_filter_bar.dart';
-import 'package:futbol_card/shared/widgets/premium_card/premium_card.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -184,88 +181,6 @@ void main() {
     });
   });
 
-  // ==================================================================
-  // EKRAN TESTLERI
-  // ==================================================================
-  group('Koleksiyon ekrani', () {
-    Future<CollectionViewModel> ekraniAc(WidgetTester tester) async {
-      final vm = CollectionViewModel(_SahteRepository(testKadrosu()));
-      await vm.load();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ChangeNotifierProvider<CollectionViewModel>.value(
-            value: vm,
-            child: Scaffold(
-              body: Column(
-                children: [
-                  CollectionFilterBar(viewModel: vm),
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 150,
-                        childAspectRatio: 0.66,
-                      ),
-                      itemCount: vm.filteredCards.length,
-                      itemBuilder: (context, i) {
-                        return PremiumPlayerCard.fromInventory(
-                          vm.filteredCards[i],
-                          key: ValueKey(vm.filteredCards[i].userCardId),
-                          width: 140,
-                          interactive: false,
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 200));
-      return vm;
-    }
-
-    testWidgets('izgara kartlari hatasiz cizer', (tester) async {
-      await ekraniAc(tester);
-
-      expect(tester.takeException(), isNull);
-      // GridView sadece gorunen kartlari cizer (lazy), en az bir tane olmali
-      expect(find.byType(PremiumPlayerCard), findsWidgets);
-    });
-
-    testWidgets('filtre bandi tum seviyeleri gosterir', (tester) async {
-      await ekraniAc(tester);
-
-      // Ekrandaki adlar: Bronz, Gümüş, Altın, Elmas, Efsane
-      // Kartlar da aynı nadirlik adını yazar; yalnız filtre bandına bak
-      final bant = find.byType(CollectionFilterBar);
-      for (final seviye in CardTier.values) {
-        expect(find.descendant(of: bant, matching: find.text(seviye.displayName)), findsOneWidget,
-            reason: '${seviye.displayName} rozeti gorunmeli');
-      }
-
-      // Pozisyon rozetleri
-      for (final pozisyon in CardPosition.values) {
-        expect(find.text(pozisyon.shortLabel), findsWidgets);
-      }
-
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('Legend filtresine basinca sadece 6 kart kalir',
-        (tester) async {
-      final vm = await ekraniAc(tester);
-
-      await tester.tap(find.descendant(of: find.byType(CollectionFilterBar), matching: find.text('Efsane')));
-      await tester.pump(const Duration(milliseconds: 200));
-
-      expect(vm.filteredCards.length, 6);
-      expect(tester.takeException(), isNull);
-    });
-  });
 }
 
 /// Testlerde gercek sunucu yerine bellekten veri veren sahte repository

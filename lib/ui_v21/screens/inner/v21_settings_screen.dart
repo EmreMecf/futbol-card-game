@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -114,6 +113,7 @@ class _Body extends StatelessWidget {
                   V21PlayerAvatar(
                     seed: 'oyuncu-${user?.id ?? user?.username ?? '?'}',
                     semanticsLabel: 'Avatar',
+                    name: user?.username,
                     size: 56 * k,
                     ringColor: const Color(0xFFFFC832),
                     background: const Color(0xFFFF9F5A),
@@ -148,32 +148,6 @@ class _Body extends StatelessWidget {
             ],
           ),
         ),
-        // Geliştirici araçları: yayın sürümünde derlenmez (kDebugMode sabit)
-        if (kDebugMode) ...[
-          SizedBox(height: 14 * k),
-          V21SectionTitle('GELİŞTİRİCİ', scale: k),
-          Wrap(
-            spacing: 8 * k,
-            runSpacing: 8 * k,
-            children: [
-              for (final (label, route) in const [
-                ('TASARIM', AppRoutes.designSystem),
-                ('KARAKTER', AppRoutes.characterPreview),
-                ('2D STİL', AppRoutes.stylePrototype),
-              ])
-                SizedBox(
-                  width: 110 * k,
-                  child: V21GameButton(
-                    label: label,
-                    tone: V21ButtonTone.purple,
-                    size: V21ButtonSize.small,
-                    scale: k,
-                    onPressed: () => context.push(route),
-                  ),
-                ),
-            ],
-          ),
-        ],
         SizedBox(height: 20 * k),
         V21GameButton(
           label: 'ÇIKIŞ YAP',

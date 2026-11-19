@@ -8,8 +8,8 @@ import '../../core/di/injection.dart';
 import '../../core/router/app_routes.dart';
 import '../../features/auth/presentation/viewmodel/auth_view_model.dart';
 import '../../features/chests/presentation/viewmodel/chests_view_model.dart';
-import '../../features/chests/presentation/widgets/chest_strip.dart' show chestInventoryChanged;
-import '../../features/chests/presentation/widgets/emergency_squad_banner.dart';
+import '../../features/chests/domain/chest_texts.dart';
+import '../../ui_v21/screens/deck/v21_emergency_banner.dart';
 import '../../features/collection/presentation/viewmodel/collection_view_model.dart';
 import '../../features/daily/data/daily_service.dart';
 import '../../features/deck/presentation/viewmodel/deck_view_model.dart';
@@ -38,22 +38,16 @@ class WebHome extends StatelessWidget {
       children: [
         wBox(268, 103, 1138, 692, wImage('home_hero', fit: BoxFit.fill)),
         wBox(
-          437,
-          540,
-          973,
-          662,
-          active == null
-              ? Semantics(
-                  button: true,
-                  label: 'Maça başla',
-                  child: V21Tap(onTap: () => context.go(AppRoutes.matchmaking), child: const SizedBox.expand()),
-                )
-              : WButton(
-                  'MAÇA DÖN',
-                  tone: V21ButtonTone.green,
-                  fontSize: 58,
-                  onTap: () => context.push(AppRoutes.matchWithId(active)),
-                ),
+          430,
+          532,
+          980,
+          670,
+          WButton(
+            active == null ? 'MAÇA BAŞLA' : 'MAÇA DÖN',
+            tone: active == null ? V21ButtonTone.gold : V21ButtonTone.green,
+            fontSize: 58,
+            onTap: () => active == null ? context.go(AppRoutes.matchmaking) : context.push(AppRoutes.matchWithId(active)),
+          ),
         ),
         wBox(282, 697, 1136, 915, const _DeckStrip()),
         wBox(
@@ -752,7 +746,7 @@ class _WebDeckState extends State<WebDeck> {
             fontSize: 31,
             icon: Icons.check_rounded,
             busy: vm.isSaving,
-            onTap: vm.hasUnsavedChanges || !vm.isComplete ? widget.onSave : null,
+            onTap: vm.hasUnsavedChanges || !vm.isComplete || vm.duplicateMessage != null ? widget.onSave : null,
           ),
         ),
       ],
@@ -1210,15 +1204,59 @@ class _WebChestsState extends State<WebChests> {
 // ====================================================================
 // MAĞAZA
 // ====================================================================
+/// Paket görseli: yelpaze kart sırtları
+class _PackArt extends StatelessWidget {
+  final Color accent;
+  const _PackArt({required this.accent});
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    alignment: Alignment.center,
+    children: [
+      for (final (a, x) in const [(-0.22, -26.0), (0.22, 26.0), (0.0, 0.0)])
+        Transform.translate(
+          offset: Offset(x, 0),
+          child: Transform.rotate(
+            angle: a,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [BoxShadow(color: accent.withValues(alpha: 0.55), blurRadius: 14)],
+              ),
+              child: const V21CardBack(width: 104, semanticsLabel: 'Kart paketi'),
+            ),
+          ),
+        ),
+    ],
+  );
+}
+
+/// Günün teklifi indirim rozeti; teklif yoksa oran gösterilmez
+class _OfferBadge extends StatelessWidget {
+  final int? percent;
+  const _OfferBadge({required this.percent});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    alignment: const Alignment(0, 0.42),
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: const Color(0xFFC81E3C),
+      border: Border.all(color: const Color(0xFF3A0A2A), width: 5),
+    ),
+    child: Text(percent == null ? '–' : '%$percent', style: wTitle(40)),
+  );
+}
+
 class WebStore extends StatelessWidget {
   final StoreViewModel vm;
   final void Function(PackType) onBuy;
   final VoidCallback onBuyOffer;
   const WebStore({super.key, required this.vm, required this.onBuy, required this.onBuyOffer});
 
-  static String _art(PackType p, int i) => p.slug.contains('squad') || p.slug.contains('kadro')
-      ? 'pack_squad'
-      : (p.slug.contains('premium') ? 'pack_premium' : (i == 0 ? 'pack_standard' : (i == 1 ? 'pack_premium' : 'pack_squad')));
+  static Color _art(PackType p, int i) => p.slug.contains('squad') || p.slug.contains('kadro')
+      ? const Color(0xFF4FC3FF)
+      : (p.slug.contains('premium') || i == 1 ? const Color(0xFFD9A2F8) : const Color(0xFFFFC832));
 
   @override
   Widget build(BuildContext context) {
@@ -1231,7 +1269,23 @@ class WebStore extends StatelessWidget {
       route: AppRoutes.store,
       children: [
         wBox(296, 100, 900, 170, Text('MAĞAZA', style: wTitle(60))),
-        wBox(292, 180, 1146, 428, ClipRRect(borderRadius: BorderRadius.circular(20), child: wImage('offer_bg', fit: BoxFit.fill))),
+        wBox(
+          292,
+          180,
+          1146,
+          428,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                wImage('offer_bg', fit: BoxFit.fill),
+                // İndirim oranı sunucudan gelir; görseldeki rozetin üstünü kapatır
+                Positioned(left: 690, top: -32, width: 124, height: 124, child: _OfferBadge(percent: offer?.discountPct)),
+              ],
+            ),
+          ),
+        ),
         wBox(
           350,
           244,
@@ -1319,19 +1373,31 @@ class WebStore extends StatelessWidget {
             ),
           ),
         ),
-        wBox(432, 840, 762, 924, WButton('PAKETLER', fontSize: 38, onTap: () {})),
+        // Paketler bu sayfanın kendisi: seçili sekme, tıklanmaz
+        wBox(
+          432,
+          840,
+          762,
+          924,
+          Semantics(
+            selected: true,
+            label: 'Paketler, seçili sekme',
+            excludeSemantics: true,
+            child: IgnorePointer(child: WButton('PAKETLER', fontSize: 38, onTap: () {})),
+          ),
+        ),
         wBox(796, 840, 1126, 924, WButton('TEKLİFLER', tone: V21ButtonTone.blue, fontSize: 38, onTap: () => context.push(AppRoutes.sbc))),
         wBox(1158, 840, 1488, 924, WButton('KOZMETİK', tone: V21ButtonTone.blue, fontSize: 38, onTap: () => context.push(AppRoutes.inventory))),
       ],
     );
   }
 
-  Widget _packCard(PackType p, String art) {
+  Widget _packCard(PackType p, Color art) {
     final missing = p.priceCoins - vm.coins;
     return WPanel(
       child: Stack(
         children: [
-          Positioned(left: 4, top: 8, bottom: 8, width: 176, child: wImage(art, fit: BoxFit.contain)),
+          Positioned(left: 4, top: 8, bottom: 8, width: 176, child: _PackArt(accent: art)),
           Positioned(
             right: 8,
             top: 14,
@@ -1862,8 +1928,8 @@ class WebFriends extends StatelessWidget {
             ),
           ),
         ),
-        wBox(472, 298, 854, 668, _player('ODA SAHİBİ', Icons.workspace_premium_rounded, host, 'avatar_me', const Color(0xFFFFC832), r?['host_ready'] == true, isHost)),
-        wBox(1048, 298, 1430, 668, _player('DAVETLİ', Icons.groups_rounded, guest ?? 'Bekleniyor...', 'avatar_rival', const Color(0xFF4FA8F5), r?['guest_ready'] == true, !isHost)),
+        wBox(472, 298, 854, 668, _player('ODA SAHİBİ', Icons.workspace_premium_rounded, host, 'oda-$host', const Color(0xFFFFC832), r?['host_ready'] == true, isHost)),
+        wBox(1048, 298, 1430, 668, _player('DAVETLİ', Icons.groups_rounded, guest ?? 'Bekleniyor...', guest == null ? null : 'oda-$guest', const Color(0xFF4FA8F5), r?['guest_ready'] == true, !isHost)),
         wBox(890, 470, 1020, 570, Center(child: Text('VS', style: wTitle(92, color: V21Colors.goldTop)))),
         wBox(
           380,
@@ -1943,7 +2009,7 @@ class WebFriends extends StatelessWidget {
     );
   }
 
-  Widget _player(String tag, IconData icon, String name, String avatar, Color color, bool ready, bool mine) => Stack(
+  Widget _player(String tag, IconData icon, String name, String? seed, Color color, bool ready, bool mine) => Stack(
     clipBehavior: Clip.none,
     children: [
       Positioned.fill(
@@ -1958,7 +2024,9 @@ class WebFriends extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  ClipOval(child: SizedBox(width: 84, height: 84, child: wImage(avatar))),
+                  seed == null
+                      ? const SizedBox(width: 84, height: 84, child: Icon(Icons.person_search_rounded, size: 60, color: Color(0xFFD9CCF7)))
+                      : V21PlayerAvatar(seed: seed, size: 84, semanticsLabel: name),
                   const SizedBox(width: 18),
                   Expanded(
                     child: Column(

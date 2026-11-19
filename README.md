@@ -2,13 +2,10 @@
 
 Gerçek zamanlı, çok oyunculu futbol kart/strateji oyunu.
 
-**Hedef platformlar: yalnız telefon ve tablet (Android, iOS/iPadOS), her
-ikisinde de dikey.** Web ve masaüstü sürümü yok (`web/` klasörü kaldırıldı).
-Yön üç yerde kilitli: `lib/main.dart`, `ios/Runner/Info.plist` (iPad'de
-`UIRequiresFullScreen`) ve `android/app/src/main/AndroidManifest.xml`
-(`sensorPortrait`; Android 16 tabletleri için geçici muafiyet özelliğiyle).
-Aşağıdaki "masaüstü" düzen anlatımları yalnız eski (Ref) arayüze aittir;
-V2.1 arayüzü tablette telefon düzenini ortalar.
+**Hedef platformlar: telefon, tablet (Android, iOS/iPadOS) ve web.** Telefon
+yalnız dikey çalışır; tablet ve web her yönde ve pencere boyutunda çalışır.
+Yön kararı açılışta `lib/core/platform/orientation_policy.dart` ile verilir.
+Geniş pencerede (1100 px ve üstü) `lib/ui_v21/web/` altındaki web tasarımı açılır.
 
 ```
 Flutter  ──HTTP/JSON──▶  Dart Sunucu  ──SQL──▶  PostgreSQL
@@ -58,10 +55,9 @@ flutter run
 | `lib/features/profile/` | Profil: karne, kazanma oranı, maç geçmişi |
 | `lib/features/settings/` | Ayarlar: ses, titreşim, animasyon (cihazda saklanır) |
 | `lib/features/leaderboard/` | Lig sistemi ve liderlik tablosu |
-| `lib/shared/widgets/app_shell.dart` | Gezinme kabuğu: telefonda alt çubuk, masaüstünde kenar çubuğu |
+| `lib/ui_v21/` | Oyunun bütün arayüzü: tasarım sistemi, ekranlar ve web düzeni |
 | `assets/fonts/` | Barlow Condensed (başlık/rakam) + Nunito (metin) |
-| `lib/shared/widgets/premium_card/` | FIFA seviyesi kart widget'ları — [README](lib/shared/widgets/premium_card/README.md) |
-| `lib/shared/widgets/walkout/` | Görkemli paket açılışı: spot ışığı, bayrak, arma, konfeti |
+| `assets/v21/characters/` | 550 kart karakteri |
 | `database/` | PostgreSQL şeması ve oyun kuralları — [README](database/README.md) |
 | `scripts/` | Veritabanı ve sunucu başlatma betikleri |
 
@@ -126,82 +122,19 @@ güncellemen yeterli. Uygulamayı yeniden yayınlamana gerek yok.
 
 ---
 
-## Tek kod, iki ekran: telefon ve tarayıcı
+## Arayüz
 
-Aynı ViewModel'i paylaşan **iki yerleşim** var. Hangisinin çizileceğine
-`AppBreakpoints` karar veriyor.
+Oyunun tek arayüzü `lib/ui_v21/` altındadır; eski tasarım tamamen kaldırıldı.
 
-| Genişlik | Sınıf | Gezinme | Ana sayfa | Maç ekranı |
-|---|---|---|---|---|
-| < 600 px | `mobile` | Alt sekme çubuğu | Tek sütun | Masa dikey, el altta |
-| 600–1024 px | `tablet` | Alt sekme çubuğu | Geniş tek sütun | Üç sütun |
-| > 1024 px | `desktop` | Sol kenar çubuğu | İki sütunlu ızgara | Üç sütun + yan panel |
+* **Telefon:** yalnız dikey, 390×844 tuvalinden ölçeklenir.
+* **Tablet:** her yön; geniş ekranda yan menü.
+* **Web:** 1100 px ve üstü pencerede `lib/ui_v21/web/` tasarımı açılır.
 
-Alt çubuk **en fazla 5 madde** taşır; fazlası dokunma hedeflerini 44 px'in
-altına düşürür. Telefona sığmayan Koleksiyon ve Görevler kenar çubuğunda
-yer alır.
+### Maskot ve kart karakterleri
 
-**Maç ekranı kaydırılamaz.** Oyuncu 45 saniyede karar verirken kaydırma
-yapmak zorunda kalmamalı; bu yüzden kart ölçüleri sabit değil, mevcut
-yüksekliğe göre hesaplanıyor.
-
-### Yazı tipleri
-
-| Aile | Nerede | Neden |
-|---|---|---|
-| Barlow Condensed | Kart gücü, skor, sayaç, başlık, buton | Rakamları dar; 3 haneli güç değeri karta sığıyor |
-| Nunito | Açıklama, etiket, gövde metni | Yumuşak köşeli, uzun metinde yormuyor |
-
-Nunito **değişken (variable)** bir font. Flutter'da yalnızca `fontWeight`
-vermek her platformda çalışmıyor; `AppTypography` her stile `fontVariations`
-ile `wght` eksenini de yazıyor.
-
-### Kimya artık maç ekranında görünüyor
-
-Turu `güç + kimya` belirliyor ama bu bonus hiçbir yerde gösterilmiyordu.
-Şimdi her kartın köşesinde **+N** rozeti var, seçili kartta altında
-**MAÇTA 86** yazıyor, masaüstü yan panelinde ise dökümü duruyor:
-`83 + 3 kimya = 86`.
-
-Ayrıca kart artık dokunulur dokunulmaz oynanmıyor: önce **seçiliyor**,
-sonra ayrı bir butonla onaylanıyor. Hamle geri alınamaz; telefonda listeyi
-kaydırırken yanlışlıkla kart oynanıyordu.
-
----
-
-## Ekranlar
-
-Hepsi tek kod tabanında, iki yerleşimle. Hangisinin çizileceğine
-`AppBreakpoints` karar veriyor.
-
-| Ekran | Telefon | Masaüstü |
-|---|---|---|
-| Ana sayfa | Tek sütun, alt sekme çubuğu | İki sütunlu ızgara, kenar çubuğu |
-| Maç | Dikey masa, el altta | Üç sütun: tur geçmişi / masa / seçili kart |
-| Koleksiyon | Yatay filtre çipleri | Sol filtre sütunu, 5'li ızgara |
-| Kadro | Saha ortada, kimya üstte | Saha solda, kimya ve kaydet sağda |
-| Mağaza | Yatay paket kartı | Üç sütunlu ızgara, dikey kart |
-| Görevler | Kart listesi | Aynı, geniş |
-| Görev kurma | Şartlar üstte | Saha solda, şartlar sağda |
-| Profil | Karne + maç geçmişi | Aynı, ortalanmış |
-| Ayarlar | Tek sütun | Aynı, ortalanmış |
-| Liderlik | Rütbe kartı + sıralama | Aynı, ortalanmış |
-| Ligler | 12 basamak, üçlü gruplar | Aynı, daha geniş kartlar |
-| Eşleşme, maç sonucu, paket açılışı | Tam ekran | Ortalanmış, en fazla 720 px |
-
-Tasarım tuvali 20 artboard olarak ayrı tutuluyor; koda dökülmeden önce
-orada karara bağlanıyor.
-
-### Bilerek yapılmayanlar
-
-| İstenen | Neden yok |
-|---|---|
-| Günlük ödül, sezon geçidi | Sunucuda karşılığı yok. Uydurma sayı göstermek yerine o alana gerçek karne kondu. |
-| Profilde rozet ve başarı | Sunucuda böyle bir sistem yok. |
-| Kullanıcı adı / şifre değiştirme | Sunucuda uç yok. Ayarlarda bilgi olarak gösteriliyor. |
-| Gerçek oyuncu görselleri | Kartlar siluet çiziyor. |
-
----
+* **Maskot:** Efsane Kaptan (yaşlı amca). Ana sayfa, giriş, yükleme, zafer, maça hazırlık ve öğretici ekranlarında görünür.
+* **Kart karakterleri:** `assets/v21/characters/` altındaki 550 karakter yalnız futbolcu kartlarında kullanılır. `V21Characters` futbolcunun adından her cihazda aynı karakteri seçer; katalogdaki 100 futbolcunun karakterleri birbirinden farklıdır.
+* **Oyuncu avatarı:** kullanıcı adının baş harfi.
 
 ## Lig sistemi
 
@@ -253,7 +186,7 @@ Kartlar o anda sunucuda zaten belirlenmiş durumdadır, sahne sadece perdedir.
 "Hepsini göster" her an doğrudan paket sonucuna atlar.
 
 Paketten çıkan **en yüksek seviyeli karta** göre farklı bir açılış oynar.
-Karar `PackOpeningViewModel` içinde, çizim `lib/shared/widgets/walkout/`
+Karar `PackOpeningViewModel` içinde, çizim `lib/ui_v21/screens/rewards/v21_walkout.dart`
 altında.
 
 | Çıkan en iyi kart | Açılış | Süre |
@@ -366,9 +299,9 @@ testler atlanır, başarısız olmaz.
 
 ## Yayına hazırlık
 
-FAZ 7 kalite kontrolünde `flutter build apk --release` gerçekten
-çalıştırıldı ve başarılı. (O dönemde web derlemesi de denenmişti; web
-artık hedef değil ve `web/` klasörü kaldırıldı.)
+FAZ 7 kalite kontrolünde `flutter build apk --release` ve
+`flutter build web --release` gerçekten çalıştırıldı ve başarılı. CI web
+derlemesini her değişiklikte denetler.
 
 ### Yayın derlemesi
 
@@ -393,7 +326,7 @@ flutter build appbundle --release --dart-define=API_BASE_URL=https://api.ornek.c
 | `ENVIRONMENT=production` | Varsayılan JWT anahtarı / geliştirme DB şifresiyle sunucu **açılmaz** |
 | `JWT_SECRET` | En az 32 karakter, rastgele |
 | `DB_PASSWORD` | Geliştirme şifresi kabul edilmez |
-| `CORS_ORIGIN` | Yalnız tarayıcı istemcileri için (varsayılan `*`). Mobil uygulama CORS'a tabi değildir; web sürümü olmadığı için oyun bu değere bağlı değil. |
+| `CORS_ORIGIN` | Web sürümünün adresi (varsayılan `*`). Web yayındayken gerçek adres yazılmalı. |
 | `TRUST_PROXY=true` | Sadece nginx / yük dengeleyici arkasındaysa |
 | `AUTH_RATE_LIMIT` | `/auth` uçlarına IP başına dakikada istek (varsayılan 20) |
 
@@ -433,7 +366,7 @@ Sunucu `wss://` (TLS) arkasında çalışmalı: WebSocket jetonu adreste taşın
 | Kademeli paket açılışı + Walkout animasyonu | ✅ Tamamlandı, 24 test |
 | Flutter: eşleşme ve maç ekranı | ✅ Tamamlandı, test edildi |
 | Tasarım sistemi (renk, yazı tipi, kırılma noktaları) | ✅ Tamamlandı, 29 test |
-| Duyarlı gezinme kabuğu (telefon + masaüstü) | ✅ Tamamlandı, 12 test |
+| Duyarlı arayüz (telefon, tablet, web) | ✅ Tamamlandı |
 | Ana sayfa ve maç ekranı yeni tasarımı | ✅ Tamamlandı, tarayıcıda doğrulandı |
 | Koleksiyon, kadro, mağaza, görevler duyarlı | ✅ Tamamlandı |
 | Profil ekranı + maç geçmişi API'si | ✅ Tamamlandı, 17 test |

@@ -5,7 +5,7 @@ import 'package:futbol_card/core/auth/session_manager.dart';
 import 'package:futbol_card/core/di/injection.dart';
 import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/features/chests/presentation/viewmodel/chests_view_model.dart';
-import 'package:futbol_card/features/chests/presentation/widgets/chest_strip.dart' show chestInventoryChanged;
+import 'package:futbol_card/features/chests/domain/chest_texts.dart' show chestInventoryChanged;
 import 'package:futbol_card/features/daily/data/daily_service.dart';
 import 'package:futbol_card/features/home/presentation/viewmodel/home_view_model.dart';
 import 'package:futbol_card/features/season/presentation/viewmodel/season_view_model.dart';

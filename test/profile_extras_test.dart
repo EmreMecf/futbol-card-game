@@ -13,7 +13,6 @@ import 'package:futbol_card/features/leaderboard/domain/repositories/leaderboard
 import 'package:futbol_card/features/match/domain/repositories/match_repository.dart';
 import 'package:futbol_card/features/profile/domain/achievements.dart';
 import 'package:futbol_card/features/profile/presentation/viewmodel/profile_view_model.dart';
-import 'package:futbol_card/features/profile/presentation/widgets/profile_sections.dart';
 import 'package:shared_models/shared_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -177,34 +176,8 @@ void main() {
           ),
         );
 
-    testWidgets('kilitli karoda kilit ve ilerleme çubuğu', (tester) async {
-      final a = bul(Achievement.evaluate(oyuncu(g: 4), null), 'on_galibiyet');
-      await tester.pumpWidget(sarmala(AchievementTile(achievement: a)));
 
-      expect(tester.takeException(), isNull);
-      expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
-      expect(find.text('Seri Galip'), findsOneWidget);
-    });
 
-    testWidgets('açık karoda onay işareti, çubuk yok', (tester) async {
-      final a = bul(Achievement.evaluate(oyuncu(g: 1), null), 'ilk_galibiyet');
-      await tester.pumpWidget(sarmala(AchievementTile(achievement: a)));
-
-      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.lock_rounded), findsNothing);
-    });
-
-    testWidgets('ekran okuyucu durumu söyler', (tester) async {
-      final semantik = tester.ensureSemantics();
-      final a = bul(Achievement.evaluate(oyuncu(g: 4), null), 'on_galibiyet');
-      await tester.pumpWidget(sarmala(AchievementTile(achievement: a)));
-
-      expect(
-        find.bySemanticsLabel(RegExp('Kilitli, 4 / 10')),
-        findsOneWidget,
-      );
-      semantik.dispose();
-    });
   });
 }
 

@@ -1,11 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../shared/widgets/avatar2d/avatar_painter.dart';
-import '../../shared/widgets/avatar2d/avatar_spec.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
+import 'v21_character.dart';
 import 'v21_painters.dart';
 import 'v21_tap.dart';
 
@@ -49,18 +47,14 @@ class V21Rarity {
 ///   ┌ Efsane Kaptan ┐     ← ad plakası
 ///   └ ★ EFSANE ★    ┘
 ///
-/// Portre: onaylı görsel ([imageUrl]) varsa o; yoksa projedeki 2D
-/// karakter çizicisi ([AvatarPortrait]) kartın kimliğinden üretilir.
+/// Portre: 550 karakterden biri;
+/// karakter futbolcunun adından seçilir (550 karakter).
 /// Bütün ölçüler [width] / 165 oranında ölçeklenir.
 class V21PlayerCard extends StatelessWidget {
   final String name;
   final CardPosition position;
   final CardTier tier;
   final int power;
-  final String seed;
-  final String? kitSeed;
-  final String? imageUrl;
-  final AvatarSpec? spec;
   final double width;
   final bool selected;
 
@@ -80,10 +74,6 @@ class V21PlayerCard extends StatelessWidget {
     required this.position,
     required this.tier,
     required this.power,
-    required this.seed,
-    this.kitSeed,
-    this.imageUrl,
-    this.spec,
     this.width = baseWidth,
     this.selected = false,
     this.locked = false,
@@ -104,9 +94,6 @@ class V21PlayerCard extends StatelessWidget {
     position: c.position,
     tier: c.tier,
     power: c.power,
-    seed: c.cardId,
-    kitSeed: c.club,
-    imageUrl: c.imageUrl,
     width: width,
     onTap: onTap,
     selected: selected,
@@ -274,18 +261,9 @@ class V21PlayerCard extends StatelessWidget {
     );
   }
 
-  Widget _portrait(double k) {
-    final url = imageUrl;
-    final avatar = Align(
-      alignment: const Alignment(0, -0.2),
-      child: AvatarPortrait(
-        spec: spec ?? AvatarSpec.generate(seed, kitSeed: kitSeed),
-        size: 150 * k,
-      ),
-    );
-    if (url != null && (url.startsWith('http://') || url.startsWith('https://'))) {
-      return CachedNetworkImage(imageUrl: url, fit: BoxFit.cover, errorWidget: (_, _, _) => avatar);
-    }
-    return avatar;
-  }
+  /// Futbolcunun karakteri: aynı ad her ekranda aynı karakter
+  Widget _portrait(double k) => Padding(
+    padding: EdgeInsets.only(top: 4 * k, bottom: 40 * k),
+    child: V21CharacterArt(characterKey: name),
+  );
 }

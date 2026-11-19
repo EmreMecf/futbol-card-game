@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../ui_v21/foundation/v21_colors.dart';
 
 /// Hata ve bilgi mesajlarini tek tip gostermek icin yardimci.
 class AppSnackBar {
   const AppSnackBar._();
 
   static void showError(BuildContext context, String message) {
-    _show(context, message, AppColors.danger, Icons.error_outline);
+    _show(context, message, V21Colors.danger, Icons.error_outline);
   }
 
   static void showSuccess(BuildContext context, String message) {
-    _show(context, message, AppColors.success, Icons.check_circle_outline);
+    _show(context, message, V21Colors.success, Icons.check_circle_outline);
   }
 
   static void showInfo(BuildContext context, String message) {
-    _show(context, message, AppColors.surfaceLight, Icons.info_outline);
+    _show(context, message, V21Colors.panel, Icons.info_outline);
   }
 
   static void _show(

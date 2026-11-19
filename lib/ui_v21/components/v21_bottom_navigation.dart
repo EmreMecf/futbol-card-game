@@ -4,6 +4,7 @@ import '../foundation/v21_assets.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_metrics.dart';
 import '../foundation/v21_typography.dart';
+import 'v21_mascot.dart';
 import 'v21_painters.dart';
 import 'v21_tap.dart';
 
@@ -51,7 +52,7 @@ class V21BottomNavigation extends StatelessWidget {
       route: cards,
       icon: (s) => V21CardStackIcon(size: s * 1.2),
     ),
-    V21NavItem(label: 'KADRO', route: squad, icon: (s) => _RoundArt(V21Assets.navSquadPortrait, s)),
+    V21NavItem(label: 'KADRO', route: squad, icon: (s) => V21MascotHead(size: s)),
     V21NavItem(label: 'ARENA', route: arena, icon: (s) => _RoundArt(V21Assets.navArenaStadium, s)),
     V21NavItem(
       label: 'MAĞAZA',

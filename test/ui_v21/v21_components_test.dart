@@ -173,7 +173,7 @@ void main() {
                     (CardTier.silver, 'Sert Stoper', CardPosition.defender, 85),
                     (CardTier.bronze, 'Genç Yetenek', CardPosition.midfielder, 78),
                   ])
-                    V21PlayerCard(name: name, position: pos, tier: tier, power: pw, seed: name, width: 110),
+                    V21PlayerCard(name: name, position: pos, tier: tier, power: pw, width: 110),
                 ],
               ),
               const SizedBox(height: 14),

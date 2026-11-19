@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/di/injection.dart';
+import 'core/platform/orientation_policy.dart';
 import 'core/utils/logger.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/settings/presentation/viewmodel/settings_view_model.dart';
@@ -21,15 +22,7 @@ import 'features/settings/presentation/viewmodel/settings_view_model.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Telefon dikey kalir; tablet ve web her yonde calisir
-  final ekran = WidgetsBinding.instance.platformDispatcher.views.first;
-  final kisaKenar = ekran.physicalSize.shortestSide / ekran.devicePixelRatio;
-  if (!kIsWeb && kisaKenar < 600) {
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-  }
+  await _ekranYonunuAyarla();
 
   try {
     await dotenv.load(fileName: '.env');
@@ -59,6 +52,28 @@ Future<void> main() async {
   }
 
   runApp(const FutbolCardApp());
+}
+
+/// Telefon dikey kalir; tablet ve web her yonde calisir.
+///
+/// Ekran olcusu acilista henuz gelmediyse once dikey kilitlenir (telefon
+/// yan acilmasin), ilk kare cizilince gercek olcuyle karar verilir.
+Future<void> _ekranYonunuAyarla() async {
+  const dikey = [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown];
+  final binding = WidgetsBinding.instance;
+  OrientationPolicy kural() {
+    final ekran = binding.platformDispatcher.views.first;
+    return orientationPolicyFor(ekran.physicalSize, ekran.devicePixelRatio, isWeb: kIsWeb);
+  }
+
+  final ilk = kural();
+  if (ilk == OrientationPolicy.free) return;
+  await SystemChrome.setPreferredOrientations(dikey);
+  if (ilk == OrientationPolicy.unknown) {
+    binding.addPostFrameCallback((_) {
+      if (kural() == OrientationPolicy.free) SystemChrome.setPreferredOrientations(const []);
+    });
+  }
 }
 
 /// Acilista bir sey ters giderse (ornek: .env eksik) bos beyaz ekran

@@ -65,6 +65,18 @@ class Env {
   /// /auth uclarina IP basina dakikada izin verilen istek
   static int get authRateLimitPerMinute => intVal('AUTH_RATE_LIMIT', 20);
 
+  // ---- GOOGLE / APPLE GIRISI ----
+  /// Kabul edilen Google istemci kimlikleri (virgulle ayrilmis: web, iOS).
+  /// Bos ise Google girisi kapalidir.
+  static Set<String> get googleClientIds => _csv('GOOGLE_CLIENT_IDS');
+
+  /// Kabul edilen Apple kimlikleri (virgulle ayrilmis: iOS paket kimligi, web Services ID).
+  /// Bos ise Apple girisi kapalidir.
+  static Set<String> get appleClientIds => _csv('APPLE_CLIENT_IDS');
+
+  static Set<String> _csv(String key) =>
+      str(key, '').split(',').map((v) => v.trim()).where((v) => v.isNotEmpty).toSet();
+
   // ---- ZAMANLAYICI ----
   /// Suresi dolmus maclarin taranma araligi (saniye)
   static int get sweepIntervalSeconds => intVal('SWEEP_INTERVAL_SECONDS', 15);

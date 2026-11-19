@@ -7,7 +7,7 @@ import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/chests/domain/chest_messages.dart';
 import 'package:futbol_card/features/chests/domain/chest_repository.dart';
 import 'package:futbol_card/features/chests/presentation/viewmodel/chests_view_model.dart';
-import 'package:futbol_card/features/chests/presentation/widgets/emergency_squad_banner.dart';
+import 'package:futbol_card/ui_v21/screens/deck/v21_emergency_banner.dart';
 import 'package:shared_models/shared_models.dart';
 
 import 'goldens/sahte_veri.dart';
@@ -100,35 +100,5 @@ void main() {
     expect(chestErrorMessage(e('bilinmeyen')), 'x', reason: 'bilinmeyen kod: sunucu mesajı');
   });
 
-  testWidgets('acil kadro: eksik mevki gösterilir, alınınca kartlar listelenir', (t) async {
-    await getIt.reset();
-    getIt.registerSingleton<ChestRepository>(depo);
-    var yenilendi = false;
-    await t.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: EmergencySquadBanner(
-          preview: EmergencySquadStatus(
-              enabled: true, missing: const {'MID': 1}, grant: const {'MID': 2, 'GK': 1}, eligible: true,
-              serverTime: kGoldenServerTime),
-          onClaimed: () => yenilendi = true,
-        ),
-      ),
-    ));
-    expect(find.text('Kadron kurulamıyor'), findsOneWidget);
-    expect(find.textContaining('1 orta saha'), findsOneWidget);
-    // Eksik 1 orta saha; yedekle birlikte 3 kart verilecek
-    await t.tap(find.text('ACİL KADRO AL (3 BRONZ KART)'));
-    await t.pump(const Duration(milliseconds: 300));
-    expect(depo.talep, 1);
-    expect(yenilendi, isTrue);
-    expect(find.text('Acil kadro alındı'), findsOneWidget);
-    await getIt.reset();
-  });
 
-  testWidgets('acil kadro: koleksiyon yetiyorsa hiç görünmez', (t) async {
-    await t.pumpWidget(MaterialApp(
-      home: Scaffold(body: EmergencySquadBanner(preview: EmergencySquadStatus(enabled: true, serverTime: kGoldenServerTime))),
-    ));
-    expect(find.byType(Container), findsNothing);
-  });
 }

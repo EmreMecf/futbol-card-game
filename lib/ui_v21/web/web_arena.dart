@@ -4,7 +4,7 @@ import 'package:shared_models/shared_models.dart';
 
 import '../../core/auth/session_manager.dart';
 import '../../core/router/app_routes.dart';
-import '../../features/match/presentation/view/match_view.dart' show handOrder;
+import '../../features/match/domain/hand_order.dart';
 import '../../features/match/presentation/viewmodel/match_view_model.dart';
 import '../ui_v21.dart';
 import 'web_kit.dart';
@@ -68,8 +68,8 @@ class WebArena extends StatelessWidget {
       overlays: overlays,
       children: [
         wBox(265, 92, 1672, 660, wImage('arena_bg', fit: BoxFit.fill)),
-        wBox(578, 116, 862, 208, _side('SEN', me, 'avatar_me', const [Color(0xFF3AA2FF), Color(0xFF1560D8)], false)),
-        wBox(1034, 116, 1324, 208, _side('RAKİP', opp, 'avatar_rival', const [Color(0xFFFF6B7D), Color(0xFFD92A4A)], true)),
+        wBox(578, 116, 862, 208, _side('SEN', me, 'oyuncu-${vm.myUserId ?? me}', const [Color(0xFF3AA2FF), Color(0xFF1560D8)], false)),
+        wBox(1034, 116, 1324, 208, _side('RAKİP', opp, 'oyuncu-${d.opponent?.id ?? opp}', const [Color(0xFFFF6B7D), Color(0xFFD92A4A)], true)),
         wBox(
           876,
           106,
@@ -184,8 +184,8 @@ class WebArena extends StatelessWidget {
     position: (m.position ?? CardPosition.midfielder).code,
   );
 
-  Widget _side(String title, String name, String avatar, List<Color> colors, bool reverse) {
-    final img = ClipOval(child: SizedBox(width: 78, height: 78, child: wImage(avatar)));
+  Widget _side(String title, String name, String seed, List<Color> colors, bool reverse) {
+    final img = V21PlayerAvatar(seed: seed, size: 78, semanticsLabel: name);
     final text = Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

@@ -5,7 +5,7 @@ import 'package:shared_models/shared_models.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/chests/presentation/viewmodel/chests_view_model.dart';
-import '../../../features/chests/presentation/widgets/chest_widgets.dart' show jokerSummary;
+import '../../../features/chests/domain/chest_texts.dart';
 import '../../ui_v21.dart';
 
 /// V2.1 SANDIK OLASILIKLARI (HTML referansında karşılığı yok; Sandıklar

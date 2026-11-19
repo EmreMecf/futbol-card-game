@@ -4,13 +4,12 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/error/app_exception.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/ref_tokens.dart';
 import '../../../../shared/widgets/error_snackbar.dart';
-import '../../../../shared/widgets/game/game_ui.dart';
+import '../../../../ui_v21/ui_v21.dart';
 import '../viewmodel/auth_view_model.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/auth_validators.dart';
+import '../widgets/social_auth_buttons.dart';
 
 /// Kayıt ekranı.
 class RegisterView extends StatefulWidget {
@@ -41,6 +40,8 @@ class _RegisterViewState extends State<RegisterView> {
     setState(() => _hata = null);
 
     final viewModel = context.read<AuthViewModel>();
+    // Davet linkiyle gelindiyse kayıt bitince o odaya dönülür
+    final hedef = AppRoutes.afterAuth(GoRouterState.of(context).uri);
     final basarili = await viewModel.signUp(
       email: _emailController.text,
       password: _passwordController.text,
@@ -50,11 +51,8 @@ class _RegisterViewState extends State<RegisterView> {
     if (!mounted) return;
 
     if (basarili) {
-      AppSnackBar.showSuccess(
-        context,
-        'Hesabın oluşturuldu! Başlangıç kadron hazır.',
-      );
-      context.go(AppRoutes.home);
+      AppSnackBar.showSuccess(context, 'Hesabın oluşturuldu! Başlangıç kadron hazır.');
+      context.go(hedef);
     } else {
       setState(() => _hata = viewModel.error);
       viewModel.clearError();
@@ -72,106 +70,74 @@ class _RegisterViewState extends State<RegisterView> {
 
     return AuthScaffold(
       showBack: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const GameLogo(size: 30, showTagline: false),
-          const SizedBox(height: AppSpacing.xxl),
-          GlassPanel(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('KADRONU KUR', style: Ref.h2()),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    'Hesabını oluştur; 15 kartlık başlangıç kadron hemen '
-                    'hazır olsun.',
-                    style: Ref.bodyText(12, color: Ref.muted),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-
-                  TextFormField(
-                    controller: _usernameController,
-                    textInputAction: TextInputAction.next,
-                    autofillHints: const [AutofillHints.newUsername],
-                    maxLength: AuthValidators.maxUsernameLength,
-                    onChanged: (_) => _hataTemizle(),
-                    decoration: const InputDecoration(
-                      labelText: 'Kullanıcı adı',
-                      helperText: 'Rakiplerin seni bu adla görecek',
-                      prefixIcon: Icon(Icons.person_outline_rounded),
-                      counterText: '',
-                    ),
-                    validator: AuthValidators.username,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    autofillHints: const [AutofillHints.email],
-                    onChanged: (_) => _hataTemizle(),
-                    decoration: const InputDecoration(
-                      labelText: 'E-posta',
-                      prefixIcon: Icon(Icons.mail_outline_rounded),
-                    ),
-                    validator: AuthValidators.email,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    textInputAction: TextInputAction.done,
-                    autofillHints: const [AutofillHints.newPassword],
-                    onChanged: (_) => _hataTemizle(),
-                    onFieldSubmitted: (_) => _submit(),
-                    decoration: InputDecoration(
-                      labelText: 'Şifre',
-                      helperText:
-                          'En az ${AuthValidators.minPasswordLength} karakter',
-                      prefixIcon: const Icon(Icons.lock_outline_rounded),
-                      suffixIcon: IconButton(
-                        tooltip: _obscurePassword
-                            ? 'Şifreyi göster'
-                            : 'Şifreyi gizle',
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
-                      ),
-                    ),
-                    validator: AuthValidators.password,
-                  ),
-
-                  if (hata != null) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    AuthErrorBanner(
-                      message: hata.message,
-                      isConnection: hata.type == AppErrorType.network,
-                    ),
-                  ],
-
-                  const SizedBox(height: AppSpacing.xl),
-                  GameButton(
-                    label: 'Hesap oluştur',
-                    icon: Icons.person_add_alt_1_rounded,
-                    isLoading: viewModel.isBusy,
-                    onPressed: _submit,
-                  ),
-                ],
+      title: 'KADRONU KUR',
+      subtitle: 'Hesabını oluştur; başlangıç kadron hemen hazır olsun.',
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextFormField(
+              controller: _usernameController,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.newUsername],
+              maxLength: AuthValidators.maxUsernameLength,
+              onChanged: (_) => _hataTemizle(),
+              style: V21Type.label(15, weight: FontWeight.w700, color: Colors.white),
+              decoration: authFieldDecoration(
+                'Kullanıcı adı',
+                Icons.person_outline_rounded,
+                helper: 'Rakiplerin seni bu adla görecek',
               ),
+              validator: AuthValidators.username,
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.email],
+              onChanged: (_) => _hataTemizle(),
+              style: V21Type.label(15, weight: FontWeight.w700, color: Colors.white),
+              decoration: authFieldDecoration('E-posta', Icons.mail_outline_rounded),
+              validator: AuthValidators.email,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.newPassword],
+              onChanged: (_) => _hataTemizle(),
+              onFieldSubmitted: (_) => _submit(),
+              style: V21Type.label(15, weight: FontWeight.w700, color: Colors.white),
+              decoration: authFieldDecoration(
+                'Şifre',
+                Icons.lock_outline_rounded,
+                helper: 'En az ${AuthValidators.minPasswordLength} karakter',
+                suffix: IconButton(
+                  tooltip: _obscurePassword ? 'Şifreyi göster' : 'Şifreyi gizle',
+                  color: V21Colors.textMuted,
+                  icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
+              validator: AuthValidators.password,
+            ),
+            if (hata != null) ...[
+              const SizedBox(height: 12),
+              AuthErrorBanner(message: hata.message, isConnection: hata.type == AppErrorType.network),
+            ],
+            const SizedBox(height: 16),
+            V21GameButton(
+              label: 'HESAP OLUŞTUR',
+              size: V21ButtonSize.large,
+              status: viewModel.isBusy ? V21ButtonStatus.loading : V21ButtonStatus.normal,
+              onPressed: _submit,
+            ),
+            SocialAuthButtons(onError: (e) => setState(() => _hata = e)),
+          ],
+        ),
       ),
     );
   }

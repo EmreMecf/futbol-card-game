@@ -8,7 +8,7 @@ import 'package:shared_models/shared_models.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/store/domain/reveal_style.dart';
 import '../../../features/store/presentation/viewmodel/pack_opening_view_model.dart';
-import '../../../features/store/presentation/widgets/pack_reveal_view.dart' show progressSummary;
+import '../../../features/store/domain/pack_texts.dart';
 import 'v21_walkout.dart';
 import '../../ui_v21.dart';
 
@@ -274,9 +274,6 @@ class _RevealState extends State<_Reveal> {
             position: card.position,
             tier: card.tier,
             power: card.power,
-            seed: card.cardId,
-            kitSeed: card.club ?? card.nationality,
-            imageUrl: card.imageUrl,
             width: cardW,
           );
           return Stack(
@@ -411,9 +408,6 @@ class _Summary extends StatelessWidget {
                                 position: best.position,
                                 tier: best.tier,
                                 power: best.power,
-                                seed: best.cardId,
-                                kitSeed: best.club ?? best.nationality,
-                                imageUrl: best.imageUrl,
                                 width: 180 * k,
                               ),
                             ),
@@ -448,9 +442,6 @@ class _Summary extends StatelessWidget {
                                   position: o.position,
                                   tier: o.tier,
                                   power: o.power,
-                                  seed: o.cardId,
-                                  kitSeed: o.club ?? o.nationality,
-                                  imageUrl: o.imageUrl,
                                   width: 96 * k,
                                 ),
                             ],

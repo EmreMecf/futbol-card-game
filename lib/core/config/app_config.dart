@@ -74,6 +74,31 @@ class AppConfig {
     return null;
   }
 
+  // ---- GOOGLE / APPLE GIRISI (bos ise ilgili dugme gorunmez) ----
+  /// Google web istemci kimligi (web ve Android bunu kullanir)
+  static String get googleWebClientId =>
+      _optional('GOOGLE_WEB_CLIENT_ID', const String.fromEnvironment('GOOGLE_WEB_CLIENT_ID'));
+
+  static String get googleIosClientId =>
+      _optional('GOOGLE_IOS_CLIENT_ID', const String.fromEnvironment('GOOGLE_IOS_CLIENT_ID'));
+
+  /// iOS'ta Apple girisi: Xcode'da "Sign in with Apple" yetenegi acildiktan sonra true yapilir
+  static bool get appleSignInIos =>
+      _optional('APPLE_SIGN_IN_IOS', const String.fromEnvironment('APPLE_SIGN_IN_IOS')).toLowerCase() == 'true';
+
+  /// Web icin Apple Services ID
+  static String get appleServiceId =>
+      _optional('APPLE_SERVICE_ID', const String.fromEnvironment('APPLE_SERVICE_ID'));
+
+  static String get appleRedirectUri =>
+      _optional('APPLE_REDIRECT_URI', const String.fromEnvironment('APPLE_REDIRECT_URI'));
+
+  /// Derleme anindaki deger .env'yi ezer
+  static String _optional(String key, String compiled) {
+    if (compiled.isNotEmpty) return compiled;
+    return dotenv.isInitialized ? (dotenv.env[key] ?? '') : '';
+  }
+
   /// Ag isteklerinin zaman asimi (saniye)
   static int get requestTimeoutSeconds =>
       int.tryParse(dotenv.env['REQUEST_TIMEOUT_SECONDS'] ?? '') ?? 20;

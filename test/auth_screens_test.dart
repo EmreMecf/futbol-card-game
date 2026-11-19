@@ -117,7 +117,7 @@ void main() {
       await ac(tester, const LoginView());
 
       expect(tester.takeException(), isNull);
-      expect(find.text('TEKRAR HOŞ GELDİN'), findsOneWidget);
+      expect(find.text('HOŞ GELDİN!'), findsOneWidget);
       expect(find.text('GİRİŞ YAP'), findsOneWidget);
       expect(alan('Şifre'), findsOneWidget);
     });

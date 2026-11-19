@@ -1,7 +1,7 @@
 // 044: günlük panel metinleri, paket gelişim kopyası özeti, model ayrıştırma.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:futbol_card/features/daily/presentation/daily_panel.dart';
-import 'package:futbol_card/features/store/presentation/widgets/pack_reveal_view.dart';
+import 'package:futbol_card/features/daily/domain/daily_texts.dart';
+import 'package:futbol_card/features/store/domain/pack_texts.dart';
 import 'package:shared_models/shared_models.dart';
 
 ChestCard _kart(String ad, String sonuc) => ChestCard(

@@ -12,19 +12,43 @@ import '../../ui_v21.dart';
 ///         │ Bu turun mevkisini sen …        │
 ///         ╰─────────────────────────────────╯
 ///
-/// Metinler eski ipucuyla AYNI kaynaktan gelir (`textFor`, sunucu kural
-/// sayılarıyla uyumlu). Öğretici maçları ödülsüz ve puansızdır (042);
+/// Metinler sunucu kural sayılarıyla uyumludur. Öğretici maçları ödülsüz ve puansızdır (042);
 /// ödül yalnız 3. adım bitince verilen Gümüş sandık.
 class V21TutorialHint extends StatelessWidget {
   final MatchState state;
 
-  /// (başlık, açıklama): eski `TutorialHint.textFor`
-  final (String, String) Function(MatchState) textFor;
   final double scale;
 
-  const V21TutorialHint({super.key, required this.state, required this.textFor, this.scale = 1});
+  const V21TutorialHint({super.key, required this.state, this.scale = 1});
 
   static const _steps = ['MEVKİ', 'KART', 'TAKTİK'];
+
+  /// (başlık, açıklama) — test edilebilsin diye ayrı
+  static (String, String) textFor(MatchState s) {
+    final adim = s.tutorialStep ?? 1;
+    final mevki = s.phase == 'position';
+    if (mevki) {
+      if (s.amILead) {
+        return adim == 1
+            ? ('MEVKİ SEÇ', 'Bu turun mevkisini sen belirliyorsun. En güçlü kartının olduğu mevkiyi seç: '
+                'iki oyuncu da o mevkiden kart oynayacak.')
+            : ('MEVKİ SEÇ', 'Turu kazanan bir sonraki turun mevkisini seçer. Rakibinin zayıf olduğu yeri düşün.');
+      }
+      return ('RAKİP SEÇİYOR', 'Bu turun mevkisini rakip seçiyor. Turu kazanırsan mevkiyi sen seçersin.');
+    }
+    if (s.iHavePlayed) {
+      return ('KARTIN GİZLİ', 'Rakip seçince iki kart birlikte açılır. Güçlü kart turu kazanır; '
+          'beraberlikte kartlar ortada kalır, sonraki turu kazanan hepsini alır.');
+    }
+    return switch (adim) {
+      1 => ('KART SEÇ', 'O mevkiden bir kart seç ve oyna. Kısa maç: 6 kart toplayan kazanır.'),
+      2 => ('GİZLİ SEÇİM', 'Rakip de şu an kartını seçiyor ama birbirinizinkini göremiyorsunuz. '
+          'En güçlü kartını her tur harcama: bazen zayıf kartla turu bırakmak iyidir.'),
+      _ => ('TAKTİK', 'Kartla birlikte taktik seçebilirsin. Pres +9 (3 enerji) ama kontraya yenilir. '
+          'Kontra presi yakalarsa +13 (2 enerji). Duvar savunurken +6 (2 enerji), prese kırılır. '
+          'Enerji her tur +1 artar.'),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,11 +133,7 @@ class _Coach extends StatelessWidget {
       color: const Color(0xFF4B23A8),
     ),
     clipBehavior: Clip.antiAlias,
-    child: Transform.scale(
-      scale: 2.1,
-      alignment: const Alignment(0.18, -0.55),
-      child: Image.asset(V21Assets.victoryMascot, fit: BoxFit.cover),
-    ),
+    child: V21MascotHead(size: size),
   );
 }
 

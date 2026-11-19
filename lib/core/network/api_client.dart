@@ -170,6 +170,7 @@ class ApiClient {
   bool _isAuthEndpoint(String yol) =>
       yol.contains('/auth/login') ||
       yol.contains('/auth/register') ||
+      yol.contains('/auth/social') ||
       yol.contains('/auth/refresh');
 
   // ------------------------------------------------------------------

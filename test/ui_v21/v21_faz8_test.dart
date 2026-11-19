@@ -13,7 +13,6 @@ import 'package:futbol_card/features/matchmaking/presentation/viewmodel/matchmak
 import 'package:futbol_card/ui_v21/screens/arena/v21_arena_screen.dart';
 import 'package:futbol_card/ui_v21/screens/arena/v21_matchmaking_screen.dart';
 import 'package:futbol_card/ui_v21/ui_v21.dart';
-import 'package:futbol_card/ui_v21/v21_flags.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -144,8 +143,6 @@ void main() {
     await t.pump();
     await t.pump(const Duration(milliseconds: 600));
   }
-
-  test('bayrak varsayılan açık', () => expect(kV21Arena, isTrue));
 
   // ------------------------------------------------------------------
   group('Arama aşaması (hf3–hf6)', () {

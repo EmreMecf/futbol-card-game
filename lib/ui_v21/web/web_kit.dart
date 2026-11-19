@@ -77,7 +77,7 @@ class WebShell extends StatelessWidget {
     _onbellek = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
-      for (final a in const ['logo', 'home_hero', 'ready_bg', 'arena_bg', 'friends_bg', 'chest_hero', 'offer_bg', 'avatar_me', 'avatar_rival', 'card_bronze', 'card_silver', 'card_gold', 'card_diamond', 'card_legend']) {
+      for (final a in const ['logo', 'home_hero', 'ready_bg', 'arena_bg', 'friends_bg', 'chest_hero', 'offer_bg']) {
         precacheImage(AssetImage(wAsset(a)), context);
       }
     });
@@ -217,7 +217,7 @@ class _NavTile extends StatelessWidget {
   }
 }
 
-/// Üst çubuk: sezon kademesi, oyuncu, lig, altın, elmas, bildirim, ayarlar
+/// Üst çubuk: sezon kademesi, oyuncu, lig, altın, bildirim, ayarlar
 class _TopBar extends StatefulWidget {
   const _TopBar();
 
@@ -441,9 +441,9 @@ class _TopBarState extends State<_TopBar> {
               ),
             ),
             wBox(
-              1068,
+              1282,
               20,
-              1296,
+              1510,
               78,
               _pill(
                 const V21CoinIcon(size: 44),
@@ -451,14 +451,6 @@ class _TopBarState extends State<_TopBar> {
                 () => context.go(AppRoutes.store),
                 'Altın al: mağaza',
               ),
-            ),
-            wBox(
-              1310,
-              20,
-              1510,
-              78,
-              // Oyunda elmas parası henüz yok: bakiye gerçek değeriyle 0
-              _pill(wImage('gem', fit: BoxFit.contain), '0', () => context.go(AppRoutes.store), 'Mağaza'),
             ),
             wBox(1526, 16, 1588, 80, _square(Icons.notifications_rounded, 'Görevler', () => context.go(AppRoutes.season))),
             wBox(1600, 16, 1662, 80, _square(Icons.settings_rounded, 'Ayarlar', () => context.push(AppRoutes.settings))),
@@ -649,14 +641,6 @@ class _WButtonState extends State<WButton> {
   }
 }
 
-String _tierArt(CardTier t) => switch (t) {
-  CardTier.bronze => 'card_bronze',
-  CardTier.silver => 'card_silver',
-  CardTier.gold => 'card_gold',
-  CardTier.diamond => 'card_diamond',
-  CardTier.legend => 'card_legend',
-};
-
 Color wTierColor(CardTier t) => switch (t) {
   CardTier.bronze => const Color(0xFFFFAB76),
   CardTier.silver => const Color(0xFFE8EEF6),
@@ -722,7 +706,21 @@ class WCard extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.asset(wAsset(_tierArt(tier)), fit: BoxFit.fill, filterQuality: FilterQuality.medium),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: V21Rarity.of(tier).art,
+                          ),
+                          border: Border.all(color: accent, width: w * 0.03),
+                          borderRadius: BorderRadius.circular(w * 0.1),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(w * 0.05, w * 0.05, w * 0.05, h * 0.2),
+                        child: V21CharacterArt(characterKey: name),
+                      ),
                       Positioned(
                         left: w * 0.03,
                         top: w * 0.03,

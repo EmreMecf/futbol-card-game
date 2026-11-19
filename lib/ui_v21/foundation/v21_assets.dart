@@ -11,19 +11,16 @@
 abstract final class V21Assets {
   static const String _root = 'assets/v21';
 
-  /// Ana sayfa kahraman görseli: stadyum + maskot "Efsane Kaptan".
-  /// home.png (0,146)–(390,558). Arayüz öğesi içermez.
+  /// MASKOT Efsane Kaptan: ana sayfa görseli (stadyum + maskot)
   static const String homeHero = '$_root/illustrations/home_hero_stadium.png';
 
-  /// Zafer ekranı maskotu (win.png 50,100–350,388; kenarları ekranda
-  /// radyal olarak yumuşatılır)
+  /// MASKOT: zafer ekranı (kenarları ekranda yumuşatılır)
   static const String victoryMascot = '$_root/illustrations/victory_mascot.png';
 
-  /// Açılış/giriş kahramanları (login.png 0,150–390,438; logo yazısı
-  /// kodla çizilir, kırpımda yok)
+  /// MASKOT: giriş ve kayıt ekranı görseli
   static const String loginHeroes = '$_root/illustrations/login_heroes.png';
 
-  /// Yükleme ekranı: logo, maskot ve stadyum tek görselde (380×679)
+  /// MASKOT: yükleme ekranı (logo, maskot ve stadyum tek görselde, 380×679)
   static const String loadingSplash = '$_root/illustrations/loading_splash.webp';
 
   /// Altın sandık (saydam zemin). home.png 2. yuva.
@@ -32,9 +29,6 @@ abstract final class V21Assets {
   /// Büyük altın sandık (saydam zemin, 138×112). chests.png Gümüş yuvası.
   /// 60 px üstü kullanımlarda (sandık kartı, ödül kartı) bulanıklaşmasın.
   static const String chestGoldLarge = '$_root/icons/chest_gold_large.png';
-
-  /// Alt menü "KADRO" portresi (daire kırpılır)
-  static const String navSquadPortrait = '$_root/icons/nav_squad_portrait.png';
 
   /// Alt menü "ARENA" stadyum rozeti (daire kırpılır)
   static const String navArenaStadium = '$_root/icons/nav_arena_stadium.png';
@@ -47,7 +41,6 @@ abstract final class V21Assets {
     loadingSplash,
     chestGold,
     chestGoldLarge,
-    navSquadPortrait,
     navArenaStadium,
   ];
 }

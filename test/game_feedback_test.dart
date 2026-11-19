@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/di/injection.dart';
 import 'package:futbol_card/core/feedback/game_feedback.dart';
 import 'package:futbol_card/features/settings/presentation/viewmodel/settings_view_model.dart';
-import 'package:futbol_card/shared/widgets/premium_card/premium_card.dart';
 import 'package:shared_models/shared_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -121,37 +120,5 @@ void main() {
       expect(GameFeedback.cardAnimationsEnabled, isFalse);
     });
 
-    testWidgets('kart animasyonları kapalıyken kart EĞİLMEZ ama dokunma çalışır',
-        (tester) async {
-      await ayarlariKur({'ayar_kart_animasyonlari': false});
-      var dokunuldu = false;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: PremiumPlayerCard(
-                fullName: 'Statik Kart',
-                position: CardPosition.forward,
-                tier: CardTier.legend,
-                power: 95,
-                width: 200,
-                interactive: true,
-                onTap: () => dokunuldu = true,
-              ),
-            ),
-          ),
-        ),
-      );
-      // Legend kartta dönen çerçeve var; animasyon kapalıysa
-      // pumpAndSettle sonsuza beklemeden bitebilmeli.
-      await tester.pumpAndSettle();
-
-      expect(find.byType(CardTilt), findsNothing,
-          reason: 'Animasyon kapalıyken 3B eğilme katmanı kurulmamalı');
-
-      await tester.tap(find.byType(PremiumPlayerCard));
-      expect(dokunuldu, isTrue, reason: 'Dokunma yine de çalışmalı');
-    });
   });
 }

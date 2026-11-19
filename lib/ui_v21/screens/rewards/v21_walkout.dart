@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../../../core/feedback/game_feedback.dart';
-import '../../../shared/widgets/walkout/club_crest.dart';
-import '../../../shared/widgets/walkout/confetti_overlay.dart';
-import '../../../shared/widgets/walkout/nation_flag.dart';
+import '../../../ui_v21/components/v21_club_crest.dart';
+import '../../../ui_v21/components/v21_confetti.dart';
+import '../../../ui_v21/components/v21_nation_flag.dart';
 import '../../ui_v21.dart';
 
 /// V2.1 WALKOUT: Elmas/Efsane kartın açılış sahnesi (paket açılışında,
@@ -330,9 +330,6 @@ class _CardBlock extends StatelessWidget {
             position: card.position,
             tier: card.tier,
             power: card.power,
-            seed: card.cardId,
-            kitSeed: card.club ?? card.nationality,
-            imageUrl: card.imageUrl,
             width: width,
           ),
         ),

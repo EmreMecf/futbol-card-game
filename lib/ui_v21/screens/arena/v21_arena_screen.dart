@@ -10,13 +10,12 @@ import '../../../core/di/injection.dart';
 import '../../../core/feedback/game_feedback.dart';
 import '../../../core/network/websocket_service.dart';
 import '../../../core/router/app_routes.dart';
-import '../../../features/match/presentation/arena/stage2d/duel_stage.dart';
-import '../../../features/match/presentation/view/match_view.dart' show handOrder;
+import '../../../features/match/domain/hand_order.dart';
 import '../../../features/match/presentation/viewmodel/match_view_model.dart';
-import '../../../features/match/presentation/widgets/match_result_view.dart';
+import '../rewards/v21_match_result.dart';
 import '../../../features/match/presentation/widgets/surrender_text.dart';
-import '../../../features/match/presentation/widgets/tutorial_hint.dart';
-import '../../../shared/widgets/avatar2d/avatar_spec.dart';
+import '../match/v21_tutorial_hint.dart';
+import 'v21_clash_scene.dart';
 import '../../../shared/widgets/error_snackbar.dart';
 import '../../ui_v21.dart';
 import '../../web/web_arena.dart';
@@ -216,7 +215,8 @@ class _BodyState extends State<_Body> {
 
     // Maç bittiyse sonuç; son turun sahnesi oynadıktan sonra
     if (vm.isOver && vm.currentClash == null) {
-      return MatchResultView(
+      return V21MatchResultView(
+        newMatchLabel: vm.result == null ? 'YENİ MAÇ' : newMatchLabel(vm.result!),
         result: vm.result,
         rewardDelta: vm.rewardDelta,
         onClose: () => context.go(AppRoutes.home),
@@ -244,7 +244,7 @@ class _BodyState extends State<_Body> {
           onPlay: () => _play(vm),
           onConfirmPosition: () => _confirmPosition(vm),
           onSurrender: () => _surrender(vm),
-          tutorial: vm.matchState!.isTutorial ? TutorialHint(state: vm.matchState!) : null,
+          tutorial: vm.matchState!.isTutorial ? V21TutorialHint(state: vm.matchState!) : null,
           overlays: [
             if (!_online && vm.currentClash == null) _Reconnecting(onRetry: vm.refresh),
             _ClashLayer(vm: vm),
@@ -311,7 +311,7 @@ class _BodyState extends State<_Body> {
                                 ),
                                 if (vm.matchState!.isTutorial) ...[
                                   SizedBox(height: 8 * k),
-                                  TutorialHint(state: vm.matchState!),
+                                  V21TutorialHint(state: vm.matchState!),
                                 ],
                                 SizedBox(height: 10 * k),
                                 _VsRow(vm: vm, selected: selected, scale: k),
@@ -544,9 +544,6 @@ class _VsRow extends StatelessWidget {
         position: selected!.position,
         tier: selected!.tier,
         power: selected!.effectivePower,
-        seed: selected!.cardId,
-        kitSeed: selected!.club ?? selected!.nationality,
-        imageUrl: selected!.imageUrl,
         width: w,
         selected: true,
       );
@@ -621,9 +618,6 @@ class _MoveCard extends StatelessWidget {
       position: move.position ?? CardPosition.midfielder,
       tier: move.tier ?? CardTier.bronze,
       power: move.effectivePower ?? 0,
-      seed: move.cardId ?? move.fullName ?? '?',
-      kitSeed: move.kitSeed,
-      imageUrl: move.imageUrl,
       width: width,
     );
     if (!locked) return card;
@@ -882,9 +876,6 @@ class _Hand extends StatelessWidget {
                     position: c.position,
                     tier: c.tier,
                     power: c.effectivePower,
-                    seed: c.cardId,
-                    kitSeed: c.club ?? c.nationality,
-                    imageUrl: c.imageUrl,
                     width: w,
                     selected: isSel,
                     onTap: enabled ? () => onSelect(c) : null,
@@ -1226,9 +1217,7 @@ class _Reconnecting extends StatelessWidget {
   }
 }
 
-// ====================================================================
-// ÇATIŞMA SAHNESİ (mevcut DuelStage; sonucu sunucu belirler)
-// ====================================================================
+/// Tur sonucu sahnesi: sırası gelen tur varsa tam ekran
 class _ClashLayer extends StatelessWidget {
   final MatchViewModel vm;
   const _ClashLayer({required this.vm});
@@ -1237,49 +1226,8 @@ class _ClashLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final e = vm.currentClash;
     if (e == null) return const SizedBox.shrink();
-
-    DuelSide side(MatchMove? m, {required bool mine}) {
-      if (m == null || m.isPass) {
-        return DuelSide(
-          spec: AvatarSpec.generate(mine ? 'pas-ben' : 'pas-rakip'),
-          name: 'PAS',
-          tier: CardTier.bronze,
-          power: 0,
-          passed: true,
-        );
-      }
-      final inHand = mine ? vm.hand.where((k) => k.userCardId == m.userCardId).firstOrNull : null;
-      final seed = m.cardId ?? inHand?.cardId ?? m.fullName ?? '?';
-      final kit = m.kitSeed ?? inHand?.club ?? inHand?.nationality;
-      return DuelSide(
-        spec: AvatarSpec.generate(seed, kitSeed: kit),
-        seed: seed,
-        name: m.fullName ?? '',
-        tier: m.tier ?? CardTier.bronze,
-        power: m.effectivePower ?? 0,
-      );
-    }
-
     return Positioned.fill(
-      child: ColoredBox(
-        color: const Color(0xE6120830),
-        child: SafeArea(
-          child: DuelStageFrame(
-            child: DuelStage(
-              key: ValueKey('catisma-${e.roundNumber}'),
-              me: side(e.myMove, mine: true),
-              opponent: side(e.opponentMove, mine: false),
-              position: e.position ?? CardPosition.midfielder,
-              outcome: e.outcome,
-              speed: 1.8,
-              skippable: true,
-              headline: e.headline,
-              detail: e.detail,
-              onFinished: vm.finishCurrentClash,
-            ),
-          ),
-        ),
-      ),
+      child: V21ClashScene(key: ValueKey('catisma-${e.roundNumber}'), event: e, onFinished: vm.finishCurrentClash),
     );
   }
 }

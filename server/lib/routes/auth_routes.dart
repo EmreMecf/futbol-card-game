@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:shared_models/shared_models.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -5,6 +8,7 @@ import 'package:shelf_router/shelf_router.dart';
 import '../auth/auth_middleware.dart';
 import '../auth/jwt_service.dart';
 import '../auth/password_service.dart';
+import '../auth/social_token_verifier.dart';
 import '../config/env.dart';
 import '../db/database.dart';
 import '../utils/api_response.dart';
@@ -14,11 +18,13 @@ import '../utils/row_mappers.dart';
 ///
 ///   POST /api/auth/register  -> Kayit ol (+ baslangic paketi)
 ///   POST /api/auth/login     -> Giris yap
+///   POST /api/auth/social    -> Google / Apple ile giris
 ///   POST /api/auth/refresh   -> Access token yenile
 ///   POST /api/auth/logout    -> Cikis yap (refresh token iptal)
 ///   GET  /api/auth/me        -> Kendi profilini getir  [jeton gerekli]
-Router authRoutes(Database db, JwtService jwt) {
+Router authRoutes(Database db, JwtService jwt, {SocialTokenVerifier? socialVerifier}) {
   final router = Router();
+  final social = socialVerifier ?? SocialTokenVerifier.fromEnv();
 
   // ------------------------------------------------------------------
   // KAYIT
@@ -143,6 +149,135 @@ Router authRoutes(Database db, JwtService jwt) {
   });
 
   // ------------------------------------------------------------------
+  // GOOGLE / APPLE ILE GIRIS
+  // ------------------------------------------------------------------
+  // Sira: bagli kimlik -> dogrulanmis ayni e-posta (hesaba baglanir) -> yeni hesap.
+  // Yeni oyuncu ad gondermediyse hesap acilmaz, `needs_username` doner.
+  router.post('/social', (Request request) async {
+    final body = await readJsonBody(request);
+    final provider = SocialProvider.fromName(requireString(body, 'provider', label: 'Saglayici'));
+    if (provider == null) throw const ApiException('Gecersiz giris yontemi.');
+
+    final nonce = body['nonce'];
+    final kimlik = await social.verify(
+      provider,
+      requireString(body, 'id_token', label: 'Kimlik jetonu'),
+      rawNonce: nonce is String ? nonce : null,
+    );
+
+    var kullanici = await db.queryOne(
+      '''
+      select u.id, u.email, u.username, u.coins, u.protection_slots, u.mmr,
+             u.wins, u.losses, u.draws, u.avatar_url, u.is_banned, u.ban_reason, u.created_at
+      from user_identities i
+      join users u on u.id = i.user_id
+      where i.provider = @provider and i.provider_subject = @subject
+      ''',
+      params: {'provider': provider.name, 'subject': kimlik.subject},
+    );
+
+    final email = kimlik.email;
+    if (kullanici == null) {
+      // Dogrulanmamis e-posta ile baskasinin hesabina girilemez, adres de kapatilamaz
+      if (email == null || !kimlik.emailVerified) {
+        throw const ApiException('Bu hesabin e-postasi dogrulanmamis. Baska bir yontemle giris yapin.', status: 403);
+      }
+
+      kullanici = await db.queryOne(
+        '''
+        select id, email, username, coins, protection_slots, mmr,
+               wins, losses, draws, avatar_url, is_banned, ban_reason, created_at
+        from users where email = @email
+        ''',
+        params: {'email': email},
+      );
+
+      if (kullanici != null) {
+        await db.query(
+          '''
+          insert into user_identities (user_id, provider, provider_subject, email)
+          values (@userId::uuid, @provider, @subject, @email)
+          on conflict do nothing
+          ''',
+          params: {
+            'userId': kullanici['id'].toString(),
+            'provider': provider.name,
+            'subject': kimlik.subject,
+            'email': email,
+          },
+        );
+      }
+    }
+
+    var yeniHesap = false;
+    if (kullanici == null) {
+      final hamAd = body['username'];
+      final username = hamAd is String ? hamAd.trim() : '';
+      if (username.isEmpty) return jsonOk({'needs_username': true});
+
+      if (username.length < 3 || username.length > 20) {
+        throw const ApiException('Kullanici adi 3-20 karakter arasinda olmali.');
+      }
+      final alinmis = await db.queryOne(
+        'select 1 as var from users where username = @username limit 1',
+        params: {'username': username},
+      );
+      if (alinmis != null) {
+        throw const ApiException('Bu kullanici adi alinmis. Baska bir tane deneyin.');
+      }
+
+      // Kullanici ve kimlik tek ifadede yazilir: yarim kayit kalamaz
+      kullanici = await db.queryOne(
+        '''
+        with yeni as (
+          insert into users (email, password_hash, username, protection_slots)
+          values (@email::text, @hash, @username, base_protection_slots())
+          returning id, email, username, coins, protection_slots, mmr,
+                    wins, losses, draws, avatar_url, is_banned, ban_reason, created_at
+        ), kimlik as (
+          insert into user_identities (user_id, provider, provider_subject, email)
+          select id, @provider::text, @subject::text, @email::text from yeni
+        )
+        select * from yeni
+        ''',
+        params: {
+          'email': email,
+          'hash': PasswordService.hash(_unusablePassword()),
+          'username': username,
+          'provider': provider.name,
+          'subject': kimlik.subject,
+        },
+      );
+      yeniHesap = true;
+      final yeniId = kullanici!['id'].toString();
+
+      try {
+        await db.scalar('select grant_starter_pack(@id::uuid)', params: {'id': yeniId});
+      } catch (e) {
+        // ignore: avoid_print
+        print('[UYARI] Baslangic paketi verilemedi ($yeniId): $e');
+      }
+    }
+
+    final oyuncu = kullanici;
+    if (oyuncu['is_banned'] == true) {
+      throw ApiException(
+        'Hesabiniz askiya alinmis. Sebep: ${oyuncu['ban_reason'] ?? 'Belirtilmemis'}',
+        status: 403,
+      );
+    }
+
+    final userId = oyuncu['id'].toString();
+    await db.query('update users set last_seen_at = now() where id = @id::uuid', params: {'id': userId});
+
+    final tokens = await _issueTokens(db, jwt, userId, oyuncu['username'] as String);
+    return jsonOk(
+      AuthResponse(user: _publicUser(oyuncu), tokens: tokens).toJson(),
+      status: yeniHesap ? 201 : 200,
+    );
+  });
+
+  // ------------------------------------------------------------------
   // JETON YENILEME
   // ------------------------------------------------------------------
   router.post('/refresh', (Request request) async {
@@ -255,6 +390,12 @@ Router meRoutes(Database db) {
 /// sizmasi mumkun degil. Eskiden elle harita kuruyorduk ve bir alani
 /// unutmak ya da yanlis adlandirmak mumkundu.
 UserModel _publicUser(Map<String, dynamic> row) => RowMappers.user(row);
+
+/// Sosyal hesaplarin sifresi yoktur: kimsenin bilmedigi rastgele bir deger ozetlenir.
+String _unusablePassword() {
+  final rastgele = Random.secure();
+  return base64Url.encode(List<int>.generate(32, (_) => rastgele.nextInt(256)));
+}
 
 /// Access + refresh jeton cifti uretir, refresh'i veritabanina yazar.
 Future<AuthTokens> _issueTokens(

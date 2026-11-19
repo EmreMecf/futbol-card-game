@@ -4,11 +4,11 @@ import 'package:shared_models/shared_models.dart';
 import '../../features/chests/data/chest_repository_impl.dart';
 import '../../features/chests/domain/chest_repository.dart';
 import '../../features/chests/presentation/viewmodel/chests_view_model.dart';
-import '../../features/characters/data/character_repository.dart';
-import '../../features/characters/presentation/character_preview_view_model.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/domain/repositories/social_auth_repository.dart';
+import '../../features/auth/data/repositories/social_auth_repository_impl.dart';
 import '../../features/auth/presentation/viewmodel/auth_view_model.dart';
 import '../../features/collection/data/datasources/collection_remote_datasource.dart';
 import '../../features/collection/data/repositories/collection_repository_impl.dart';
@@ -133,6 +133,13 @@ Future<void> configureDependencies() async {
 
   // ---------------- 5. REPOSITORY'LER ----------------
   getIt
+    ..registerLazySingleton<SocialAuthRepository>(
+      () => SocialAuthRepositoryImpl(
+        getIt<AuthRemoteDataSource>(),
+        getIt<SessionManager>(),
+        getIt<WebSocketService>(),
+      ),
+    )
     ..registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(
         getIt<AuthRemoteDataSource>(),
@@ -162,18 +169,12 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<SbcRepository>(
       () => SbcRepositoryImpl(getIt<SbcRemoteDataSource>()),
-    )
-    ..registerLazySingleton<CharacterRepository>(
-      () => CharacterRepositoryImpl(getIt<ApiClient>()),
-    )
-    ..registerFactory<CharacterPreviewViewModel>(
-      () => CharacterPreviewViewModel(getIt<CharacterRepository>()),
     );
 
   // ---------------- 6. VIEWMODEL'LER ----------------
   getIt
     ..registerFactory<AuthViewModel>(
-      () => AuthViewModel(getIt<AuthRepository>()),
+      () => AuthViewModel(getIt<AuthRepository>(), social: getIt<SocialAuthRepository>()),
     )
     ..registerFactory<CollectionViewModel>(
       () => CollectionViewModel(

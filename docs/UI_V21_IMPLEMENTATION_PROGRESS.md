@@ -1,6 +1,6 @@
 # Futbol Card Arena — V2.1 Flutter UI dönüşümü: ilerleme raporu
 
-**Faz:** 1–3 (ilk görev + Koleksiyon), Faz 2 (temel tasarım sistemi, §10), Faz 3 (Kadrom, Mağaza, Sezon, §11), Faz 4 (iç ekranlar, §12), Faz 5 (paket, sandık, kart, maç sonu, §13), Faz 6 (sıralama, kadro kurma, olasılıklar, maç sonu panelleri, §14), Faz 7 (öğretici ipucu, kadro uyarısı, walkout, açılış, §15), Faz 8 (Maça Hazırlan, rakip arama, canlı arena, §16), hedef platform: yalnız telefon/tablet dikey (§17) · **Dal:** `feature/ui-v21-rebuild` · **Tarih:** 2026-11-17
+**Faz:** 1–3 (ilk görev + Koleksiyon), Faz 2 (temel tasarım sistemi, §10), Faz 3 (Kadrom, Mağaza, Sezon, §11), Faz 4 (iç ekranlar, §12), Faz 5 (paket, sandık, kart, maç sonu, §13), Faz 6 (sıralama, kadro kurma, olasılıklar, maç sonu panelleri, §14), Faz 7 (öğretici ipucu, kadro uyarısı, walkout, açılış, §15), Faz 8 (Maça Hazırlan, rakip arama, canlı arena, §16), hedef platform: telefon, tablet ve web (§17), eski tasarımın kaldırılması, maskot ve 550 kart karakteri (§18) · **Dal:** `feature/ui-v21-rebuild` · **Tarih:** 2026-11-17
 **Durum:** V2.1 değişiklikleri `feature/ui-v21-rebuild` dalına commit edildi ve PR #7 açıldı. Güvenlik / yayın denetimi PR #8 üzerinden yürütülüyor; `main` dalına birleştirme ve gerçek cihaz kabul testleri henüz tamamlanmadı.
 
 Bu fazın kapsamı: referans HTML'nin envanteri, mevcut ekranlarla eşleşme tablosu, `lib/ui_v21/` altında bağımsız V2.1 tasarım sistemi (8 temel bileşen + 2 yardımcı bileşen) ve gerçek sunucu verisiyle çalışan **V2.1 Ana Sayfa** ile **V2.1 Koleksiyon (KARTLARIM)**. Eski Ref arayüzü silinmedi.
@@ -1457,49 +1457,63 @@ Bu uyarlamalar yapılana kadar, PR #6 birleştikten sonra arkadaş maçları iç
 
 ---
 
-## 17. Hedef platform: yalnız telefon ve tablet, dikey
+## 17. Hedef platform: telefon, tablet ve web
 
-Kullanıcı kararı: oyun **yalnız telefon ve tablette** (Android, iOS/iPadOS) yayınlanacak; web ve masaüstü sürümü olmayacak. Tabletler de **dikey**.
+Kullanıcı kararı (18 Kasım 2026): **web kalıyor.** Önceki "yalnız telefon ve tablet, dikey" kararı geçersizdir.
 
-### 17.1 Yapılanlar
+* **Telefon:** yalnız dikey.
+* **Tablet ve web:** her yön ve pencere boyutu. Genişlik 1100 px ve yükseklik 600 px üstünde web tasarımı (`lib/ui_v21/web/`) açılır.
+* **Yön kararı:** `lib/core/platform/orientation_policy.dart`. Ekran ölçüsü açılışta sıfır gelirse önce dikey kilitlenir, ilk kare çizilince gerçek ölçüyle karar verilir.
 
-| Yer | Değişiklik |
+### 17.1 İnceleme düzeltmeleri
+
+| Sorun | Düzeltme |
 |---|---|
-| `ios/Runner/Info.plist` | iPhone: yalnız `Portrait`. iPad: `Portrait` ve `PortraitUpsideDown`. `UIRequiresFullScreen = true`. Dikey kilitli bir iPad uygulaması için gerekli; Split View / Slide Over kapanır. Önceden iPhone ve iPad'de yatay da açıktı. |
-| `android/app/src/main/AndroidManifest.xml` | Etkinlikte `screenOrientation="sensorPortrait"` (dik ve ters dik), `android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` özelliği (açıklaması aşağıda). |
-| `lib/main.dart` | Değişmedi; zaten `portraitUp`/`portraitDown`. |
-| `web/` | **Silindi** (index.html, manifest, 5 ikon). Git geçmişinde duruyor. |
-| `.claude/launch.json` | Web ile ilgili iki başlatma yapılandırması kaldırıldı: `flutter run -d web-server` ve `build/web` sunucusu. |
-| `lib/shared/widgets/premium_card/card_tilt.dart` | Gereksiz `kIsWeb` dalı kaldırıldı. Android/iOS denetimi duruyor; bilgisayardaki testlerde jiroskop yine kapalı. |
-| `walkout_screen.dart`, `ui_v21` yorumları | "web/masaüstü" anlatımları düzeltildi. Fare-üstü (hover) davranışı kaldı: iPad fare ve trackpad işaretçisiyle çalışıyor. |
-| `README.md` | Başa "Hedef platformlar" notu eklendi. Web derlemesi ve `CORS_ORIGIN` satırları düzeltildi. |
-| `test/ui_v21/v21_test_support.dart` | V2.1 test boyutlarından yatay tablet (1024×768) ve masaüstü (1366×768) çıktı. Yerlerine dikey tabletler geldi: 820×1180 (iPad Air / 10. nesil) ve 1024×1366 (iPad Pro 12,9"). 64 eski golden silindi, yenileri üretildi. Hepsi taşmasız. |
+| Giriş yapmamış oyuncu davet linkiyle gelince girişten sonra ana sayfaya düşüyordu | Davet kodu giriş ve kayıt adresinde taşınıyor (`?davet=`); giriş ya da kayıt bitince oda açılıyor |
+| Web ana sayfada görselin üstünde görünmez MAÇA BAŞLA alanı | Gerçek düğme |
+| Mağaza görselinde gömülü %25 | İndirim rozeti sunucudaki orandan çiziliyor; teklif yoksa oran yok |
+| Oyunda olmayan elmas bakiyesi (sabit 0) | Üst çubuktan kaldırıldı |
+| Maç ve arkadaş odasında herkese aynı avatar | Oyuncuya özel avatar |
+| PAKETLER düğmesi hiçbir şey yapmıyordu | Seçili sekme olarak gösteriliyor, tıklanmıyor |
 
-**Android 16 ve tabletler:**
-* Hedef SDK 36 (Android 16) büyük ekranlarda (en kısa kenar ≥ 600 dp) uygulamanın yön kilidini **yok sayıyor**. Bu, hem manifestteki ayarı hem `main.dart`'taki kilidi etkiliyor.
-* `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` bu sürüm için resmi, geçici muafiyet.
-* **Hedef SDK 37'ye geçilince bu muafiyet çalışmaz.** O zaman Android tabletlerde yatay düzen desteklenmeli. V2.1 ekranları yatayda taşmadan, telefon düzenini ortalayarak çalışıyor (eski 1024×768 goldenlarıyla görülmüştü).
+Testler: `test/davet_giris_test.dart`.
 
-### 17.2 Bilerek dokunulmayanlar
+### 17.2 Bilinen eksik
 
-* **Eski (Ref) arayüzün masaüstü düzenleri:** `AppShell` kenar çubuğu, `AppBreakpoints.desktop`, ≥900 px iki sütunlu ekranlar ve bunların testleri (`app_shell_test`, `design_system_test`, 1366/1440 px goldenları) olduğu gibi duruyor.
-  * Bu kod yalnız V2.1 bayrakları kapatılırsa çalışan yedek.
-  * Eski golden testleri bu makinede zaten atlanıyor (MaterialIcons yolu `C:/dev/flutter`); burada yeniden üretilemezlerdi.
-  * Eski arayüz kaldırılırken birlikte silinmeli.
-* **Sunucudaki CORS:** backend değişmez kuralı gereği dokunulmadı. Mobil uygulama CORS'a tabi değil.
-* **PR #3'teki `kIsWeb` kontrolleri** (`social_sign_in_service.dart`): zararsız, PR'a dokunulmadı.
+Web kart görselleri nadirliğe göre sabit (`card_diamond.webp` vb.): aynı nadirlikteki kartlar aynı portreyi gösteriyor. Telefon ve tablet düzeninde kartın kendi portresi kullanılıyor.
 
-### 17.3 Doğrulama
+---
 
-* `flutter analyze`: 193 bilgi notu, hepsi deprecation. Hata ve uyarı yok.
-* `flutter test`: **865 geçti, 244 atlandı, 0 hata.**
-* `AndroidManifest.xml` ve `Info.plist` XML olarak geçerli.
-* **Gerçek cihazda ya da derlemede denenmedi.** APK derlemesi bu makinede JDK 8 yüzünden yapılamıyor (§7); iOS için Mac gerekiyor.
-* PR çakışması: PR #3, #4 ve #6 manifest ya da `Info.plist` dosyalarına dokunuyor; üçü de temiz birleşiyor. Hiçbir PR `web/` klasörüne dokunmuyor ve hiçbir CI web derlemiyor.
+## 18. Eski tasarımın kaldırılması, maskot ve 550 kart karakteri
 
-### 17.4 Sonraki adım (öneri)
+Kullanıcı kararı (18 Kasım 2026): eski tasarıma ait hiçbir şey kalmayacak. **Maskot Efsane Kaptan (yaşlı amca) oyunda kalır; 550 karakter yalnız futbolcu kartlarında kullanılır.**
 
-Büyük tabletlerde (iPad Pro 12,9") V2.1 telefon düzeni en fazla 520 px genişlikte ortalanıyor; altta geniş boş alan kalıyor. Tablet ana hedef olduğuna göre tablete özel ölçekleme ya da yerleşim ayrı bir iş olarak ele alınmalı.
+### 18.1 Maskot ve kart karakterleri
+
+* Kaynak: git geçmişindeki `tool/karakter/cikti/izgara` (138 sayfa, 137×4 + 2 = 550 karakter).
+* Macenta zemin temizlendi, her karakter ayrı WebP oldu: `assets/v21/characters/c001.webp` … `c550.webp` (13 MB).
+* `V21Characters`: futbolcunun karakteri adından seçilir; her ekranda ve platformda aynıdır. Katalogdaki 100 futbolcuda çakışma yoktur (test ediliyor).
+* Maskot görselleri yerinde: ana sayfa, giriş, yükleme, zafer, maça hazırlık, öğretici koçu ve alt menüdeki KADRO simgesi.
+* Oyuncu avatarı kullanıcı adının baş harfidir (kart karakteri kullanılmaz).
+* Kodla üretilen 2D yüzler silindi.
+
+### 18.2 Kaldırılanlar
+
+* Eski ekranlar, `lib/shared` bileşenleri, Ref tasarım dili, eski tema, 2D avatar ve düello sahnesi, V2.1 geçiş bayrakları ve `forceLegacy`.
+* Geliştirici ekranları (tasarım vitrini, karakter önizleme, 2D stil).
+* Eski arayüzün testleri ve görüntüleri, eski tasarım referansları (`design-reference` içinde yalnız `web` kaldı), eski tasarım raporları ve araçları.
+* `cached_network_image` ve `sensors_plus` bağımlılıkları.
+
+### 18.3 Yeni yazılanlar
+
+* Giriş ve kayıt ekranları, yükleme ekranı.
+* Tur sonucu sahnesi (`V21ClashScene`): iki kart karşılaşır, sonucu sunucu belirler.
+* Giriş ekranı stadyumu (`V21StadiumScene`) ve acil kadro uyarısı.
+
+### 18.4 Bilinen eksikler
+
+* **Mevki uyumu yok:** karakterler mevkiye göre etiketli değil; kaleci eldivenli bir karakter forvet kartına düşebilir.
+* Sunucudaki `image_url` alanı ve karakter katalogu uçları kullanılmıyor; backend değiştirilmedi.
 
 ---
 
@@ -1536,9 +1550,6 @@ V2.1 arayüz: tasarım sistemi, beş sekme, iç ekranlar ve ödül akışları
 - Faz 8: Maça Hazırlan + rakip arama (hf3–hf6) ve canlı arena
   (hf7–hf11); kart ve taktik tek gizli hamle (tek playCard);
   V21StepTracker; kV21Arena (rota düzeyinde)
-- Platform: yalnız telefon ve tablet, dikey (iOS Info.plist, Android
-  sensorPortrait + Android 16 muafiyeti); web/ klasörü kaldırıldı;
-  V2.1 test boyutları dikey tabletlere çevrildi
 - Bütün ekranlar mevcut ViewModel'leri kullanır ve bayraklıdır
   (kV21Home, kV21Collection, kV21Deck, kV21Store, kV21Season,
   kV21Inner, kV21MatchResult, kV21Transitions); eski Ref ekranları

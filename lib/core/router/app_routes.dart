@@ -15,16 +15,34 @@ class AppRoutes {
   static const String friends = '/arkadaslar';
   static const String friendInvite = '/davet';
   static String friendInviteWithCode(String code) => '$friendInvite/$code';
+
+  /// Giriş/kayıt adresinde bekleyen davet kodunun parametresi
+  static const String inviteParam = 'davet';
+  static final RegExp _inviteCode = RegExp(r'^[0-9a-f]{30}$');
+
+  /// Giriş yapmamış oyuncu bu adrese gelince davet kodu giriş adresinde taşınır
+  static String loginFor(String location) {
+    final parts = Uri.parse(location).pathSegments;
+    final isInvite = parts.length == 2 && '/${parts[0]}' == friendInvite && _inviteCode.hasMatch(parts[1]);
+    return isInvite ? '$login?$inviteParam=${parts[1]}' : login;
+  }
+
+  /// Giriş ekranından kayıt ekranına geçerken bekleyen davet korunur
+  static String registerFrom(Uri current) {
+    final code = current.queryParameters[inviteParam];
+    return code != null && _inviteCode.hasMatch(code) ? '$register?$inviteParam=$code' : register;
+  }
+
+  /// Giriş ya da kayıt bitince açılacak ekran: bekleyen davet, yoksa ana sayfa
+  static String afterAuth(Uri current) {
+    final code = current.queryParameters[inviteParam];
+    return code != null && _inviteCode.hasMatch(code) ? friendInviteWithCode(code) : home;
+  }
+
   static const String match = '/mac';
   static const String profile = '/profil';
   static const String settings = '/ayarlar';
 
-  /// Tasarim sistemi vitrini. SADECE gelistirme surumunde baglanti var.
-  static const String designSystem = '/ayarlar/tasarim';
-
-  /// Geliştirici: tek karakter prototipi (Aşama A1)
-  static const String characterPreview = '/ayarlar/karakter-onizleme';
-  static const String stylePrototype = '/ayarlar/stil-prototipi';
   static const String leaderboard = '/liderlik';
   static const String leagueTiers = '/ligler';
   static const String store = '/magaza';

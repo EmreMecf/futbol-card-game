@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../../core/feedback/game_feedback.dart';
-import '../../features/deck/presentation/widgets/formation_pitch.dart';
+import '../../ui_v21/components/v21_pitch_layout.dart';
 import '../animations/v21_motion.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
@@ -108,9 +108,6 @@ class V21SquadPitch extends StatelessWidget {
             position: card.position,
             tier: card.tier,
             power: card.power,
-            seed: card.cardId,
-            kitSeed: card.club ?? card.nationality,
-            imageUrl: card.imageUrl,
             width: cw * scaleUp,
             selected: valid || highlighted == slot,
           );

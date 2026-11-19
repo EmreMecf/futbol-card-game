@@ -8,7 +8,7 @@ import 'package:shared_models/shared_models.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/feedback/game_feedback.dart';
 import '../../../core/router/app_routes.dart';
-import '../../../features/chests/presentation/widgets/emergency_squad_banner.dart';
+import '../../../ui_v21/screens/deck/v21_emergency_banner.dart';
 import '../../../features/deck/presentation/viewmodel/deck_view_model.dart';
 import '../rewards/v21_card_sheets.dart';
 import '../../../shared/widgets/error_snackbar.dart';
@@ -111,6 +111,8 @@ class _BodyState extends State<_Body> {
   Future<void> _save(DeckViewModel vm) async {
     // hf17: 11 kart dolmadan kaydedilemez → KADRO EKSİK uyarısı
     if (!vm.isComplete) return _warnInvalid(vm);
+    final tekrar = vm.duplicateMessage;
+    if (tekrar != null) return _warnInvalid(vm, message: tekrar);
     final ok = await vm.save();
     if (!mounted) return;
     if (!ok && vm.errorMessage != null) {
@@ -129,6 +131,8 @@ class _BodyState extends State<_Body> {
       missing: {for (final p in CardPosition.values) p: p.requiredCount - vm.countFor(p)},
     );
     if (!edit || !mounted) return;
+    final tekrarYuva = vm.firstDuplicateSlot;
+    if (tekrarYuva != null) return _pick(vm, tekrarYuva);
     for (var s = 0; s < GameRules.squadSize; s++) {
       if (vm.cardAt(s) == null) return _pick(vm, s);
     }

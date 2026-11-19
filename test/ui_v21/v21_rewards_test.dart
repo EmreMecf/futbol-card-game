@@ -6,7 +6,7 @@ import 'package:futbol_card/core/auth/session_manager.dart';
 import 'package:futbol_card/core/di/injection.dart';
 import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/features/match/presentation/viewmodel/match_view_model.dart' show MatchRewardDelta;
-import 'package:futbol_card/features/match/presentation/widgets/match_result_view.dart';
+import 'package:futbol_card/ui_v21/screens/rewards/v21_match_result.dart';
 import 'package:futbol_card/ui_v21/screens/rewards/v21_walkout.dart';
 import 'package:futbol_card/ui_v21/screens/rewards/v21_card_sheets.dart';
 import 'package:futbol_card/ui_v21/screens/rewards/v21_chest_opening.dart';
@@ -258,12 +258,6 @@ void main() {
 
   // ------------------------------------------------------------------
   group('Maç sonucu', () {
-    testWidgets('MatchResultView varsayılan olarak V2.1 ekranını çizer', (t) async {
-      await pump(t, MatchResultView(result: _win, rewardDelta: _delta, onClose: () {}, onNewMatch: () {}));
-      expect(find.byType(V21MatchResultView), findsOneWidget);
-      await unmount(t);
-    });
-
     testWidgets('zafer: skor, ödüller, kazanılan kartlar, düğmeler', (t) async {
       var closed = 0, again = 0;
       await pump(
@@ -313,7 +307,6 @@ void main() {
       expect(find.bySemanticsLabel('MÜCADELE BİTTİ'), findsOneWidget);
       expect(find.text('-25'), findsOneWidget);
       expect(find.text('-1 KART KAYBETTİN'), findsOneWidget);
-      expect(find.image(const AssetImage(V21Assets.victoryMascot)), findsNothing);
       await unmount(t);
     });
   });

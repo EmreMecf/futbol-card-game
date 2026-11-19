@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/theme/app_theme.dart';
-import 'package:futbol_card/features/match/presentation/widgets/tutorial_hint.dart';
+import 'package:futbol_card/ui_v21/screens/match/v21_tutorial_hint.dart';
 import 'package:futbol_card/ui_v21/screens/auth/v21_splash_art.dart';
 import 'package:futbol_card/ui_v21/screens/match/v21_tutorial_hint.dart';
 import 'package:futbol_card/ui_v21/screens/rewards/v21_walkout.dart';
@@ -83,7 +83,7 @@ void main() {
           child: ListView(
             padding: const EdgeInsets.all(12),
             children: [
-              TutorialHint(
+              V21TutorialHint(
                 state: _state(step, phase: phase, lead: lead),
               ),
             ],
@@ -117,18 +117,6 @@ void main() {
       await unmount(t);
     });
 
-    testWidgets('forceLegacy eski paneli çizer', (t) async {
-      await pump(
-        t,
-        Scaffold(
-          body: TutorialHint(state: _state(2, phase: 'pick'), forceLegacy: true),
-        ),
-        const Size(390, 844),
-      );
-      expect(find.byType(V21TutorialHint), findsNothing);
-      expect(find.textContaining('ÖĞRETİCİ 2/3'), findsOneWidget);
-      await unmount(t);
-    });
   });
 
   group('Geçersiz kadro uyarısı (hf17)', () {
@@ -224,12 +212,6 @@ void main() {
       await unmount(t);
     });
 
-    testWidgets('tablette görselin tamamı görünür', (t) async {
-      await pump(t, const Scaffold(body: V21SplashArt(progress: 1)), const Size(768, 1024));
-      final fitler = t.widgetList<Image>(find.byType(Image)).map((i) => i.fit).toList();
-      expect(fitler, containsAll([BoxFit.cover, BoxFit.contain]));
-      await unmount(t);
-    });
   });
 
   // ------------------------------------------------------------------

@@ -7,6 +7,7 @@ import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
 import '../../../../core/network/websocket_service.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../deck/domain/deck_rules.dart';
 import '../../domain/repositories/matchmaking_repository.dart';
 
 /// Eslestirme ekraninin asamalari
@@ -188,7 +189,9 @@ class MatchmakingViewModel extends BaseViewModel {
       () => _repository.validateDeck(deste.id),
       showLoading: false,
     );
-    _dogrulama = sonuc;
+    // Sunucu kabul etse de aynı futbolcu iki kez olan kadroyla maça girilmez
+    final tekrar = duplicatePlayerMessage(_desteKartlari);
+    _dogrulama = tekrar != null && sonuc != null ? DeckValidation(isValid: false, message: tekrar) : sonuc;
 
     safeNotify();
   }

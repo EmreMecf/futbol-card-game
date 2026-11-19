@@ -8,7 +8,7 @@ import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/auth/presentation/viewmodel/auth_view_model.dart';
 import '../../../features/chests/presentation/viewmodel/chests_view_model.dart';
-import '../../../features/chests/presentation/widgets/chest_strip.dart' show chestInventoryChanged;
+import '../../../features/chests/domain/chest_texts.dart';
 import '../../../features/home/presentation/viewmodel/home_view_model.dart';
 import '../../../features/season/presentation/viewmodel/season_view_model.dart';
 import '../../ui_v21.dart';

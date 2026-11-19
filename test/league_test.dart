@@ -7,7 +7,6 @@ import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/features/leaderboard/domain/repositories/leaderboard_repository.dart';
 import 'package:futbol_card/features/leaderboard/presentation/viewmodel/leaderboard_view_model.dart';
-import 'package:futbol_card/features/leaderboard/presentation/widgets/rank_badge.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -188,24 +187,6 @@ void main() {
   });
 
   // ==================================================================
-  // RENK ÇÖZÜMLEME
-  // ==================================================================
-  group('leagueColor', () {
-    test('altı haneli hex çözülür', () {
-      expect(leagueColor('#2DD4BF'), const Color(0xFF2DD4BF));
-      expect(leagueColor('2DD4BF'), const Color(0xFF2DD4BF));
-    });
-
-    test('BOZUK renk ekranı ÇÖKERTMEZ', () {
-      // Renk veritabanından geliyor. Yanlış yazılmış bir değer
-      // yüzünden liderlik tablosunun açılmaması kabul edilemez.
-      expect(() => leagueColor('kirmizi'), returnsNormally);
-      expect(() => leagueColor(''), returnsNormally);
-      expect(() => leagueColor('#XYZ'), returnsNormally);
-    });
-  });
-
-  // ==================================================================
   // VIEWMODEL
   // ==================================================================
   group('LeaderboardViewModel', () {
@@ -353,59 +334,10 @@ void main() {
           home: Scaffold(body: Center(child: cocuk)),
         );
 
-    testWidgets('seviye numarası rozetin içinde yazar', (tester) async {
-      await tester.pumpWidget(sar(
-        RankBadge.fromRank(rutbe(lig: 'Usta', seviye: 2)),
-      ));
 
-      expect(find.text('2'), findsOneWidget);
-    });
 
-    testWidgets('etiketli halde lig adı da yazar', (tester) async {
-      await tester.pumpWidget(sar(
-        RankBadge.fromRank(rutbe(lig: 'Master Class', seviye: 3),
-            showLabel: true),
-      ));
 
-      expect(find.text('Master Class'), findsOneWidget);
-      expect(find.text('Seviye 3'), findsOneWidget);
-    });
 
-    testWidgets('rütbe kartı hedefi GALİBİYET olarak yazar',
-        (tester) async {
-      await tester.pumpWidget(sar(
-        RankProgressCard(rank: rutbe(mmr: 1025, tavan: 1100)),
-      ));
-
-      expect(find.text('Yükselmek için 3 galibiyet'), findsOneWidget);
-    });
-
-    testWidgets('EN ÜST basamakta ilerleme çubuğu yerine mesaj çıkar',
-        (tester) async {
-      await tester.pumpWidget(sar(
-        RankProgressCard(
-          rank: rutbe(
-            lig: 'Master Class',
-            seviye: 3,
-            enUst: true,
-            tavan: null,
-            sonrakiLig: null,
-            sonrakiSeviye: null,
-          ),
-        ),
-      ));
-
-      expect(find.textContaining('En üst basamaktasın'), findsOneWidget);
-      expect(find.textContaining('Yükselmek için'), findsNothing);
-    });
-
-    testWidgets('sıra rozeti verilirse gösterilir', (tester) async {
-      await tester.pumpWidget(sar(
-        RankProgressCard(rank: rutbe(), position: 42),
-      ));
-
-      expect(find.text('#42'), findsOneWidget);
-    });
   });
 }
 

@@ -5,7 +5,6 @@ import '../../../core/router/app_routes.dart';
 import '../../components/v21_bottom_navigation.dart';
 import '../../components/v21_side_navigation.dart';
 import '../../layouts/v21_screen_layout.dart';
-import '../../v21_flags.dart';
 
 /// V2.1 alt menüsünün uygulama rotalarına bağlanmış hâli.
 ///
@@ -44,12 +43,7 @@ class V21HomeNav extends StatelessWidget {
     void select(int i) {
       final route = items[i].route;
       if (route == currentRoute) return;
-      // V2.1'de Sezon da bir sekme (go); eski Sezon ekranı push ile açılıyordu
-      if (route == AppRoutes.season && !kV21Season) {
-        context.push(route);
-      } else {
         context.go(route);
-      }
     }
 
     if (V21NavPlacement.isSide(context)) {

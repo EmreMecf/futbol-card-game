@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../../../features/chests/presentation/widgets/chest_widgets.dart' show jokerSummary, extrasSummary;
+import '../../../features/chests/domain/chest_texts.dart';
 import '../../ui_v21.dart';
 
 /// V2.1 SANDIK AÇILIŞI (paket açılışından ayrı sahne; referansın kutlama
@@ -209,9 +209,6 @@ class _ChestCardReveal extends StatelessWidget {
                   position: card.position,
                   tier: card.tier,
                   power: card.power,
-                  seed: card.cardId,
-                  kitSeed: card.club ?? card.nationality,
-                  imageUrl: card.imageUrl,
                   width: width,
                 ),
                 SizedBox(height: 6 * k),

@@ -2,6 +2,7 @@ import 'package:shared_models/shared_models.dart';
 
 import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
+import '../../domain/deck_rules.dart';
 import '../../domain/repositories/deck_repository.dart';
 
 /// Kadro düzenleme ekranının beyni.
@@ -91,7 +92,20 @@ class DeckViewModel extends BaseViewModel {
 
   bool get isComplete => _slotlar.length == GameRules.squadSize;
 
-  bool get canSave => isComplete && _degisiklikVar && !_kaydediliyor;
+  /// Aynı futbolcu kadroda birden fazlaysa açıklama, değilse null
+  String? get duplicateMessage => duplicatePlayerMessage(selectedCards);
+
+  /// Aynı futbolcunun ikinci kez durduğu ilk yuva (düzeltmeye buradan başlanır)
+  int? get firstDuplicateSlot {
+    final seen = <String>{};
+    for (var s = 0; s < GameRules.squadSize; s++) {
+      final k = _slotlar[s];
+      if (k != null && !seen.add(k.cardId)) return s;
+    }
+    return null;
+  }
+
+  bool get canSave => isComplete && duplicateMessage == null && _degisiklikVar && !_kaydediliyor;
 
   String? get missingMessage {
     final eksikler = <String>[];
@@ -99,7 +113,7 @@ class DeckViewModel extends BaseViewModel {
       final eksik = p.requiredCount - countFor(p);
       if (eksik > 0) eksikler.add('$eksik ${p.label.toLowerCase()}');
     }
-    return eksikler.isEmpty ? null : 'Eksik: ${eksikler.join(', ')}';
+    return eksikler.isEmpty ? duplicateMessage : 'Eksik: ${eksikler.join(', ')}';
   }
 
   bool isSelected(String userCardId) =>
@@ -107,18 +121,17 @@ class DeckViewModel extends BaseViewModel {
 
   /// Bir slota konabilecek envanter kartları.
   ///
-  /// Slotun pozisyonuna uyan, kilitli olmayan ve kadroda bulunmayan
-  /// kartlar. Yani listede görünen her kart geçerlidir.
+  /// Slotun pozisyonuna uyan, kilitli olmayan ve aynı futbolcusu başka bir
+  /// yuvada bulunmayan kartlar. Yani listede görünen her kart geçerlidir.
   List<InventoryCard> availableForSlot(int slot) {
     final pozisyon = formationSlotPosition(slot);
-    final mevcut = _slotlar[slot];
+    final digerleri = {
+      for (final e in _slotlar.entries)
+        if (e.key != slot) e.value.cardId,
+    };
 
     final liste = _envanter
-        .where((k) =>
-            k.position == pozisyon &&
-            !k.isLocked &&
-            (!isSelected(k.userCardId) ||
-                k.userCardId == mevcut?.userCardId))
+        .where((k) => k.position == pozisyon && !k.isLocked && !digerleri.contains(k.cardId))
         .toList();
 
     liste.sort((a, b) {
@@ -249,6 +262,12 @@ class DeckViewModel extends BaseViewModel {
       if (k.userCardId == kart.userCardId) eskiSlot = s;
     });
 
+    // Aynı futbolcu başka bir yuvadaysa (başka kopyası bile olsa) konamaz
+    final tekrar = _slotlar.entries.any(
+      (e) => e.key != slot && e.key != eskiSlot && e.value.cardId == kart.cardId,
+    );
+    if (tekrar) return false;
+
     if (eskiSlot != null && eskiSlot != slot) {
       // Yer değiştirme: hedefteki kart eski slota gitsin
       final hedeftekiKart = _slotlar[slot];
@@ -294,6 +313,14 @@ class DeckViewModel extends BaseViewModel {
   // ------------------------------------------------------------------
   /// Boş slotları en güçlü kartlarla doldurur (kimyaya bakmaz).
   void autoFillBest() {
+    // Eski kadrodaki tekrarlar: futbolcunun yalnız en güçlü kopyası kalır
+    final enIyi = <String, int>{};
+    for (final e in _slotlar.entries) {
+      final onceki = enIyi[e.value.cardId];
+      if (onceki == null || e.value.power > _slotlar[onceki]!.power) enIyi[e.value.cardId] = e.key;
+    }
+    _slotlar.removeWhere((s, k) => enIyi[k.cardId] != s);
+
     for (var slot = 0; slot < GameRules.squadSize; slot++) {
       if (_slotlar[slot] != null) continue;
 
@@ -550,6 +577,12 @@ class DeckViewModel extends BaseViewModel {
   Future<bool> save() async {
     final deste = _aktifDeste;
     if (deste == null || !isComplete) return false;
+    final tekrar = duplicateMessage;
+    if (tekrar != null) {
+      _kayitMesaji = tekrar;
+      safeNotify();
+      return false;
+    }
 
     _kaydediliyor = true;
     _kayitMesaji = null;
