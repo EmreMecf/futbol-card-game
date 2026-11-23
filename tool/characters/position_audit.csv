@@ -1,34 +1,34 @@
 filename,position,review_status,review_note
-c001.webp,GK,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c002.webp,DEF,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c003.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c004.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c005.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c006.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c007.webp,MID,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c008.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c009.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c010.webp,MID,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c011.webp,GK,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c012.webp,GK,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c013.webp,GK,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c014.webp,GK,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c015.webp,DEF,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c016.webp,DEF,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c017.webp,DEF,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c018.webp,DEF,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c019.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c020.webp,DEF,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c021.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c022.webp,DEF,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c023.webp,DEF,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c024.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c025.webp,MID,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c026.webp,MID,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c027.webp,MID,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c028.webp,MID,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c029.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c030.webp,MID,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
+c001.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c002.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c003.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c004.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c005.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c006.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c007.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c008.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c009.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c010.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c011.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c012.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c013.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c014.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c015.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c016.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c017.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c018.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c019.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c020.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c021.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c022.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c023.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c024.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c025.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c026.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c027.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c028.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c029.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c030.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c031.webp,,pending,Not yet visually audited; excluded from game rotation
 c032.webp,,pending,Not yet visually audited; excluded from game rotation
 c033.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -36,60 +36,60 @@ c034.webp,,pending,Not yet visually audited; excluded from game rotation
 c035.webp,,pending,Not yet visually audited; excluded from game rotation
 c036.webp,,pending,Not yet visually audited; excluded from game rotation
 c037.webp,,pending,Not yet visually audited; excluded from game rotation
-c038.webp,,pending,Not yet visually audited; excluded from game rotation
+c038.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c039.webp,,pending,Not yet visually audited; excluded from game rotation
-c040.webp,,pending,Not yet visually audited; excluded from game rotation
-c041.webp,,pending,Not yet visually audited; excluded from game rotation
-c042.webp,,pending,Not yet visually audited; excluded from game rotation
-c043.webp,,pending,Not yet visually audited; excluded from game rotation
-c044.webp,,pending,Not yet visually audited; excluded from game rotation
-c045.webp,,pending,Not yet visually audited; excluded from game rotation
-c046.webp,,pending,Not yet visually audited; excluded from game rotation
-c047.webp,,pending,Not yet visually audited; excluded from game rotation
-c048.webp,,pending,Not yet visually audited; excluded from game rotation
-c049.webp,,pending,Not yet visually audited; excluded from game rotation
-c050.webp,GK,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
+c040.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c041.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c042.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c043.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c044.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c045.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c046.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c047.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c048.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c049.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c050.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c051.webp,,pending,Not yet visually audited; excluded from game rotation
-c052.webp,,pending,Not yet visually audited; excluded from game rotation
-c053.webp,,pending,Not yet visually audited; excluded from game rotation
-c054.webp,,pending,Not yet visually audited; excluded from game rotation
-c055.webp,,pending,Not yet visually audited; excluded from game rotation
-c056.webp,,pending,Not yet visually audited; excluded from game rotation
-c057.webp,,pending,Not yet visually audited; excluded from game rotation
-c058.webp,,pending,Not yet visually audited; excluded from game rotation
-c059.webp,,pending,Not yet visually audited; excluded from game rotation
-c060.webp,,pending,Not yet visually audited; excluded from game rotation
-c061.webp,,pending,Not yet visually audited; excluded from game rotation
-c062.webp,,pending,Not yet visually audited; excluded from game rotation
+c052.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c053.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c054.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c055.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c056.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c057.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c058.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c059.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c060.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c061.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c062.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c063.webp,,pending,Not yet visually audited; excluded from game rotation
 c064.webp,,pending,Not yet visually audited; excluded from game rotation
-c065.webp,,pending,Not yet visually audited; excluded from game rotation
+c065.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c066.webp,,pending,Not yet visually audited; excluded from game rotation
 c067.webp,,pending,Not yet visually audited; excluded from game rotation
 c068.webp,,pending,Not yet visually audited; excluded from game rotation
 c069.webp,,pending,Not yet visually audited; excluded from game rotation
-c070.webp,,pending,Not yet visually audited; excluded from game rotation
-c071.webp,,pending,Not yet visually audited; excluded from game rotation
+c070.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c071.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c072.webp,,pending,Not yet visually audited; excluded from game rotation
 c073.webp,,pending,Not yet visually audited; excluded from game rotation
 c074.webp,,pending,Not yet visually audited; excluded from game rotation
-c075.webp,,pending,Not yet visually audited; excluded from game rotation
+c075.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c076.webp,,pending,Not yet visually audited; excluded from game rotation
 c077.webp,,pending,Not yet visually audited; excluded from game rotation
 c078.webp,,pending,Not yet visually audited; excluded from game rotation
 c079.webp,,pending,Not yet visually audited; excluded from game rotation
-c080.webp,,pending,Not yet visually audited; excluded from game rotation
-c081.webp,,pending,Not yet visually audited; excluded from game rotation
+c080.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c081.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c082.webp,,pending,Not yet visually audited; excluded from game rotation
 c083.webp,,pending,Not yet visually audited; excluded from game rotation
 c084.webp,,pending,Not yet visually audited; excluded from game rotation
-c085.webp,,pending,Not yet visually audited; excluded from game rotation
+c085.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c086.webp,,pending,Not yet visually audited; excluded from game rotation
 c087.webp,,pending,Not yet visually audited; excluded from game rotation
 c088.webp,,pending,Not yet visually audited; excluded from game rotation
 c089.webp,,pending,Not yet visually audited; excluded from game rotation
-c090.webp,,pending,Not yet visually audited; excluded from game rotation
-c091.webp,,pending,Not yet visually audited; excluded from game rotation
+c090.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c091.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c092.webp,,pending,Not yet visually audited; excluded from game rotation
 c093.webp,,pending,Not yet visually audited; excluded from game rotation
 c094.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -98,48 +98,48 @@ c096.webp,,pending,Not yet visually audited; excluded from game rotation
 c097.webp,,pending,Not yet visually audited; excluded from game rotation
 c098.webp,,pending,Not yet visually audited; excluded from game rotation
 c099.webp,,pending,Not yet visually audited; excluded from game rotation
-c100.webp,MID,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c101.webp,,pending,Not yet visually audited; excluded from game rotation
+c100.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c101.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c102.webp,,pending,Not yet visually audited; excluded from game rotation
 c103.webp,,pending,Not yet visually audited; excluded from game rotation
 c104.webp,,pending,Not yet visually audited; excluded from game rotation
-c105.webp,,pending,Not yet visually audited; excluded from game rotation
+c105.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c106.webp,,pending,Not yet visually audited; excluded from game rotation
 c107.webp,,pending,Not yet visually audited; excluded from game rotation
 c108.webp,,pending,Not yet visually audited; excluded from game rotation
 c109.webp,,pending,Not yet visually audited; excluded from game rotation
-c110.webp,,pending,Not yet visually audited; excluded from game rotation
-c111.webp,,pending,Not yet visually audited; excluded from game rotation
+c110.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c111.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c112.webp,,pending,Not yet visually audited; excluded from game rotation
 c113.webp,,pending,Not yet visually audited; excluded from game rotation
 c114.webp,,pending,Not yet visually audited; excluded from game rotation
-c115.webp,,pending,Not yet visually audited; excluded from game rotation
+c115.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c116.webp,,pending,Not yet visually audited; excluded from game rotation
 c117.webp,,pending,Not yet visually audited; excluded from game rotation
 c118.webp,,pending,Not yet visually audited; excluded from game rotation
 c119.webp,,pending,Not yet visually audited; excluded from game rotation
-c120.webp,,pending,Not yet visually audited; excluded from game rotation
-c121.webp,,pending,Not yet visually audited; excluded from game rotation
+c120.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c121.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c122.webp,,pending,Not yet visually audited; excluded from game rotation
 c123.webp,,pending,Not yet visually audited; excluded from game rotation
 c124.webp,,pending,Not yet visually audited; excluded from game rotation
-c125.webp,,pending,Not yet visually audited; excluded from game rotation
+c125.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c126.webp,,pending,Not yet visually audited; excluded from game rotation
 c127.webp,,pending,Not yet visually audited; excluded from game rotation
 c128.webp,,pending,Not yet visually audited; excluded from game rotation
 c129.webp,,pending,Not yet visually audited; excluded from game rotation
-c130.webp,,pending,Not yet visually audited; excluded from game rotation
-c131.webp,,pending,Not yet visually audited; excluded from game rotation
-c132.webp,,pending,Not yet visually audited; excluded from game rotation
+c130.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c131.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c132.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c133.webp,,pending,Not yet visually audited; excluded from game rotation
 c134.webp,,pending,Not yet visually audited; excluded from game rotation
 c135.webp,,pending,Not yet visually audited; excluded from game rotation
-c136.webp,,pending,Not yet visually audited; excluded from game rotation
+c136.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c137.webp,,pending,Not yet visually audited; excluded from game rotation
 c138.webp,,pending,Not yet visually audited; excluded from game rotation
 c139.webp,,pending,Not yet visually audited; excluded from game rotation
 c140.webp,,pending,Not yet visually audited; excluded from game rotation
-c141.webp,,pending,Not yet visually audited; excluded from game rotation
+c141.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c142.webp,,pending,Not yet visually audited; excluded from game rotation
 c143.webp,,pending,Not yet visually audited; excluded from game rotation
 c144.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -147,9 +147,9 @@ c145.webp,,pending,Not yet visually audited; excluded from game rotation
 c146.webp,,pending,Not yet visually audited; excluded from game rotation
 c147.webp,,pending,Not yet visually audited; excluded from game rotation
 c148.webp,,pending,Not yet visually audited; excluded from game rotation
-c149.webp,,pending,Not yet visually audited; excluded from game rotation
-c150.webp,MID,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c151.webp,,pending,Not yet visually audited; excluded from game rotation
+c149.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c150.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c151.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c152.webp,,pending,Not yet visually audited; excluded from game rotation
 c153.webp,,pending,Not yet visually audited; excluded from game rotation
 c154.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -157,9 +157,9 @@ c155.webp,,pending,Not yet visually audited; excluded from game rotation
 c156.webp,,pending,Not yet visually audited; excluded from game rotation
 c157.webp,,pending,Not yet visually audited; excluded from game rotation
 c158.webp,,pending,Not yet visually audited; excluded from game rotation
-c159.webp,,pending,Not yet visually audited; excluded from game rotation
+c159.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c160.webp,,pending,Not yet visually audited; excluded from game rotation
-c161.webp,,pending,Not yet visually audited; excluded from game rotation
+c161.webp,DEF,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c162.webp,,pending,Not yet visually audited; excluded from game rotation
 c163.webp,,pending,Not yet visually audited; excluded from game rotation
 c164.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -167,7 +167,7 @@ c165.webp,,pending,Not yet visually audited; excluded from game rotation
 c166.webp,,pending,Not yet visually audited; excluded from game rotation
 c167.webp,,pending,Not yet visually audited; excluded from game rotation
 c168.webp,,pending,Not yet visually audited; excluded from game rotation
-c169.webp,,pending,Not yet visually audited; excluded from game rotation
+c169.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c170.webp,,pending,Not yet visually audited; excluded from game rotation
 c171.webp,,pending,Not yet visually audited; excluded from game rotation
 c172.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -177,9 +177,9 @@ c175.webp,,pending,Not yet visually audited; excluded from game rotation
 c176.webp,,pending,Not yet visually audited; excluded from game rotation
 c177.webp,,pending,Not yet visually audited; excluded from game rotation
 c178.webp,,pending,Not yet visually audited; excluded from game rotation
-c179.webp,,pending,Not yet visually audited; excluded from game rotation
+c179.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c180.webp,,pending,Not yet visually audited; excluded from game rotation
-c181.webp,,pending,Not yet visually audited; excluded from game rotation
+c181.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c182.webp,,pending,Not yet visually audited; excluded from game rotation
 c183.webp,,pending,Not yet visually audited; excluded from game rotation
 c184.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -187,9 +187,9 @@ c185.webp,,pending,Not yet visually audited; excluded from game rotation
 c186.webp,,pending,Not yet visually audited; excluded from game rotation
 c187.webp,,pending,Not yet visually audited; excluded from game rotation
 c188.webp,,pending,Not yet visually audited; excluded from game rotation
-c189.webp,,pending,Not yet visually audited; excluded from game rotation
+c189.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c190.webp,,pending,Not yet visually audited; excluded from game rotation
-c191.webp,,pending,Not yet visually audited; excluded from game rotation
+c191.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c192.webp,,pending,Not yet visually audited; excluded from game rotation
 c193.webp,,pending,Not yet visually audited; excluded from game rotation
 c194.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -197,9 +197,9 @@ c195.webp,,pending,Not yet visually audited; excluded from game rotation
 c196.webp,,pending,Not yet visually audited; excluded from game rotation
 c197.webp,,pending,Not yet visually audited; excluded from game rotation
 c198.webp,,pending,Not yet visually audited; excluded from game rotation
-c199.webp,,pending,Not yet visually audited; excluded from game rotation
-c200.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
-c201.webp,,pending,Not yet visually audited; excluded from game rotation
+c199.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c200.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
+c201.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c202.webp,,pending,Not yet visually audited; excluded from game rotation
 c203.webp,,pending,Not yet visually audited; excluded from game rotation
 c204.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -207,9 +207,9 @@ c205.webp,,pending,Not yet visually audited; excluded from game rotation
 c206.webp,,pending,Not yet visually audited; excluded from game rotation
 c207.webp,,pending,Not yet visually audited; excluded from game rotation
 c208.webp,,pending,Not yet visually audited; excluded from game rotation
-c209.webp,,pending,Not yet visually audited; excluded from game rotation
+c209.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c210.webp,,pending,Not yet visually audited; excluded from game rotation
-c211.webp,,pending,Not yet visually audited; excluded from game rotation
+c211.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c212.webp,,pending,Not yet visually audited; excluded from game rotation
 c213.webp,,pending,Not yet visually audited; excluded from game rotation
 c214.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -217,9 +217,9 @@ c215.webp,,pending,Not yet visually audited; excluded from game rotation
 c216.webp,,pending,Not yet visually audited; excluded from game rotation
 c217.webp,,pending,Not yet visually audited; excluded from game rotation
 c218.webp,,pending,Not yet visually audited; excluded from game rotation
-c219.webp,,pending,Not yet visually audited; excluded from game rotation
+c219.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c220.webp,,pending,Not yet visually audited; excluded from game rotation
-c221.webp,,pending,Not yet visually audited; excluded from game rotation
+c221.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c222.webp,,pending,Not yet visually audited; excluded from game rotation
 c223.webp,,pending,Not yet visually audited; excluded from game rotation
 c224.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -227,9 +227,9 @@ c225.webp,,pending,Not yet visually audited; excluded from game rotation
 c226.webp,,pending,Not yet visually audited; excluded from game rotation
 c227.webp,,pending,Not yet visually audited; excluded from game rotation
 c228.webp,,pending,Not yet visually audited; excluded from game rotation
-c229.webp,,pending,Not yet visually audited; excluded from game rotation
+c229.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c230.webp,,pending,Not yet visually audited; excluded from game rotation
-c231.webp,,pending,Not yet visually audited; excluded from game rotation
+c231.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c232.webp,,pending,Not yet visually audited; excluded from game rotation
 c233.webp,,pending,Not yet visually audited; excluded from game rotation
 c234.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -237,9 +237,9 @@ c235.webp,,pending,Not yet visually audited; excluded from game rotation
 c236.webp,,pending,Not yet visually audited; excluded from game rotation
 c237.webp,,pending,Not yet visually audited; excluded from game rotation
 c238.webp,,pending,Not yet visually audited; excluded from game rotation
-c239.webp,,pending,Not yet visually audited; excluded from game rotation
+c239.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c240.webp,,pending,Not yet visually audited; excluded from game rotation
-c241.webp,,pending,Not yet visually audited; excluded from game rotation
+c241.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c242.webp,,pending,Not yet visually audited; excluded from game rotation
 c243.webp,,pending,Not yet visually audited; excluded from game rotation
 c244.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -247,9 +247,9 @@ c245.webp,,pending,Not yet visually audited; excluded from game rotation
 c246.webp,,pending,Not yet visually audited; excluded from game rotation
 c247.webp,,pending,Not yet visually audited; excluded from game rotation
 c248.webp,,pending,Not yet visually audited; excluded from game rotation
-c249.webp,,pending,Not yet visually audited; excluded from game rotation
+c249.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c250.webp,,pending,Not yet visually audited; excluded from game rotation
-c251.webp,,pending,Not yet visually audited; excluded from game rotation
+c251.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c252.webp,,pending,Not yet visually audited; excluded from game rotation
 c253.webp,,pending,Not yet visually audited; excluded from game rotation
 c254.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -257,9 +257,9 @@ c255.webp,,pending,Not yet visually audited; excluded from game rotation
 c256.webp,,pending,Not yet visually audited; excluded from game rotation
 c257.webp,,pending,Not yet visually audited; excluded from game rotation
 c258.webp,,pending,Not yet visually audited; excluded from game rotation
-c259.webp,,pending,Not yet visually audited; excluded from game rotation
+c259.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c260.webp,,pending,Not yet visually audited; excluded from game rotation
-c261.webp,,pending,Not yet visually audited; excluded from game rotation
+c261.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c262.webp,,pending,Not yet visually audited; excluded from game rotation
 c263.webp,,pending,Not yet visually audited; excluded from game rotation
 c264.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -267,7 +267,7 @@ c265.webp,,pending,Not yet visually audited; excluded from game rotation
 c266.webp,,pending,Not yet visually audited; excluded from game rotation
 c267.webp,,pending,Not yet visually audited; excluded from game rotation
 c268.webp,,pending,Not yet visually audited; excluded from game rotation
-c269.webp,,pending,Not yet visually audited; excluded from game rotation
+c269.webp,GK,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c270.webp,,pending,Not yet visually audited; excluded from game rotation
 c271.webp,,pending,Not yet visually audited; excluded from game rotation
 c272.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -298,7 +298,7 @@ c296.webp,,pending,Not yet visually audited; excluded from game rotation
 c297.webp,,pending,Not yet visually audited; excluded from game rotation
 c298.webp,,pending,Not yet visually audited; excluded from game rotation
 c299.webp,,pending,Not yet visually audited; excluded from game rotation
-c300.webp,,pending,Not yet visually audited; excluded from game rotation
+c300.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c301.webp,,pending,Not yet visually audited; excluded from game rotation
 c302.webp,,pending,Not yet visually audited; excluded from game rotation
 c303.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -398,7 +398,7 @@ c396.webp,,pending,Not yet visually audited; excluded from game rotation
 c397.webp,,pending,Not yet visually audited; excluded from game rotation
 c398.webp,,pending,Not yet visually audited; excluded from game rotation
 c399.webp,,pending,Not yet visually audited; excluded from game rotation
-c400.webp,MID,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
+c400.webp,MID,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c401.webp,,pending,Not yet visually audited; excluded from game rotation
 c402.webp,,pending,Not yet visually audited; excluded from game rotation
 c403.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -498,7 +498,7 @@ c496.webp,,pending,Not yet visually audited; excluded from game rotation
 c497.webp,,pending,Not yet visually audited; excluded from game rotation
 c498.webp,,pending,Not yet visually audited; excluded from game rotation
 c499.webp,,pending,Not yet visually audited; excluded from game rotation
-c500.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
+c500.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
 c501.webp,,pending,Not yet visually audited; excluded from game rotation
 c502.webp,,pending,Not yet visually audited; excluded from game rotation
 c503.webp,,pending,Not yet visually audited; excluded from game rotation
@@ -548,4 +548,4 @@ c546.webp,,pending,Not yet visually audited; excluded from game rotation
 c547.webp,,pending,Not yet visually audited; excluded from game rotation
 c548.webp,,pending,Not yet visually audited; excluded from game rotation
 c549.webp,,pending,Not yet visually audited; excluded from game rotation
-c550.webp,FWD,reviewed,Reviewed from original illustration; confirm gameplay role before final approval
+c550.webp,FWD,reviewed,Visually inspected first-pass role candidate; confirm ambiguous outfield poses
