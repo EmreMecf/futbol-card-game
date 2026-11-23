@@ -1,54 +1,98 @@
 import 'package:flutter/material.dart';
 
-/// KART KARAKTERLERİ: `assets/v21/characters/c001.webp` … `c550.webp`.
-///
-/// Bu 550 karakter yalnız futbolcu kartlarında kullanılır. Aynı futbolcu adı
-/// her ekranda ve cihazda aynı karakteri verir. Maskot Efsane Kaptan ayrıdır
-/// ([V21MascotHead], `V21Assets`).
+/// Position-verified visual subset of the 550 illustrations.
+/// UNKNOWN images MUST NOT be used until manually audited.
+/// This prevents a GK illustration appearing on a midfielder card.
+/// Remaining WebP assets are retained, not deleted.
 abstract final class V21Characters {
   static const int count = 550;
-
-  /// Katalogdaki 100 futbolcunun karakterleri çakışmasın diye seçildi
   static const int _salt = 8937;
 
-  static String assetFor(String key) => assetAt(indexFor(key));
+  /// Human-reviewed illustrations from original assets.
+  /// Order and numbers intentionally fixed for consistent results on web/mobile.
+  static const Map<String, List<int>> reviewedByPosition = {
+    'GK': [1, 11, 12, 13, 14, 50],
+    'DEF': [2, 15, 16, 17, 18, 20, 22, 23],
+    'MID': [7, 10, 25, 26, 27, 28, 30, 100, 150, 400],
+    'FWD': [3, 4, 5, 6, 8, 9, 19, 21, 24, 29, 200, 500, 550],
+  };
 
-  static String assetAt(int index) => 'assets/v21/characters/c${(index + 1).toString().padLeft(3, '0')}.webp';
+  /// Full 550-file audit is outstanding; approved subset is intentionally
+  /// conservative and will repeat illustrations until the remaining 513
+  /// (550 - 37) images have been checked.
+  static int get reviewedCount => reviewedByPosition.values
+      .expand((v) => v)
+      .toSet().length;
 
-  /// FNV-1a: platformdan bağımsız, her açılışta aynı sonuç (String.hashCode değil)
+  static String assetAt(int index) =>
+      'assets/v21/characters/c${(index + 1).toString().padLeft(3, '0')}.webp';
+
+  static String _assetNumber(int number) =>
+      'assets/v21/characters/c${number.toString().padLeft(3, '0')}.webp';
+
+  /// Renaming one of the historical Legends must not change their portrait.
+  static String canonicalKey(String key) {
+    final normalized = key.toLowerCase().trim();
+    return switch (normalized) {
+      'aren solmar' || 'pele' || 'pelé' => 'legend-forvet-pele',
+      'nerio valtan' || 'diego maradona' => 'legend-orta-diego-maradona',
+      'elias veyron' || 'johan cruyff' => 'legend-orta-johan-cruyff',
+      'borek kaldren' || 'franz beckenbauer' => 'legend-defans-franz-beckenbauer',
+      'taren volsk' || 'lev yashin' => 'legend-kaleci-lev-yashin',
+      'miran korvek' || 'ferenc puskas' => 'legend-forvet-ferenc-puskas',
+      _ => normalized,
+    };
+  }
+
+  /// Existing deterministic hash, used within a *position-approved* pool.
   static int indexFor(String key) {
     var h = 0x811c9dc5 ^ _salt;
-    for (final unit in key.toLowerCase().trim().codeUnits) {
+    for (final unit in canonicalKey(key).codeUnits) {
       h ^= unit;
-      // h * 0x01000193 (mod 2^32): webde de aynı sonuç için parçalı çarpım
       h = (((h << 24) & 0xffffffff) + h * 0x193) & 0xffffffff;
     }
     return h % count;
   }
+
+  /// Every rendered position must be one of GK, DEF, MID or FWD.
+  /// Never fall back to the global 550-file pool.
+  static String assetFor(String key, {required String position}) {
+    final pool = reviewedByPosition[position.toUpperCase()];
+    if (pool == null || pool.isEmpty) {
+      throw ArgumentError.value(position, 'position', 'Invalid football position');
+    }
+    return _assetNumber(pool[indexFor(key) % pool.length]);
+  }
 }
 
-/// Karakter görseli. Üstten hizalanır: dar çerçevede yüz kesilmez.
+/// Shared player illustration used by mobile cards and wide-screen Web cards.
 class V21CharacterArt extends StatelessWidget {
   final String asset;
   final BoxFit fit;
   final Alignment alignment;
 
-  const V21CharacterArt.asset(this.asset, {super.key, this.fit = BoxFit.cover, this.alignment = Alignment.topCenter});
-
-  V21CharacterArt({
-    required String characterKey,
+  const V21CharacterArt.asset(
+    this.asset, {
     super.key,
     this.fit = BoxFit.cover,
     this.alignment = Alignment.topCenter,
-  }) : asset = V21Characters.assetFor(characterKey);
+  });
+
+  V21CharacterArt({
+    required String characterKey,
+    required String position,
+    super.key,
+    this.fit = BoxFit.cover,
+    this.alignment = Alignment.topCenter,
+  }) : asset = V21Characters.assetFor(characterKey, position: position);
 
   @override
   Widget build(BuildContext context) => Image.asset(
-    asset,
-    fit: fit,
-    alignment: alignment,
-    filterQuality: FilterQuality.medium,
-    gaplessPlayback: true,
-    excludeFromSemantics: true,
-  );
+        asset,
+        fit: fit,
+        alignment: alignment,
+        filterQuality: FilterQuality.medium,
+        gaplessPlayback: true,
+        excludeFromSemantics: true,
+      );
 }
