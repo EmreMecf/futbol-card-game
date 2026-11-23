@@ -11,15 +11,14 @@ abstract final class V21Characters {
   /// Human-reviewed illustrations from original assets.
   /// Order and numbers intentionally fixed for consistent results on web/mobile.
   static const Map<String, List<int>> reviewedByPosition = {
-    'GK': [1, 11, 12, 13, 14, 50],
-    'DEF': [2, 15, 16, 17, 18, 20, 22, 23],
-    'MID': [7, 10, 25, 26, 27, 28, 30, 100, 150, 400],
-    'FWD': [3, 4, 5, 6, 8, 9, 19, 21, 24, 29, 200, 500, 550],
+    'GK': [1, 11, 12, 13, 14, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 121, 125, 130, 131, 132, 136, 251, 259, 261, 269],
+    'DEF': [2, 15, 16, 17, 18, 20, 22, 23, 61, 62, 65, 71, 149, 151, 161],
+    'MID': [7, 10, 25, 26, 27, 28, 30, 52, 53, 54, 55, 57, 60, 75, 80, 100, 105, 110, 115, 120, 150, 159, 181, 191, 199, 201, 209, 219, 221, 229, 231, 300, 400],
+    'FWD': [3, 4, 5, 6, 8, 9, 19, 21, 24, 29, 38, 40, 56, 58, 59, 70, 81, 85, 90, 91, 101, 111, 141, 169, 179, 189, 200, 211, 239, 241, 249, 500, 550],
   };
 
   /// Full 550-file audit is outstanding; approved subset is intentionally
-  /// conservative and will repeat illustrations until the remaining 513
-  /// (550 - 37) images have been checked.
+  /// conservative and will repeat illustrations until the remaining unreviewed images have been checked.
   static int get reviewedCount => reviewedByPosition.values
       .expand((v) => v)
       .toSet().length;
