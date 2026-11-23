@@ -13,6 +13,10 @@ void main() {
       }
     }
     expect(seen.length, V21Characters.reviewedCount);
+    expect(seen.length, 550, reason: 'Every original illustration must be mapped once');
+    for (var id = 1; id <= 550; id++) {
+      expect(seen.contains(id), isTrue, reason: 'Unassigned image c$id');
+    }
   });
 
   test('every card can only receive a reviewed illustration of its position', () {
