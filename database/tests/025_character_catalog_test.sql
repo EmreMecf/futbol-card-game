@@ -41,14 +41,20 @@ begin
   perform pg_temp.beklenen('her kartin kimligi arsivde',
     (select count(*) from cards), (select count(*) from cards_identity_archive));
 
-  perform pg_temp.beklenen('arsiv ile kartlar birebir ayni (guc, mevki, seviye, ad)',
+  -- 054 updates ONLY the six public display names; archive preserves originals.
+  -- Gameplay identity and chemistry fields must remain identical.
+  perform pg_temp.beklenen('arsiv ile kartlarin oyun degerleri ayni (ad haric)',
     (select count(*) from cards c join cards_identity_archive a on a.card_id = c.id
-     where (c.slug, c.full_name, c.position, c.tier, c.power,
+     where (c.slug, c.position, c.tier, c.power,
             coalesce(c.nationality, ''), coalesce(c.league, ''), coalesce(c.club, ''))
        is distinct from
-           (a.slug, a.full_name, a.position, a.tier, a.power,
+           (a.slug, a.position, a.tier, a.power,
             coalesce(a.nationality, ''), coalesce(a.league, ''), coalesce(a.club, ''))),
     0::bigint);
+  perform pg_temp.beklenen('arsivde altı efsanenin orijinal adlari saklanir',
+    (select count(*) from cards_identity_archive
+     where full_name in ('Lev Yashin','Franz Beckenbauer','Diego Maradona',
+                         'Johan Cruyff','Pele','Ferenc Puskas')), 6::bigint);
 
   perform pg_temp.beklenen('hicbir karta karakter baglanmadi',
     (select count(*) from cards where character_id is not null), 0::bigint);
