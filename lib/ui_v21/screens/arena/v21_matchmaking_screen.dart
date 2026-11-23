@@ -72,15 +72,32 @@ class _BodyState extends State<_Body> {
     super.initState();
     if (getIt.isRegistered<WebSocketService>()) {
       final ws = getIt<WebSocketService>();
-      _online = ws.isConnected;
-      _conn = ws.connectionState.listen((v) {
-        if (mounted) setState(() => _online = v);
+      _setOnline(ws.isConnected);
+      _conn = ws.connectionState.listen(_setOnline);
+    }
+  }
+
+  /// Kısa kopmalarda "bağlantı kontrol ediliyor" gösterilmez; arama
+  /// REST yoklamasıyla zaten sürüyor
+  static const offlineNoticeDelay = Duration(seconds: 6);
+  Timer? _offlineDelay;
+
+  void _setOnline(bool online) {
+    if (online) {
+      _offlineDelay?.cancel();
+      _offlineDelay = null;
+      if (!_online && mounted) setState(() => _online = true);
+    } else {
+      _offlineDelay ??= Timer(offlineNoticeDelay, () {
+        _offlineDelay = null;
+        if (mounted) setState(() => _online = false);
       });
     }
   }
 
   @override
   void dispose() {
+    _offlineDelay?.cancel();
     _tick?.cancel();
     _conn?.cancel();
     super.dispose();
@@ -568,7 +585,9 @@ class _Search extends StatelessWidget {
       V21SearchPhase.widened => ('ARAMA DEVAM EDİYOR', 'Arama aralığı genişletiliyor'),
       V21SearchPhase.notFound => (
         'HENÜZ RAKİP BULUNAMADI',
-        'Şu anda uygun rakip yok. Arama sürüyor; istersen botla antrenman yap.',
+        vm.trainingEnabled
+            ? 'Şu anda uygun rakip yok. Arama sürüyor; istersen botla antrenman yap.'
+            : 'Şu anda uygun rakip yok. Arama sürüyor, biri gelince maç başlar.',
       ),
       V21SearchPhase.offline => (
         'BAĞLANTI KONTROL EDİLİYOR',

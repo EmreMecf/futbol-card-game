@@ -29,6 +29,18 @@ void main() {
     expect(FriendRoomApi.inviteUrlFor('https://api.ornek.com', kod), 'https://api.ornek.com/invite/$kod');
   });
 
+  test('uygulamayı açan davet bağlantısı iki biçimde de okunur', () {
+    final kod = 'ab12' * 7 + 'cd';
+    String? oku(String s) => FriendRoomApi.inviteCodeFromUri(Uri.parse(s));
+    expect(oku('futbolcard://davet/$kod'), kod); // Android intent
+    expect(oku('futbolcard:///davet/$kod'), kod); // eski mesajlar
+    expect(oku('FUTBOLCARD://davet/${kod.toUpperCase()}'), kod);
+    expect(oku('futbolcard://davet/kisa'), isNull);
+    expect(oku('futbolcard://baska/$kod'), isNull);
+    expect(oku('futbolcard://davet/$kod/fazla'), isNull);
+    expect(oku('https://ornek.com/davet/$kod'), isNull);
+  });
+
   test('sunucu kural mesajı aynen gösterilir, bilinmeyen hata genel kalır', () {
     expect(friendRoomErrorText(const AppException(message: 'Oda dolu.')), 'Oda dolu.');
     expect(friendRoomErrorText(StateError('x')), contains('Bağlantını kontrol'));

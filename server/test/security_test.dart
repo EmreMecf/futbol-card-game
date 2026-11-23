@@ -187,8 +187,11 @@ void main() {
     test('davet sayfası oyunu açan bağlantıyı içerir', () {
       final kod = 'a' * 30;
       final sayfa = inviteLandingPage(kod);
-      expect(sayfa, contains('futbolcard:///davet/$kod'));
-      expect(sayfa, contains('Oyunda aç'));
+      expect(sayfa, contains('futbolcard://davet/$kod'));
+      // Android tarayıcıları çıplak şema yönlendirmesini engeller
+      expect(sayfa, contains('intent://davet/$kod#Intent;scheme=futbolcard;package=com.futbolcard.futbol_card;end'));
+      expect(sayfa, contains('OYUNDA AÇ'));
+      expect(sayfa, contains('KODU KOPYALA'));
     });
   });
 

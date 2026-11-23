@@ -27,8 +27,23 @@ class FriendRoomApi {
   }
 
   /// Paylaşılan bağlantı HTTPS'tir: mesajlaşma uygulamaları yalnız bunu
-  /// tıklanabilir yapar. Açılan sayfa oyunu `futbolcard:///davet/<kod>` ile açar.
+  /// tıklanabilir yapar. Açılan sayfa oyunu açar (Android'de intent adresiyle).
   static String inviteUrl(String code) => inviteUrlFor(AppConfig.apiBaseUrl, code);
 
   static String inviteUrlFor(String baseUrl, String code) => '$baseUrl/invite/$code';
+
+  /// Uygulamayı açan bağlantıdan davet kodu. Kabul edilen biçimler:
+  ///   `futbolcard://davet/KOD`   (Android intent adresi, yeni sayfa)
+  ///   `futbolcard:///davet/KOD`  (eski sayfa ve eski mesajlar)
+  /// Geçersizse null.
+  static String? inviteCodeFromUri(Uri uri) {
+    if (uri.scheme.toLowerCase() != 'futbolcard') return null;
+    final parts = [
+      if (uri.host.isNotEmpty) uri.host,
+      ...uri.pathSegments.where((s) => s.isNotEmpty),
+    ];
+    if (parts.length != 2 || parts[0].toLowerCase() != 'davet') return null;
+    final code = parts[1].toLowerCase();
+    return RegExp(r'^[0-9a-f]{30}$').hasMatch(code) ? code : null;
+  }
 }

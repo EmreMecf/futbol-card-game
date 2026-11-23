@@ -25,6 +25,11 @@ import 'v21_match_panels.dart';
 /// sayaç farkı (`MatchRewardDelta`). Fark bilinmiyorsa ödül kartları hiç
 /// çizilmez. Antrenman, öğretici ve kart kaybı olmayan modlarda sandık,
 /// sezon XP'si ve lig paneli gösterilmez (yalnız `mode == 'ranked'`).
+/// Maç skorla değil hükmen mi bitti (teslim ya da üst üste iki hamle
+/// kaçırma)? Skorla biten maçta kazanan her zaman daha fazla kart toplar.
+bool matchEndedByForfeit(MatchResultSummary s) =>
+    !s.isDraw && (s.didIWin ? s.myScore <= s.opponentScore : s.myScore >= s.opponentScore);
+
 class V21MatchResultView extends StatefulWidget {
   final MatchResultSummary? result;
   final MatchRewardDelta? rewardDelta;
@@ -295,25 +300,32 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
 
   static String _signed(int v) => v > 0 ? '+$v' : '$v';
 
+
   (String, List<Color>, String) _look(MatchResultSummary s) {
     const gold = [Color(0xFFFFF1A8), Color(0xFFFFC21F), Color(0xFFFF7A00)];
     const red = [Color(0xFFFFC2CB), Color(0xFFFF5A6E), Color(0xFFB0193A)];
     if (s.isDraw) return ('BERABERLİK', gold, 'Skor eşit bitti. Kimse kart kaybetmedi.');
+    // Kazanan daha fazla kart toplamadıysa maç skorla değil hükmen bitti:
+    // teslim olundu ya da üst üste iki turda hamle yapılmadı
+    final hukmen = matchEndedByForfeit(s);
     if (s.noCardLossRules) {
+      if (hukmen) {
+        return s.didIWin
+            ? ('ZAFER!', gold, 'Rakip maçı bıraktı, hükmen kazandın.')
+            : ('HÜKMEN YENİLGİ', red, 'Teslim olundu ya da üst üste iki turda hamle yapılmadı; skor sayılmadı.');
+      }
       return s.didIWin
           ? ('ZAFER!', gold, '${s.myScore} kart topladın, maçı kazandın.')
           : ('MÜCADELE BİTTİ', red, 'Bu maçta kart kaybı yok: kartların sende kaldı.');
     }
     if (s.didIWin) {
       final n = s.cardsWon.length;
-      return ('ZAFER!', gold, n > 0 ? 'Rakibinden $n kart aldın.' : 'Rakibinin korumasız kartı kalmamıştı.');
+      final kart = n > 0 ? 'Rakibinden $n kart aldın.' : 'Rakibinin korumasız kartı kalmamıştı.';
+      return ('ZAFER!', gold, hukmen ? 'Rakip maçı bıraktı, hükmen kazandın. $kart' : kart);
     }
     final n = s.cardsLost.length;
-    return (
-      'MÜCADELE BİTTİ',
-      red,
-      n > 0 ? '$n kartını kalıcı olarak kaptırdın.' : 'Korumadaki kartların sayesinde hiç kart kaybetmedin.',
-    );
+    final kart = n > 0 ? '$n kartını kalıcı olarak kaptırdın.' : 'Korumadaki kartların sayesinde hiç kart kaybetmedin.';
+    return (hukmen ? 'HÜKMEN YENİLGİ' : 'MÜCADELE BİTTİ', red, kart);
   }
 }
 

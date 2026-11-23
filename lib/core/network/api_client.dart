@@ -126,6 +126,13 @@ class ApiClient {
   // ilki basarili olur, digerleri "gecersiz jeton" alir ve kullanici
   // haksiz yere disari atilirdi. Bu Completer o yarisi engelliyor:
   // ilk cagri yeniler, digerleri onun sonucunu bekler.
+  /// WebSocket gibi REST disi baglantilar icin: jetonu simdi yenile.
+  /// Basarisizsa oturumu kapatmaz; o karar REST isteklerine aittir.
+  Future<bool> refreshSession() {
+    if (_session.refreshToken == null) return Future.value(false);
+    return _refreshToken();
+  }
+
   Completer<bool>? _yenilemeIslemi;
 
   Future<bool> _refreshToken() async {

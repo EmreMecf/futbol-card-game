@@ -197,6 +197,9 @@ void main() {
       socket = _OfflineSocket();
       await pump(t, const V21MatchmakingScreen(), const Size(390, 844));
       await tapText(t, 'RAKİP BUL');
+      // Kısa kopmada uyarı yok, birkaç saniye sürerse gösterilir
+      expect(find.text('BAĞLANTI KONTROL EDİLİYOR'), findsNothing);
+      await t.pump(const Duration(seconds: 7));
       expect(find.text('BAĞLANTI KONTROL EDİLİYOR'), findsOneWidget);
       expect(find.textContaining('otomatik sürüyor'), findsOneWidget);
       await tapText(t, 'ARAMAYI İPTAL ET');
@@ -267,11 +270,15 @@ void main() {
       await unmount(t);
     });
 
-    testWidgets('bağlantı kopuk (hf11): yeniden bağlanma paneli', (t) async {
+    testWidgets('bağlantı kopuk (hf11): oyunu kapatmayan şerit, kısa kopmada görünmez', (t) async {
       socket = _OfflineSocket();
       await pump(t, const V21ArenaScreen(matchId: 'm'), const Size(390, 844));
-      expect(find.text('MAÇA YENİDEN BAĞLANILIYOR'), findsOneWidget);
+      expect(find.text('BAĞLANTI YENİDEN KURULUYOR'), findsNothing);
+      await t.pump(const Duration(seconds: 5));
+      expect(find.text('BAĞLANTI YENİDEN KURULUYOR'), findsOneWidget);
       expect(find.text('TEKRAR DENE'), findsOneWidget);
+      // Şerit oyunu kapatmaz: OYNA! hâlâ görünür ve dokunulabilir
+      expect(find.text('OYNA!').hitTestable(), findsWidgets);
       await unmount(t);
     });
 
@@ -314,6 +321,12 @@ void main() {
         testWidgets('${e.key} ${v21SizeName(size)}', (t) async {
           e.value.$2();
           await pump(t, e.value.$1(), size);
+          if (e.key == 'arena_reconnect') {
+            await t.pump(const Duration(seconds: 5));
+            // Kart resimleri gerçek zamanda çözülür
+            await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
+            await t.pump(const Duration(milliseconds: 100));
+          }
           expect(t.takeException(), isNull, reason: 'taşma olmamalı');
           if (skipGolden == null && v21GoldenFor(size)) {
             await expectLater(

@@ -667,6 +667,15 @@ class _SahteSocket implements WebSocketService {
   Future<void> reconnect() async {}
 
   @override
+  Future<void> retryNow() async {}
+
+  @override
+  Duration get handshakeTimeout => Duration.zero;
+
+  @override
+  Duration get staleAfter => Duration.zero;
+
+  @override
   Future<void> dispose() async {}
 }
 

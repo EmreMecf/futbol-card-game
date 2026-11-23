@@ -119,22 +119,43 @@ class _BodyState extends State<_Body> {
   CardPosition? _pickedPosition;
   String? _shownError;
   StreamSubscription<bool>? _conn;
-  bool _online = true;
+  Timer? _offlineDelay;
+
+  /// Kısa kopmalar uyarı göstermez; maç REST yoklamasıyla sürer
+  static const offlineNoticeDelay = Duration(seconds: 4);
+  bool _showOffline = false;
 
   @override
   void initState() {
     super.initState();
     if (getIt.isRegistered<WebSocketService>()) {
       final ws = getIt<WebSocketService>();
-      _online = ws.isConnected;
-      _conn = ws.connectionState.listen((v) {
-        if (mounted) setState(() => _online = v);
+      _setOnline(ws.isConnected);
+      _conn = ws.connectionState.listen(_setOnline);
+    }
+  }
+
+  void _setOnline(bool online) {
+    if (online) {
+      _offlineDelay?.cancel();
+      _offlineDelay = null;
+      if (_showOffline && mounted) setState(() => _showOffline = false);
+    } else {
+      _offlineDelay ??= Timer(offlineNoticeDelay, () {
+        _offlineDelay = null;
+        if (mounted) setState(() => _showOffline = true);
       });
     }
   }
 
+  void _retryConnection(MatchViewModel vm) {
+    if (getIt.isRegistered<WebSocketService>()) unawaited(getIt<WebSocketService>().retryNow());
+    unawaited(vm.refresh());
+  }
+
   @override
   void dispose() {
+    _offlineDelay?.cancel();
     _conn?.cancel();
     super.dispose();
   }
@@ -246,7 +267,7 @@ class _BodyState extends State<_Body> {
           onSurrender: () => _surrender(vm),
           tutorial: vm.matchState!.isTutorial ? V21TutorialHint(state: vm.matchState!) : null,
           overlays: [
-            if (!_online && vm.currentClash == null) _Reconnecting(onRetry: vm.refresh),
+            if (_showOffline && vm.currentClash == null) _Reconnecting(onRetry: () => _retryConnection(vm)),
             _ClashLayer(vm: vm),
           ],
         ),
@@ -362,7 +383,7 @@ class _BodyState extends State<_Body> {
                 );
               },
             ),
-            if (!_online && vm.currentClash == null) _Reconnecting(onRetry: vm.refresh),
+            if (_showOffline && vm.currentClash == null) _Reconnecting(onRetry: () => _retryConnection(vm)),
             _ClashLayer(vm: vm),
           ],
         ),
@@ -1149,64 +1170,74 @@ class _ActionBar extends StatelessWidget {
 // ====================================================================
 // YENİDEN BAĞLANMA (hf11)
 // ====================================================================
+/// Anlık bağlantı kopuksa ekranın üstünde küçük bir şerit. Oyunu
+/// KAPATMAZ: maç REST yoklamasıyla sürer, kart ve taktik seçilip
+/// OYNA! ile gönderilebilir.
 class _Reconnecting extends StatelessWidget {
   final VoidCallback onRetry;
   const _Reconnecting({required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
+    final top = MediaQuery.paddingOf(context).top;
+    return Positioned(
+      left: 0,
+      right: 0,
+      top: top + 64,
       child: LayoutBuilder(
         builder: (context, box) {
-          final k = V21Scale.forSize(box.biggest).s;
-          return ColoredBox(
-            color: const Color(0x99120933),
-            child: Center(
-              child: Semantics(
-                liveRegion: true,
-                label: 'Maça yeniden bağlanılıyor. Seçimlerin korunuyor.',
-                child: SizedBox(
-                  width: 300 * k,
-                  child: V21GamePanel(
-                    scale: k,
-                    radius: 20,
-                    padding: EdgeInsets.fromLTRB(16 * k, 18 * k, 16 * k, 12 * k),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Icon(Icons.cell_tower_rounded, size: 54 * k, color: const Color(0xFF6FE4FF)),
-                        SizedBox(height: 6 * k),
-                        Text(
-                          'MAÇA YENİDEN BAĞLANILIYOR',
-                          textAlign: TextAlign.center,
-                          style: V21Type.title(24 * k, color: V21Colors.goldTop, shadows: V21Type.inkShadow(k)),
-                        ),
-                        SizedBox(height: 4 * k),
-                        Text(
-                          'Seçimlerin korunuyor. Hamle yalnız OYNA! ile gönderilir.',
-                          textAlign: TextAlign.center,
-                          style: V21Type.label(12 * k, weight: FontWeight.w700, color: const Color(0xFFE6DBFF)),
-                        ),
-                        SizedBox(height: 12 * k),
-                        V21GameButton(
-                          label: 'BEKLE',
-                          tone: V21ButtonTone.blue,
-                          scale: k,
-                          status: V21ButtonStatus.loading,
-                          onPressed: () {},
-                        ),
-                        SizedBox(height: 8 * k),
-                        V21GameButton(
-                          label: 'TEKRAR DENE',
-                          tone: V21ButtonTone.purple,
-                          size: V21ButtonSize.small,
-                          scale: k,
-                          onPressed: onRetry,
-                        ),
-                      ],
+          final k = V21Scale.forSize(Size(box.maxWidth, 844)).s;
+          return Center(
+            child: Semantics(
+              liveRegion: true,
+              label: 'Bağlantı yeniden kuruluyor. Maç devam ediyor.',
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 360 * k),
+                margin: EdgeInsets.symmetric(horizontal: 12 * k),
+                padding: EdgeInsets.fromLTRB(12 * k, 6 * k, 6 * k, 6 * k),
+                decoration: BoxDecoration(
+                  color: const Color(0xEE1B0F45),
+                  borderRadius: BorderRadius.circular(14 * k),
+                  border: Border.all(color: const Color(0xFF6FE4FF), width: 1.2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.cell_tower_rounded, size: 20 * k, color: const Color(0xFF6FE4FF)),
+                    SizedBox(width: 8 * k),
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'BAĞLANTI YENİDEN KURULUYOR',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: V21Type.label(12 * k, weight: FontWeight.w900, color: V21Colors.goldTop),
+                          ),
+                          Text(
+                            'Maç sürüyor, hamleni yapabilirsin.',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: V21Type.label(11 * k, weight: FontWeight.w700, color: const Color(0xFFE6DBFF)),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 6 * k),
+                    TextButton(
+                      onPressed: onRetry,
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 10 * k),
+                        minimumSize: Size(0, 36 * k),
+                      ),
+                      child: Text(
+                        'TEKRAR DENE',
+                        style: V21Type.label(11 * k, weight: FontWeight.w900, color: const Color(0xFF6FE4FF)),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

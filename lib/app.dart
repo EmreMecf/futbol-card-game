@@ -11,6 +11,7 @@ import 'core/router/app_router.dart';
 import 'core/router/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/viewmodel/auth_view_model.dart';
+import 'features/friends/friend_room_api.dart';
 import 'ui_v21/theme/v21_scroll_behavior.dart';
 
 /// Uygulamanin kok widget'i.
@@ -36,16 +37,8 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
     // Webde davet adresi doğrudan rotaya gelir; uygulama bağlantısı eklentisi yok
     if (kIsWeb) return;
     _inviteSubscription = AppLinks().uriLinkStream.listen((uri) {
-      if (uri.scheme != 'futbolcard' || uri.pathSegments.length != 2 ||
-          uri.pathSegments[0] != 'davet') {
-        return;
-      }
-      final code = uri.pathSegments[1].toLowerCase();
-      const allowed = '0123456789abcdef';
-      if (code.length != 30 ||
-          code.split('').any((ch) => !allowed.contains(ch))) {
-        return;
-      }
+      final code = FriendRoomApi.inviteCodeFromUri(uri);
+      if (code == null) return;
       getIt<AppRouter>().router.go(AppRoutes.friendInviteWithCode(code));
     });
   }

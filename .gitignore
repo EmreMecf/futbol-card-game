@@ -89,3 +89,6 @@ design-reference/gercek/pvp/*
 # Uretilen ciktilar: testler ve araclar yeniden yazar, depoda tutulmaz
 /tool/karakter/cikti/
 /docs/ui_v21/compare/
+
+# Canli test hesaplari (sifre icerir)
+*hesaplar*.txt

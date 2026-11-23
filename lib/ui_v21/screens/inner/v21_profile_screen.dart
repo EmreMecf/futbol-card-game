@@ -328,9 +328,16 @@ class _MatchRow extends StatelessWidget {
       MatchOutcome.draw => V21Colors.goldTop,
     };
     final transfer = entry.transferText;
+    // Kazanan daha fazla kart toplamadıysa maç hükmen bitti (teslim / hamle yok)
+    final hukmen = switch (entry.outcome) {
+      MatchOutcome.win => entry.myScore <= entry.opponentScore,
+      MatchOutcome.loss => entry.myScore >= entry.opponentScore,
+      MatchOutcome.draw => false,
+    };
+    final etiket = hukmen ? 'Hükmen' : entry.outcome.shortLabel;
     return Semantics(
       label:
-          '${entry.opponentUsername} karşı ${entry.scoreText}, ${entry.outcome.shortLabel}${transfer == null ? '' : ', $transfer'}',
+          '${entry.opponentUsername} karşı ${entry.scoreText}, ${hukmen ? '${entry.outcome.shortLabel}, hükmen' : entry.outcome.shortLabel}${transfer == null ? '' : ', $transfer'}',
       excludeSemantics: true,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12 * k, vertical: 10 * k),
@@ -367,7 +374,7 @@ class _MatchRow extends StatelessWidget {
             ),
             Text(entry.scoreText, style: V21Type.title(20 * k)),
             SizedBox(width: 10 * k),
-            V21Tag(text: entry.outcome.shortLabel, background: color, foreground: Colors.white, scale: k),
+            V21Tag(text: etiket, background: color, foreground: Colors.white, scale: k),
           ],
         ),
       ),

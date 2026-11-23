@@ -99,7 +99,11 @@ Future<void> configureDependencies() async {
       ),
     )
     ..registerLazySingleton<WebSocketService>(
-      () => WebSocketService(getIt<SessionManager>()),
+      () => WebSocketService(
+        getIt<SessionManager>(),
+        // Suresi dolmus jetonla WebSocket 401 alir; once REST ile yenilenir
+        refreshToken: () => getIt<ApiClient>().refreshSession(),
+      ),
     );
 
   // ---------------- 3. YONLENDIRME ----------------

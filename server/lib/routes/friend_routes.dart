@@ -82,13 +82,49 @@ Router friendRoutes(Database db) {
 /// Paylaşılan HTTPS davet bağlantısının açtığı sayfa: oyunu açmayı dener,
 /// olmazsa düğme ve elle girilecek kodu gösterir. [code] çağıran tarafından
 /// 30 karakterlik küçük harf onaltılık olarak doğrulanmış olmalıdır.
+///
+/// Android'de `intent://` adresi kullanılır: Chrome ve WhatsApp'ın iç
+/// tarayıcısı çıplak `futbolcard://` yönlendirmesini sessizce engeller,
+/// intent adresini ise uygulamaya iletir. Uygulama yüklü değilse sayfa
+/// açık kalır ve kod elle girilebilir.
 String inviteLandingPage(String code) {
-  final deepLink = 'futbolcard:///davet/$code';
+  final deepLink = 'futbolcard://davet/$code';
+  final androidLink = 'intent://davet/$code#Intent;scheme=futbolcard;'
+      'package=$androidPackage;end';
   return '<!doctype html><html lang="tr"><head><meta charset="utf-8">'
       '<meta name="viewport" content="width=device-width,initial-scale=1">'
-      '<title>Futbol Card Arena</title></head><body>'
-      '<h1>Futbol Card Arena</h1><p>Arkadaşın seni özel maça davet ediyor.</p>'
-      '<p><a href="$deepLink">Oyunda aç</a></p>'
-      '<p>Oyun açılmazsa bu kodu oyunda "Arkadaşınla Oyna" ekranına gir: $code</p>'
-      '<script>window.location.href="$deepLink";</script></body></html>';
+      '<meta name="robots" content="noindex">'
+      '<title>Futbol Card Arena daveti</title>'
+      '<style>'
+      'body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;'
+      'background:#1b0f45;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}'
+      'main{width:100%;max-width:380px;padding:24px 16px;text-align:center}'
+      'h1{margin:0 0 6px;font-size:26px;color:#ffd75e}'
+      'p{margin:8px 0;color:#e6dbff;line-height:1.4}'
+      'a.btn,button{display:block;width:100%;box-sizing:border-box;margin:14px 0 0;padding:15px;'
+      'border:0;border-radius:14px;font-size:17px;font-weight:800;text-decoration:none;cursor:pointer}'
+      'a.btn{background:#22d6a5;color:#0b1020}'
+      'button{background:transparent;color:#6fe4ff;border:1.5px solid #6fe4ff}'
+      'code{display:block;margin:10px 0 0;padding:10px;border-radius:10px;background:#0b0726;'
+      'color:#fff;font-size:15px;word-break:break-all;user-select:all}'
+      '</style></head><body><main>'
+      '<h1>Futbol Card Arena</h1>'
+      '<p>Arkadaşın seni özel maça davet ediyor.</p>'
+      '<a class="btn" id="ac" href="$deepLink">OYUNDA AÇ</a>'
+      '<p style="margin-top:22px">Oyun açılmazsa oyunda <b>Arkadaşınla Oyna</b> ekranına bu kodu gir:</p>'
+      '<code id="kod">$code</code>'
+      '<button id="kopyala" type="button">KODU KOPYALA</button>'
+      '<script>'
+      'var a=document.getElementById("ac");'
+      'if(/android/i.test(navigator.userAgent))a.href="$androidLink";'
+      'document.getElementById("kopyala").onclick=function(){'
+      'var b=this;function ok(){b.textContent="KOPYALANDI";}'
+      'if(navigator.clipboard){navigator.clipboard.writeText("$code").then(ok,function(){});}'
+      'else{var r=document.createRange();r.selectNodeContents(document.getElementById("kod"));'
+      'var s=getSelection();s.removeAllRanges();s.addRange(r);document.execCommand("copy");ok();}};'
+      'window.location.href=a.href;'
+      '</script></main></body></html>';
 }
+
+/// Android uygulama kimliği (android/app/build.gradle applicationId)
+const androidPackage = 'com.futbolcard.futbol_card';
