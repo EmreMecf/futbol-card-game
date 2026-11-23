@@ -676,6 +676,9 @@ class _SahteSocket implements WebSocketService {
   Duration get staleAfter => Duration.zero;
 
   @override
+  Future<bool> Function()? get refreshToken => null;
+
+  @override
   Future<void> dispose() async {}
 }
 

@@ -38,7 +38,7 @@ typedef WebSocketConnector = WebSocketChannel Function(Uri uri);
 ///   * Uygulama one gelince kopuksa beklemeden yeniden denenir.
 class WebSocketService {
   final SessionManager _session;
-  final Future<bool> Function()? _refreshToken;
+  final Future<bool> Function()? refreshToken;
   final WebSocketConnector _connector;
 
   /// Render gibi uyuyan sunucular ilk istekte ~30 sn uyanir
@@ -75,12 +75,11 @@ class WebSocketService {
 
   WebSocketService(
     this._session, {
-    Future<bool> Function()? refreshToken,
+    this.refreshToken,
     WebSocketConnector? connector,
     this.handshakeTimeout = const Duration(seconds: 40),
     this.staleAfter = const Duration(seconds: 70),
-  }) : _refreshToken = refreshToken,
-       _connector = connector ?? WebSocketChannel.connect;
+  }) : _connector = connector ?? WebSocketChannel.connect;
 
   /// Sunucudan gelen tum olaylar (teknik gurultu ayiklanmis)
   Stream<RealtimeEvent> get events => _olaylar.stream;
@@ -104,7 +103,7 @@ class WebSocketService {
 
     // Suresi dolmus (ya da reddedilmis) jetonla denemenin anlami yok
     if (_jetonYenilensin || _jetonBitiyor(_session.accessToken)) {
-      final yenile = _refreshToken;
+      final yenile = refreshToken;
       if (yenile != null) {
         try {
           await yenile();
