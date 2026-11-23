@@ -162,7 +162,8 @@ begin
   perform pg_temp.beklenen('ikinci oynayinca tur cozulur', r ->> 'phase', 'round_resolved');
   select * into m from matches where id = v_mac;
   perform pg_temp.beklenen('2. tur, yeniden mevki asamasi', m.round_number::text || m.phase, '2position');
-  perform pg_temp.beklenen('mevki suresi ~5 sn', m.turn_deadline between now() + interval '4 seconds' and now() + interval '6 seconds', true);
+  -- 051: tur sonucu sahnesi payi (3 sn) + mevki suresi (5 sn)
+  perform pg_temp.beklenen('mevki suresi ~5 sn + sahne payi', m.turn_deadline between now() + interval '7 seconds' and now() + interval '9 seconds', true);
   perform pg_temp.beklenen('tur kaydi', (select count(*)::int from match_rounds where match_id = v_mac), 1);
   perform pg_temp.beklenen('hamle bayraklari: 1 acan + 1 cevap',
     (select count(*) filter (where is_lead) || '+' || count(*) filter (where not is_lead) from match_moves

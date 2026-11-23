@@ -80,8 +80,15 @@ OZET="select (select count(*) from matches where status = 'finished') || ' mac, 
              (select count(*) from economy_ledger) || ' defter kaydi'"
 
 ONCE=$(sql "$IZ"); echo "once : $(sql "$OZET")  iz=$ONCE"
+# BILEREK VERI ONARAN migration'lar bu kontrolun disinda tutulur. Bu listeye
+# yalniz amaci kullanici verisini duzeltmek olan, bunu basliginda aciklayan
+# ve kendi kural testi olan migration'lar girer:
+#   050: ayni futbolcuyu iki kez iceren kadrolari ve kadro kuramayan
+#        oyunculari bir kez onarir (kart/kadro verisi bilerek degisir)
+VERI_ONARIMI="${VERI_ONARIMI:-050}"
 for m in $(cd "$KOK" && git ls-files 'database/migrations/*.sql' | sort); do
   eski_mi "$m" && continue
+  case " $VERI_ONARIMI " in *" $(basename "$m" | cut -c1-3) "*) echo "atlandi (veri onarimi): $(basename "$m")"; continue ;; esac
   "$PSQL" -d "$DB" -v ON_ERROR_STOP=1 -q -1 -f "$KOK/$m" >/dev/null 2>&1
 done
 SONRA=$(sql "$IZ"); echo "sonra: $(sql "$OZET")  iz=$SONRA"
