@@ -241,7 +241,11 @@ class _Header extends StatelessWidget {
       levelProgress: hasSeason ? season.tierProgress.clamp(0.0, 1.0) : null,
       levelMeaning: 'Sezon kademesi',
       onProfileTap: () => context.push(AppRoutes.profile),
-      trailing: [V21ResourcePill.coins(scale: k, coins: user?.coins, onTap: () => context.go(AppRoutes.store))],
+      trailing: [
+        // 056: elmas — mağazadaki elmas bölümüne götürür
+        V21ResourcePill.gems(scale: k, gems: user?.gems, onTap: () => context.go(AppRoutes.store)),
+        V21ResourcePill.coins(scale: k, coins: user?.coins, onTap: () => context.go(AppRoutes.store)),
+      ],
     );
   }
 }

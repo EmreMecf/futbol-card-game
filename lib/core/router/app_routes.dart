@@ -58,6 +58,13 @@ class AppRoutes {
   /// Ekonomi V2 (FAZ 3): item envanteri
   static const String inventory = '/envanter';
 
+  /// 056: arkadaş listesi, istekler, oyuncu arama
+  static const String social = '/sosyal';
+
+  /// 056: başka oyuncunun açık profili (/oyuncu/:id)
+  static const String player = '/oyuncu';
+  static String playerFor(String id) => '$player/$id';
+
   /// Ekonomi V2 (FAZ 4): Battle Pass + görevler
   static const String season = '/sezon';
 

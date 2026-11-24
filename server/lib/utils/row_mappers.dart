@@ -23,6 +23,7 @@ class RowMappers {
       email: row['email']?.toString() ?? '',
       avatarUrl: row['avatar_url'] as String?,
       coins: _int(row['coins']),
+      gems: _int(row['gems']),
       protectionSlots: _int(row['protection_slots'], GameRules.baseProtectionSlots),
       mmr: _int(row['mmr'], 1000),
       wins: _int(row['wins']),

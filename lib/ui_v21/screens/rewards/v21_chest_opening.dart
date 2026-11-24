@@ -142,6 +142,14 @@ class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProv
                 runSpacing: 10 * k,
                 children: [
                   V21RewardCard.coins(r.coins, scale: k),
+                  // 056: sandıktan elmas
+                  if (r.gems > 0)
+                    V21RewardCard(
+                      icon: V21GemIcon(size: 46 * k),
+                      value: '+${r.gems}',
+                      label: 'ELMAS',
+                      scale: k,
+                    ),
                   if (r.jokers.values.any((v) => v > 0))
                     V21RewardCard(
                       icon: V21ItemArt(

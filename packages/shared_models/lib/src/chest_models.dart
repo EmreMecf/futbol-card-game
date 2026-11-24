@@ -144,6 +144,13 @@ abstract class ChestOpenResult with _$ChestOpenResult {
     @Default({}) Map<String, int> extras,
     int? coinsAfter,
     int? ledgerId,
+
+    /// 056: sandıktan çıkan elmas ve sonraki bakiye
+    @Default(0) int gems,
+    int? gemsAfter,
+
+    /// 056: sandık elmasla hemen açıldıysa harcanan elmas
+    @Default(0) int gemsSpent,
   }) = _ChestOpenResult;
 
   factory ChestOpenResult.fromJson(Map<String, dynamic> json) => _$ChestOpenResultFromJson(json);

@@ -5,6 +5,7 @@ import 'package:shelf_router/shelf_router.dart';
 import '../auth/auth_middleware.dart';
 import '../db/database.dart';
 import '../utils/api_response.dart';
+import '../utils/rule_errors.dart';
 import '../utils/row_mappers.dart';
 
 /// Eslestirme ve mac uc noktalari. Hepsi jeton gerektirir.
@@ -151,6 +152,20 @@ Router matchRoutes(Database db) {
           .map((r) => RowMappers.matchHistoryEntry(r).toJson())
           .toList(),
     });
+  });
+
+  // ------------------------------------------------------------------
+  // RAKIBIN KADROSU (056) — yalniz bitmis ve oyuncunun katildigi mac
+  // ------------------------------------------------------------------
+  router.get('/<matchId>/opponent-squad', (Request request, String matchId) async {
+    final userId = requireUserId(request);
+    if (!RegExp(r'^[0-9a-fA-F-]{36}$').hasMatch(matchId)) {
+      throw const ApiException('Mac bulunamadi.', status: 404, code: 'match_not_found');
+    }
+    return withRuleCodes(() async => jsonOk(RowMappers.asMap(await db.scalar(
+          'select match_opponent_squad(@u::uuid, @m::uuid)',
+          params: {'u': userId, 'm': matchId},
+        ))));
   });
 
   // ------------------------------------------------------------------

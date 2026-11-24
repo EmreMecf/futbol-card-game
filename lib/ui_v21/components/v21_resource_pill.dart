@@ -4,6 +4,7 @@ import '../foundation/v21_colors.dart';
 import '../foundation/v21_metrics.dart';
 import '../foundation/v21_typography.dart';
 import '../utilities/v21_format.dart';
+import 'v21_item_art.dart';
 import 'v21_painters.dart';
 import 'v21_tap.dart';
 
@@ -49,6 +50,18 @@ class V21ResourcePill extends StatelessWidget {
         onTap: onTap,
         scale: scale,
         width: 117,
+      );
+
+  /// 056: elmas hapı (altından dar)
+  factory V21ResourcePill.gems({Key? key, required int? gems, VoidCallback? onTap, double scale = 1}) =>
+      V21ResourcePill(
+        key: key,
+        icon: V21GemIcon(size: 24 * scale),
+        value: gems,
+        semanticsName: 'elmas',
+        onTap: onTap,
+        scale: scale,
+        width: 88,
       );
 
   @override

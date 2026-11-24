@@ -15,6 +15,9 @@ String chestErrorMessage(AppException e) => switch (e.technicalDetail) {
       'economy_disabled' => 'Sandık sistemi henüz açık değil.',
       'squad_complete' => 'Kadron zaten kurulabiliyor.',
       'emergency_cooldown' => 'Acil kadro 24 saatte bir alınabilir.',
+      'not_enough_gems' => 'Yeterli elmas yok.',
+      'gem_cost_changed' => 'Elmas bedeli değişti, tekrar dene.',
+      'chest_not_gem_openable' => 'Bu sandık elmasla açılamaz.',
       'idempotency_in_progress' => 'İstek hâlâ işleniyor, birazdan tekrar dene.',
       _ => e.message,
     };

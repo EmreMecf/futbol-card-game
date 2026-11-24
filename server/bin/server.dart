@@ -19,6 +19,7 @@ import 'package:futbol_card_server/routes/match_routes.dart';
 import 'package:futbol_card_server/routes/friend_routes.dart';
 import 'package:futbol_card_server/routes/progress_routes.dart';
 import 'package:futbol_card_server/routes/sbc_routes.dart';
+import 'package:futbol_card_server/routes/social_routes.dart';
 import 'package:futbol_card_server/scheduler/timeout_sweeper.dart';
 import 'package:futbol_card_server/utils/api_response.dart';
 import 'package:futbol_card_server/utils/idempotency.dart';
@@ -110,6 +111,8 @@ Future<void> main(List<String> args) async {
   api.mount('/sbc', korumali.addHandler(sbcRoutes(db).call));
   api.mount('/leaderboard', korumali.addHandler(leaderboardRoutes(db).call));
   api.mount('/characters', korumali.addHandler(characterRoutes(db).call));
+  // 056: arkadaşlık, oyuncu arama, açık profil
+  api.mount('/social', korumali.addHandler(socialRoutes(db).call));
 
   // Ekonomi V2 (028+). Degistirici uclar Idempotency-Key ister; FAZ 0'da
   // yalniz okuma uclari var, ara katman simdiden bagli.
@@ -124,6 +127,8 @@ Future<void> main(List<String> args) async {
   api.mount('/items', idempotent.addHandler(itemRoutes(db).call));
   // Ekonomi V2 (FAZ 4): Battle Pass + gorevler
   api.mount('/season', idempotent.addHandler(seasonRoutes(db).call));
+  // 056: elmas
+  api.mount('/gems', idempotent.addHandler(gemRoutes(db).call));
 
   // ---- 5. WEBSOCKET ----
   // Baglanti adresi: ws://localhost:8080/ws?token=<access_token>

@@ -625,3 +625,67 @@ class _EmblemPainter extends CustomPainter {
   @override
   bool shouldRepaint(_EmblemPainter old) => old.category != category || old.p != p;
 }
+
+// =====================================================================
+// ELMAS (nadir para birimi simgesi)
+// =====================================================================
+
+/// Elmas simgesi: yüzeyli yeşil-camgöbeği mücevher, mürekkep konturlu.
+/// Altın simgesinin ([V21CoinIcon]) elmas karşılığı.
+class V21GemIcon extends StatelessWidget {
+  final double size;
+  const V21GemIcon({super.key, this.size = 24});
+
+  @override
+  Widget build(BuildContext context) =>
+      ExcludeSemantics(child: SizedBox.square(dimension: size, child: const CustomPaint(painter: _GemPainter())));
+}
+
+class _GemPainter extends CustomPainter {
+  const _GemPainter();
+
+  static const _light = Color(0xFFD6FFF1);
+  static const _base = Color(0xFF2EE6A8);
+  static const _dark = Color(0xFF0C8A73);
+
+  @override
+  void paint(Canvas c, Size s) {
+    final u = s.width / 100;
+    c.save();
+    c.scale(u);
+    // Üst taç + alt sivri: klasik kesim
+    const tl = Offset(24, 30), tr = Offset(76, 30), l = Offset(8, 44), r = Offset(92, 44), b = Offset(50, 92);
+    const t1 = Offset(36, 14), t2 = Offset(64, 14);
+    final outer = Path()..addPolygon([l, t1, t2, r, b], true);
+    c.drawPath(outer.shift(const Offset(0, 3)), Paint()..color = const Color(0x55000000));
+    final yuzler = <(List<Offset>, Color)>[
+      ([l, t1, tl], _light),
+      ([t1, t2, tr, tl], Color.lerp(_light, Colors.white, 0.5)!),
+      ([t2, r, tr], _base),
+      ([l, tl, const Offset(50, 44), b], _base),
+      ([tl, tr, const Offset(50, 44)], _light),
+      ([tr, r, b, const Offset(50, 44)], _dark),
+    ];
+    for (final (pts, col) in yuzler) {
+      c.drawPath(Path()..addPolygon(pts, true), Paint()..color = col);
+    }
+    final ince = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..color = const Color(0x66FFFFFF);
+    c.drawLine(l, r, ince);
+    c.drawPath(
+      outer,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 7
+        ..strokeJoin = StrokeJoin.round
+        ..color = V21Colors.ink,
+    );
+    c.drawCircle(const Offset(36, 26), 4, Paint()..color = Colors.white);
+    c.restore();
+  }
+
+  @override
+  bool shouldRepaint(_GemPainter oldDelegate) => false;
+}

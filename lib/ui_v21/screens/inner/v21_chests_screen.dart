@@ -141,8 +141,14 @@ class _Body extends StatelessWidget {
 /// Sandığı açar ve sonucu mevcut tam ekran sahnede gösterir
 Future<void> openChest(BuildContext context, ChestsViewModel vm, Chest c) async {
   final ok = await vm.open(c);
+  if (!ok || !context.mounted) return;
+  await _showOpening(context, vm);
+}
+
+/// Son açılan sandığın sahnesi (normal açılış ve elmasla açılış)
+Future<void> _showOpening(BuildContext context, ChestsViewModel vm) async {
   final result = vm.lastOpening;
-  if (!ok || result == null || !context.mounted) return;
+  if (result == null || !context.mounted) return;
   await Navigator.of(context).push(
     PageRouteBuilder<void>(
       opaque: true,
@@ -251,7 +257,7 @@ class _SlotGrid extends StatelessWidget {
         onTap = null;
       } else if (c.isReady) {
         onTap = () => openChest(context, vm, c);
-      } else if (vm.canUseKey(c) || vm.canSpeedUp(c)) {
+      } else if (vm.canUseKey(c) || vm.canSpeedUp(c) || vm.canOpenWithGems(c)) {
         onTap = () => _options(context, vm, c, unlocking);
       } else if (c.isSealed && !unlocking) {
         onTap = () => vm.startUnlock(c);
@@ -323,14 +329,20 @@ Future<void> _options(BuildContext context, ChestsViewModel vm, Chest c, bool un
     title: '${V21Format.upper(c.typeName)} SANDIK',
     icon: V21ChestArt.tier(c.chestType, height: 80),
     message: c.isUnlocking
-        ? 'Sayaç çalışıyor. Anahtarla hemen açabilir ya da hızlandırabilirsin.'
-        : 'Sayacı başlatabilir ya da anahtarla hemen açabilirsin.',
+        ? 'Sayaç çalışıyor. Beklemeden açmak için elmas ya da anahtar kullanabilirsin.'
+        : 'Sayacı başlatabilir ya da elmasla hemen açabilirsin.',
     actions: [
       if (c.isSealed && !unlocking)
         V21DialogAction(
           'KİLİDİ AÇ (${V21Format.shortDuration(c.unlockSeconds)})',
           tone: V21ButtonTone.green,
           result: 'unlock',
+        ),
+      if (vm.canOpenWithGems(c))
+        V21DialogAction(
+          'ELMASLA AÇ (${vm.gemCost(c)} ELMAS · sende ${vm.gems})',
+          tone: V21ButtonTone.blue,
+          result: 'gems',
         ),
       if (vm.canUseKey(c)) V21DialogAction('ANAHTARLA AÇ (${vm.keyCost(c)} / ${vm.keys})', result: 'key'),
       if (vm.canSpeedUp(c))
@@ -341,6 +353,8 @@ Future<void> _options(BuildContext context, ChestsViewModel vm, Chest c, bool un
   switch (choice) {
     case 'unlock':
       await vm.startUnlock(c);
+    case 'gems':
+      if (await vm.openWithGems(c) && context.mounted) await _showOpening(context, vm);
     case 'key':
       await vm.useKey(c);
     case 'speed':

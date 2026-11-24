@@ -9,6 +9,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../features/store/presentation/viewmodel/store_view_model.dart';
 import '../rewards/v21_pack_opening.dart';
 import '../../../shared/widgets/error_snackbar.dart';
+import '../social/v21_social_screens.dart';
 import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
 import '../../web/web_kit.dart';
@@ -170,6 +171,9 @@ class _BodyState extends State<_Body> {
           onBuy: (p) => _buy(vm, p),
         ),
         if (selected != null) ...[SizedBox(height: 16 * k), _Odds(pack: selected, scale: k)],
+        // 056: elmasla altın
+        SizedBox(height: 18 * k),
+        V21GemStoreSection(scale: k),
         SizedBox(height: 18 * k),
         _Tabs(scale: k),
         SizedBox(height: 14 * k),

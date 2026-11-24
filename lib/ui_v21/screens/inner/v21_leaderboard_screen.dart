@@ -73,14 +73,19 @@ class _Body extends StatelessWidget {
             SizedBox(height: 14 * k),
           ],
           for (final e in entries.skip(entries.length >= 3 ? 3 : 0)) ...[
-            _Row(
-              position: e.rankPosition,
-              name: e.userId == vm.myUserId ? '${e.username} (sen)' : e.username,
-              league: e.rankLabel,
-              points: e.mmr,
-              me: e.userId == vm.myUserId,
-              seed: 'oyuncu-${e.userId}',
-              scale: k,
+            // 056: oyuncuya dokun → açık profil
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => context.push(AppRoutes.playerFor(e.userId)),
+              child: _Row(
+                position: e.rankPosition,
+                name: e.userId == vm.myUserId ? '${e.username} (sen)' : e.username,
+                league: e.rankLabel,
+                points: e.mmr,
+                me: e.userId == vm.myUserId,
+                seed: 'oyuncu-${e.userId}',
+                scale: k,
+              ),
             ),
             SizedBox(height: 8 * k),
           ],
@@ -266,49 +271,53 @@ class _Podium extends StatelessWidget {
       final color = _medal[i.clamp(0, 2)];
       final me = e.userId == myId;
       return Expanded(
-        child: Semantics(
-          label: '${e.rankPosition}. sıra, ${e.username}${me ? ' (sen)' : ''}, ${e.mmr} kupa, ${e.rankLabel}',
-          excludeSemantics: true,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              V21PlayerAvatar(
-                seed: 'oyuncu-${e.userId}',
-                semanticsLabel: e.username,
-                size: (i == 0 ? 68 : 56) * k,
-                ringColor: color,
-                background: const Color(0xFF7FC0FF),
-              ),
-              SizedBox(height: 4 * k),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  me ? '${e.username} (sen)' : e.username,
-                  maxLines: 1,
-                  style: V21Type.title(15 * k, color: me ? V21Colors.goldTop : Colors.white),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => context.push(AppRoutes.playerFor(e.userId)),
+          child: Semantics(
+            label: '${e.rankPosition}. sıra, ${e.username}${me ? ' (sen)' : ''}, ${e.mmr} kupa, ${e.rankLabel}',
+            excludeSemantics: true,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                V21PlayerAvatar(
+                  seed: 'oyuncu-${e.userId}',
+                  semanticsLabel: e.username,
+                  size: (i == 0 ? 68 : 56) * k,
+                  ringColor: color,
+                  background: const Color(0xFF7FC0FF),
                 ),
-              ),
-              Text(
-                V21Format.thousands(e.mmr),
-                style: V21Type.label(12 * k, weight: FontWeight.w800, color: color),
-              ),
-              SizedBox(height: 4 * k),
-              Container(
-                height: height * k,
-                margin: EdgeInsets.symmetric(horizontal: 6 * k),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(12 * k)),
-                  border: Border.all(color: V21Colors.ink, width: 3 * k),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [color, Color.lerp(color, V21Colors.ink, 0.55)!],
+                SizedBox(height: 4 * k),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    me ? '${e.username} (sen)' : e.username,
+                    maxLines: 1,
+                    style: V21Type.title(15 * k, color: me ? V21Colors.goldTop : Colors.white),
                   ),
                 ),
-                alignment: Alignment.center,
-                child: Text('${e.rankPosition}', style: V21Type.title(30 * k, shadows: V21Type.inkShadow(k))),
-              ),
-            ],
+                Text(
+                  V21Format.thousands(e.mmr),
+                  style: V21Type.label(12 * k, weight: FontWeight.w800, color: color),
+                ),
+                SizedBox(height: 4 * k),
+                Container(
+                  height: height * k,
+                  margin: EdgeInsets.symmetric(horizontal: 6 * k),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(12 * k)),
+                    border: Border.all(color: V21Colors.ink, width: 3 * k),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [color, Color.lerp(color, V21Colors.ink, 0.55)!],
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text('${e.rankPosition}', style: V21Type.title(30 * k, shadows: V21Type.inkShadow(k))),
+                ),
+              ],
+            ),
           ),
         ),
       );

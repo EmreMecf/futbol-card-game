@@ -9,8 +9,10 @@ import '../../../features/items/cosmetics/equipped_cosmetics.dart';
 import '../../../features/items/domain/items_repository.dart';
 import '../../../features/profile/domain/achievements.dart';
 import '../../../features/profile/presentation/viewmodel/profile_view_model.dart';
+import '../../../features/social/social_api.dart';
 import '../../../ui_v21/components/v21_cosmetics.dart';
 import '../../ui_v21.dart';
+import '../social/v21_social_screens.dart';
 
 /// V2.1 PROFİL (referans `assets/v21/screens/profile.png`).
 ///
@@ -128,8 +130,29 @@ class _Body extends StatelessWidget {
               ),
             ],
           ),
+          // 056: arkadaşlar (liste, istekler, oyuncu arama)
+          if (getIt.isRegistered<SocialApi>()) ...[
+            SizedBox(height: 8 * k),
+            V21GameButton(
+              key: const Key('arkadaslar-dugmesi'),
+              label: 'ARKADAŞLAR',
+              tone: V21ButtonTone.green,
+              size: V21ButtonSize.small,
+              scale: k * 1.1,
+              semanticsLabel: 'Arkadaşlar, istekler ve oyuncu ara',
+              onPressed: () => context.push(AppRoutes.social),
+            ),
+          ],
           SizedBox(height: 16 * k),
           V21SectionTitle('SON MAÇLAR', trailing: '${vm.history.length} MAÇ', scale: k),
+          if (vm.history.isNotEmpty && getIt.isRegistered<SocialApi>())
+            Padding(
+              padding: EdgeInsets.only(bottom: 6 * k),
+              child: Text(
+                'Rakibin kadrosunu görmek için maça dokun.',
+                style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textDim),
+              ),
+            ),
           if (vm.history.isEmpty)
             Text(
               'Henüz bitmiş maçın yok. İlk maçını oyna; sonuçların burada görünür.',
@@ -335,47 +358,57 @@ class _MatchRow extends StatelessWidget {
       MatchOutcome.draw => false,
     };
     final etiket = hukmen ? 'Hükmen' : entry.outcome.shortLabel;
-    return Semantics(
-      label:
-          '${entry.opponentUsername} karşı ${entry.scoreText}, ${hukmen ? '${entry.outcome.shortLabel}, hükmen' : entry.outcome.shortLabel}${transfer == null ? '' : ', $transfer'}',
-      excludeSemantics: true,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12 * k, vertical: 10 * k),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14 * k),
-          border: Border.all(color: V21Colors.ink, width: 2 * k),
-          color: const Color(0xFF2E1675),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 6 * k,
-              height: 34 * k,
-              decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3 * k)),
-            ),
-            SizedBox(width: 10 * k),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.opponentUsername,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: V21Type.label(14 * k, weight: FontWeight.w800),
-                  ),
-                  if (transfer != null)
-                    Text(
-                      transfer,
-                      style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textMuted),
-                    ),
-                ],
+    final kadroVar = getIt.isRegistered<SocialApi>();
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: kadroVar ? () => V21OpponentSquadSheet.show(context, entry.matchId) : null,
+      child: Semantics(
+        button: kadroVar,
+        label:
+            '${entry.opponentUsername} karşı ${entry.scoreText}, ${hukmen ? '${entry.outcome.shortLabel}, hükmen' : entry.outcome.shortLabel}${transfer == null ? '' : ', $transfer'}',
+        excludeSemantics: true,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12 * k, vertical: 10 * k),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14 * k),
+            border: Border.all(color: V21Colors.ink, width: 2 * k),
+            color: const Color(0xFF2E1675),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 6 * k,
+                height: 34 * k,
+                decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3 * k)),
               ),
-            ),
-            Text(entry.scoreText, style: V21Type.title(20 * k)),
-            SizedBox(width: 10 * k),
-            V21Tag(text: etiket, background: color, foreground: Colors.white, scale: k),
-          ],
+              SizedBox(width: 10 * k),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.opponentUsername,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: V21Type.label(14 * k, weight: FontWeight.w800),
+                    ),
+                    if (transfer != null)
+                      Text(
+                        transfer,
+                        style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textMuted),
+                      ),
+                  ],
+                ),
+              ),
+              Text(entry.scoreText, style: V21Type.title(20 * k)),
+              SizedBox(width: 10 * k),
+              V21Tag(text: etiket, background: color, foreground: Colors.white, scale: k),
+              if (kadroVar) ...[
+                SizedBox(width: 4 * k),
+                Icon(Icons.chevron_right_rounded, color: V21Colors.textMuted, size: 22 * k),
+              ],
+            ],
+          ),
         ),
       ),
     );

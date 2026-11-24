@@ -98,6 +98,22 @@ Router chestRoutes(Database db) {
   });
 
   // ------------------------------------------------------------------
+  // POST /api/chests/<id>/open-gems {expected_cost}  — 056: elmasla hemen aç.
+  // expected_cost oyuncunun gördüğü bedel; gerçek bedel daha yüksekse
+  // gem_cost_changed döner, elmas düşmez.
+  // ------------------------------------------------------------------
+  router.post('/<id>/open-gems', (Request request, String id) async {
+    final userId = requireUserId(request);
+    final govde = await readJsonBody(request);
+    final beklenen = (govde['expected_cost'] as num?)?.toInt();
+    return kuralli(() async {
+      final ham = await db.scalar('select open_chest_with_gems(@u::uuid, @c::uuid, @e)',
+          params: {'u': userId, 'c': id, 'e': beklenen});
+      return jsonOk(ChestOpenResult.fromJson(RowMappers.asMap(ham)).toJson());
+    });
+  });
+
+  // ------------------------------------------------------------------
   // POST /api/chests/mailbox/<id>/claim  — posta kutusundan boş yuvaya
   // ------------------------------------------------------------------
   router.post('/mailbox/<id>/claim', (Request request, String id) async {

@@ -1,3 +1,4 @@
+import '../../../social/social_api.dart';
 import 'dart:async';
 
 import 'package:shared_models/shared_models.dart';
@@ -42,14 +43,62 @@ class ChestsViewModel extends BaseViewModel {
   // Özel adlı parametre yazımı projede kullanılmıyor (bkz. ProfileViewModel)
   // ignore: prefer_initializing_formals
   ChestsViewModel(this._repository,
-      {WebSocketService? socket, SessionManager? session, DateTime Function()? clock, ItemsRepository? items})
+      {WebSocketService? socket,
+      SessionManager? session,
+      DateTime Function()? clock,
+      ItemsRepository? items,
+      SocialApi? gemApi})
       // ignore: prefer_initializing_formals
       : _socket = socket,
         // ignore: prefer_initializing_formals
         _session = session,
         // ignore: prefer_initializing_formals
         _items = items,
+        // ignore: prefer_initializing_formals
+        _gemApi = gemApi,
         _saat = clock ?? DateTime.now;
+
+  /// 056: elmasla hemen açma (kayıtlı değilse seçenek yok)
+  final SocialApi? _gemApi;
+
+  int get gems => _session?.user?.gems ?? 0;
+
+  /// Yuvadaki sandığı elmasla hemen açmanın bedeli (sunucuyla aynı
+  /// formül: kalan her 10 dakika 1 elmas, en az 1). Açılamıyorsa null.
+  int? gemCost(Chest c) {
+    if (c.location != 'slot' || c.isReady) return null;
+    if (c.isSealed) return GemStatus.costFor(c.unlockSeconds);
+    if (c.isUnlocking) return GemStatus.costFor(remaining(c)?.inSeconds ?? 0);
+    return null;
+  }
+
+  bool canOpenWithGems(Chest c) => _gemApi != null && gemCost(c) != null;
+
+  /// Elmasla hemen aç; sonuç [lastOpening]'de (açılış sahnesi)
+  Future<bool> openWithGems(Chest c) {
+    final bedel = gemCost(c);
+    if (bedel == null) return Future.value(false);
+    if (gems < bedel) {
+      _hata = 'Yeterli elmas yok ($bedel gerekli, sende $gems).';
+      safeNotify();
+      return Future.value(false);
+    }
+    return _eylem(c.id, 'gem:${c.id}',
+        (k) => Result.guard(() => _gemApi!.openChestWithGems(c.id, bedel, key: k)), (sonuc) async {
+      _sonAcilis = sonuc;
+      await _bakiyeGuncelle(sonuc);
+      await refresh();
+    });
+  }
+
+  Future<void> _bakiyeGuncelle(ChestOpenResult sonuc) async {
+    final kullanici = _session?.user;
+    if (kullanici == null) return;
+    await _session!.updateUser(kullanici.copyWith(
+      coins: sonuc.coinsAfter ?? kullanici.coins,
+      gems: sonuc.gemsAfter ?? kullanici.gems,
+    ));
+  }
 
   /// FAZ 3: sandık anahtarı ve hızlandırıcı (kayıtlı değilse seçenek yok)
   final ItemsRepository? _items;
@@ -179,11 +228,8 @@ class ChestsViewModel extends BaseViewModel {
   Future<bool> open(Chest c) => _eylem(c.id, 'open:${c.id}', (k) => _repository.open(c.id, idempotencyKey: k),
       (sonuc) async {
     _sonAcilis = sonuc;
-    // Altın değişti: üst bantta doğru görünsün
-    final kullanici = _session?.user;
-    if (kullanici != null && sonuc.coinsAfter != null) {
-      await _session!.updateUser(kullanici.copyWith(coins: sonuc.coinsAfter!));
-    }
+    // Altın ve elmas değişti: üst bantta doğru görünsün
+    await _bakiyeGuncelle(sonuc);
     await refresh();
   });
 

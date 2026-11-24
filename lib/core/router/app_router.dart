@@ -12,6 +12,7 @@ import '../../ui_v21/screens/collection/v21_collection_screen.dart';
 import '../../ui_v21/screens/home/v21_home_screen.dart';
 import '../../ui_v21/screens/inner/v21_inner_screens.dart';
 import '../../ui_v21/screens/season/v21_season_screen.dart';
+import '../../ui_v21/screens/social/v21_social_screens.dart';
 import '../../ui_v21/screens/store/v21_store_screen.dart';
 import '../../ui_v21/screens/deck/v21_deck_screen.dart';
 import '../../ui_v21/layouts/v21_tab_swipe.dart';
@@ -108,6 +109,15 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.progress,
         builder: (context, state) => const V21ProgressScreen(),
+      ),
+      // 056: arkadaşlar ve açık oyuncu profili
+      GoRoute(
+        path: AppRoutes.social,
+        builder: (context, state) => const V21FriendsScreen(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.player}/:id',
+        builder: (context, state) => V21PlayerProfileScreen(playerId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.inventory,

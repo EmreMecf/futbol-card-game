@@ -33,6 +33,7 @@ class V21HomeNav extends StatelessWidget {
     V21SideLink(label: 'SANDIKLAR', icon: Icons.inventory_2_rounded, route: AppRoutes.chests),
     V21SideLink(label: 'SIRALAMA', icon: Icons.leaderboard_rounded, route: AppRoutes.leaderboard),
     V21SideLink(label: 'KART TAKASI', icon: Icons.swap_horiz_rounded, route: AppRoutes.sbc),
+    V21SideLink(label: 'ARKADAŞLAR', icon: Icons.people_alt_rounded, route: AppRoutes.social),
     V21SideLink(label: 'ARKADAŞ MAÇI', icon: Icons.group_add_rounded, route: AppRoutes.friends),
     V21SideLink(label: 'PROFİL', icon: Icons.person_rounded, route: AppRoutes.profile),
     V21SideLink(label: 'AYARLAR', icon: Icons.settings_rounded, route: AppRoutes.settings),

@@ -20,6 +20,9 @@ abstract class UserModel with _$UserModel {
     String? avatarUrl,
     @Default(0) int coins,
 
+    /// 056: elmas (nadir para birimi)
+    @Default(0) int gems,
+
     /// Maca girerken korumaya alinabilecek kart sayisi.
     /// Her galibiyette 1 artar (ust sinir [GameRules.maxProtectionSlots]).
     @Default(GameRules.baseProtectionSlots) int protectionSlots,

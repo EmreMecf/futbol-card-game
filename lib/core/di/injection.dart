@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../features/social/social_api.dart';
 import '../../features/chests/data/chest_repository_impl.dart';
 import '../../features/chests/domain/chest_repository.dart';
 import '../../features/chests/presentation/viewmodel/chests_view_model.dart';
@@ -239,8 +240,11 @@ Future<void> configureDependencies() async {
         socket: getIt<WebSocketService>(),
         session: getIt<SessionManager>(),
         items: getIt<ItemsRepository>(),
+        gemApi: getIt<SocialApi>(),
       ),
     )
+    // 056: arkadaşlık, açık profil, elmas, rakip kadrosu
+    ..registerLazySingleton<SocialApi>(() => SocialApi(getIt<ApiClient>()))
     // Gorev kadrosu kurma ekrani hangi gorev icin acildigini bilmeli
     ..registerFactoryParam<SbcBuilderViewModel, SbcChallenge, void>(
       (gorev, _) => SbcBuilderViewModel(getIt<SbcRepository>(), challenge: gorev),
