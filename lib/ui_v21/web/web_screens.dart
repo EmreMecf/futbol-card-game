@@ -710,7 +710,6 @@ class _WebDeckState extends State<WebDeck> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _orb('${vm.averagePower}', 'GÜÇ', const Color(0xFFFF5A7A)),
-                        _orb('${vm.chemistry.total}', 'KİMYA', const Color(0xFF3DD15A)),
                         _orb('${vm.totalSelected}/${GameRules.squadSize}', 'KADRO', const Color(0xFF4FA8F5)),
                       ],
                     ),
@@ -724,7 +723,7 @@ class _WebDeckState extends State<WebDeck> {
                       padding: const EdgeInsets.symmetric(horizontal: 18),
                       decoration: BoxDecoration(color: wInset, borderRadius: BorderRadius.circular(12)),
                       child: Text(
-                        vm.saveMessage ?? 'Aynı kulüp / lig / uyruk = daha çok kimya',
+                        vm.saveMessage ?? 'Kartı seçmek için yuvaya dokun, yer değiştirmek için sürükle',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: wBody(21),
@@ -1452,13 +1451,6 @@ class _WebProgressState extends State<WebProgress> {
   bool _asc = false;
 
   static const _tiers = ['bronze', 'silver', 'gold', 'diamond', 'legend'];
-  static const _colors = {
-    'bronze': Color(0xFFFFAB76),
-    'silver': Color(0xFFE8EEF6),
-    'gold': Color(0xFFFFE07A),
-    'diamond': Color(0xFF7FF3FF),
-    'legend': Color(0xFFE3A9FA),
-  };
 
   /// Seviye gücü eğrisi (040)
   static int _bonus(int level) => level >= 10 ? 3 : (level >= 7 ? 2 : (level >= 4 ? 1 : 0));
@@ -1499,7 +1491,7 @@ class _WebProgressState extends State<WebProgress> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          V21HexIcon(color: _colors[t]!, size: 56),
+                          V21ItemArt(category: 'joker', tier: t, size: 60),
                           const SizedBox(width: 8),
                           Text('${o.jokers[t] ?? 0}', style: wTitle(36)),
                         ],

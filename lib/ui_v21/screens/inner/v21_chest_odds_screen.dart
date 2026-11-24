@@ -135,7 +135,7 @@ class _TypePanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Image.asset(V21Assets.chestGoldLarge, width: 64 * k, fit: BoxFit.contain),
+              V21ChestArt(width: 64 * k),
               SizedBox(width: 10 * k),
               Expanded(
                 child: Column(

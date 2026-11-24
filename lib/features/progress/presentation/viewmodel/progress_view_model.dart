@@ -50,20 +50,36 @@ class ProgressViewModel extends BaseViewModel {
 
   final Map<String, String> _anahtarlar = {};
 
+  /// Ekran açıldığındaki sıra (kart kimlikleri). Seviye atlayan futbolcu
+  /// listede yerinde kalsın diye işlemlerden sonra sıra yeniden
+  /// hesaplanmaz; yalnız [load] (ekranı açma / aşağı çekip yenileme) sıralar.
+  List<String> _sira = const [];
+
   List<PlayerProgressItem> get visibleItems {
     final o = _ozet;
     if (o == null) return const [];
-    final liste = o.items.where((i) => i.isOwned).toList()
-      ..sort((a, b) {
-        // Hazır olanlar önce, sonra seviye, sonra güç
-        final ha = o.isSuggested(a) ? 1 : 0;
-        final hb = o.isSuggested(b) ? 1 : 0;
-        if (ha != hb) return hb - ha;
-        if (a.level != b.level) return b.level - a.level;
-        return b.power - a.power;
-      });
+    final liste = o.items.where((i) => i.isOwned).toList();
+    if (_sira.isEmpty) {
+      _oneriSirasi(o, liste);
+    } else {
+      int yer(PlayerProgressItem i) {
+        final n = _sira.indexOf(i.cardId);
+        return n < 0 ? _sira.length : n;
+      }
+
+      liste.sort((a, b) => yer(a).compareTo(yer(b)));
+    }
     return _yalnizHazir ? liste.where(o.isSuggested).toList() : liste;
   }
+
+  /// Hazır olanlar önce, sonra seviye, sonra güç
+  static void _oneriSirasi(ProgressOverview o, List<PlayerProgressItem> liste) => liste.sort((a, b) {
+    final ha = o.isSuggested(a) ? 1 : 0;
+    final hb = o.isSuggested(b) ? 1 : 0;
+    if (ha != hb) return hb - ha;
+    if (a.level != b.level) return b.level - a.level;
+    return b.power - a.power;
+  });
 
   void setOnlyReady(bool v) {
     _yalnizHazir = v;
@@ -74,6 +90,9 @@ class ProgressViewModel extends BaseViewModel {
     final o = await run(() => _repository.fetchOverview(), loadingState: ViewState.loading);
     if (o != null) {
       _ozet = o;
+      final liste = o.items.where((i) => i.isOwned).toList();
+      _oneriSirasi(o, liste);
+      _sira = [for (final i in liste) i.cardId];
       safeNotify();
     }
   }

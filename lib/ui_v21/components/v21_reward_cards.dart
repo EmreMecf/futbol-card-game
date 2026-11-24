@@ -1,11 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../foundation/v21_assets.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
 import '../utilities/v21_format.dart';
 import 'v21_chest_slot.dart';
 import 'v21_game_panel.dart';
+import 'v21_item_art.dart';
 import 'v21_painters.dart';
 import 'v21_tap.dart';
 
@@ -51,7 +51,7 @@ class V21RewardCard extends StatelessWidget {
   /// Sandık ödülü: "ALTIN / SANDIK" ([typeName] sunucudan, ör. "Altın")
   factory V21RewardCard.chest(String typeName, {Key? key, double scale = 1}) => V21RewardCard(
     key: key,
-    icon: Image.asset(V21Assets.chestGoldLarge, height: 54 * scale, fit: BoxFit.contain),
+    icon: V21ChestArt(height: 54 * scale),
     value: V21Format.upper(typeName),
     label: 'SANDIK',
     valueColor: const Color(0xFFFFC832),
@@ -109,6 +109,9 @@ class V21RewardCard extends StatelessWidget {
 /// Ana sayfadaki küçük [V21ChestSlot] ile aynı durum kümesini kullanır.
 class V21ChestCard extends StatelessWidget {
   final V21ChestSlotState state;
+
+  /// Sandık türü (metal rengi); null → altın
+  final String? tier;
   final String? name;
   final String? footer;
   final VoidCallback? onTap;
@@ -119,6 +122,7 @@ class V21ChestCard extends StatelessWidget {
     super.key,
     required this.state,
     required this.semanticsLabel,
+    this.tier,
     this.name,
     this.footer,
     this.onTap,
@@ -182,7 +186,7 @@ class V21ChestCard extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: Image.asset(V21Assets.chestGoldLarge, fit: BoxFit.contain, filterQuality: FilterQuality.medium),
+              child: V21ChestArt.tier(tier, glowing: state == V21ChestSlotState.ready),
             ),
             if (name != null)
               FittedBox(

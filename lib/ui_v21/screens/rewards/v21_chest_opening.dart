@@ -118,7 +118,7 @@ class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProv
                 angle: math.sin(shake * math.pi * 6) * 0.08 * (1 - open),
                 child: Transform.scale(
                   scale: 0.9 + 0.15 * open,
-                  child: Image.asset(V21Assets.chestGoldLarge, height: 140 * k, fit: BoxFit.contain),
+                  child: V21ChestArt.tier(r.chestType, height: 140 * k, glowing: open > 0.5),
                 ),
               ),
             ),
@@ -144,7 +144,11 @@ class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProv
                   V21RewardCard.coins(r.coins, scale: k),
                   if (r.jokers.values.any((v) => v > 0))
                     V21RewardCard(
-                      icon: V21HexIcon(color: const Color(0xFFE3A9FA), size: 44 * k),
+                      icon: V21ItemArt(
+                        category: 'joker',
+                        tier: r.jokers.entries.where((e) => e.value > 0).map((e) => e.key).lastOrNull,
+                        size: 48 * k,
+                      ),
                       value: '+${r.jokers.values.fold<int>(0, (a, b) => a + b)}',
                       label: 'JOKER',
                       scale: k,

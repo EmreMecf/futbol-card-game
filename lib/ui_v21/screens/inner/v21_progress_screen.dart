@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/audio/game_audio.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/progress/presentation/viewmodel/progress_view_model.dart';
@@ -32,13 +33,6 @@ class V21ProgressScreen extends StatelessWidget {
 }
 
 const _tierOrder = ['bronze', 'silver', 'gold', 'diamond', 'legend'];
-const _tierColor = {
-  'bronze': Color(0xFFFFAB76),
-  'silver': Color(0xFFE8EEF6),
-  'gold': Color(0xFFFFE07A),
-  'diamond': Color(0xFF7FF3FF),
-  'legend': Color(0xFFE3A9FA),
-};
 const _tierName = {'bronze': 'Bronz', 'silver': 'Gümüş', 'gold': 'Altın', 'diamond': 'Elmas', 'legend': 'Efsane'};
 
 class _Body extends StatelessWidget {
@@ -148,7 +142,7 @@ class _Jokers extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        V21HexIcon(color: _tierColor[t]!, size: 38 * k),
+                        V21ItemArt(category: 'joker', tier: t, size: 40 * k),
                         SizedBox(width: 4 * k),
                         Text('${overview.jokers[t] ?? 0}', style: V21Type.title(22 * k)),
                       ],
@@ -214,7 +208,7 @@ class _Row extends StatelessWidget {
         semanticsLabel: ready
             ? '${i.fullName}: seviye ${i.level + 1}\'e atla, ${next!.coins} altın'
             : '${i.fullName}: ${i.missingCopies} joker ve ${next!.coins} altınla atla',
-        onPressed: () => ready ? vm.levelUp(i) : vm.levelUp(i, useJokers: true),
+        onPressed: () => _levelUp(context, vm, i, useJokers: !ready),
       );
     } else {
       action = Text(
@@ -287,12 +281,18 @@ class _Row extends StatelessWidget {
                       SizedBox(width: 8 * k),
                       Expanded(
                         child: V21ProgressBar(
+                          key: Key('kopya-${i.cardId}'),
                           value: i.progress,
                           height: 14 * k,
                           trackColor: const Color(0xFF201046),
                           fillColors: const [Color(0xFF9EDCFF), Color(0xFF3FA2F5)],
                           semanticsLabel: 'Kopya ${i.copies} / ${next.copies}',
                         ),
+                      ),
+                      SizedBox(width: 8 * k),
+                      Text(
+                        '${i.copies}/${next.copies}',
+                        style: V21Type.title(14 * k, color: i.copies >= next.copies ? V21Colors.successText : Colors.white),
                       ),
                     ],
                   ),
@@ -332,9 +332,9 @@ class _Row extends StatelessWidget {
     if (!context.mounted) return;
     switch (choice) {
       case 'jokers':
-        await vm.levelUp(i, useJokers: true);
+        await _levelUp(context, vm, i, useJokers: true);
       case 'discount':
-        await vm.levelUp(i, useDiscount: true);
+        await _levelUp(context, vm, i, useDiscount: true);
       case 'book':
         await vm.useBook(i);
       case 'convert':
@@ -393,4 +393,38 @@ class _Pips extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Seviye atla + başarıda kutlama penceresi. Önceden seviye sessizce
+/// artıyor, futbolcu listede yer değiştirip gözden kayboluyordu.
+Future<void> _levelUp(
+  BuildContext context,
+  ProgressViewModel vm,
+  PlayerProgressItem i, {
+  bool useJokers = false,
+  bool useDiscount = false,
+}) async {
+  final ok = await vm.levelUp(i, useJokers: useJokers, useDiscount: useDiscount);
+  final r = vm.lastLevelUp;
+  if (!ok || r == null || !context.mounted) return;
+  GameAudio.sfx(Sfx.levelUp);
+  final satirlar = [
+    if (r.coinsSpent > 0) '${V21Format.thousands(r.coinsSpent)} altın harcandı',
+    if (r.jokersUsed > 0) '${r.jokersUsed} joker parça kullanıldı',
+    if (r.discount > 0) '%25 indirimle ${V21Format.thousands(r.discount)} altın kazandın',
+    if (r.masteryCoins > 0) 'Ustalık ödülü: +${V21Format.thousands(r.masteryCoins)} altın!',
+    if (r.next != null)
+      'Sonraki seviye: ${r.next!.copies} kopya · ${V21Format.thousands(r.next!.coins)} altın'
+    else
+      'En yüksek seviyeye ulaştı!',
+  ];
+  await V21GameDialog.show<void>(
+    context,
+    subtitle: V21Format.upper(i.fullName),
+    title: 'SEVİYE ${r.level}!',
+    icon: V21PlayerCard(name: i.fullName, position: i.position, tier: i.tier, power: i.power, width: 110),
+    message: satirlar.join('\n'),
+    actions: const [V21DialogAction('HARİKA', tone: V21ButtonTone.green)],
+  );
+  vm.clearLastLevelUp();
 }

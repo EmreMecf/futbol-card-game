@@ -188,7 +188,7 @@ class _LeagueRow extends StatelessWidget {
             bottom: 0,
             child: Opacity(
               opacity: locked ? 0.6 : 1,
-              child: Image.asset(V21Assets.chestGoldLarge, width: 72 * k, fit: BoxFit.contain),
+              child: V21ChestArt(width: 72 * k),
             ),
           ),
           Padding(

@@ -198,12 +198,18 @@ void main() {
   });
 
   group('Açılış', () {
-    testWidgets('yükleme görseli ve çubuk; çubuk ilerlemeyle dolar', (t) async {
-      await pump(t, const Scaffold(body: V21SplashArt(progress: 1)), const Size(390, 844));
-      final gorsel = t.widget<Image>(find.byType(Image)).image as AssetImage;
-      expect(gorsel.assetName, V21Assets.loadingSplash);
+    testWidgets('keskin sahne, 3 kart, oyun ipucu ve çubuk; çubuk ilerlemeyle dolar', (t) async {
+      await pump(t, const Scaffold(body: V21SplashArt(progress: 1, tip: 1)), const Size(390, 844));
+      // Bulanık tam ekran resim yok: sahne vektör, kartlar kendi portreleriyle
+      expect(
+        find.byWidgetPredicate((w) => w is Image && w.image is AssetImage && (w.image as AssetImage).assetName == V21Assets.loadingSplash),
+        findsNothing,
+      );
+      expect(find.byType(V21PlayerCard), findsNWidgets(3));
+      expect(find.text('İPUCU'), findsOneWidget);
+      expect(find.text(V21SplashArt.tips[1]), findsOneWidget);
       expect(find.text('YÜKLENİYOR'), findsOneWidget);
-      expect(find.bySemanticsLabel('Futbol Card Arena yükleniyor'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('^Futbol Card Arena yükleniyor')), findsOneWidget);
       double cubuk() => t.widget<FractionallySizedBox>(find.byKey(const Key('yukleme-cubugu'))).widthFactor!;
       expect(cubuk(), 1);
       await t.pumpWidget(const MaterialApp(home: Scaffold(body: V21SplashArt(progress: 0))));

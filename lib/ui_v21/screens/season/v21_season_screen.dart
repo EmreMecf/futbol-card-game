@@ -450,7 +450,7 @@ class _RewardIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (reward.isCoins) return V21CoinIcon(size: size * 0.82);
-    if (reward.isChest) return Image.asset(V21Assets.chestGoldLarge, width: size, height: size, fit: BoxFit.contain);
+    if (reward.isChest) return SizedBox.square(dimension: size, child: const V21ChestArt());
     return V21CardStackIcon(size: size * 0.85);
   }
 }

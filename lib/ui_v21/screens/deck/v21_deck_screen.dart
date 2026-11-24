@@ -21,15 +21,15 @@ import '../../web/web_screens.dart';
 /// V2.1 KADROM (referans `assets/v21/screens/deck.png`).
 ///
 ///   ‹ KADROM                              ( ● 87 GÜÇ )
-///   yeşil saha: 4-4-2, 11 küçük oyuncu kartı (kimya bağları altta)
-///   (87 GÜÇ) (29 KİMYA) (11/11 KADRO)
+///   yeşil saha: 4-4-2, 11 küçük oyuncu kartı
+///   (87 GÜÇ) (11/11 KADRO)
 ///   [ ipucu / eksik mevki / kayıt sonucu ]
 ///   [ OTOMATİK DİZ ]   — kaydedilmemiş değişiklik varsa [DİZ] [KAYDET]
 ///
 /// Oyun mantığı mevcut `DeckViewModel`'de, DEĞİŞMEDİ:
 ///   * dokun → o mevkiye uygun kartlardan seç (`V21CardPickerSheet`)
 ///   * sürükle → yalnız AYNI mevkideki yuvayla yer değiştir (4-4-2 kuralı)
-///   * basılı tut → o kartın kimya bağları vurgulanır
+///   * basılı tut → kart vurgulanır
 ///   * kaydedilmemiş değişiklikle çıkışta onay
 ///   * kadro kurulamıyorsa acil kadro afişi (Ekonomi V2, 032)
 /// Kaydetme `/api/decks/:id` (sunucu doğrular).
@@ -104,7 +104,6 @@ class _BodyState extends State<_Body> {
       position: formationSlotPosition(slot),
       cards: vm.availableForSlot(slot),
       current: vm.cardAt(slot),
-      chemistryPreview: (c) => vm.chemistryIfPlaced(slot, c),
     );
     if (picked != null) vm.placeCard(slot, picked);
   }
@@ -199,7 +198,7 @@ class _BodyState extends State<_Body> {
     } else {
       final pitch = V21SquadPitch(
         cardAt: vm.cardAt,
-        links: vm.links,
+        links: const [],
         scale: k,
         highlighted: _dragging ?? _highlighted,
         dragging: _dragging,
@@ -217,7 +216,6 @@ class _BodyState extends State<_Body> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             V21StatOrb(value: '${vm.averagePower}', label: 'GÜÇ', color: V21StatOrb.red, scale: k),
-            V21StatOrb(value: '${vm.chemistry.total}', label: 'KİMYA', color: V21StatOrb.green, scale: k),
             V21StatOrb(
               value: '${vm.totalSelected}/${GameRules.squadSize}',
               label: 'KADRO',
@@ -295,36 +293,22 @@ class _HintPanel extends StatelessWidget {
         ? (missing, const Color(0xFFFF8A9B))
         : saved != null
         ? (saved, V21Colors.successText)
-        : ('Aynı kulüp / lig / uyruk = daha çok kimya', V21Colors.textMuted);
+        : ('Kartı seçmek için boş yuvaya dokun, yer değiştirmek için sürükle', V21Colors.textMuted);
     return Container(
-      padding: EdgeInsets.fromLTRB(14 * k, 8 * k, 6 * k, 8 * k),
+      padding: EdgeInsets.fromLTRB(14 * k, 8 * k, 14 * k, 8 * k),
       constraints: BoxConstraints(minHeight: 48 * k),
+      alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
         color: const Color(0xFF1E1150),
         borderRadius: BorderRadius.circular(14 * k),
         border: Border.all(color: V21Colors.ink, width: 2 * k),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Semantics(
-              liveRegion: missing != null || saved != null,
-              child: Text(
-                text,
-                style: V21Type.label(13 * k, weight: FontWeight.w700, color: color),
-              ),
-            ),
-          ),
-          SizedBox(width: 6 * k),
-          V21IconPill(
-            icon: Icons.link_rounded,
-            badge: 'KİMYA',
-            iconColor: V21Colors.successText,
-            semanticsLabel: 'Kimyaya göre diz',
-            scale: k * 0.9,
-            onTap: vm.autoFillByChemistry,
-          ),
-        ],
+      child: Semantics(
+        liveRegion: missing != null || saved != null,
+        child: Text(
+          text,
+          style: V21Type.label(13 * k, weight: FontWeight.w700, color: color),
+        ),
       ),
     );
   }

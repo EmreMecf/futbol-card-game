@@ -116,7 +116,26 @@ class _BodyState extends State<_Body> {
           V21PageTitle(
             title: 'KARTLARIM',
             scale: k,
-            trailing: _CountPill(vm: vm, scale: k),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Gelişim ekranına görünür giriş (önceden yalnız ilerleme
+                // çubuğuna dokunmak götürüyordu, oyuncular bulamıyordu)
+                if (getIt.isRegistered<ProgressRepository>()) ...[
+                  V21IconPill(
+                    key: const Key('gelisim-dugmesi'),
+                    icon: Icons.trending_up_rounded,
+                    badge: 'GELİŞİM',
+                    iconColor: V21Colors.successText,
+                    semanticsLabel: 'Gelişim: futbolcu seviyeleri',
+                    scale: k * 0.9,
+                    onTap: () => context.push(AppRoutes.progress),
+                  ),
+                  SizedBox(width: 8 * k),
+                ],
+                _CountPill(vm: vm, scale: k),
+              ],
+            ),
           ),
           SizedBox(height: 11 * k),
           _CatalogBar(vm: vm, scale: k),

@@ -14,6 +14,7 @@ export 'components/v21_card_back.dart';
 export 'components/v21_celebration.dart';
 export 'components/v21_character.dart';
 export 'components/v21_chest_slot.dart';
+export 'components/v21_item_art.dart';
 export 'components/v21_feedback.dart';
 export 'components/v21_filters.dart';
 export 'components/v21_game_button.dart';

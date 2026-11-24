@@ -97,27 +97,12 @@ abstract interface class ChemistrySource {
   String? get club;
 }
 
-/// Iki degerin ikisi de dolu ve esit mi?
+/// Iki kart arasindaki kimya puani.
 ///
-/// NULL = NULL eslesme SAYILMAZ. Ligi belirsiz iki kart "ayni ligde"
-/// sayilsaydi, eksik veri kimya kazandirirdi.
-bool _ayniMi(String? a, String? b) => a != null && b != null && a == b;
-
-/// Iki kart arasindaki kimya puani: 0, 1 veya 2.
-///
-/// KURALLAR:
-///   Ayni Kulup VEYA (Ayni Lig + Ayni Uyruk) -> 2  (yesil)
-///   Ayni Uyruk VEYA Ayni Lig                -> 1  (sari)
-///   Ortak nokta yok                          -> 0  (kirmizi)
-int chemistryLinkScore(ChemistrySource a, ChemistrySource b) {
-  final ulke = _ayniMi(a.nationality, b.nationality);
-  final lig = _ayniMi(a.league, b.league);
-  final kulup = _ayniMi(a.club, b.club);
-
-  if (kulup || (lig && ulke)) return 2;
-  if (ulke || lig) return 1;
-  return 0;
-}
+/// KIMYA KALDIRILDI (migration 055): sunucudaki chemistry_link_score gibi
+/// her zaman 0 doner; kart masaya yalniz kendi gucuyle cikar. Modeller ve
+/// alan adlari eski kayitlar ve eski uygulama surumleri icin yerinde kalir.
+int chemistryLinkScore(ChemistrySource a, ChemistrySource b) => 0;
 
 // =====================================================================
 // MODELLER

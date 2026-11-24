@@ -48,7 +48,6 @@ class _BodyState extends State<_Body> {
       position: formationSlotPosition(slot),
       cards: vm.availableForSlot(slot),
       current: vm.cardAt(slot),
-      chemistryPreview: (c) => vm.chemistryIfPlaced(slot, c),
     );
     if (picked != null) vm.placeCard(slot, picked);
   }
@@ -103,7 +102,6 @@ class _BodyState extends State<_Body> {
               color: V21StatOrb.blue,
               scale: k * 0.85,
             ),
-            V21StatOrb(value: '${vm.chemistry.total}', label: 'KİMYA', color: V21StatOrb.green, scale: k * 0.85),
             V21StatOrb(value: '${vm.burnValue}', label: 'ERİYECEK GÜÇ', color: V21StatOrb.red, scale: k * 0.85),
           ],
         ),
@@ -113,11 +111,10 @@ class _BodyState extends State<_Body> {
         Row(
           children: [
             for (final (label, action) in [
-              ('KİMYAYA GÖRE', vm.autoFillByChemistry),
               ('EN DÜŞÜKLER', vm.autoFill),
               ('BOŞALT', vm.clearAll),
             ]) ...[
-              if (label != 'KİMYAYA GÖRE') SizedBox(width: 6 * k),
+              if (label != 'EN DÜŞÜKLER') SizedBox(width: 6 * k),
               Expanded(
                 child: V21GameButton(
                   label: label,
@@ -125,7 +122,6 @@ class _BodyState extends State<_Body> {
                   size: V21ButtonSize.small,
                   scale: k,
                   semanticsLabel: switch (label) {
-                    'KİMYAYA GÖRE' => 'Kimyaya göre doldur',
                     'EN DÜŞÜKLER' => 'En düşük kartlarla doldur',
                     _ => 'Kadroyu boşalt',
                   },
@@ -141,7 +137,7 @@ class _BodyState extends State<_Body> {
             constraints: const BoxConstraints(maxWidth: 480),
             child: V21SquadPitch(
               cardAt: vm.cardAt,
-              links: vm.chemistry.links,
+              links: const [],
               scale: k,
               highlighted: _highlighted,
               dragging: null,

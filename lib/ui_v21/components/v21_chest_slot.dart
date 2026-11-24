@@ -1,11 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../animations/v21_motion.dart';
-import '../foundation/v21_assets.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_metrics.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_game_panel.dart';
+import 'v21_item_art.dart';
 import 'v21_tap.dart';
 
 /// Sandık yuvasının görünür durumu (sunucu durumundan türetilir)
@@ -44,6 +44,10 @@ class V21ChestSlot extends StatelessWidget {
 
   /// Kenar rengi (sandık türü / durum)
   final Color accent;
+
+  /// Sandık türü (bronze/silver/gold/legend): metal rengi. Verilmezse
+  /// [accent]'ten çıkarılır (açılırken kenar yeşil olsa da tür doğru kalsın).
+  final String? tier;
   final VoidCallback? onTap;
   final String semanticsLabel;
   final double scale;
@@ -55,6 +59,7 @@ class V21ChestSlot extends StatelessWidget {
     this.label,
     this.footer,
     this.accent = V21Colors.rarityGold,
+    this.tier,
     this.onTap,
     this.scale = 1,
   });
@@ -127,13 +132,12 @@ class V21ChestSlot extends StatelessWidget {
     child: Column(
       children: [
         Expanded(
-          child: Image.asset(
-            V21Assets.chestGold,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.medium,
-            // Türlere göre ton: gümüş/bronz sandık için hafif renk süzgeci
-            color: _tint,
-            colorBlendMode: _tint == null ? null : BlendMode.modulate,
+          // Vektör sandık: her ekranda keskin, türe göre metal rengi
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 2 * k, vertical: 3 * k),
+            child: tier != null
+                ? V21ChestArt.tier(tier, glowing: state == V21ChestSlotState.ready)
+                : V21ChestArt.accent(accent, glowing: state == V21ChestSlotState.ready),
           ),
         ),
         Container(
@@ -156,11 +160,4 @@ class V21ChestSlot extends StatelessWidget {
     ),
   );
 
-  /// Referansta yalnız altın sandık görseli var; diğer türler renk süzgeci
-  /// ile ayrışır (tasarımcıdan tür başına görsel bekleniyor).
-  Color? get _tint => switch (accent) {
-    V21Colors.raritySilver => const Color(0xFFD8E4F0),
-    V21Colors.rarityBronze => const Color(0xFFE8B48E),
-    _ => null,
-  };
 }

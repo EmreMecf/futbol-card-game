@@ -330,68 +330,12 @@ class _TestKart implements ChemistrySource {
 }
 
 void chemistryTests() {
-  group('Kimya bag puani', () {
-    test('ayni kulup -> +2 (yesil)', () {
-      expect(
-        chemistryLinkScore(
-          const _TestKart(nationality: 'TUR', league: 'Super Lig', club: 'Anadolu SK'),
-          const _TestKart(nationality: 'BRA', league: 'Super Lig', club: 'Anadolu SK'),
-        ),
-        2,
-      );
-    });
-
-    test('ayni lig + ayni uyruk -> +2 (yesil)', () {
-      expect(
-        chemistryLinkScore(
-          const _TestKart(nationality: 'TUR', league: 'Super Lig', club: 'Anadolu SK'),
-          const _TestKart(nationality: 'TUR', league: 'Super Lig', club: 'Kartal SK'),
-        ),
-        2,
-      );
-    });
-
-    test('sadece ayni uyruk -> +1 (sari)', () {
-      expect(
-        chemistryLinkScore(
-          const _TestKart(nationality: 'TUR', league: 'Super Lig', club: 'Anadolu SK'),
-          const _TestKart(nationality: 'TUR', league: 'La Liga', club: 'Madrid Real'),
-        ),
-        1,
-      );
-    });
-
-    test('sadece ayni lig -> +1 (sari)', () {
-      expect(
-        chemistryLinkScore(
-          const _TestKart(nationality: 'TUR', league: 'Super Lig', club: 'Anadolu SK'),
-          const _TestKart(nationality: 'BRA', league: 'Super Lig', club: 'Kartal SK'),
-        ),
-        1,
-      );
-    });
-
-    test('ortak nokta yok -> 0 (kirmizi)', () {
-      expect(
-        chemistryLinkScore(
-          const _TestKart(nationality: 'TUR', league: 'Super Lig', club: 'Anadolu SK'),
-          const _TestKart(nationality: 'BRA', league: 'La Liga', club: 'Madrid Real'),
-        ),
-        0,
-      );
-    });
-
-    test('NULL degerler eslesme SAYILMAZ', () {
-      // Ligi belirsiz iki kart "ayni ligde" sayilsaydi, eksik veri
-      // kimya kazandirirdi.
+  group('Kimya kaldirildi (055)', () {
+    test('hicbir bag puan vermez: ayni kulup, lig ve uyruk bile 0', () {
+      const a = _TestKart(nationality: 'TUR', league: 'Super Lig', club: 'Anadolu SK');
+      expect(chemistryLinkScore(a, a), 0);
+      expect(chemistryLinkScore(a, const _TestKart(nationality: 'TUR')), 0);
       expect(chemistryLinkScore(const _TestKart(), const _TestKart()), 0);
-      expect(
-        chemistryLinkScore(
-          const _TestKart(nationality: 'TUR'),
-          const _TestKart(league: 'Super Lig'),
-        ),
-        0,
-      );
     });
   });
 
@@ -433,11 +377,8 @@ void chemistryTests() {
     });
   });
 
-  group('Kadro kimyasi hesabi', () {
-    const anadolu = _TestKart(
-        nationality: 'TUR', league: 'Super Lig', club: 'Anadolu SK');
-    const yabanci =
-        _TestKart(nationality: 'JPN', league: 'J-Lig', club: 'Tokyo Blue');
+  group('Kadro kimyasi hesabi (kimya kaldirildi)', () {
+    const anadolu = _TestKart(nationality: 'TUR', league: 'Super Lig', club: 'Anadolu SK');
 
     test('bos kadroda kimya sifir', () {
       final k = DeckChemistry.calculate({});
@@ -445,62 +386,16 @@ void chemistryTests() {
       expect(k.isComplete, isFalse);
     });
 
-    test('tamami ayni kuluptense kimya EN YUKSEK degere ulasir', () {
+    test('tamami ayni kulupten olsa da kimya 0, kadro tam', () {
       final k = DeckChemistry.calculate({
         for (var s = 0; s < GameRules.squadSize; s++) s: anadolu,
       });
-
-      expect(k.total, kMaxTeamChemistry);
-      expect(k.percent, 100);
-      expect(k.isComplete, isTrue);
-      expect(k.strongCount, 17);
-      expect(k.noneCount, 0);
-      expect(k.label, 'Mukemmel uyum');
-    });
-
-    test('tamami farkliysa kimya sifir ama kadro tam', () {
-      final k = DeckChemistry.calculate({
-        for (var s = 0; s < GameRules.squadSize; s++)
-          s: _TestKart(nationality: 'U$s', league: 'L$s', club: 'K$s'),
-      });
-
       expect(k.total, 0);
       expect(k.isComplete, isTrue);
-      expect(k.noneCount, 17);
-      expect(k.label, 'Uyum yok');
-    });
-
-    test('eksik kadroda bos slotlarin baglari sayilmaz', () {
-      final k = DeckChemistry.calculate({0: anadolu, 2: anadolu});
-
-      // Slot 0 ile 2 arasinda bag var -> +2
-      expect(k.total, 2);
-      expect(k.links.length, 1, reason: 'Sadece dolu slotlar arasi bag sayilir');
-      expect(k.isComplete, isFalse);
-    });
-
-    test('kart kimyasi baglarinin TOPLAMI', () {
-      // Slot 2'nin baglari: (0,2), (1,2), (2,3), (2,6) -> 4 bag
-      final k = DeckChemistry.calculate({
-        0: anadolu, 1: anadolu, 2: anadolu, 3: anadolu, 6: anadolu,
-      });
-
-      expect(k.chemistryAt(2), 8, reason: '4 bag x 2 puan');
-      expect(k.linksAt(2).length, 4);
-    });
-
-    test('BAGLI OLMAYAN slotlar birbirini etkilemez', () {
-      // Slot 1 ile 4 formasyonda bagli degil
-      final k = DeckChemistry.calculate({1: anadolu, 4: anadolu});
-      expect(k.total, 0);
-    });
-
-    test('bag kalitesi dogru siniflandirilir', () {
-      final k = DeckChemistry.calculate({1: anadolu, 2: yabanci});
-      expect(k.links.first.quality, ChemistryQuality.none);
-
-      final k2 = DeckChemistry.calculate({1: anadolu, 2: anadolu});
-      expect(k2.links.first.quality, ChemistryQuality.strong);
+      for (var s = 0; s < GameRules.squadSize; s++) {
+        expect(k.chemistryAt(s), 0);
+      }
+      expect(k.strongCount, 0);
     });
   });
 }

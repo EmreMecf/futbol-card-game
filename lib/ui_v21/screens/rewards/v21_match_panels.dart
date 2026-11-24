@@ -346,7 +346,7 @@ class _V21MatchChestPanelState extends State<V21MatchChestPanel> {
       };
       children.add(
         _Line(
-          icon: Image.asset(V21Assets.chestGoldLarge, width: 64 * k, fit: BoxFit.contain),
+          icon: V21ChestArt(width: 64 * k),
           kicker: 'SANDIK KAZANDIN',
           title: '${V21Format.upper(c.typeName)} SANDIK',
           subtitle: where,

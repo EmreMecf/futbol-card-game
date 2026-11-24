@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/auth/session_manager.dart';
 import 'package:futbol_card/core/di/injection.dart';
+import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/core/storage/favorites_store.dart';
 import 'package:futbol_card/core/theme/app_theme.dart';
 import 'package:futbol_card/features/chests/presentation/viewmodel/chests_view_model.dart';
@@ -192,6 +193,25 @@ void main() {
       await unmount(t);
     });
 
+    testWidgets('SEVİYE ATLA: kutlama penceresi çıkar, kopya sayısı yazılır', (t) async {
+      await getIt.unregister<ProgressViewModel>();
+      getIt.registerFactory<ProgressViewModel>(() => ProgressViewModel(_AtlayanDepo(), session: session));
+      await pump(t, const V21ProgressScreen(), const Size(390, 844));
+      expect(find.text('2/2'), findsWidgets, reason: 'kopya ilerlemesi sayıyla görünür');
+      await t.tap(find.text('SEVİYE ATLA'));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 600));
+      await t.pump(const Duration(milliseconds: 600));
+      expect(find.text('SEVİYE 4!'), findsOneWidget);
+      expect(find.textContaining('250 altın harcandı'), findsOneWidget);
+      await t.tap(find.text('HARİKA'));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 600));
+      expect(find.text('SEVİYE 4!'), findsNothing);
+      expect(t.takeException(), isNull);
+      await unmount(t);
+    });
+
     testWidgets('kopya dönüştürme geri alınamaz: açık onay ister, vazgeçince sunucuya gitmez', (t) async {
       await pump(t, const V21ProgressScreen(), const Size(390, 844));
       final more = find.bySemanticsLabel(RegExp(r'Genç Yetenek: diğer seçenekler'));
@@ -358,4 +378,17 @@ void main() {
       }, skip: skipGolden != null);
     }
   });
+}
+/// Seviye atlamayı kabul eden sahte gelişim deposu
+class _AtlayanDepo extends GoldenProgressRepo {
+  @override
+  Future<Result<LevelUpResult>> levelUp(String cardId,
+          {required bool useJokers, bool useDiscount = false, required String idempotencyKey}) async =>
+      Success(LevelUpResult(
+        cardId: cardId,
+        level: 4,
+        coinsSpent: 250,
+        coinsAfter: 2200,
+        next: const LevelCost(copies: 3, coins: 400),
+      ));
 }

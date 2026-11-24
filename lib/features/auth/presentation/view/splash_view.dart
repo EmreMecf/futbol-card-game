@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
@@ -5,7 +7,6 @@ import '../../../../core/auth/session_manager.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/feedback/game_feedback.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../ui_v21/foundation/v21_assets.dart';
 import '../../../../ui_v21/screens/auth/v21_splash_art.dart';
 
 /// Açılış ekranı (MD bölüm 4-A): stadyum ışıkları yanar, logo belirir,
@@ -45,12 +46,8 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
     _yonlendir();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Görsel ilk karede hazır olsun
-    precacheImage(const AssetImage(V21Assets.loadingSplash), context);
-  }
+  /// Her açılışta farklı bir oyun ipucu
+  final int _ipucu = math.Random().nextInt(V21SplashArt.tips.length);
 
   @override
   void dispose() {
@@ -71,7 +68,7 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
     return Scaffold(
       body: AnimatedBuilder(
         animation: _kontrolcu,
-        builder: (context, _) => V21SplashArt(progress: _kontrolcu.value),
+        builder: (context, _) => V21SplashArt(progress: _kontrolcu.value, tip: _ipucu),
       ),
     );
   }

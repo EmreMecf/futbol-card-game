@@ -186,18 +186,12 @@ class _ItemTile extends StatelessWidget {
             children: [
               Column(
                 children: [
-                  Container(
-                    width: 112 * k,
-                    height: 112 * k,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: V21Colors.ink, width: 4 * k),
-                      gradient: RadialGradient(
-                        center: const Alignment(-0.25, -0.35),
-                        colors: [Color.lerp(color, Colors.white, 0.35)!, color],
-                      ),
-                    ),
-                    child: Icon(icon, size: 54 * k, color: Colors.white),
+                  V21ItemArt(
+                    category: def.category,
+                    tier: v21ItemTier(def.slug),
+                    size: 112 * k,
+                    fallbackIcon: icon,
+                    fallbackColor: color,
                   ),
                   SizedBox(height: 8 * k),
                   FittedBox(
@@ -265,7 +259,13 @@ class _ItemTile extends StatelessWidget {
       context,
       subtitle: 'EŞYA',
       title: V21Format.upper(def.name),
-      icon: Icon(icon, size: 64, color: color),
+      icon: V21ItemArt(
+        category: def.category,
+        tier: v21ItemTier(def.slug),
+        size: 84,
+        fallbackIcon: icon,
+        fallbackColor: color,
+      ),
       message: [def.description, ?_extra].join('\n'),
       actions: [
         if (action != null) V21DialogAction(action.$1, tone: V21ButtonTone.green, result: true),

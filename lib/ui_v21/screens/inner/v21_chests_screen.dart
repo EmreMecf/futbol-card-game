@@ -89,6 +89,7 @@ class _Body extends StatelessWidget {
         SizedBox(height: 12 * k),
         _WideChest(
           name: '${V21Format.upper(c.typeName)} SANDIK',
+          tier: c.chestType,
           subtitle: 'Maç ödülü · hazır',
           action: 'AÇ!',
           busy: vm.busyChestId == c.id,
@@ -108,6 +109,7 @@ class _Body extends StatelessWidget {
         for (final c in env.mailbox) ...[
           _WideChest(
             name: '${V21Format.upper(c.typeName)} SANDIK',
+            tier: c.chestType,
             subtitle: '${_daysLeft(c, env, vm.serverNow)} gün içinde yuvaya taşı',
             action: 'TAŞI',
             tone: V21ButtonTone.blue,
@@ -258,6 +260,7 @@ class _SlotGrid extends StatelessWidget {
         final left = V21Format.countdown(vm.remaining(c) ?? Duration.zero);
         return V21ChestCard(
           state: V21ChestSlotState.unlocking,
+          tier: c.chestType,
           name: name,
           footer: left,
           onTap: onTap,
@@ -267,6 +270,7 @@ class _SlotGrid extends StatelessWidget {
       if (c.isReady) {
         return V21ChestCard(
           state: V21ChestSlotState.ready,
+          tier: c.chestType,
           name: name,
           footer: 'AÇ!',
           onTap: onTap,
@@ -276,6 +280,7 @@ class _SlotGrid extends StatelessWidget {
       final d = V21Format.shortDuration(c.unlockSeconds);
       return V21ChestCard(
         state: V21ChestSlotState.sealed,
+        tier: c.chestType,
         name: name,
         footer: d,
         onTap: onTap,
@@ -316,7 +321,7 @@ Future<void> _options(BuildContext context, ChestsViewModel vm, Chest c, bool un
     context,
     subtitle: 'SANDIK',
     title: '${V21Format.upper(c.typeName)} SANDIK',
-    icon: Image.asset(V21Assets.chestGoldLarge, height: 80),
+    icon: V21ChestArt.tier(c.chestType, height: 80),
     message: c.isUnlocking
         ? 'Sayaç çalışıyor. Anahtarla hemen açabilir ya da hızlandırabilirsin.'
         : 'Sayacı başlatabilir ya da anahtarla hemen açabilirsin.',
@@ -345,6 +350,7 @@ Future<void> _options(BuildContext context, ChestsViewModel vm, Chest c, bool un
 
 /// Geniş sandık satırı (referans "BRONZ SANDIK · Maç ödülü · hazır · AÇ!")
 class _WideChest extends StatelessWidget {
+  final String? tier;
   final String name;
   final String subtitle;
   final String action;
@@ -354,6 +360,7 @@ class _WideChest extends StatelessWidget {
   final VoidCallback? onPressed;
 
   const _WideChest({
+    this.tier,
     required this.name,
     required this.subtitle,
     required this.action,
@@ -376,7 +383,7 @@ class _WideChest extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Image.asset(V21Assets.chestGoldLarge, width: 104 * k, fit: BoxFit.contain),
+          V21ChestArt.tier(tier, width: 104 * k),
           SizedBox(width: 8 * k),
           Expanded(
             child: Column(

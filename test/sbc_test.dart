@@ -142,8 +142,8 @@ void main() {
       expect(sonuc.isValid, isFalse);
     });
 
-    test('min_chemistry: kimya şartı kadroya göre hesaplanır', () {
-      // Hepsi aynı kulüpten -> maksimum kimya
+    test('kimya kaldırıldı (055): aynı kulüpten kadro bile 0 kimya', () {
+      // Sunucu kimya şartlarını sildi; istemci de kimyayı 0 hesaplar
       final slotlar = tamKadro(envanter(
         ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK',
       ));
@@ -155,8 +155,8 @@ void main() {
         slots: slotlar,
       );
 
-      expect(sonuc.chemistry, kMaxTeamChemistry);
-      expect(sonuc.isValid, isTrue);
+      expect(sonuc.chemistry, 0);
+      expect(sonuc.isValid, isFalse, reason: 'eski kimya şartı artık karşılanamaz');
     });
 
     test('min_distinct_nations: farklı uyruk sayılır', () {
@@ -219,15 +219,14 @@ void main() {
       final sonuc = SbcEvaluation.calculate(
         requirements: const [
           SbcRequirement(type: SbcRequirementType.exactTier, tier: CardTier.silver),
-          SbcRequirement(type: SbcRequirementType.minChemistry, targetValue: 30),
           SbcRequirement(type: SbcRequirementType.minAvgPower, targetValue: 65),
         ],
         slots: slotlar,
       );
 
-      expect(sonuc.requirements.length, 3);
-      expect(sonuc.metCount, 3);
-      expect(sonuc.progressText, '3/3');
+      expect(sonuc.requirements.length, 2);
+      expect(sonuc.metCount, 2);
+      expect(sonuc.progressText, '2/2');
       expect(sonuc.isValid, isTrue);
     });
   });

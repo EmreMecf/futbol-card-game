@@ -246,7 +246,7 @@ class _DailyOffer extends StatelessWidget {
               top: -8 * k,
               bottom: 8 * k,
               width: 150 * k,
-              child: Image.asset(V21Assets.chestGoldLarge, fit: BoxFit.contain),
+              child: const V21ChestArt(),
             ),
             Positioned(
               right: 18 * k,

@@ -82,7 +82,7 @@ class _Banner extends StatelessWidget {
               style: V21Type.title(19 * k, shadows: V21Type.inkShadow(k * 0.7)),
             ),
           ),
-          Image.asset(V21Assets.chestGoldLarge, width: 86 * k, fit: BoxFit.contain),
+          V21ChestArt(width: 86 * k),
         ],
       ),
     );

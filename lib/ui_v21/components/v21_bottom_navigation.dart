@@ -4,6 +4,7 @@ import '../foundation/v21_assets.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_metrics.dart';
 import '../foundation/v21_typography.dart';
+import 'v21_item_art.dart';
 import 'v21_mascot.dart';
 import 'v21_painters.dart';
 import 'v21_tap.dart';
@@ -57,7 +58,7 @@ class V21BottomNavigation extends StatelessWidget {
     V21NavItem(
       label: 'MAĞAZA',
       route: store,
-      icon: (s) => Image.asset(V21Assets.chestGold, width: s * 1.3, height: s * 1.15, fit: BoxFit.contain),
+      icon: (s) => V21ChestArt(width: s * 1.3),
     ),
     V21NavItem(
       label: 'SEZON',

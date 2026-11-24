@@ -188,231 +188,46 @@ void main() {
     });
 
     // ================================================================
-    // KIMYA
+    // KIMYA KALDIRILDI (055): kart yalniz kendi gucuyle oynar
     // ================================================================
-    group('kimya hesabi', () {
-      test('bos kadroda kimya sifir', () async {
-        repo.envanter = zenginEnvanter();
-        await vm.load();
-
-        expect(vm.chemistry.total, 0);
-        expect(vm.chemistry.isComplete, isFalse);
-      });
-
-      test('ayni kulupten iki kart YESIL bag kurar (+2)', () async {
-        repo.envanter = [
-          kart('a', CardPosition.defender, 60,
-              ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK'),
-          kart('b', CardPosition.defender, 60,
-              ulke: 'BRA', lig: 'Super Lig', kulup: 'Anadolu SK'),
-        ];
-        await vm.load();
-
-        vm.placeCard(1, repo.envanter[0]);
-        vm.placeCard(2, repo.envanter[1]);
-
-        expect(vm.chemistryAt(1), 2);
-        expect(vm.chemistryAt(2), 2);
-        expect(vm.chemistry.total, 2);
-        expect(vm.chemistry.strongCount, 1);
-      });
-
-      test('sadece ayni uyruk SARI bag kurar (+1)', () async {
-        repo.envanter = [
-          kart('a', CardPosition.defender, 60,
-              ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK'),
-          kart('b', CardPosition.defender, 60,
-              ulke: 'TUR', lig: 'La Liga', kulup: 'Madrid Real'),
-        ];
-        await vm.load();
-
-        vm.placeCard(1, repo.envanter[0]);
-        vm.placeCard(2, repo.envanter[1]);
-
-        expect(vm.chemistryAt(1), 1);
-        expect(vm.chemistry.weakCount, 1);
-      });
-
-      test('ortak nokta yoksa KIRMIZI bag (0)', () async {
-        repo.envanter = [
-          kart('a', CardPosition.defender, 60,
-              ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK'),
-          kart('b', CardPosition.defender, 60,
-              ulke: 'BRA', lig: 'La Liga', kulup: 'Madrid Real'),
-        ];
-        await vm.load();
-
-        vm.placeCard(1, repo.envanter[0]);
-        vm.placeCard(2, repo.envanter[1]);
-
-        expect(vm.chemistryAt(1), 0);
-        expect(vm.chemistry.noneCount, 1);
-      });
-
-      test('BAGLI OLMAYAN slotlar birbirini etkilemez', () async {
-        repo.envanter = [
-          kart('a', CardPosition.defender, 60,
-              ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK'),
-          kart('b', CardPosition.defender, 60,
-              ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK'),
-        ];
-        await vm.load();
-
-        // Slot 1 ile 4 formasyonda BAGLI DEGIL
-        vm.placeCard(1, repo.envanter[0]);
-        vm.placeCard(4, repo.envanter[1]);
-
-        expect(vm.chemistry.total, 0,
-            reason: 'Slot 1 ile 4 arasinda formasyon bagi yok');
-      });
-
-      test('DIZILIS degisince kimya degisir (ayni kartlar)', () async {
-        final turk1 = kart('t1', CardPosition.defender, 60,
-            ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK');
-        final turk2 = kart('t2', CardPosition.defender, 60,
-            ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK');
-        final bre1 = kart('b1', CardPosition.defender, 60,
-            ulke: 'BRA', lig: 'La Liga', kulup: 'Madrid Real');
-        final bre2 = kart('b2', CardPosition.defender, 60,
-            ulke: 'BRA', lig: 'La Liga', kulup: 'Madrid Real');
-
-        repo.envanter = [turk1, turk2, bre1, bre2];
-        await vm.load();
-
-        // DIZILIS A: uyumlular ayrik (T B T B)
-        vm.placeCard(1, turk1);
-        vm.placeCard(2, bre1);
-        vm.placeCard(3, turk2);
-        vm.placeCard(4, bre2);
-        final dizilisA = vm.chemistry.total;
-
-        // DIZILIS B: uyumlular yan yana (T T B B)
-        vm.clearAll();
-        vm.placeCard(1, turk1);
-        vm.placeCard(2, turk2);
-        vm.placeCard(3, bre1);
-        vm.placeCard(4, bre2);
-        final dizilisB = vm.chemistry.total;
-
-        expect(dizilisB, greaterThan(dizilisA),
-            reason: 'Uyumlulari yan yana dizmek kimyayi artirmali');
-      });
-
-      test('kimya onizlemesi kart secmeden once hesaplanir', () async {
-        final turk = kart('t', CardPosition.defender, 60,
-            ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK');
-        final ayniKulup = kart('a', CardPosition.defender, 55,
-            ulke: 'BRA', lig: 'Super Lig', kulup: 'Anadolu SK');
-        final yabanci = kart('y', CardPosition.defender, 62,
-            ulke: 'JPN', lig: 'J-Lig', kulup: 'Tokyo Blue');
-
-        repo.envanter = [turk, ayniKulup, yabanci];
-        await vm.load();
-        vm.placeCard(1, turk);
-
-        expect(vm.chemistryIfPlaced(2, ayniKulup), 2);
-        expect(vm.chemistryIfPlaced(2, yabanci), 0);
-      });
-
-      // ================================================================
-      // KIMYA / GUC DENGESI
-      // ================================================================
-      // Bu iki test sistemin en onemli dengesini belgeliyor.
-      //
-      // MATEMATIK: Her bag puanini BAGLADIGI IKI KARTA birden ekler.
-      // Yani 1 takim kimyasi puani = 2 guc puani eder. 17 bagin tamami
-      // yesil olsa takim kimyasi 34 olur; bu da 11 karta dagilan
-      // 68 guc puani, yani kart basina ortalama +6.2 demektir.
-      //
-      // Sonuc: kimya kart basina ~6 guc degerinde. Aradaki guc farki
-      // bundan buyukse gucu, kucukse kimyayi secmek mantikli.
-      // Otomatik dizilim bu hesabi yapiyor.
-
-      /// Uyumlu (hepsi ayni kulup) ve uyumsuz (her biri farkli) kartlardan
-      /// olusan envanter uretir. [gucFarki] iki grup arasindaki guc farki.
-      List<InventoryCard> dengeliEnvanter(int gucFarki) {
-        final liste = <InventoryCard>[];
-        var no = 0;
-        for (final p in CardPosition.values) {
-          for (var i = 0; i < p.requiredCount; i++) {
-            liste.add(kart('uyum${no++}', p, 50,
-                ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK'));
-            liste.add(kart('guc$no', p, 50 + gucFarki,
-                ulke: 'U$no', lig: 'L$no', kulup: 'K$no'));
-            no++;
-          }
-        }
-        return liste;
-      }
-
-      test('guc farki KUCUKSE kimyali kartlar secilir', () async {
-        // Guc farki 4: kimyanin verdigi ~6 puan daha degerli
-        repo.envanter = dengeliEnvanter(4);
-        await vm.load();
-
-        vm.autoFillByChemistry();
-
-        expect(vm.isComplete, isTrue);
-        expect(vm.chemistry.total, greaterThan(0),
-            reason: 'Kimya guce degdiginde uyumlu kartlar secilmeli');
-
-        // Kimyali dizilim, saf guc diziliminden daha guclu olmali
-        final kimyaliEtkinGuc = vm.averageEffectivePower;
-        vm.clearAll();
-        vm.autoFillBest();
-        final gucluEtkinGuc = vm.averageEffectivePower;
-
-        expect(kimyaliEtkinGuc, greaterThanOrEqualTo(gucluEtkinGuc));
-      });
-
-      test('guc farki BUYUKSE guc tercih edilir (kimya bosuna feda edilmez)',
-          () async {
-        // Guc farki 12: kimyanin verdigi ~6 puan yetmiyor
-        repo.envanter = dengeliEnvanter(12);
-        await vm.load();
-
-        vm.autoFillByChemistry();
-
-        expect(vm.isComplete, isTrue);
-
-        // Kadro tamamen guclu kartlardan olusmali
-        final secilenler = vm.selectedCards;
-        expect(
-          secilenler.every((k) => k.power == 62),
-          isTrue,
-          reason: 'Kimya guce degmiyorsa guclu kartlar secilmeli',
-        );
-      });
-
-      test('autoFillByChemistry etkin gucu artirir ya da korur', () async {
-        repo.envanter = dengeliEnvanter(4);
-        await vm.load();
-
-        vm.autoFillBest();
-        final oncesi = vm.averageEffectivePower;
-
-        vm.autoFillByChemistry();
-        final sonrasi = vm.averageEffectivePower;
-
-        expect(sonrasi, greaterThanOrEqualTo(oncesi),
-            reason: 'Iyilestirme algoritmasi kadroyu kotulestirmemeli');
-      });
-
-      test('kimya ortalama gucu yukseltir', () async {
+    group('kimya kaldirildi', () {
+      test('ayni kulupten kartlar da kimya kazandirmaz', () async {
         repo.envanter = [
           for (var i = 0; i < 4; i++)
-            kart('d$i', CardPosition.defender, 60,
-                ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK'),
+            kart('d$i', CardPosition.defender, 60, ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK'),
         ];
         await vm.load();
-
         for (var i = 0; i < 4; i++) {
           vm.placeCard(i + 1, repo.envanter[i]);
         }
 
-        expect(vm.averagePower, 60);
-        expect(vm.averageEffectivePower, greaterThan(60),
-            reason: 'Kimya bonusu efektif gucu artirmali');
+        expect(vm.chemistry.total, 0);
+        expect(vm.chemistryAt(1), 0);
+        expect(vm.chemistryIfPlaced(2, repo.envanter[1]), 0);
+        expect(vm.averageEffectivePower, vm.averagePower, reason: 'etkin guc = guc');
+      });
+
+      test('otomatik dizilim en guclu kartlari secer', () async {
+        final liste = <InventoryCard>[];
+        var no = 0;
+        for (final p in CardPosition.values) {
+          for (var i = 0; i < p.requiredCount; i++) {
+            liste.add(kart('uyum${no++}', p, 50, ulke: 'TUR', lig: 'Super Lig', kulup: 'Anadolu SK'));
+            liste.add(kart('guc$no', p, 54, ulke: 'U$no', lig: 'L$no', kulup: 'K$no'));
+            no++;
+          }
+        }
+        repo.envanter = liste;
+        await vm.load();
+
+        vm.autoFillBest();
+        expect(vm.isComplete, isTrue);
+        expect(vm.selectedCards.every((k) => k.power == 54), isTrue);
+
+        vm.clearAll();
+        vm.autoFillByChemistry();
+        expect(vm.selectedCards.every((k) => k.power == 54), isTrue,
+            reason: 'kimya yokken ayni kulup kartlari guce tercih edilmez');
       });
     });
   });

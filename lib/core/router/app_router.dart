@@ -14,6 +14,7 @@ import '../../ui_v21/screens/inner/v21_inner_screens.dart';
 import '../../ui_v21/screens/season/v21_season_screen.dart';
 import '../../ui_v21/screens/store/v21_store_screen.dart';
 import '../../ui_v21/screens/deck/v21_deck_screen.dart';
+import '../../ui_v21/layouts/v21_tab_swipe.dart';
 import '../../ui_v21/ui_v21.dart';
 import '../auth/session_manager.dart';
 import 'app_routes.dart';
@@ -49,15 +50,15 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const V21HomeScreen(),
+        pageBuilder: (context, state) => _sekme(state, AppRoutes.home, const V21HomeScreen()),
       ),
       GoRoute(
         path: AppRoutes.collection,
-        builder: (context, state) => const V21CollectionScreen(),
+        pageBuilder: (context, state) => _sekme(state, AppRoutes.collection, const V21CollectionScreen()),
       ),
       GoRoute(
         path: AppRoutes.deck,
-        builder: (context, state) => const V21DeckScreen(),
+        pageBuilder: (context, state) => _sekme(state, AppRoutes.deck, const V21DeckScreen()),
       ),
       GoRoute(
         path: AppRoutes.friends,
@@ -93,7 +94,7 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.store,
-        builder: (context, state) => const V21StoreScreen(),
+        pageBuilder: (context, state) => _sekme(state, AppRoutes.store, const V21StoreScreen()),
       ),
       // Ekonomi V2 (FAZ 1): sandıklar ve olasılıklar
       GoRoute(
@@ -114,7 +115,7 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.season,
-        builder: (context, state) => const V21SeasonScreen(),
+        pageBuilder: (context, state) => _sekme(state, AppRoutes.season, const V21SeasonScreen()),
       ),
       GoRoute(
         path: AppRoutes.sbc,
@@ -153,6 +154,18 @@ class AppRouter {
       ),
     ),
   );
+
+  /// Alt menu sekmeleri, menudeki sirayla (kaydirarak gecis bu sirayi izler)
+  static const List<String> tabs = [
+    AppRoutes.collection,
+    AppRoutes.deck,
+    AppRoutes.home,
+    AppRoutes.store,
+    AppRoutes.season,
+  ];
+
+  static Page<void> _sekme(GoRouterState state, String route, Widget child) =>
+      V21TabPages.page(state: state, tabs: tabs, route: route, child: child);
 
   /// Oturum durumuna gore yonlendirme karari
   String? _handleRedirect(BuildContext context, GoRouterState state) {

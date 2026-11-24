@@ -11,6 +11,12 @@ import 'goldens/sahte_veri.dart';
 /// Ekonomi V2 FAZ 2: futbolcu seviyesi ViewModel'i.
 class _Depo extends GoldenProgressRepo {
   final anahtarlar = <String>[];
+
+  /// Doluysa bir sonraki özet isteği bunu döndürür (sunucu güncellendi)
+  ProgressOverview? sonraki;
+
+  @override
+  Future<Result<ProgressOverview>> fetchOverview() async => Success(sonraki ?? kGoldenProgress);
   final hatalar = <AppException>[];
 
   @override
@@ -78,5 +84,21 @@ void main() {
   test('hata kodları Türkçe', () {
     expect(progressErrorMessage('max_level', 'x'), 'Futbolcu en yüksek seviyede.');
     expect(progressErrorMessage('bilinmeyen', 'sunucu'), 'sunucu');
+  });
+  test('seviye atlayan futbolcu listede YERİNDE kalır (gözden kaybolmaz)', () async {
+    final once = vm.visibleItems.map((i) => i.cardId).toList();
+    // Sunucu atlamadan sonra ilk futbolcuyu "hazır değil" ve daha düşük gösterir
+    final ilk = kGoldenProgress.items.first;
+    depo.sonraki = kGoldenProgress.copyWith(items: [
+      ilk.copyWith(level: ilk.level + 1, copies: 0),
+      ...kGoldenProgress.items.skip(1),
+    ]);
+    expect(await vm.levelUp(vm.visibleItems.first), isTrue);
+    expect(vm.visibleItems.map((i) => i.cardId).toList(), once);
+    expect(vm.visibleItems.first.level, ilk.level + 1, reason: 'yeni veri gösterilir');
+
+    // Ekranı yeniden açınca (load) öneri sırası tekrar kurulur
+    await vm.load();
+    expect(vm.visibleItems.first.cardId, isNot(ilk.cardId));
   });
 }

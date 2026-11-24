@@ -191,9 +191,14 @@ void main() {
         ),
       ),
     );
-    await t.runAsync(
-      () => precacheImage(const AssetImage(V21Assets.chestGold), t.element(find.byKey(const Key('gallery')))),
-    );
+    // Sandıklar artık vektör; görüntü yalnız kart portrelerinden gelir.
+    // Hepsi çözülmeden karşılaştırılırsa yük altında sonuç değişir.
+    await t.runAsync(() async {
+      final el = t.element(find.byKey(const Key('gallery')));
+      for (final img in t.widgetList<Image>(find.byType(Image))) {
+        await precacheImage(img.image, el);
+      }
+    });
     await t.pump(const Duration(seconds: 1));
     expect(t.takeException(), isNull);
     await expectLater(find.byKey(const Key('gallery')), matchesGoldenFile('goldens/v21_components.png'));
