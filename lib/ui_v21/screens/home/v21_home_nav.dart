@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/audio/game_audio.dart';
 import '../../../core/router/app_routes.dart';
 import '../../components/v21_bottom_navigation.dart';
 import '../../components/v21_side_navigation.dart';
@@ -43,7 +44,8 @@ class V21HomeNav extends StatelessWidget {
     void select(int i) {
       final route = items[i].route;
       if (route == currentRoute) return;
-        context.go(route);
+      GameAudio.sfx(Sfx.tab);
+      context.go(route);
     }
 
     if (V21NavPlacement.isSide(context)) {
@@ -54,7 +56,9 @@ class V21HomeNav extends StatelessWidget {
         links: sideLinks,
         activeLink: currentRoute,
         onLink: (l) {
-          if (l.route != currentRoute) context.go(l.route);
+          if (l.route == currentRoute) return;
+          GameAudio.sfx(Sfx.tab);
+          context.go(l.route);
         },
       );
     }

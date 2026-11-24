@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/audio/game_audio.dart';
 import '../../../core/auth/session_manager.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/network/websocket_service.dart';
@@ -103,14 +104,19 @@ class _BodyState extends State<_Body> {
     super.dispose();
   }
 
-  void _syncTicker(bool searching) {
+  void _syncTicker(bool searching, {required bool matched}) {
     if (searching && _tick == null) {
-      _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      GameAudio.sfx(Sfx.searchPing);
+      _tick = Timer.periodic(const Duration(seconds: 1), (t) {
+        // Radar sesi 2 saniyede bir
+        if (t.tick.isEven) GameAudio.sfx(Sfx.searchPing);
         if (mounted) setState(() {});
       });
     } else if (!searching && _tick != null) {
       _tick!.cancel();
       _tick = null;
+      // Arama eşleşmeden bittiyse oyuncu iptal etmiştir
+      if (!matched) GameAudio.sfx(Sfx.searchCancel);
     }
   }
 
@@ -153,12 +159,13 @@ class _BodyState extends State<_Body> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         vm.consumeFoundMatch();
+        GameAudio.sfx(Sfx.opponentFound);
         context.pushReplacement(AppRoutes.matchWithId(id));
       });
     }
 
     final searching = vm.stage == MatchmakingStage.searching;
-    _syncTicker(searching);
+    _syncTicker(searching, matched: id != null);
 
     if (v21IsWeb(context)) {
       return PopScope(

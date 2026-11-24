@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/audio/game_audio.dart';
+import '../../../core/audio/sound_cues.dart';
 import '../../../features/chests/domain/chest_texts.dart';
 import '../../ui_v21.dart';
 
@@ -26,6 +28,16 @@ class V21ChestOpening extends StatefulWidget {
 
 class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProviderStateMixin {
   late final AnimationController _a = AnimationController(vsync: this, duration: const Duration(milliseconds: 2200));
+  // Zaman çizelgesiyle aynı noktalar: 3 sallanma, kapak, kartlar, özet
+  SoundCues _cues() => SoundCues(_a, [
+    (0.0, Sfx.chestShake),
+    (0.083, Sfx.chestShake),
+    (0.166, Sfx.chestShake),
+    (0.22, Sfx.chestOpen),
+    for (var i = 0; i < widget.result.cards.length; i++) (0.4 + i * 0.15, Sfx.chestReward),
+    (0.8, Sfx.coins),
+  ]);
+  SoundCues? _sounds;
   bool _started = false;
 
   @override
@@ -34,14 +46,18 @@ class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProv
     if (_started) return;
     _started = true;
     if (V21Motion.cardEffects(context)) {
+      _sounds = _cues();
       _a.forward();
     } else {
+      // Animasyon kapalı: sahne son hâlinde açılır, tek açılış sesi yeter
+      GameAudio.sfx(Sfx.chestOpen);
       _a.value = 1;
     }
   }
 
   @override
   void dispose() {
+    _sounds?.dispose();
     _a.dispose();
     super.dispose();
   }

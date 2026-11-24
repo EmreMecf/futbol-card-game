@@ -1,5 +1,6 @@
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/audio/game_audio.dart';
 import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
 import '../../../../core/error/app_exception.dart';
@@ -53,12 +54,16 @@ class SeasonViewModel extends BaseViewModel {
 
   Future<bool> claim(SeasonTier t, String track) =>
       _eylem('$track:${t.tier}', 'claim:${t.tier}:$track', (k) => _repository.claim(t.tier, track, idempotencyKey: k),
-          (sonuc) => _bilgi = '${t.tier}. kademe ödülü alındı: ${rewardLabel(track == 'free' ? t.free : t.premium)}.');
+          (sonuc) {
+        GameAudio.sfx(Sfx.seasonClaim);
+        _bilgi = '${t.tier}. kademe ödülü alındı: ${rewardLabel(track == 'free' ? t.free : t.premium)}.';
+      });
 
   Future<bool> claimAll() {
     final s = _sezon;
     return _eylem('all', 'all:${s?.xp}:${s?.claimableCount}', (k) => _repository.claimAll(idempotencyKey: k), (sonuc) {
       final n = (sonuc['count'] as num?)?.toInt() ?? 0;
+      if (n > 0) GameAudio.sfx(Sfx.seasonClaim);
       _bilgi = n == 0 ? 'Alınacak ödül yok.' : '$n ödül alındı.';
     });
   }

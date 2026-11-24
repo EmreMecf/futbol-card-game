@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/audio/game_audio.dart';
 import '../../../core/auth/session_manager.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/feedback/game_feedback.dart';
@@ -170,7 +171,10 @@ class _BodyState extends State<_Body> {
   }
 
   void _select(HandCard c) {
-    if (_selectedId != c.userCardId) GameFeedback.haptic(HapticStrength.selection);
+    if (_selectedId != c.userCardId) {
+      GameFeedback.haptic(HapticStrength.selection);
+      GameAudio.sfx(Sfx.cardSelect);
+    }
     setState(() => _selectedId = c.userCardId);
   }
 

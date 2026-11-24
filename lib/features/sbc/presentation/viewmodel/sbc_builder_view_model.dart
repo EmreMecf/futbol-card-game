@@ -1,5 +1,6 @@
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/audio/game_audio.dart';
 import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
 import '../../domain/repositories/sbc_repository.dart';
@@ -248,6 +249,7 @@ class SbcBuilderViewModel extends BaseViewModel {
     }
 
     _sonuc = sonuc.dataOrNull;
+    GameAudio.sfx(Sfx.exchange);
     _slotlar.clear();
     safeNotify();
     return true;

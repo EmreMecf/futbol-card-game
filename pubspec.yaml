@@ -58,6 +58,7 @@ dependencies:
   google_sign_in_web: ^1.1.3
   sign_in_with_apple: ^8.2.0
   crypto: ^3.0.6
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -122,6 +123,9 @@ flutter:
     - assets/v21/illustrations/
     - assets/v21/icons/
     - assets/v21/web/
+    # Ses: liste ve dosya adları docs/SES_LISTESI.md
+    - assets/audio/music/
+    - assets/audio/sfx/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

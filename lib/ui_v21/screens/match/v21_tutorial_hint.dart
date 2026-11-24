@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/audio/game_audio.dart';
+import '../../../core/audio/sound_cues.dart';
 import '../../ui_v21.dart';
 
 /// V2.1 ÖĞRETİCİ İPUCU (referans hf12–hf14).
@@ -55,7 +57,11 @@ class V21TutorialHint extends StatelessWidget {
     final k = scale;
     final step = (state.tutorialStep ?? 1).clamp(1, 3);
     final (title, text) = textFor(state);
-    return Semantics(
+    // Her yeni ipucu (başlık değişince) kısa bir "pop" sesiyle gelir
+    return SfxOnMount(
+      key: ValueKey(title),
+      sfx: Sfx.tutorialTip,
+      child: Semantics(
       container: true,
       liveRegion: true,
       label: 'Öğretici, adım $step / 3, ${_steps[step - 1].toLowerCase()}. $title. $text',
@@ -115,6 +121,7 @@ class V21TutorialHint extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

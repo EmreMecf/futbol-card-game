@@ -196,7 +196,7 @@ void main() {
   group('SettingsViewModel', () {
     setUp(() => SharedPreferences.setMockInitialValues({}));
 
-    test('varsayılanlar: ses ve titreşim açık, müzik kapalı', () async {
+    test('varsayılanlar: ses, müzik ve titreşim açık', () async {
       final vm = SettingsViewModel();
       await vm.load();
 
@@ -204,7 +204,7 @@ void main() {
       expect(vm.vibration, isTrue);
       expect(vm.cardAnimations, isTrue);
       expect(vm.turnWarning, isTrue);
-      expect(vm.music, isFalse);
+      expect(vm.music, isTrue);
     });
 
     test('değişiklik ANINDA yansır (diski beklemez)', () async {
@@ -213,8 +213,8 @@ void main() {
 
       // await edilmeden once bile deger degismis olmali; aksi halde
       // anahtarin hareketi disk yazimini bekliyormus gibi takilirdi.
-      final future = vm.setMusic(true);
-      expect(vm.music, isTrue);
+      final future = vm.setMusic(false);
+      expect(vm.music, isFalse);
       await future;
     });
 
@@ -222,13 +222,13 @@ void main() {
       final vm = SettingsViewModel();
       await vm.load();
       await vm.setSoundEffects(false);
-      await vm.setMusic(true);
+      await vm.setMusic(false);
 
       final yeni = SettingsViewModel();
       await yeni.load();
 
       expect(yeni.soundEffects, isFalse);
-      expect(yeni.music, isTrue);
+      expect(yeni.music, isFalse);
     });
 
     test('kayıtlı değerler varsayılanı ezer', () async {

@@ -1,5 +1,6 @@
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/audio/game_audio.dart';
 import '../../../../core/auth/session_manager.dart';
 import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
@@ -104,6 +105,7 @@ class StoreViewModel extends BaseViewModel {
       return false;
     }
     _acilanPaket = null;
+    GameAudio.sfx(Sfx.purchase);
     final kullanici = _session.user;
     final acilis = _sonAcilis;
     if (kullanici != null && acilis != null) {
@@ -147,6 +149,7 @@ class StoreViewModel extends BaseViewModel {
     }
 
     safeNotify();
+    GameAudio.sfx(Sfx.purchase);
     return true;
   }
 

@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/audio/game_audio.dart';
 import '../../../../core/auth/session_manager.dart';
 import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
+import '../../../../core/feedback/game_feedback.dart';
 import '../../../../core/network/websocket_service.dart';
 import '../../../../core/utils/logger.dart';
 import '../../domain/clash_event.dart';
@@ -200,8 +202,19 @@ class MatchViewModel extends BaseViewModel {
 
   /// Taktiği seçer; aynı taktiğe tekrar dokunmak seçimi kaldırır.
   void selectTactic(MatchTactic t) {
-    if (!t.isNone && !canUseTactic(t)) return;
+    if (!t.isNone && !canUseTactic(t)) {
+      // Tek engel enerjiyse oyuncuya bunu sesle de söyle
+      if (tacticsEnabled && isMyTurn && !isOver && tacticCost(t) > myEnergy) GameAudio.sfx(Sfx.noEnergy);
+      return;
+    }
     _secilenTaktik = (_secilenTaktik == t) ? MatchTactic.none : t;
+    final sfx = switch (_secilenTaktik) {
+      MatchTactic.highPress => Sfx.tacticPress,
+      MatchTactic.counterAttack => Sfx.tacticCounter,
+      MatchTactic.defensiveWall => Sfx.tacticWall,
+      MatchTactic.none => null,
+    };
+    if (sfx != null) GameAudio.sfx(sfx);
     safeNotify();
   }
 
@@ -374,8 +387,26 @@ class MatchViewModel extends BaseViewModel {
         _tazele();
         return;
       }
+      _sayacSesi();
       safeNotify();
     });
+  }
+
+  /// Son 5 saniye her saniye "tık", süre dolunca bir kez uyarı.
+  /// Yalnız hamle bende iken; "Süre uyarısı" ayarı kapalıysa sessiz.
+  int? _sonTikSaniyesi;
+  DateTime? _sureDolduSesiCalinanSon;
+  void _sayacSesi() {
+    final son = _durum?.turnDeadline;
+    if (!isMyTurn || isOver || son == null || !GameFeedback.turnWarningEnabled) return;
+    final s = remainingSeconds;
+    if (s >= 1 && s <= 5 && s != _sonTikSaniyesi) {
+      _sonTikSaniyesi = s;
+      GameAudio.sfx(Sfx.tick);
+    } else if (s == 0 && _sureDolduSesiCalinanSon != son) {
+      _sureDolduSesiCalinanSon = son;
+      GameAudio.sfx(Sfx.timeUp);
+    }
   }
 
   // ------------------------------------------------------------------
@@ -397,6 +428,7 @@ class MatchViewModel extends BaseViewModel {
       _saatFarki = sunucuSaati.difference(DateTime.now());
     }
 
+    _durumSesleri(_durum, yeniDurum);
     _durum = yeniDurum;
 
     // El ve geçmişi PARALEL çek: iki isteği de başlatıp sonra bekliyoruz,
@@ -419,6 +451,23 @@ class MatchViewModel extends BaseViewModel {
 
     if (showLoading) setState(ViewState.idle);
     safeNotify();
+  }
+
+  /// Sunucudan gelen değişikliklerin sesleri (oyuncunun kendi hamlesi
+  /// değil): maç başı düdüğü, rakibin gizli seçimi, maç sonu düdüğü.
+  void _durumSesleri(MatchState? eski, MatchState yeni) {
+    if (eski == null) {
+      // Maça ilk giriş; geri dönüldüğünde (tur oynanmışsa) düdük çalmaz
+      if (!yeni.isOver && _gecmis.rounds.isEmpty) GameAudio.sfx(Sfx.whistle);
+      return;
+    }
+    if (!eski.isOver && yeni.isOver) {
+      GameAudio.sfx(Sfx.earlyFinish);
+      return;
+    }
+    if (yeni.simultaneous && yeni.phase == 'pick' && !eski.opponentHasPlayed && yeni.opponentHasPlayed) {
+      GameAudio.sfx(Sfx.opponentPicked);
+    }
   }
 
   Future<void> _sonucuGetir() async {
@@ -455,6 +504,7 @@ class MatchViewModel extends BaseViewModel {
     if (!isMyTurn || _hamleGonderiliyor || isOver) return false;
 
     _hamleGonderiliyor = true;
+    GameAudio.sfx(Sfx.cardPlay);
     safeNotify();
 
     final sonuc = await _repository.playCard(
@@ -467,6 +517,7 @@ class MatchViewModel extends BaseViewModel {
 
     final hata = sonuc.errorOrNull;
     if (hata != null) {
+      GameAudio.sfx(Sfx.error);
       setError(hata);
       // Sunucu reddettiyse ekran gerçeği yansıtmıyor demektir;
       // doğru durumu yeniden çekelim.
@@ -484,6 +535,7 @@ class MatchViewModel extends BaseViewModel {
   Future<bool> choosePosition(CardPosition mevki) async {
     if (!isPositionPhase || !(_durum?.canChoosePosition ?? false) || _hamleGonderiliyor) return false;
     _hamleGonderiliyor = true;
+    GameAudio.sfx(Sfx.position);
     safeNotify();
     final sonuc = await _repository.choosePosition(matchId, mevki);
     _hamleGonderiliyor = false;

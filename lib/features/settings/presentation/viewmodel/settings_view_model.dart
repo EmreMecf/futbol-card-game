@@ -24,7 +24,7 @@ class SettingsViewModel extends ChangeNotifier {
   SharedPreferences? _depo;
 
   bool _sesEfektleri = true;
-  bool _muzik = false;
+  bool _muzik = true;
   bool _titresim = true;
   bool _kartAnimasyonlari = true;
   bool _sureUyarisi = true;
@@ -47,7 +47,7 @@ class SettingsViewModel extends ChangeNotifier {
     try {
       _depo = await SharedPreferences.getInstance();
       _sesEfektleri = _depo?.getBool(_anahtarSes) ?? true;
-      _muzik = _depo?.getBool(_anahtarMuzik) ?? false;
+      _muzik = _depo?.getBool(_anahtarMuzik) ?? true;
       _titresim = _depo?.getBool(_anahtarTitresim) ?? true;
       _kartAnimasyonlari = _depo?.getBool(_anahtarAnimasyon) ?? true;
       _sureUyarisi = _depo?.getBool(_anahtarSureUyarisi) ?? true;

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/audio/game_audio.dart';
+import '../../../core/audio/sound_cues.dart';
 import '../../../features/match/domain/clash_event.dart';
 import '../../ui_v21.dart';
 
@@ -20,6 +22,7 @@ class V21ClashScene extends StatefulWidget {
 class _V21ClashSceneState extends State<V21ClashScene> with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 650));
   Timer? _timer;
+  SoundCues? _sounds;
   bool _started = false;
   bool _done = false;
 
@@ -31,10 +34,25 @@ class _V21ClashSceneState extends State<V21ClashScene> with SingleTickerProvider
     final reduced = V21Motion.reduced(context);
     if (reduced) {
       _c.value = 1;
+      _playOutcome();
     } else {
-      _c.forward();
+      // Kartlar birlikte açılır, ortada çarpışır, sonuç şeridiyle sonuç sesi
+      _sounds = SoundCues(_c, [(0.0, Sfx.reveal), (0.55, Sfx.clash)]);
+      _c.forward().whenComplete(() {
+        if (mounted && !_done) _playOutcome();
+      });
     }
     _timer = Timer(Duration(milliseconds: reduced ? 1400 : 2300), _finish);
+  }
+
+  void _playOutcome() {
+    final e = widget.event;
+    if (e.wonByLegendRule) GameAudio.sfx(Sfx.legend);
+    GameAudio.sfx(switch (e.outcome) {
+      ClashOutcome.win => Sfx.roundWin,
+      ClashOutcome.loss => Sfx.roundLose,
+      ClashOutcome.draw => Sfx.roundDraw,
+    });
   }
 
   void _finish() {
@@ -47,6 +65,7 @@ class _V21ClashSceneState extends State<V21ClashScene> with SingleTickerProvider
   @override
   void dispose() {
     _timer?.cancel();
+    _sounds?.dispose();
     _c.dispose();
     super.dispose();
   }

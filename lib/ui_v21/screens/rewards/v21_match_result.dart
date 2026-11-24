@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/audio/game_audio.dart';
+import '../../../core/audio/sound_cues.dart';
 import '../../../core/auth/session_manager.dart';
 import '../../../core/feedback/game_feedback.dart';
 import '../../../features/items/cosmetics/equipped_cosmetics.dart';
@@ -74,6 +76,15 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
     if (_hapticDone) return;
     _hapticDone = true;
     GameFeedback.haptic(s.didIWin ? HapticStrength.heavy : (s.isDraw ? HapticStrength.light : HapticStrength.medium));
+    // Jingle maç müziğini durdurur; ödül sesleri jingle başladıktan sonra
+    GameAudio.jingle(s.didIWin ? Jingle.victory : (s.isDraw ? Jingle.draw : Jingle.defeat));
+    final coins = widget.rewardDelta?.coins ?? 0;
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      if (!mounted) return;
+      if (coins > 0) GameAudio.sfx(Sfx.coins);
+      if (s.cardsWon.isNotEmpty) GameAudio.sfx(Sfx.cardsWon);
+      if (s.cardsLost.isNotEmpty) GameAudio.sfx(Sfx.cardsLost);
+    });
   }
 
   @override
@@ -129,9 +140,12 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
                 ),
                 if (s.leagueChange?.isPromoted == true && !_promotionClosed)
                   Positioned.fill(
-                    child: V21LeaguePromotionOverlay(
-                      change: s.leagueChange!,
-                      onContinue: () => setState(() => _promotionClosed = true),
+                    child: SfxOnMount(
+                      sfx: Sfx.leagueUp,
+                      child: V21LeaguePromotionOverlay(
+                        change: s.leagueChange!,
+                        onContinue: () => setState(() => _promotionClosed = true),
+                      ),
                     ),
                   ),
                 if (s.didIWin && fireworks) FireworksOverlay(active: effects),

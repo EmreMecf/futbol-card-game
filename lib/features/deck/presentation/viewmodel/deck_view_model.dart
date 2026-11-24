@@ -1,5 +1,6 @@
 import 'package:shared_models/shared_models.dart';
 
+import '../../../../core/audio/game_audio.dart';
 import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
 import '../../domain/deck_rules.dart';
@@ -616,6 +617,7 @@ class DeckViewModel extends BaseViewModel {
     }
 
     _degisiklikVar = false;
+    GameAudio.sfx(Sfx.squadSave);
     _kayitMesaji = 'Kadro kaydedildi';
     safeNotify();
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../core/audio/game_audio.dart';
 import '../../core/feedback/game_feedback.dart';
 import '../../ui_v21/components/v21_pitch_layout.dart';
 import '../animations/v21_motion.dart';
@@ -125,6 +126,7 @@ class V21SquadPitch extends StatelessWidget {
                 childWhenDragging: Opacity(opacity: 0.25, child: tile()),
                 onDragStarted: () {
                   GameFeedback.haptic(HapticStrength.selection);
+                  GameAudio.sfx(Sfx.squadLift);
                   onDrag?.call(slot);
                 },
                 onDragEnd: (_) => onDrag?.call(null),

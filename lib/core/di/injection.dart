@@ -40,6 +40,7 @@ import '../../features/store/data/datasources/store_remote_datasource.dart';
 import '../../features/store/data/repositories/store_repository_impl.dart';
 import '../../features/store/domain/repositories/store_repository.dart';
 import '../../features/store/presentation/viewmodel/store_view_model.dart';
+import '../audio/game_audio.dart';
 import '../auth/session_manager.dart';
 import '../network/api_client.dart';
 import '../network/websocket_service.dart';
@@ -277,6 +278,8 @@ Future<void> configureDependencies() async {
     // Ayarlar cihazda saklandigi icin repository'ye ihtiyaci yok.
     // Tek ornek yeterli: ayni tercihleri her ekran ayni anda gormeli.
     ..registerLazySingleton<SettingsViewModel>(() => SettingsViewModel())
+    // Ses: ayarları okur; main() içinde init() ile dosyaları öğrenir
+    ..registerLazySingleton<GameAudio>(() => GameAudio(getIt<SettingsViewModel>()))
     ..registerFactory<MatchmakingViewModel>(
       () => MatchmakingViewModel(
         getIt<MatchmakingRepository>(),

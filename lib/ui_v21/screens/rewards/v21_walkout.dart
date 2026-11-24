@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/audio/game_audio.dart';
+import '../../../core/audio/sound_cues.dart';
 import '../../../core/feedback/game_feedback.dart';
 import '../../../ui_v21/components/v21_club_crest.dart';
 import '../../../ui_v21/components/v21_confetti.dart';
@@ -36,6 +38,14 @@ class _V21WalkoutScreenState extends State<V21WalkoutScreen> with SingleTickerPr
   static const _flagAt = 0.11, _posAt = 0.33, _clubAt = 0.54, _cardAt = 0.76;
 
   late final AnimationController _c = AnimationController(vsync: this, duration: _total);
+  // Işıklar ve bayrak / mevki / arma vuruşları (dokunup atlanırsa çalmaz)
+  SoundCues? _sounds;
+  SoundCues _cues() => SoundCues(_c, [
+    (0.0, Sfx.walkoutLights),
+    (_flagAt, Sfx.walkoutHit),
+    (_posAt, Sfx.walkoutHit),
+    (_clubAt, Sfx.walkoutHit),
+  ]);
   bool _hit = false;
   bool _done = false;
   bool _started = false;
@@ -60,7 +70,9 @@ class _V21WalkoutScreenState extends State<V21WalkoutScreen> with SingleTickerPr
       _done = true;
       _c.value = 1;
       GameFeedback.haptic(HapticStrength.heavy);
+      GameAudio.sfx(Sfx.walkoutCard);
     } else {
+      _sounds = _cues();
       _c.forward();
     }
   }
@@ -69,6 +81,9 @@ class _V21WalkoutScreenState extends State<V21WalkoutScreen> with SingleTickerPr
     if (!_hit && _c.value >= _cardAt) {
       _hit = true;
       GameFeedback.haptic(HapticStrength.heavy);
+      // Kart vuruşu atlansa da çalar: sahnenin asıl anı
+      GameAudio.sfx(Sfx.walkoutCard);
+      GameAudio.sfx(Sfx.walkoutConfetti);
       if (mounted) setState(() {});
     }
   }
@@ -85,6 +100,7 @@ class _V21WalkoutScreenState extends State<V21WalkoutScreen> with SingleTickerPr
   @override
   void dispose() {
     _c.removeListener(_onTick);
+    _sounds?.dispose();
     _c.dispose();
     super.dispose();
   }

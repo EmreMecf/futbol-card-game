@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/audio/game_audio.dart';
+import '../../../core/audio/sound_cues.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/store/domain/reveal_style.dart';
 import '../../../features/store/presentation/viewmodel/pack_opening_view_model.dart';
@@ -77,7 +79,9 @@ class _SealState extends State<_Seal> with SingleTickerProviderStateMixin {
 
   Future<void> _open() async {
     if (_burst.isAnimating) return;
+    GameAudio.sfx(Sfx.packShake);
     if (V21Motion.cardEffects(context)) await _burst.forward();
+    GameAudio.sfx(Sfx.packBurst);
     widget.vm.unseal();
   }
 
@@ -141,7 +145,10 @@ class _SealState extends State<_Seal> with SingleTickerProviderStateMixin {
                                   tone: V21ButtonTone.blue,
                                   size: V21ButtonSize.small,
                                   scale: k * 1.1,
-                                  onPressed: vm.revealAll,
+                                  onPressed: () {
+                                    GameAudio.sfx(Sfx.packSkip);
+                                    vm.revealAll();
+                                  },
                                 ),
                               ),
                             ],
@@ -253,6 +260,10 @@ class _RevealState extends State<_Reveal> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() => _front = true);
     });
+    // Kart dönerken: nadirliğe göre ses (Elmas/Efsane'de ek parlama)
+    final tier = widget.card.tier;
+    GameAudio.sfx(tier.rank >= CardTier.gold.rank ? Sfx.cardFlipGold : Sfx.cardFlip);
+    if (tier.rank >= CardTier.diamond.rank) GameAudio.sfx(Sfx.cardRareGlow);
   }
 
   @override
@@ -369,135 +380,138 @@ class _Summary extends StatelessWidget {
     }
     final tiers = CardTier.values.reversed.where((t) => (counts[t] ?? 0) > 0).toList();
     final others = result.cards.where((c) => c.userCardId != best?.userCardId).toList();
-    return Scaffold(
-      backgroundColor: V21Colors.inkDeep,
-      body: LayoutBuilder(
-        builder: (context, c) {
-          final k = V21Scale.forSize(c.biggest).s;
-          return Stack(
-            children: [
-              const Positioned.fill(child: V21RaysBackground(rayColor: Color(0x1FFFD27A))),
-              SafeArea(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: V21Metrics.maxContentWidth * k),
-                    child: ListView(
-                      padding: EdgeInsets.fromLTRB(16 * k, 16 * k, 16 * k, 24 * k),
-                      children: [
-                        Text(
-                          'PAKET AÇILDI',
-                          textAlign: TextAlign.center,
-                          style: V21Type.title(18 * k, color: const Color(0xFFFFE6A0)),
-                        ),
-                        Center(child: V21HeroTitle(V21Format.upper(result.packName), size: 40 * k)),
-                        SizedBox(height: 14 * k),
-                        if (best != null) ...[
+    return SfxOnMount(
+      sfx: Sfx.packSummary,
+      child: Scaffold(
+        backgroundColor: V21Colors.inkDeep,
+        body: LayoutBuilder(
+          builder: (context, c) {
+            final k = V21Scale.forSize(c.biggest).s;
+            return Stack(
+              children: [
+                const Positioned.fill(child: V21RaysBackground(rayColor: Color(0x1FFFD27A))),
+                SafeArea(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: V21Metrics.maxContentWidth * k),
+                      child: ListView(
+                        padding: EdgeInsets.fromLTRB(16 * k, 16 * k, 16 * k, 24 * k),
+                        children: [
                           Text(
-                            'EN İYİ KART',
+                            'PAKET AÇILDI',
                             textAlign: TextAlign.center,
-                            style: V21Type.label(12 * k, weight: FontWeight.w900, color: V21Colors.textMuted),
+                            style: V21Type.title(18 * k, color: const Color(0xFFFFE6A0)),
                           ),
-                          SizedBox(height: 6 * k),
-                          Center(
-                            child: V21RarityGlow(
-                              color: V21Rarity.of(best.tier).frameLight,
-                              enabled: best.tier.rank >= CardTier.diamond.rank,
-                              radius: 16 * 180 * k / V21PlayerCard.baseWidth,
-                              child: V21PlayerCard(
-                                name: best.fullName,
-                                position: best.position,
-                                tier: best.tier,
-                                power: best.power,
-                                width: 180 * k,
+                          Center(child: V21HeroTitle(V21Format.upper(result.packName), size: 40 * k)),
+                          SizedBox(height: 14 * k),
+                          if (best != null) ...[
+                            Text(
+                              'EN İYİ KART',
+                              textAlign: TextAlign.center,
+                              style: V21Type.label(12 * k, weight: FontWeight.w900, color: V21Colors.textMuted),
+                            ),
+                            SizedBox(height: 6 * k),
+                            Center(
+                              child: V21RarityGlow(
+                                color: V21Rarity.of(best.tier).frameLight,
+                                enabled: best.tier.rank >= CardTier.diamond.rank,
+                                radius: 16 * 180 * k / V21PlayerCard.baseWidth,
+                                child: V21PlayerCard(
+                                  name: best.fullName,
+                                  position: best.position,
+                                  tier: best.tier,
+                                  power: best.power,
+                                  width: 180 * k,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                        SizedBox(height: 14 * k),
-                        Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 8 * k,
-                          runSpacing: 6 * k,
-                          children: [
-                            for (final t in tiers)
-                              V21Tag(
-                                text: '${counts[t]} × ${V21Rarity.of(t).name}',
-                                background: V21Rarity.of(t).frameLight,
-                                foreground: V21Colors.ink,
-                                scale: k,
-                                fontSize: 12,
-                              ),
                           ],
-                        ),
-                        if (others.isNotEmpty) ...[
                           SizedBox(height: 14 * k),
                           Wrap(
                             alignment: WrapAlignment.center,
-                            spacing: 10 * k,
-                            runSpacing: 12 * k,
+                            spacing: 8 * k,
+                            runSpacing: 6 * k,
                             children: [
-                              for (final o in others)
-                                V21PlayerCard(
-                                  name: o.fullName,
-                                  position: o.position,
-                                  tier: o.tier,
-                                  power: o.power,
-                                  width: 96 * k,
+                              for (final t in tiers)
+                                V21Tag(
+                                  text: '${counts[t]} × ${V21Rarity.of(t).name}',
+                                  background: V21Rarity.of(t).frameLight,
+                                  foreground: V21Colors.ink,
+                                  scale: k,
+                                  fontSize: 12,
                                 ),
                             ],
                           ),
-                        ],
-                        if (result.progress.isNotEmpty) ...[
-                          SizedBox(height: 14 * k),
-                          V21GamePanel(
-                            scale: k,
-                            padding: EdgeInsets.all(12 * k),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          if (others.isNotEmpty) ...[
+                            SizedBox(height: 14 * k),
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              spacing: 10 * k,
+                              runSpacing: 12 * k,
                               children: [
-                                Text('GELİŞİM KOPYASI', style: V21Type.title(16 * k, color: V21Colors.successText)),
-                                SizedBox(height: 4 * k),
-                                Text(
-                                  progressSummary(result.progress),
-                                  style: V21Type.label(12 * k, weight: FontWeight.w600, color: V21Colors.textMuted),
-                                ),
+                                for (final o in others)
+                                  V21PlayerCard(
+                                    name: o.fullName,
+                                    position: o.position,
+                                    tier: o.tier,
+                                    power: o.power,
+                                    width: 96 * k,
+                                  ),
                               ],
                             ),
+                          ],
+                          if (result.progress.isNotEmpty) ...[
+                            SizedBox(height: 14 * k),
+                            V21GamePanel(
+                              scale: k,
+                              padding: EdgeInsets.all(12 * k),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('GELİŞİM KOPYASI', style: V21Type.title(16 * k, color: V21Colors.successText)),
+                                  SizedBox(height: 4 * k),
+                                  Text(
+                                    progressSummary(result.progress),
+                                    style: V21Type.label(12 * k, weight: FontWeight.w600, color: V21Colors.textMuted),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          SizedBox(height: 14 * k),
+                          Text(
+                            '${result.cards.length} kart koleksiyonuna eklendi · kalan '
+                            '${V21Format.thousands(result.coinsLeft)} altın',
+                            textAlign: TextAlign.center,
+                            style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
+                          ),
+                          SizedBox(height: 16 * k),
+                          V21GameButton(
+                            label: 'KOLEKSİYONA GİT',
+                            size: V21ButtonSize.large,
+                            scale: k,
+                            onPressed: () {
+                              onClose();
+                              GoRouter.maybeOf(context)?.go(AppRoutes.collection);
+                            },
+                          ),
+                          SizedBox(height: 10 * k),
+                          V21GameButton(
+                            label: 'MAĞAZAYA DÖN',
+                            tone: V21ButtonTone.blue,
+                            size: V21ButtonSize.medium,
+                            scale: k,
+                            onPressed: onClose,
                           ),
                         ],
-                        SizedBox(height: 14 * k),
-                        Text(
-                          '${result.cards.length} kart koleksiyonuna eklendi · kalan '
-                          '${V21Format.thousands(result.coinsLeft)} altın',
-                          textAlign: TextAlign.center,
-                          style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
-                        ),
-                        SizedBox(height: 16 * k),
-                        V21GameButton(
-                          label: 'KOLEKSİYONA GİT',
-                          size: V21ButtonSize.large,
-                          scale: k,
-                          onPressed: () {
-                            onClose();
-                            GoRouter.maybeOf(context)?.go(AppRoutes.collection);
-                          },
-                        ),
-                        SizedBox(height: 10 * k),
-                        V21GameButton(
-                          label: 'MAĞAZAYA DÖN',
-                          tone: V21ButtonTone.blue,
-                          size: V21ButtonSize.medium,
-                          scale: k,
-                          onPressed: onClose,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

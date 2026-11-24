@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
+import 'core/audio/audio_route_listener.dart';
 import 'core/auth/session_manager.dart';
 import 'core/di/injection.dart';
 import 'core/router/app_router.dart';
@@ -30,10 +31,13 @@ class FutbolCardApp extends StatefulWidget {
 
 class _FutbolCardAppState extends State<FutbolCardApp> {
   StreamSubscription<Uri>? _inviteSubscription;
+  late final AudioRouteListener _music = AudioRouteListener(getIt<AppRouter>().router);
 
   @override
   void initState() {
     super.initState();
+    // Ekran değiştikçe doğru müzik (menü / arama / maç)
+    _music.attach();
     // Webde davet adresi doğrudan rotaya gelir; uygulama bağlantısı eklentisi yok
     if (kIsWeb) return;
     _inviteSubscription = AppLinks().uriLinkStream.listen((uri) {
@@ -45,6 +49,7 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
 
   @override
   void dispose() {
+    _music.detach();
     _inviteSubscription?.cancel();
     super.dispose();
   }

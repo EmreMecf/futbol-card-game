@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app.dart';
+import 'core/audio/game_audio.dart';
 import 'core/config/app_config.dart';
 import 'core/di/injection.dart';
 import 'core/platform/orientation_policy.dart';
@@ -39,6 +40,10 @@ Future<void> main() async {
     // önce okunmalı. Aksi halde ayarlar ekranı açılana kadar her yer
     // varsayılanlarla çalışır ve oyuncunun kapattığı titreşim gelir.
     await getIt<SettingsViewModel>().load();
+
+    // Ses: hangi müzik/efekt dosyalarının eklendiğini öğrenir. Başarısız
+    // olursa oyun sessiz açılır; açılışı engellemez.
+    await getIt<GameAudio>().init();
 
     AppLogger.info('Backend adresi: ${AppConfig.apiBaseUrl}');
 

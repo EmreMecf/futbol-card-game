@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/audio/game_audio.dart';
 import '../animations/v21_motion.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_metrics.dart';
@@ -245,6 +246,7 @@ class _V21GameButtonState extends State<V21GameButton> with SingleTickerProvider
           onTap: _interactive
               ? () {
                   HapticFeedback.lightImpact();
+                  GameAudio.sfx(Sfx.tap);
                   widget.onPressed!();
                 }
               : null,

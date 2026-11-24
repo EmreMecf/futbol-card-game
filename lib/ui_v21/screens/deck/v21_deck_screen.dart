@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../../core/audio/game_audio.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/feedback/game_feedback.dart';
 import '../../../core/router/app_routes.dart';
@@ -156,6 +157,7 @@ class _BodyState extends State<_Body> {
         onDrop: (from, to) {
           vm.swapSlots(from, to);
           GameFeedback.haptic(HapticStrength.light);
+          GameAudio.sfx(Sfx.squadDrop);
         },
       );
     }
@@ -207,6 +209,7 @@ class _BodyState extends State<_Body> {
         onDrop: (from, to) {
           vm.swapSlots(from, to);
           GameFeedback.haptic(HapticStrength.light);
+          GameAudio.sfx(Sfx.squadDrop);
         },
       );
       final details = <Widget>[
