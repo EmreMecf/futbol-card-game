@@ -24,7 +24,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FLUTTER_VERSION: "3.44.6"
+  FLUTTER_VERSION: "3.50.1"
   STAGING_API_URL: "https://futbol-card-staging-api-lzq3.onrender.com"
   EXPECTED_IOS_BUNDLE_ID: "com.futbolcard.futbolCard"
 
