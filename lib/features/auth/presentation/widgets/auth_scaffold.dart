@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../../ui_v21/screens/auth/v21_splash_art.dart';
 import '../../../../ui_v21/ui_v21.dart';

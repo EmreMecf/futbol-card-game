@@ -60,6 +60,9 @@ dependencies:
   crypto: ^3.0.6
   audioplayers: ^6.8.1
 
+  # Flutter 3.47+: Material ve Cupertino ayri paketlerde
+  material_ui: ^1.11.1
+  cupertino_ui: ^1.1.7
 dev_dependencies:
   flutter_test:
     sdk: flutter

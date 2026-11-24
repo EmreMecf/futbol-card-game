@@ -1,6 +1,6 @@
 import 'dart:ui' show PointerDeviceKind;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Web ve masaüstünde yatay listeler fareyle de sürüklenebilsin.
 class V21ScrollBehavior extends MaterialScrollBehavior {

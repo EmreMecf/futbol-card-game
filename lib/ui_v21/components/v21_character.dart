@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// KART KARAKTERLERİ: `assets/v21/characters/c001.webp` … `c550.webp`.
 ///

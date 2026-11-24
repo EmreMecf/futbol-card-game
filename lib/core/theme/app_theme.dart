@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../ui_v21/animations/v21_card_motion.dart';
 import '../../ui_v21/foundation/v21_colors.dart';

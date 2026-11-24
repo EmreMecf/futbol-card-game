@@ -1,5 +1,5 @@
 // 043: KUPA YOLU — model metni, ViewModel ve Ligler ekranındaki gösterim.
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/features/leaderboard/presentation/viewmodel/league_tiers_view_model.dart';
 import 'package:shared_models/shared_models.dart';

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Gece stadyumu: gök, projektörler, tribün, reklam şeridi ve çim.
 /// Tamamen kodla çizilir; görselde karakter ya da yazı yoktur.

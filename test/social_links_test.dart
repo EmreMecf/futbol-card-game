@@ -1,6 +1,6 @@
 // Ayarlar → BAĞLI HESAPLAR: Google/Apple yalnız giriş yapmış oyuncunun
 // hesabına, oyuncunun kendi isteğiyle bağlanır.
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/di/injection.dart';
 import 'package:futbol_card/core/error/app_exception.dart';
