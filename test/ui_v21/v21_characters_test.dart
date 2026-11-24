@@ -17,7 +17,7 @@ void main() {
   });
 
   test('anahtar her zaman aynı karaktere gider ve aralık dışına çıkmaz', () {
-    expect(V21Characters.assetFor('Emre Yilmaz'), V21Characters.assetFor('emre yilmaz '));
+    expect(V21Characters.assetFor('Emre Yilmaz', position: 'GK'), V21Characters.assetFor('emre yilmaz ', position: 'GK'));
     for (var i = 0; i < 2000; i++) {
       expect(V21Characters.indexFor('oyuncu-$i'), inInclusiveRange(0, V21Characters.count - 1));
     }
