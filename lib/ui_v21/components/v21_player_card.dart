@@ -47,8 +47,7 @@ class V21Rarity {
 ///   ┌ Efsane Kaptan ┐     ← ad plakası
 ///   └ ★ EFSANE ★    ┘
 ///
-/// Portre: 550 karakterden biri;
-/// karakter futbolcunun adından seçilir (550 karakter).
+/// Portre: mevkisi görsel olarak doğrulanmış karakter havuzundan seçilir.
 /// Bütün ölçüler [width] / 165 oranında ölçeklenir.
 class V21PlayerCard extends StatelessWidget {
   final String name;
@@ -264,6 +263,6 @@ class V21PlayerCard extends StatelessWidget {
   /// Futbolcunun karakteri: aynı ad her ekranda aynı karakter
   Widget _portrait(double k) => Padding(
     padding: EdgeInsets.only(top: 4 * k, bottom: 40 * k),
-    child: V21CharacterArt(characterKey: name),
+    child: V21CharacterArt(characterKey: name, position: position.code),
   );
 }

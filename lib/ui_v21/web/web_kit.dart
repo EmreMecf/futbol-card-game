@@ -719,7 +719,7 @@ class WCard extends StatelessWidget {
                       ),
                       Padding(
                         padding: EdgeInsets.fromLTRB(w * 0.05, w * 0.05, w * 0.05, h * 0.2),
-                        child: V21CharacterArt(characterKey: name),
+                        child: V21CharacterArt(characterKey: name, position: position),
                       ),
                       Positioned(
                         left: w * 0.03,
