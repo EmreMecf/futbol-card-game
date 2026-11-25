@@ -65,11 +65,11 @@ class V21CollectionScreen extends StatelessWidget {
 
 /// Referans nadirlik daireleri (soldan sağa)
 List<(CardTier, Color, String)> get _tierChips => [
-  (CardTier.bronze, Color(0xFFFFAB76), 'Bronz'.tr),
-  (CardTier.silver, Color(0xFFE8EEF6), 'Gümüş'.tr),
-  (CardTier.gold, Color(0xFFFFE07A), 'Altın'.tr),
-  (CardTier.diamond, Color(0xFF7FF3FF), 'Elmas'.tr),
-  (CardTier.legend, Color(0xFFE3A9FA), 'Efsane'.tr),
+  (CardTier.bronze, const Color(0xFFFFAB76), 'Bronz'.tr),
+  (CardTier.silver, const Color(0xFFE8EEF6), 'Gümüş'.tr),
+  (CardTier.gold, const Color(0xFFFFE07A), 'Altın'.tr),
+  (CardTier.diamond, const Color(0xFF7FF3FF), 'Elmas'.tr),
+  (CardTier.legend, const Color(0xFFE3A9FA), 'Efsane'.tr),
 ];
 
 /// Referans mevki hapları

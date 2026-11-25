@@ -104,7 +104,7 @@ class SocialAuthRepositoryImpl implements SocialAuthRepository {
             : null,
       );
       final token = credential.identityToken;
-      if (token == null) throw SignInWithAppleCredentialsException(message: 'identityToken yok');
+      if (token == null) throw const SignInWithAppleCredentialsException(message: 'identityToken yok');
       return SocialCredential(provider: SocialProvider.apple, idToken: token, nonce: nonce);
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) return null;

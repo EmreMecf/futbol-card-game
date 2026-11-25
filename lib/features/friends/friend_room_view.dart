@@ -243,7 +243,7 @@ class _FriendRoomViewState extends State<FriendRoomView> {
                       TextField(
                         controller: _codeController,
                         style: govde,
-                        decoration: InputDecoration(labelText: 'Davet kodu'.tr, border: OutlineInputBorder()),
+                        decoration: InputDecoration(labelText: 'Davet kodu'.tr, border: const OutlineInputBorder()),
                         textCapitalization: TextCapitalization.none,
                       ),
                       SizedBox(height: 10 * k),

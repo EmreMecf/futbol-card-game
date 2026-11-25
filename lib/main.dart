@@ -111,7 +111,7 @@ class _BaslatmaHatasiEkrani extends StatelessWidget {
                 const SizedBox(height: 16),
                 Text(
                   'Uygulama baslatilamadi'.tr,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 12),
                 Text(

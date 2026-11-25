@@ -18,25 +18,25 @@ class V21Rarity {
   const V21Rarity(this.frame, this.frameLight, this.art, this.name);
 
   static V21Rarity of(CardTier t) => switch (t) {
-    CardTier.legend => V21Rarity(Color(0xFFA35BEA), Color(0xFFDDB0FF), [
-      Color(0xFF8E54E0),
-      Color(0xFF4B1D9C),
+    CardTier.legend => V21Rarity(const Color(0xFFA35BEA), const Color(0xFFDDB0FF), [
+      const Color(0xFF8E54E0),
+      const Color(0xFF4B1D9C),
     ], 'EFSANE'.tr),
-    CardTier.diamond => V21Rarity(Color(0xFF37B5F0), Color(0xFFA7EBFF), [
-      Color(0xFF58D2FF),
-      Color(0xFF1C7FC2),
+    CardTier.diamond => V21Rarity(const Color(0xFF37B5F0), const Color(0xFFA7EBFF), [
+      const Color(0xFF58D2FF),
+      const Color(0xFF1C7FC2),
     ], 'ELMAS'.tr),
-    CardTier.gold => V21Rarity(Color(0xFFF2B526), Color(0xFFFFE38A), [
-      Color(0xFFFFD55A),
-      Color(0xFFE89A1A),
+    CardTier.gold => V21Rarity(const Color(0xFFF2B526), const Color(0xFFFFE38A), [
+      const Color(0xFFFFD55A),
+      const Color(0xFFE89A1A),
     ], 'ALTIN'.tr),
-    CardTier.silver => V21Rarity(Color(0xFFA9B8C8), Color(0xFFE6EEF6), [
-      Color(0xFFC9D5E2),
-      Color(0xFF7D8DA3),
+    CardTier.silver => V21Rarity(const Color(0xFFA9B8C8), const Color(0xFFE6EEF6), [
+      const Color(0xFFC9D5E2),
+      const Color(0xFF7D8DA3),
     ], 'GÜMÜŞ'.tr),
-    CardTier.bronze => V21Rarity(Color(0xFFCB7F4E), Color(0xFFF5C49C), [
-      Color(0xFFE6A276),
-      Color(0xFF9B5530),
+    CardTier.bronze => V21Rarity(const Color(0xFFCB7F4E), const Color(0xFFF5C49C), [
+      const Color(0xFFE6A276),
+      const Color(0xFF9B5530),
     ], 'BRONZ'.tr),
   };
 }

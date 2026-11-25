@@ -87,16 +87,12 @@ class FriendChallengeController extends ChangeNotifier {
 
   FriendChallengeController(
     this._api, {
-    required Stream<RealtimeEvent> events,
-    required Stream<bool> connection,
-    required bool Function() isSignedIn,
-    Listenable? sessionChanges,
+    required this._events,
+    required this._connection,
+    required this._isSignedIn,
+    this._sessionChanges,
     DateTime Function()? now,
-  })  : _events = events,
-        _connection = connection,
-        _isSignedIn = isSignedIn,
-        _sessionChanges = sessionChanges,
-        _now = now ?? DateTime.now;
+  })  : _now = now ?? DateTime.now;
 
   FriendChallenge? _current;
 
