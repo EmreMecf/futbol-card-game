@@ -141,7 +141,7 @@ Future<void> main(List<String> args) async {
   // ---- 6. ANA YONLENDIRICI ----
   final root = Router();
   root.mount('/api', api.call);
-  root.get('/ws', (Request request) => _wsGuard(request, jwt, hub));
+  root.get('/ws', (Request request) => _wsGuard(request, jwt, hub, db));
 
   root.get('/invite/<code>', (Request request, String code) {
     const allowed = '0123456789abcdef';
@@ -205,7 +205,23 @@ Future<void> main(List<String> args) async {
 /// ISE YARAMAZ - geri cagri tetiklendiginde degisken coktan temizlenmis
 /// olur. Cozum: her baglanti icin kimligi kapanis (closure) icinde
 /// yakalayan yeni bir handler uretmek.
-Future<Response> _wsGuard(Request request, JwtService jwt, WsHub hub) async {
+/// Son görülme (056 açık profil ve arkadaş listesindeki "çevrimiçi"):
+/// oyuncu oyunu açık tuttukça tazelenir. Ping 25 sn'de bir gelir; her
+/// birinde yazmamak için en fazla 2 dakikada bir yazılır.
+const _sonGorulmeAraligi = Duration(minutes: 2);
+final _sonGorulmeYazildi = <String, DateTime>{};
+
+void _sonGorulmeTazele(Database db, String userId) {
+  final simdi = DateTime.now();
+  final onceki = _sonGorulmeYazildi[userId];
+  if (onceki != null && simdi.difference(onceki) < _sonGorulmeAraligi) return;
+  _sonGorulmeYazildi[userId] = simdi;
+  unawaited(db
+      .query('update users set last_seen_at = now() where id = @u::uuid', params: {'u': userId})
+      .then((_) {}, onError: (Object _) => _sonGorulmeYazildi.remove(userId)));
+}
+
+Future<Response> _wsGuard(Request request, JwtService jwt, WsHub hub, Database db) async {
   final token = request.url.queryParameters['token'];
 
   if (token == null || token.isEmpty) {
@@ -221,6 +237,7 @@ Future<Response> _wsGuard(Request request, JwtService jwt, WsHub hub) async {
   final handler = webSocketHandler(
     (WebSocketChannel socket, String? subprotocol) {
       hub.add(userId, socket);
+      _sonGorulmeTazele(db, userId);
 
       socket.sink.add(jsonEncode({
         'type': 'connected',
@@ -233,9 +250,13 @@ Future<Response> _wsGuard(Request request, JwtService jwt, WsHub hub) async {
           // Istemciden gelen tek mesaj tipi: baglantiyi canli tutan ping
           if (mesaj == 'ping') {
             socket.sink.add(jsonEncode({'type': 'pong'}));
+            _sonGorulmeTazele(db, userId);
           }
         },
-        onDone: () => hub.remove(userId, socket),
+        onDone: () {
+          hub.remove(userId, socket);
+          _sonGorulmeYazildi.remove(userId);
+        },
         onError: (Object e) => hub.remove(userId, socket),
         cancelOnError: true,
       );

@@ -74,6 +74,9 @@ jobs:
       GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
       GOOGLE_IOS_CLIENT_ID: ${{ vars.GOOGLE_IOS_CLIENT_ID }}
       GOOGLE_IOS_REVERSED_CLIENT_ID: ${{ vars.GOOGLE_IOS_REVERSED_CLIENT_ID }}
+      # Apple ile giris: App ID'de "Sign In with Apple" acilip profil ondan
+      # SONRA uretildiyse 'true' yap. Bos ya da 'false' ise dugme gizli kalir.
+      APPLE_SIGN_IN_IOS: ${{ vars.APPLE_SIGN_IN_IOS }}
       APPSTORE_ISSUER_ID: ${{ vars.APPSTORE_ISSUER_ID }}
       APPSTORE_API_KEY_ID: ${{ vars.APPSTORE_API_KEY_ID }}
       IOS_DISTRIBUTION_CERT_P12_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERT_P12_BASE64 }}
@@ -169,8 +172,13 @@ jobs:
           old = "PRODUCT_BUNDLE_IDENTIFIER = " + bundle + ";"
           if src.count(old) != 3:
               raise SystemExit("Expected exactly 3 Runner bundle declarations")
+          # Apple ile giris acikken uygulamaya yetki dosyasi baglanir
+          # (profilde "Sign In with Apple" yoksa imza burada hata verir)
+          yetki = ("\t\t\t\tCODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;\n"
+                   if os.environ.get("APPLE_SIGN_IN_IOS") == "true" else "")
           src = src.replace(old, (
               "DEVELOPMENT_TEAM = " + team + ";\n"
+              + yetki +
               "\t\t\t\tCODE_SIGN_STYLE = Manual;\n"
               "\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = \"" + profile + "\";\n"
               "\t\t\t\t" + old))
@@ -204,7 +212,8 @@ jobs:
             --export-options-plist="$RUNNER_TEMP/ExportOptions.plist" \
             --dart-define=API_BASE_URL="$STAGING_API_URL" \
             --dart-define=GOOGLE_WEB_CLIENT_ID="$GOOGLE_WEB_CLIENT_ID" \
-            --dart-define=GOOGLE_IOS_CLIENT_ID="$GOOGLE_IOS_CLIENT_ID"
+            --dart-define=GOOGLE_IOS_CLIENT_ID="$GOOGLE_IOS_CLIENT_ID" \
+            --dart-define=APPLE_SIGN_IN_IOS="${APPLE_SIGN_IN_IOS:-false}"
           shopt -s nullglob
           ipa_files=(build/ios/ipa/*.ipa)
           if (( ${#ipa_files[@]} != 1 )); then

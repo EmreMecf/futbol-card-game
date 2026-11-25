@@ -29,7 +29,11 @@ iOS için `ios/Runner/Info.plist` içindeki `CFBundleURLSchemes` dizisine iOS is
 Ücretli Apple Developer hesabı gerekir.
 
 1. [Identifiers](https://developer.apple.com/account/resources/identifiers/list) içinde `com.futbolcard.futbolCard` için **Sign in with Apple** yeteneğini aç.
-2. Xcode'da Runner hedefi, **Signing & Capabilities**, **+ Capability**, **Sign in with Apple**.
+2. Yetki dosyası hazır: `ios/Runner/Runner.entitlements`. TestFlight iş akışı onu
+   yalnız GitHub'da **ios-testflight** ortamındaki `APPLE_SIGN_IN_IOS` değişkeni `true`
+   iken bağlar ve düğmeyi açar. Önce App ID'de Sign in with Apple'ı aç, provisioning
+   profile'ı **ondan sonra** yeniden üret; yoksa imzalama hata verir.
+   (Mac'te Xcode ile derlerken: Runner, **Signing & Capabilities**, **+ Capability**, **Sign in with Apple**.)
 3. Web için bir **Services ID** oluştur, alan adını ve dönüş adresini (`https://...`) tanımla. Apple `localhost` kabul etmez.
 
 ## 4. Ayarlar
