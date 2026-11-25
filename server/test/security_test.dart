@@ -155,6 +155,26 @@ void main() {
       expect(c.headers['x-frame-options'], 'DENY');
     });
 
+    test('virgülle birden çok köken: gelen adres listedeyse geri yazılır', () async {
+      final h = const Pipeline()
+          .addMiddleware(corsHeaders(allowOrigin: 'https://oyun.ornek.com, https://test.ornek.com'))
+          .addHandler((_) => Response.ok('x'));
+      Future<String?> koken(String? origin) async => (await h(Request(
+            'GET',
+            Uri.parse('http://localhost/api/x'),
+            headers: {if (origin != null) 'origin': origin},
+          )))
+              .headers['access-control-allow-origin'];
+      expect(await koken('https://test.ornek.com'), 'https://test.ornek.com');
+      expect(await koken('https://oyun.ornek.com'), 'https://oyun.ornek.com');
+      // Listede olmayan site: ilk adres yazılır, tarayıcı isteği engeller
+      expect(await koken('https://kotu.site'), 'https://oyun.ornek.com');
+      expect(await koken(null), 'https://oyun.ornek.com');
+      final c = await h(Request('OPTIONS', Uri.parse('http://localhost/api/x'), headers: {'origin': 'https://test.ornek.com'}));
+      expect(c.headers['access-control-allow-origin'], 'https://test.ornek.com');
+      expect(c.headers['vary'], 'Origin');
+    });
+
     test('ön kontrol Idempotency-Key başlığına izin verir (web)', () async {
       final h = const Pipeline()
           .addMiddleware(corsHeaders())

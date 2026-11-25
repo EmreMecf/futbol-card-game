@@ -1,21 +1,29 @@
 import 'package:futbol_card/core/config/app_config.dart';
 import 'package:futbol_card/core/network/api_client.dart';
 
+import 'friend_room_view_model.dart';
+
 /// İki kişilik özel oda uçları.
-class FriendRoomApi {
+class FriendRoomApi implements FriendRoomGateway {
   final ApiClient api;
   FriendRoomApi(this.api);
 
+  @override
   Future<Map<String, dynamic>> create() => api.post('/friends/create');
+  @override
   Future<Map<String, dynamic>> join(String code) =>
       api.post('/friends/join', govde: {'code': code});
+  @override
   Future<Map<String, dynamic>> status(String code) =>
       api.get('/friends/$code');
+  @override
   Future<Map<String, dynamic>> ready(String code, String? deckId) =>
       api.post('/friends/$code/ready', govde: {'deck_id': deckId});
+  @override
   Future<Map<String, dynamic>> leave(String code) =>
       api.post('/friends/$code/leave');
 
+  @override
   Future<String?> activeDeck() async {
     final response = await api.get('/game/decks');
     for (final entry in response['decks'] as List? ?? const []) {

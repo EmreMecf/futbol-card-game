@@ -15,7 +15,7 @@ Bu dosya sade bir kontrol listesidir. Gercek degerleri Render Dashboard'da yalni
 | JWT_SECRET | Rastgele, en az 32 byte, varsayilanla ayni DEGIL |
 | AUTH_RATE_LIMIT | Varsayilan 20/dakika; staging'de dusunerek ayarla |
 | TRUST_PROXY | Proxy IP guvenligi denetlenmeden true yapma |
-| CORS_ORIGIN | Yalniz bilinen web origin; gerekirse duzenle |
+| CORS_ORIGIN | Yalniz bilinen web origin; birden cok adres virgulle yazilir (ornek: https://oyun.ornek.com,https://test.ornek.com) |
 
 Saglik kontrolu: `https://<host>/api/health`; WebSocket: `wss://<host>/ws?token=<jwt>`. WebSocket JWT'yi URL/query icinde tasir: request URL'lerini loglama ya da paylasma.
 

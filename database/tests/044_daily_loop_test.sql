@@ -71,8 +71,14 @@ begin
   for i in 1..30 loop
     select * into m from matches where id = v;
     exit when m.status <> 'active' or (select count(*) from match_rounds where match_id = v) >= 6;
+    -- Kart secimi belirli sirayla (dizinler satir sirasini degistirebilir;
+    -- ORDER BY olmadan sonuc kararsizdi)
     select user_card_id into c from match_hands where match_id = v and user_id = m.current_turn_id
-      and not is_played and (m.required_position is null or position = m.required_position) limit 1;
+      and not is_played and (m.required_position is null or position = m.required_position)
+    order by power desc, user_card_id limit 1;
+    -- Bu testin oyunculari eksik desteli (kalecisiz 8 kart): turu acanin
+    -- karti bitebilir. Gercek 4-4-2 kadroda olmaz; burada maci bitiririz.
+    exit when c is null and m.lead_player_id = m.current_turn_id;
     perform play_card(m.current_turn_id, v, c);
   end loop;
   perform _finish_match(v, p_kazanan);

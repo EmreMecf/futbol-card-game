@@ -129,35 +129,45 @@ String redactUrl(Uri url) {
 // ---------------------------------------------------------------------
 // 3) CORS
 // ---------------------------------------------------------------------
-/// Tarayıcı isteklerine izin verilen köken.
+/// Tarayıcı isteklerine izin verilen köken(ler).
 ///
 /// Mobil uygulama CORS'a tabi değil; bu sadece Flutter Web için.
 /// Geliştirmede '*'. Üretimde CORS_ORIGIN ile web sitesinin adresi
-/// verilmeli (ör. https://oyun.ornek.com). Jetonlar çerezde değil
-/// Authorization başlığında taşındığı için '*' doğrudan hesap ele
+/// verilmeli (ör. https://oyun.ornek.com). Birden çok adres virgülle
+/// yazılabilir (ör. "https://oyun.ornek.com,https://test.ornek.com"):
+/// istek listedeki bir adresten geliyorsa o adres geri yazılır, değilse
+/// listenin ilki yazılır ve tarayıcı isteği engeller. Jetonlar çerezde
+/// değil Authorization başlığında taşındığı için '*' doğrudan hesap ele
 /// geçirmeye yol açmaz, ama kısıtlamak iyi uygulamadır.
 Middleware corsHeaders({String allowOrigin = '*'}) {
-  final headers = {
-    'Access-Control-Allow-Origin': allowOrigin,
+  final izinli = allowOrigin.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+  final herkes = izinli.isEmpty || izinli.contains('*');
+  final ortak = {
     'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
     // Idempotency-Key: ekonomi/sandık/enerji POST'ları bu başlığı gönderir;
     // listede olmazsa tarayıcı ön kontrolde (OPTIONS) isteği engeller.
     'Access-Control-Allow-Headers': 'Origin, Content-Type, Authorization, Idempotency-Key',
     'Access-Control-Max-Age': '86400',
-    if (allowOrigin != '*') 'Vary': 'Origin',
+    if (!herkes) 'Vary': 'Origin',
     // Basit güvenlik başlıkları
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'Referrer-Policy': 'no-referrer',
   };
 
+  Map<String, String> basliklar(Request request) {
+    final gelen = request.headers['origin'];
+    final koken = herkes ? '*' : (gelen != null && izinli.contains(gelen) ? gelen : izinli.first);
+    return {'Access-Control-Allow-Origin': koken, ...ortak};
+  }
+
   return (Handler inner) {
     return (Request request) async {
       if (request.method == 'OPTIONS') {
-        return Response.ok('', headers: headers);
+        return Response.ok('', headers: basliklar(request));
       }
       final response = await inner(request);
-      return response.change(headers: headers);
+      return response.change(headers: basliklar(request));
     };
   };
 }

@@ -93,6 +93,10 @@ class V21GameButton extends StatefulWidget {
 
 class _V21GameButtonState extends State<V21GameButton> with SingleTickerProviderStateMixin {
   bool _down = false;
+
+  /// Klavyeyle odaklanıldı (Tab). Odak halkası yalnız bu durumda çizilir;
+  /// dokunmatik ve fare kullanımında görünmez.
+  bool _focused = false;
   late final AnimationController _shake = AnimationController(vsync: this, duration: V21Motion.shake);
 
   bool get _interactive =>
@@ -229,6 +233,30 @@ class _V21GameButtonState extends State<V21GameButton> with SingleTickerProvider
       child: Opacity(opacity: disabled ? 0.7 : 1, child: body),
     );
 
+    if (_focused) {
+      body = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          body,
+          Positioned.fill(
+            left: -4 * k,
+            top: -4 * k,
+            right: -4 * k,
+            bottom: -4 * k,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                key: const ValueKey('v21-odak-halkasi'),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(radius + 6 * k),
+                  border: Border.all(color: Colors.white, width: 3 * k),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Semantics(
       container: true,
       button: true,
@@ -236,8 +264,22 @@ class _V21GameButtonState extends State<V21GameButton> with SingleTickerProvider
       label: widget.semanticsLabel ?? widget.label,
       excludeSemantics: true,
       onTap: _interactive ? widget.onPressed : null,
-      child: MouseRegion(
-        cursor: _interactive ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      // Klavye: Tab ile odak, Enter / Boşluk ile basılır (web ve masaüstü)
+      child: FocusableActionDetector(
+        enabled: _interactive,
+        mouseCursor: _interactive ? SystemMouseCursors.click : SystemMouseCursors.basic,
+        onShowFocusHighlight: (v) {
+          if (_focused != v) setState(() => _focused = v);
+        },
+        actions: {
+          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
+            if (!_interactive) return null;
+            HapticFeedback.lightImpact();
+            GameAudio.sfx(Sfx.tap);
+            widget.onPressed!();
+            return null;
+          }),
+        },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTapDown: _interactive ? (_) => _set(true) : null,

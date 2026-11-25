@@ -84,7 +84,7 @@ begin
                                             and round_number = m.round_number and user_id = p_insan) then
       select user_card_id into v_kart from match_hands
       where match_id = p_match and user_id = p_insan and not is_played and position = m.required_position
-      order by power desc limit 1;
+      order by power desc, user_card_id limit 1;
       perform play_card(p_insan, p_match, v_kart);
     else
       perform bot_tick();
@@ -154,8 +154,11 @@ begin
     (select count(*)::int from match_moves where match_id = v_mac and user_id = h), 0);
   perform pg_temp.oyna(v_mac, h);
   perform pg_temp.beklenen('adim 1 bitti', (select status::text from matches where id = v_mac), 'finished');
-  perform pg_temp.beklenen('kisa mac: en fazla 6 kart toplayan biter',
-    (select greatest(p1_captured_count, p2_captured_count) between 6 and 7
+  -- Kısa maç: biri 6 karta ulaşınca biter. Beraberlikte kartlar masada
+  -- birikir ve sonraki turu kazanan hepsini alır; bu yüzden skor 6'yı
+  -- aşabilir (ör. 5 -> 8). Doğru ölçüt: 6'ya ulaşan var ya da kart kalmadı.
+  perform pg_temp.beklenen('kisa mac: 6 karta ulasan olunca biter',
+    (select greatest(p1_captured_count, p2_captured_count) >= 6
          or (select count(*) from match_hands where match_id = v_mac and not is_played) = 0 from matches where id = v_mac), true);
   perform pg_temp.beklenen('adim 1 tamamlandi', (tutorial_status(h) ->> 'step'), '1');
 
