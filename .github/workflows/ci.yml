@@ -180,6 +180,7 @@ jobs:
           SINIR=054 bash scripts/gecmis-veri-kontrolu.sh
           SINIR=055 bash scripts/gecmis-veri-kontrolu.sh
           SINIR=056 bash scripts/gecmis-veri-kontrolu.sh
+          SINIR=057 bash scripts/gecmis-veri-kontrolu.sh
       # 039: ayni maci ayni anda ilerleten oturumlar turu iki kez cozmemeli
       - name: Es zamanli duello yaris testi
         run: bash scripts/esz-zamanli-yaris-testi.sh

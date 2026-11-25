@@ -547,6 +547,7 @@ class _ProtectCard extends StatelessWidget {
               opacity: protected ? 1 : 0.8,
               child: V21PlayerCard(
                 name: card.fullName,
+                artKey: card.slug,
                 position: card.position,
                 tier: card.tier,
                 power: card.power,

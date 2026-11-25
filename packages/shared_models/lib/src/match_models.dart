@@ -20,6 +20,9 @@ abstract class HandCard with _$HandCard implements ChemistrySource {
   const factory HandCard({
     required String userCardId,
     required String cardId,
+
+    /// Katalogdaki değişmeyen kimlik; kart görseli buna bağlıdır
+    String? slug,
     required String fullName,
     required CardPosition position,
     required CardTier tier,
@@ -257,6 +260,9 @@ abstract class MatchMove with _$MatchMove {
     /// `AvatarSpec.generate(cardId, kitSeed: club ?? nationality)`.
     /// Eski sunucu bunları göndermez; o zaman istemci ada düşer.
     String? cardId,
+
+    /// Katalogdaki değişmeyen kimlik; kart görseli buna bağlıdır
+    String? slug,
     String? club,
     String? nationality,
   }) = _MatchMove;

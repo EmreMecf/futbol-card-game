@@ -653,6 +653,9 @@ Color wTierColor(CardTier t) => switch (t) {
 /// Tasarımdaki oyuncu kartı: kademe görseli + gerçek güç, mevki ve ad
 class WCard extends StatelessWidget {
   final String name;
+
+  /// Kartın değişmeyen katalog kimliği (`slug`); görsel buna bağlanır
+  final String? artKey;
   final CardTier tier;
   final int power;
   final String position;
@@ -662,6 +665,7 @@ class WCard extends StatelessWidget {
   const WCard({
     super.key,
     required this.name,
+    this.artKey,
     required this.tier,
     required this.power,
     required this.position,
@@ -672,6 +676,7 @@ class WCard extends StatelessWidget {
 
   factory WCard.of(InventoryCard c, {bool selected = false, VoidCallback? onTap}) => WCard(
     name: c.fullName,
+    artKey: c.slug,
     tier: c.tier,
     power: c.power,
     position: c.position.code,
@@ -720,7 +725,7 @@ class WCard extends StatelessWidget {
                       ),
                       Padding(
                         padding: EdgeInsets.fromLTRB(w * 0.05, w * 0.05, w * 0.05, h * 0.2),
-                        child: V21CharacterArt(characterKey: name, position: position),
+                        child: V21CharacterArt(characterKey: V21Characters.keyFor(name: name, slug: artKey), position: position),
                       ),
                       Positioned(
                         left: w * 0.03,

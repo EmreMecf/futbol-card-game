@@ -484,7 +484,9 @@ final kGoldenChestInventory = ChestInventory(
 ChestCard goldenChestCard(int i, String outcome) {
   final k = kGoldenCards[i];
   return ChestCard(
-    cardId: k.cardId, slug: k.cardId, fullName: k.fullName, position: k.position, tier: k.tier,
+    cardId: k.cardId,
+    // Sunucudaki biçim: tier-mevki-ad-soyad (görsel bu kimliğe bağlı)
+    slug: '${k.tier.code}-orta-${k.fullName.toLowerCase().replaceAll(' ', '-')}', fullName: k.fullName, position: k.position, tier: k.tier,
     power: k.power, club: k.club, nationality: k.nationality, outcome: outcome);
 }
 

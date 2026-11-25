@@ -102,6 +102,7 @@ class V21CardDetailSheet extends StatelessWidget {
                                 radius: 16 * cardW / V21PlayerCard.baseWidth,
                                 child: V21PlayerCard(
                                   name: card.fullName,
+                                  artKey: card.slug,
                                   position: card.position,
                                   tier: card.tier,
                                   power: card.power,
@@ -491,6 +492,7 @@ class V21CardPickerSheet extends StatelessWidget {
                                   child: V21PlayerCard(
                                     key: ValueKey(c.userCardId),
                                     name: c.fullName,
+                                    artKey: c.slug,
                                     position: c.position,
                                     tier: c.tier,
                                     power: c.power,

@@ -1543,6 +1543,7 @@ class _WebProgressState extends State<WebProgress> {
                 final it = all[i];
                 return WCard(
                   name: it.fullName,
+                  artKey: it.slug,
                   tier: it.tier,
                   power: it.power,
                   position: it.position.code,
@@ -1594,7 +1595,7 @@ class _WebProgressState extends State<WebProgress> {
           children: [
             SizedBox(
               width: 226,
-              child: WCard(name: i.fullName, tier: i.tier, power: i.power, position: i.position.code),
+              child: WCard(name: i.fullName, artKey: i.slug, tier: i.tier, power: i.power, position: i.position.code),
             ),
             const SizedBox(width: 24),
             Expanded(

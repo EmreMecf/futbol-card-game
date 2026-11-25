@@ -566,6 +566,7 @@ class _VsRow extends StatelessWidget {
     } else if (selected != null) {
       myCard = V21PlayerCard(
         name: selected!.fullName,
+        artKey: selected!.slug,
         position: selected!.position,
         tier: selected!.tier,
         power: selected!.effectivePower,
@@ -640,6 +641,7 @@ class _MoveCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final card = V21PlayerCard(
       name: move.fullName ?? '',
+      artKey: move.slug,
       position: move.position ?? CardPosition.midfielder,
       tier: move.tier ?? CardTier.bronze,
       power: move.effectivePower ?? 0,
@@ -898,6 +900,7 @@ class _Hand extends StatelessWidget {
                   opacity: ok ? 1 : 0.4,
                   child: V21PlayerCard(
                     name: c.fullName,
+                    artKey: c.slug,
                     position: c.position,
                     tier: c.tier,
                     power: c.effectivePower,

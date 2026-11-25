@@ -52,6 +52,9 @@ class V21Rarity {
 /// Bütün ölçüler [width] / 165 oranında ölçeklenir.
 class V21PlayerCard extends StatelessWidget {
   final String name;
+
+  /// Kartın değişmeyen katalog kimliği (`slug`); görsel buna bağlanır
+  final String? artKey;
   final CardPosition position;
   final CardTier tier;
   final int power;
@@ -71,6 +74,7 @@ class V21PlayerCard extends StatelessWidget {
   const V21PlayerCard({
     super.key,
     required this.name,
+    this.artKey,
     required this.position,
     required this.tier,
     required this.power,
@@ -91,6 +95,7 @@ class V21PlayerCard extends StatelessWidget {
   }) => V21PlayerCard(
     key: key,
     name: c.fullName,
+    artKey: c.slug,
     position: c.position,
     tier: c.tier,
     power: c.power,
@@ -264,6 +269,6 @@ class V21PlayerCard extends StatelessWidget {
   /// Futbolcunun karakteri: aynı ad her ekranda aynı karakter
   Widget _portrait(double k) => Padding(
     padding: EdgeInsets.only(top: 4 * k, bottom: 40 * k),
-    child: V21CharacterArt(characterKey: name, position: position.code),
+    child: V21CharacterArt(characterKey: V21Characters.keyFor(name: name, slug: artKey), position: position.code),
   );
 }

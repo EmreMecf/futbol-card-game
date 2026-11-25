@@ -107,6 +107,7 @@ class V21SquadPitch extends StatelessWidget {
         : V21PlayerCard(
             key: ValueKey('slot-$slot-${card.userCardId}'),
             name: card.fullName,
+            artKey: card.slug,
             position: card.position,
             tier: card.tier,
             power: card.power,

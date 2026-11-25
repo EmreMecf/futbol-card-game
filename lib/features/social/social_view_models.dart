@@ -14,6 +14,7 @@ String socialErrorText(AppException e) => switch (e.technicalDetail) {
   'friend_self' => 'Kendine arkadaşlık isteği gönderemezsin.'.tr,
   'player_not_found' => 'Oyuncu bulunamadı.'.tr,
   'friend_limit' => 'En fazla 100 arkadaşın olabilir.'.tr,
+  'friend_limit_other' => 'Bu oyuncunun arkadaş listesi dolu.'.tr,
   'friend_request_limit' => 'Bekleyen çok fazla isteğin var. Önce bazılarını geri çek.'.tr,
   'friend_request_not_found' => 'Bu istek artık geçerli değil.'.tr,
   'match_not_found' => 'Maç bulunamadı.'.tr,

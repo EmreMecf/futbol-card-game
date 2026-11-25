@@ -521,7 +521,7 @@ class _ProfileBody extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 for (final c in pr.topCards)
-                  V21PlayerCard(name: c.fullName, position: c.position, tier: c.tier, power: c.power, width: 100 * k),
+                  V21PlayerCard(name: c.fullName, artKey: c.slug, position: c.position, tier: c.tier, power: c.power, width: 100 * k),
               ],
             ),
           SizedBox(height: 16 * k),
@@ -816,7 +816,7 @@ class _SquadBody extends StatelessWidget {
           runSpacing: 6 * k,
           children: [
             for (final c in s.byPosition(p))
-              V21PlayerCard(name: c.fullName, position: c.position, tier: c.tier, power: c.power, width: cw),
+              V21PlayerCard(name: c.fullName, artKey: c.slug, position: c.position, tier: c.tier, power: c.power, width: cw),
           ],
         ),
       );

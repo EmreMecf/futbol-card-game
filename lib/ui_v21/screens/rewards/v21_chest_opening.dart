@@ -235,6 +235,7 @@ class _ChestCardReveal extends StatelessWidget {
               children: [
                 V21PlayerCard(
                   name: card.fullName,
+                  artKey: card.slug,
                   position: card.position,
                   tier: card.tier,
                   power: card.power,

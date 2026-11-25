@@ -97,6 +97,20 @@ abstract final class V21Characters {
     };
   }
 
+  /// KART GÖRSELİNİN ANAHTARI
+  ///
+  /// Görsel futbolcunun adına değil, katalogdaki değişmeyen kimliğine
+  /// (`cards.slug`) bağlıdır: ad değişse de yüz aynı kalır. Slug,
+  /// "tier-mevki-ad-soyad" biçimindedir; ondan çıkan ad ilk kayıttaki adla
+  /// aynı olduğu için bugünkü görseller değişmez. Slug gelmeyen (eski
+  /// sunucu, örnek veri) kartlarda ada düşülür.
+  static String keyFor({required String name, String? slug}) {
+    final s = slug?.trim() ?? '';
+    if (s.isEmpty) return name;
+    final m = RegExp(r'^[a-z]+-(kaleci|defans|orta|forvet)-(.+)$').firstMatch(s);
+    return m == null ? s : m.group(2)!.replaceAll('-', ' ');
+  }
+
   /// Existing deterministic hash, used within a *position-approved* pool.
   static int indexFor(String key) {
     var h = 0x811c9dc5 ^ _salt;

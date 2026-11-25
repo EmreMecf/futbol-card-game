@@ -283,6 +283,7 @@ class _RevealState extends State<_Reveal> {
           final cardW = math.min(260 * k, c.maxWidth - 60);
           final front = V21PlayerCard(
             name: card.fullName,
+            artKey: card.slug,
             position: card.position,
             tier: card.tier,
             power: card.power,
@@ -419,6 +420,7 @@ class _Summary extends StatelessWidget {
                                 radius: 16 * 180 * k / V21PlayerCard.baseWidth,
                                 child: V21PlayerCard(
                                   name: best.fullName,
+                                  artKey: best.slug,
                                   position: best.position,
                                   tier: best.tier,
                                   power: best.power,
@@ -453,6 +455,7 @@ class _Summary extends StatelessWidget {
                                 for (final o in others)
                                   V21PlayerCard(
                                     name: o.fullName,
+                                    artKey: o.slug,
                                     position: o.position,
                                     tier: o.tier,
                                     power: o.power,

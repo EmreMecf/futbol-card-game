@@ -191,6 +191,7 @@ class _Side extends StatelessWidget {
       duration: const Duration(milliseconds: 240),
       child: V21PlayerCard(
         name: m.fullName ?? '',
+        artKey: m.slug,
         position: m.position ?? CardPosition.midfielder,
         tier: m.tier ?? CardTier.bronze,
         power: m.effectivePower ?? 0,

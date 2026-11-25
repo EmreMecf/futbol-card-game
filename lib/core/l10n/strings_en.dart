@@ -189,6 +189,7 @@ const Map<String, String> kEnStrings = {
   'Bu mevkide kartın yok': 'You have no card in this position',
   'Bu mevkide kartın yok: pas geçmek zorundasın (tur rakibe yazılır).': 'You have no card in this position: you must pass (the round goes to the opponent).',
   'Bu mevkide kartın yoktu.': 'You had no card in this position.',
+  'Bu oyuncunun arkadaş listesi dolu.': 'This player\'s friend list is full.',
   'Bu sandık elmasla açılamaz.': 'This chest can\'t be opened with gems.',
   'Bu sandık posta kutusunda değil.': 'This chest isn\'t in the mailbox.',
   'Bu sandık telafi altınına dönüştü.': 'This chest turned into compensation gold.',

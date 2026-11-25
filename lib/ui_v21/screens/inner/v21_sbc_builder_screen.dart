@@ -331,6 +331,7 @@ class V21SbcResultView extends StatelessWidget {
                                   V21PlayerCard(
                                     key: ValueKey(card.userCardId),
                                     name: card.fullName,
+                                    artKey: card.slug,
                                     position: card.position,
                                     tier: card.tier,
                                     power: card.power,

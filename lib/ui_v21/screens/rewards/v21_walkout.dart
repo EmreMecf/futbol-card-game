@@ -344,6 +344,7 @@ class _CardBlock extends StatelessWidget {
           radius: 16 * width / V21PlayerCard.baseWidth,
           child: V21PlayerCard(
             name: card.fullName,
+            artKey: card.slug,
             position: card.position,
             tier: card.tier,
             power: card.power,

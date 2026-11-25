@@ -58,7 +58,7 @@ class WebArena extends StatelessWidget {
     final Widget myCard = mine != null && !mine.isPass
         ? _move(mine)
         : selected != null
-        ? WCard(name: selected!.fullName, tier: selected!.tier, power: selected!.effectivePower, position: selected!.position.code)
+        ? WCard(name: selected!.fullName, artKey: selected!.slug, tier: selected!.tier, power: selected!.effectivePower, position: selected!.position.code)
         : (vm.waitingOpponentPick ? const WHiddenCard(icon: Icons.lock_rounded) : const WHiddenCard());
     final Widget rivalCard = rival != null && !rival.isPass
         ? _move(rival)
@@ -180,6 +180,7 @@ class WebArena extends StatelessWidget {
 
   Widget _move(MatchMove m) => WCard(
     name: m.fullName ?? '',
+    artKey: m.slug,
     tier: m.tier ?? CardTier.bronze,
     power: m.effectivePower ?? 0,
     position: (m.position ?? CardPosition.midfielder).code,
@@ -220,6 +221,7 @@ class WebArena extends StatelessWidget {
           width: 160,
           child: WCard(
             name: c.fullName,
+            artKey: c.slug,
             tier: c.tier,
             power: c.effectivePower,
             position: c.position.code,

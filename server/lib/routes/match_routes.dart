@@ -194,7 +194,9 @@ Router matchRoutes(Database db) {
     final userId = requireUserId(request);
 
     final kartlar = await db.query(
-      'select * from get_my_hand(@userId::uuid, @matchId::uuid)',
+      // slug: kart görselinin değişmeyen kimliği (ad değişse de aynı yüz)
+      'select h.*, c.slug from get_my_hand(@userId::uuid, @matchId::uuid) h '
+      'left join cards c on c.id = h.card_id',
       params: {'userId': userId, 'matchId': matchId},
     );
 
@@ -229,7 +231,7 @@ Router matchRoutes(Database db) {
              mm.user_card_id, c.full_name, c.image_url, mm.tactic_bonus,
              -- Görsel kimlik: rakip kartın 2D yüzü koleksiyondakiyle
              -- aynı çizilsin (kart zaten masada açık; gizli bilgi değil)
-             mm.card_id, c.club, c.nationality,
+             mm.card_id, c.slug, c.club, c.nationality,
              -- GIZLILIK: rakibin taktigi, o tur cozulene kadar gonderilmez.
              -- (Turu acan taktigini secip bekliyorken cevap veren onu
              -- gorebilseydi her zaman karsi taktigi secerdi.)

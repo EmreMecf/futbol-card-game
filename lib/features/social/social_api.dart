@@ -120,6 +120,9 @@ class FriendLists {
 /// Profilde ve rakip kadrosunda gösterilen kart
 class ShownCard {
   final String cardId;
+
+  /// Katalogdaki değişmeyen kimlik (kart görseli); eski sunucuda yok
+  final String? slug;
   final String fullName;
   final CardPosition position;
   final CardTier tier;
@@ -127,6 +130,7 @@ class ShownCard {
   final bool played;
   const ShownCard({
     required this.cardId,
+    this.slug,
     required this.fullName,
     required this.position,
     required this.tier,
@@ -136,6 +140,7 @@ class ShownCard {
 
   factory ShownCard.fromJson(Map<String, dynamic> j) => ShownCard(
     cardId: j['card_id'].toString(),
+    slug: j['slug']?.toString(),
     fullName: j['full_name']?.toString() ?? '',
     position: CardPosition.fromCode(j['position'].toString()),
     tier: CardTier.fromCode(j['tier'].toString()),

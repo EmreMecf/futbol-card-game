@@ -238,6 +238,7 @@ class _Row extends StatelessWidget {
         children: [
           V21PlayerCard(
             name: i.fullName,
+            artKey: i.slug,
             position: i.position,
             tier: i.tier,
             power: i.power,
@@ -420,7 +421,7 @@ Future<void> _levelUp(
     context,
     subtitle: V21Format.upper(i.fullName),
     title: 'SEVİYE {level}!'.trArgs({'level': r.level}),
-    icon: V21PlayerCard(name: i.fullName, position: i.position, tier: i.tier, power: i.power, width: 110),
+    icon: V21PlayerCard(name: i.fullName, artKey: i.slug, position: i.position, tier: i.tier, power: i.power, width: 110),
     message: satirlar.join('\n'),
     actions: [V21DialogAction('HARİKA'.tr, tone: V21ButtonTone.green)],
   );

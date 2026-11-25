@@ -111,4 +111,32 @@ kontrol "oyuncu basina tek mac sandigi" \
 kontrol "zamanlayici hatasi kaydedilmedi" "$(sql "select count(*) from economy_errors where context = 'advance_simultaneous'")" "0"
 kontrol "kart transferi yok" "$(sql "select count(*) from card_transfers where match_id = '$M'")" "0"
 
+# ---- 6) Elmas defteri (057): ayni anahtarla AYNI ANDA iki islem ----
+# Ilk oturum anahtari yazip kilidi 2 sn tutar; ikinci oturum o sirada
+# baslar, kilidi bekler. Ikincisi hata vermeden ilk sonucu donmeli.
+ONCE=$(sql "select gems from users where id = '$A'")
+"$PSQL" -d "$DB" -q -tA -c "begin; select _gem_add('$A', 5, 'test', 'yaris', 'yaris:elmas'); select pg_sleep(2); commit;" >/dev/null 2>&1 &
+sleep 0.5
+IKINCI=$("$PSQL" -d "$DB" -v ON_ERROR_STOP=1 -q -tA -c "select _gem_add('$A', 5, 'test', 'yaris', 'yaris:elmas')" 2>&1 || echo HATA)
+wait
+kontrol "ayni anahtarla es zamanli ikinci elmas cagrisi hatasiz ilk sonucu doner" "$IKINCI" "$((ONCE + 5))"
+kontrol "elmas yalniz bir kez eklendi" "$(sql "select gems from users where id = '$A'")" "$((ONCE + 5))"
+kontrol "defterde tek satir" "$(sql "select count(*) from gem_ledger where idempotency_key = 'yaris:elmas'")" "1"
+
+# ---- 7) Arkadas siniri (057): 99 arkadasli oyuncu iki istegi AYNI ANDA kabul eder ----
+sql "insert into users (email, password_hash, username)
+     select 'f' || g || '@test.local', 'x', 'yaris_f' || lpad(g::text, 3, '0') from generate_series(1, 101) g;
+     insert into friendships (user_low, user_high, requested_by, status, accepted_at)
+     select least('$A'::uuid, id), greatest('$A'::uuid, id), '$A', 'accepted', now()
+     from users where username like 'yaris_f%' and username <= 'yaris_f099';
+     insert into friendships (user_low, user_high, requested_by)
+     select least('$A'::uuid, id), greatest('$A'::uuid, id), id
+     from users where username in ('yaris_f100', 'yaris_f101');" >/dev/null
+for u in yaris_f100 yaris_f101; do
+  "$PSQL" -d "$DB" -q -tA -c "select friend_respond('$A', (select id from users where username = '$u'), true)" >/dev/null 2>&1 &
+done
+wait
+kontrol "es zamanli iki kabulde sinir asilmadi (100)" \
+  "$(sql "select count(*) from friendships where status = 'accepted' and '$A' in (user_low, user_high)")" "100"
+
 [ "$HATA" = 0 ] && echo "SONUC: yaris testleri gecti" || { echo "SONUC: KALDI"; exit 1; }

@@ -90,6 +90,7 @@ const Map<String, String> kEnServerStrings = {
   'Bu macta mevki secimi yok.': 'There\'s no position pick in this match.',
   'Bu odanin uyesi degilsin.': 'You\'re not a member of this room.',
   'Bu odanın üyesi değilsin.': 'You\'re not a member of this room.',
+  'Bu oyuncunun arkadas listesi dolu.': 'This player\'s friend list is full.',
   'Bu ozellik henuz acik degil.': 'This feature isn\'t open yet.',
   'Bu paket magazadan satin alinamaz.': 'This pack can\'t be bought in the store.',
   'Bu sandiga anahtar kullanilamaz.': 'A key can\'t be used on this chest.',

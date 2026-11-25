@@ -411,6 +411,7 @@ class _CardsRow extends StatelessWidget {
     angle: angle,
     child: V21PlayerCard(
       name: c.fullName,
+      artKey: c.slug,
       position: c.position,
       tier: c.tier,
       power: c.power,
