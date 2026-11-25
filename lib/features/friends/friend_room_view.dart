@@ -14,6 +14,7 @@ import 'friend_room_api.dart';
 import '../../ui_v21/web/web_kit.dart';
 import '../../ui_v21/web/web_screens.dart';
 import '../../core/l10n/app_language.dart';
+import '../social/friend_challenge.dart';
 
 /// Sunucunun kural mesajını gösterir ('Oda dolu.' gibi); bağlantı hatası ayrıdır.
 String friendRoomErrorText(Object e) => e is AppException
@@ -147,6 +148,8 @@ class _FriendRoomViewState extends State<FriendRoomView> {
   Future<void> _leave() async {
     final code = _code;
     if (code != null) {
+      // 058: bu odadan giden bekleyen dostluk daveti geri çekilir
+      unawaited(getIt<FriendChallengeController>().cancelForRoom(code));
       try { await _api.leave(code); } catch (_) {}
     }
     _poll?.cancel();

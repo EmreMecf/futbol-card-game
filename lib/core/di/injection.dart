@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../../features/social/social_api.dart';
+import '../../features/social/friend_challenge.dart';
 import '../../features/chests/data/chest_repository_impl.dart';
 import '../../features/chests/domain/chest_repository.dart';
 import '../../features/chests/presentation/viewmodel/chests_view_model.dart';
@@ -245,6 +246,16 @@ Future<void> configureDependencies() async {
     )
     // 056: arkadaşlık, açık profil, elmas, rakip kadrosu
     ..registerLazySingleton<SocialApi>(() => SocialApi(getIt<ApiClient>()))
+    // 058: arkadaşı dostluk maçına çağırma (ekranın üstündeki davet kutucuğu)
+    ..registerLazySingleton<FriendChallengeController>(
+      () => FriendChallengeController(
+        getIt<SocialApi>(),
+        events: getIt<WebSocketService>().events,
+        connection: getIt<WebSocketService>().connectionState,
+        isSignedIn: () => getIt<SessionManager>().isSignedIn,
+        sessionChanges: getIt<SessionManager>(),
+      ),
+    )
     // Gorev kadrosu kurma ekrani hangi gorev icin acildigini bilmeli
     ..registerFactoryParam<SbcBuilderViewModel, SbcChallenge, void>(
       (gorev, _) => SbcBuilderViewModel(getIt<SbcRepository>(), challenge: gorev),

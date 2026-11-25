@@ -39,6 +39,15 @@ enum RealtimeEventType {
   @JsonValue('chest_granted')
   chestGranted,
 
+  /// 058: bir arkadaşın seni dostluk maçına çağırdı.
+  /// Yalnız kimlik taşır; ayrıntı GET /api/social/challenges ile çekilir.
+  @JsonValue('friend_challenge')
+  friendChallenge,
+
+  /// 058: bir davetin durumu değişti (kabul, ret, geri çekme, süre doldu)
+  @JsonValue('friend_challenge_update')
+  friendChallengeUpdate,
+
   /// Taninmayan olay (ileride sunucuya yeni olay eklenirse
   /// eski uygulama surumleri cokmesin diye)
   @JsonValue('unknown')
@@ -70,6 +79,9 @@ abstract class RealtimeEvent with _$RealtimeEvent {
     String? chestType,
     String? sourceType,
     String? sourceId,
+
+    /// friend_challenge / friend_challenge_update: davet kimliği
+    String? challengeId,
   }) = _RealtimeEvent;
 
   factory RealtimeEvent.fromJson(Map<String, dynamic> json) =>
@@ -88,6 +100,10 @@ abstract class RealtimeEvent with _$RealtimeEvent {
 
   /// Sandik verildi mi? (ana sayfa seridi ve mac sonu tazelensin)
   bool get isChestGranted => type == RealtimeEventType.chestGranted;
+
+  /// Dostluk maçı daveti geldi ya da durumu değişti mi?
+  bool get isFriendChallenge =>
+      type == RealtimeEventType.friendChallenge || type == RealtimeEventType.friendChallengeUpdate;
 
   /// Mac bitis olayi mi?
   bool get isMatchFinished => type == RealtimeEventType.matchFinished;

@@ -2,14 +2,39 @@ import 'package:shared_models/shared_models.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/l10n/app_language.dart';
+import 'friend_challenge.dart';
 
 /// 056 — sosyal, elmas ve rakip kadrosu uçları.
 ///
 /// Modeller burada, sade sınıflar: alanlar sunucunun açık profil
 /// sözleşmesiyle birebir (e-posta, altın, elmas, eşya YOK).
-class SocialApi {
+class SocialApi implements FriendChallengeApi {
   final ApiClient api;
   SocialApi(this.api);
+
+  // ---- 058: dostluk maçına çağırma ----
+  @override
+  Future<FriendChallenge> sendChallenge(String friendId) async =>
+      FriendChallenge.fromJson(await api.post('/social/challenges/$friendId'));
+
+  @override
+  Future<List<FriendChallenge>> incomingChallenges() async {
+    final r = await api.get('/social/challenges');
+    final l = r['challenges'];
+    return l is List ? [for (final x in l) FriendChallenge.fromJson((x as Map).cast<String, dynamic>())] : const [];
+  }
+
+  @override
+  Future<FriendChallenge> acceptChallenge(String id) async =>
+      FriendChallenge.fromJson(await api.post('/social/challenges/$id/accept'));
+
+  @override
+  Future<FriendChallenge> declineChallenge(String id) async =>
+      FriendChallenge.fromJson(await api.post('/social/challenges/$id/decline'));
+
+  @override
+  Future<FriendChallenge> cancelChallenge(String id) async =>
+      FriendChallenge.fromJson(await api.post('/social/challenges/$id/cancel'));
 
   Future<FriendLists> friends() async => FriendLists.fromJson(await api.get('/social/friends'));
   Future<String> request(String id) async => (await api.post('/social/friends/$id'))['friend_status'].toString();

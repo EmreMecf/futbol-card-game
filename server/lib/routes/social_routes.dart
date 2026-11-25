@@ -27,6 +27,11 @@ String _id(String v) {
 ///   DELETE `/api/social/friends/<id>`             arkadaşlıktan çıkar / isteği geri çek
 ///   GET    `/api/social/search?q=ad`              ada göre oyuncu ara (en az 2 harf)
 ///   GET    `/api/social/players/<id>`             açık profil
+///   POST   `/api/social/challenges/<arkadaşId>`   arkadaşı dostluk maçına çağır (058)
+///   GET    `/api/social/challenges`               bana gelen bekleyen davetler
+///   POST   `/api/social/challenges/<id>/accept`   kabul et (odaya katılır)
+///   POST   `/api/social/challenges/<id>/decline`  reddet
+///   POST   `/api/social/challenges/<id>/cancel`   çağıran geri çeker
 ///
 /// Hata kodları: friend_self, player_not_found, friend_limit,
 /// friend_request_limit, friend_request_not_found
@@ -77,6 +82,37 @@ Router socialRoutes(Database db) {
     final ham = await db.scalar('select search_players(@u::uuid, @q)', params: {'u': userId, 'q': q});
     return jsonOk({'players': ham is List ? ham : const []});
   });
+
+  // ---- 058: dostluk maçına çağırma ----
+  router.post('/challenges/<id>', (Request request, String id) async {
+    final userId = await kim(request);
+    return withRuleCodes(() async => jsonOk(RowMappers.asMap(await db.scalar(
+          'select friend_challenge_send(@u::uuid, @t::uuid)',
+          params: {'u': userId, 't': _id(id)},
+        ))));
+  });
+
+  router.get('/challenges', (Request request) async {
+    final userId = await kim(request);
+    final ham = await db.scalar('select friend_challenge_incoming(@u::uuid)', params: {'u': userId});
+    return jsonOk({'challenges': ham is List ? ham : const []});
+  });
+
+  Future<Response> davet(Request request, String id, String sql) async {
+    final userId = await kim(request);
+    if (!_uuid.hasMatch(id)) {
+      throw const ApiException('Davet bulunamadı.', status: 404, code: 'challenge_not_found');
+    }
+    return withRuleCodes(() async =>
+        jsonOk(RowMappers.asMap(await db.scalar(sql, params: {'u': userId, 'c': id}))));
+  }
+
+  router.post('/challenges/<id>/accept', (Request request, String id) =>
+      davet(request, id, 'select friend_challenge_respond(@u::uuid, @c::uuid, true)'));
+  router.post('/challenges/<id>/decline', (Request request, String id) =>
+      davet(request, id, 'select friend_challenge_respond(@u::uuid, @c::uuid, false)'));
+  router.post('/challenges/<id>/cancel', (Request request, String id) =>
+      davet(request, id, 'select friend_challenge_cancel(@u::uuid, @c::uuid)'));
 
   router.get('/players/<id>', (Request request, String id) async {
     final userId = await kim(request);

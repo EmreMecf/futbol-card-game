@@ -11,6 +11,9 @@ import '../../../features/social/social_view_models.dart';
 import '../../components/v21_cosmetics.dart';
 import '../../ui_v21.dart';
 import '../../../core/l10n/app_language.dart';
+import '../../../features/social/friend_challenge.dart';
+import '../../../core/error/app_exception.dart';
+import '../../../shared/widgets/error_snackbar.dart';
 
 // =====================================================================
 // ARKADAŞLAR (056)
@@ -128,11 +131,26 @@ class _FriendsBodyState extends State<_FriendsBody> {
         V21PlayerRow(
           player: p,
           scale: k,
-          trailing: V21IconPill(
-            icon: Icons.person_remove_rounded,
-            semanticsLabel: '{username}: arkadaşlıktan çıkar'.trArgs({'username': p.username}),
-            scale: k * 0.8,
-            onTap: () => _cikarOnay(context, vm, p),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 058: dostluk maçına çağır
+              V21IconPill(
+                key: ValueKey('cagir-${p.id}'),
+                icon: Icons.sports_soccer_rounded,
+                iconColor: V21Colors.success,
+                semanticsLabel: '{username}: maça çağır'.trArgs({'username': p.username}),
+                scale: k * 0.8,
+                onTap: () => friendChallengeSend(context, p.id, p.username),
+              ),
+              SizedBox(width: 6 * k),
+              V21IconPill(
+                icon: Icons.person_remove_rounded,
+                semanticsLabel: '{username}: arkadaşlıktan çıkar'.trArgs({'username': p.username}),
+                scale: k * 0.8,
+                onTap: () => _cikarOnay(context, vm, p),
+              ),
+            ],
           ),
         ),
         SizedBox(height: 8 * k),
@@ -654,7 +672,31 @@ class _ArkadaslikDugmesi extends StatelessWidget {
           Expanded(child: dugme('REDDET'.tr, V21ButtonTone.red, vm.decline)),
         ],
       ),
-      FriendStatus.friends => dugme('ARKADAŞSINIZ · ÇIKAR'.tr, V21ButtonTone.purple, () async {
+      FriendStatus.friends => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 058: dostluk maçına çağır
+            dugme('MAÇA ÇAĞIR'.tr, V21ButtonTone.green,
+                () => friendChallengeSend(context, vm.profile!.id, vm.profile!.username)),
+            SizedBox(height: 8 * k),
+            _ArkadasiCikar(vm: vm, dugme: dugme),
+          ],
+        ),
+      FriendStatus.self => const SizedBox.shrink(),
+    };
+  }
+}
+
+/// Arkadaşlıktan çıkarma düğmesi (onaylı)
+class _ArkadasiCikar extends StatelessWidget {
+  final PlayerProfileViewModel vm;
+  final Widget Function(String label, V21ButtonTone tone, VoidCallback f) dugme;
+  const _ArkadasiCikar({required this.vm, required this.dugme});
+
+  @override
+  Widget build(BuildContext context) {
+    return dugme('ARKADAŞSINIZ · ÇIKAR'.tr, V21ButtonTone.purple, () async {
         final ok = await V21GameDialog.show<bool>(
           context,
           subtitle: 'ARKADAŞLIK'.tr,
@@ -666,9 +708,23 @@ class _ArkadaslikDugmesi extends StatelessWidget {
           ],
         );
         if (ok == true) await vm.removeFriend();
-      }),
-      FriendStatus.self => const SizedBox.shrink(),
-    };
+      });
+  }
+}
+
+/// 058: arkadaşı dostluk maçına çağır; çağıran özel odaya geçip bekler.
+Future<void> friendChallengeSend(BuildContext context, String friendId, String friendName) async {
+  try {
+    final c = await getIt<FriendChallengeController>().send(friendId, friendName);
+    if (!context.mounted) return;
+    AppSnackBar.showInfo(context, '{name} maça çağrıldı. Odada yanıtını bekle.'.trArgs({'name': friendName}));
+    context.go(AppRoutes.friendInviteWithCode(c.code));
+  } on AppException catch (e) {
+    if (context.mounted) AppSnackBar.showError(context, e.message);
+  } catch (_) {
+    if (context.mounted) {
+      AppSnackBar.showError(context, 'İşlem tamamlanamadı. Bağlantını kontrol edip tekrar dene.'.tr);
+    }
   }
 }
 

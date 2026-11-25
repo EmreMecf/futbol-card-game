@@ -60,6 +60,7 @@ const Map<String, String> kEnServerStrings = {
   'Bronz futbolcularda eksik gelişim kopyasının yerine geçer.': 'Stands in for a missing upgrade copy on Bronze players.',
   'Bronz Temizligi': 'Bronze Clean-up',
   'Bronz Temizliği': 'Bronze Clean-up',
+  'Bu davet artık geçerli değil.': 'This challenge is no longer valid.',
   'Bu deste size ait degil.': 'This squad isn\'t yours.',
   'Bu e-posta adresi ile zaten bir hesap var.': 'An account with this email address already exists.',
   'Bu e-postayla kayıtlı bir hesap var. Önce e-posta ve şifrenle giriş yap, sonra Ayarlar\'dan bu hesabı bağla.': 'An account with this email already exists. Log in with your email and password first, then link this account in Settings.',
@@ -195,6 +196,7 @@ const Map<String, String> kEnServerStrings = {
   'Kartlardan bazilari size ait degil veya devam eden bir macta kilitli.': 'Some of the cards aren\'t yours or are locked in a match in progress.',
   'Katalogda yeterli kart yok. Once seed verisini yukleyin.': 'Not enough cards in the catalog. Load the seed data first.',
   'Kendine arkadaslik istegi gonderemezsin.': 'You can\'t send a friend request to yourself.',
+  'Kendini maça çağıramazsın.': 'You can\'t challenge yourself.',
   'Kilidi acilan bir sandik yok.': 'No chest is unlocking.',
   'Kilidi açılan sandığın kalan süresinden 2 saat düşer.': 'Takes 2 hours off the remaining time of the unlocking chest.',
   'Klasik': 'Classic',
@@ -217,6 +219,7 @@ const Map<String, String> kEnServerStrings = {
   'Oda bulunamadi.': 'Room not found.',
   'Oda bulunamadı.': 'Room not found.',
   'Oda dolu.': 'The room is full.',
+  'Odanda zaten bir oyuncu var.': 'There\'s already a player in your room.',
   'Ogretici kapali.': 'The tutorial is off.',
   'Ogretici yalniz es zamanli kurallarla acilir.': 'The tutorial only runs with simultaneous rules.',
   'Ogretici zaten tamamlandi.': 'The tutorial is already complete.',
@@ -281,6 +284,7 @@ const Map<String, String> kEnServerStrings = {
   'Ustalık kitabı (Efsane)': 'Mastery book (Legend)',
   'Ustalık kitabı (Elmas)': 'Mastery book (Diamond)',
   'Ustalık kitabı (Gümüş)': 'Mastery book (Silver)',
+  'Yalnız arkadaşlarını maça çağırabilirsin.': 'You can only challenge your friends.',
   'Yeterli altin yok.': 'Not enough gold.',
   'Yeterli gelisim kopyasi yok.': 'Not enough upgrade copies.',
   'Yeterli item yok.': 'Not enough items.',
@@ -288,6 +292,7 @@ const Map<String, String> kEnServerStrings = {
   'Yuvadaki bir sandığın kilidini anında açar. Efsane sandık 2 anahtar ister.': 'Instantly unlocks a chest in a slot. A Legend chest needs 2 keys.',
   'Zafer animasyonu: Havai Fişek': 'Victory animation: Fireworks',
   'Zor gorevlerin odulu. 5 kart, yuksek Diamond ve Legend ihtimali.': 'Reward for hard challenges. 5 cards, high chance of Diamond and Legend.',
+  'Çok sık davet gönderdin. Biraz bekle.': 'You\'re sending challenges too often. Wait a bit.',
 };
 
 /// Sunucudan gelen şablonlu mesajlar. Türkçedeki `%`/`%s` yerleri sırayla `{1}`, `{2}`... olur.

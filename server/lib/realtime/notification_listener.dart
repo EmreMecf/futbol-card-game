@@ -26,6 +26,7 @@ class NotificationListener {
   StreamSubscription<String>? _macAboneligi;
   StreamSubscription<String>? _kuyrukAboneligi;
   StreamSubscription<String>? _ekonomiAboneligi;
+  StreamSubscription<String>? _sosyalAboneligi;
 
   NotificationListener(this._db, this._hub);
 
@@ -56,6 +57,15 @@ class NotificationListener {
       onError: (Object e) {
         // ignore: avoid_print
         print('[NOTIFY] economy_events hatasi: $e');
+      },
+    );
+
+    // ---- SOSYAL OLAYLAR (058: dostluk maci daveti) ----
+    _sosyalAboneligi = conn.channels['social_events'].listen(
+      _handleSocialEvent,
+      onError: (Object e) {
+        // ignore: avoid_print
+        print('[NOTIFY] social_events hatasi: $e');
       },
     );
 
@@ -122,7 +132,27 @@ class NotificationListener {
     }
   }
 
+  /// Dostluk maci daveti geldi / durumu degisti -> yalniz o oyuncuya.
+  /// Baglanti kopuksa kayip olmaz: istemci GET /api/social/challenges ile toparlar.
+  void _handleSocialEvent(String payload) {
+    try {
+      final veri = jsonDecode(payload) as Map<String, dynamic>;
+      final userId = veri['user_id']?.toString();
+      if (userId == null) return;
+      _hub.sendTo(userId, {
+        'type': veri['event'],
+        'challenge_id': veri['challenge_id'],
+        'status': veri['status'],
+        'at': veri['at'],
+      });
+    } catch (e) {
+      // ignore: avoid_print
+      print('[NOTIFY] social_events cozulemedi: $e | $payload');
+    }
+  }
+
   Future<void> stop() async {
+    await _sosyalAboneligi?.cancel();
     await _ekonomiAboneligi?.cancel();
     await _macAboneligi?.cancel();
     await _kuyrukAboneligi?.cancel();

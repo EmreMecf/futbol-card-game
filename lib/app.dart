@@ -17,6 +17,8 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/viewmodel/auth_view_model.dart';
 import 'features/friends/friend_room_api.dart';
 import 'ui_v21/theme/v21_scroll_behavior.dart';
+import 'features/social/friend_challenge.dart';
+import 'ui_v21/components/v21_friend_challenge_banner.dart';
 
 /// Uygulamanin kok widget'i.
 ///
@@ -87,7 +89,18 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
         builder: (context, child) => MediaQuery.withClampedTextScaling(
           minScaleFactor: 0.9,
           maxScaleFactor: 1.2,
-          child: LanguageRebuilder(child: child ?? const SizedBox.shrink()),
+          child: LanguageRebuilder(
+            child: Stack(
+              children: [
+                child ?? const SizedBox.shrink(),
+                // 058: arkadaş dostluk maçına çağırınca üstten kayan davet
+                V21FriendChallengeBanner(
+                  controller: getIt<FriendChallengeController>(),
+                  router: appRouter.router,
+                ),
+              ],
+            ),
+          ),
         ),
 
         // Uygulama dili: Ayarlar > DİL (Türkçe / English)
