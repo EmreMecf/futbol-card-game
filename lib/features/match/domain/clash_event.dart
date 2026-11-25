@@ -1,4 +1,5 @@
 import 'package:shared_models/shared_models.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// Bir turun çatışma sahnesinde nasıl biteceği.
 enum ClashOutcome { win, loss, draw }
@@ -138,38 +139,37 @@ class ClashEvent {
 
   /// Sonuç bandındaki başlık
   String get headline => switch (outcome) {
-        ClashOutcome.win => 'ELİ KAZANDIN!',
-        ClashOutcome.loss => 'ELİ KAYBETTİN',
-        ClashOutcome.draw => 'BERABERE',
+        ClashOutcome.win => 'ELİ KAZANDIN!'.tr,
+        ClashOutcome.loss => 'ELİ KAYBETTİN'.tr,
+        ClashOutcome.draw => 'BERABERE'.tr,
       };
 
   /// Sonuç bandındaki açıklama
   String get detail {
     if (outcome == ClashOutcome.draw) {
-      return 'Kartlar masada kalıyor; sonraki eli kazanan hepsini alır.';
+      return 'Kartlar masada kalıyor; sonraki eli kazanan hepsini alır.'.tr;
     }
     if (opponentPassed && outcome == ClashOutcome.win) {
-      return 'Rakibin bu mevkide kartı yoktu.';
+      return 'Rakibin bu mevkide kartı yoktu.'.tr;
     }
     if (iPassed && outcome == ClashOutcome.loss) {
-      return 'Bu mevkide kartın yoktu.';
+      return 'Bu mevkide kartın yoktu.'.tr;
     }
     if (wonByLegendRule) {
-      return 'Legend kuralı: Legend kart alttaki seviyeleri yener.';
+      return 'Legend kuralı: Legend kart alttaki seviyeleri yener.'.tr;
     }
     if (wonByTactic) {
       final kazanan = outcome == ClashOutcome.win ? myMove! : opponentMove!;
       final ad = kazanan.tactic!.label;
       return outcome == ClashOutcome.win
-          ? '$ad eli çevirdi! (+${kazanan.tacticBonus})'
-          : 'Rakibin $ad taktiği eli çevirdi (+${kazanan.tacticBonus}).';
+          ? '{ad} eli çevirdi! (+{tacticBonus})'.trArgs({'ad': ad, 'tacticBonus': kazanan.tacticBonus})
+          : 'Rakibin {ad} taktiği eli çevirdi (+{tacticBonus}).'.trArgs({'ad': ad, 'tacticBonus': kazanan.tacticBonus});
     }
     if (myTacticCountered) {
-      return '${myMove!.tactic!.label} boşa gitti: rakip '
-          '${opponentMove!.tactic!.label} oynadı.';
+      return '{label} boşa gitti: rakip {label2} oynadı.'.trArgs({'label': myMove!.tactic!.label, 'label2': opponentMove!.tactic!.label});
     }
     if (outcome == ClashOutcome.win && cardsCollected > 0) {
-      return 'Masadan $cardsCollected kart topladın.';
+      return 'Masadan {cardsCollected} kart topladın.'.trArgs({'cardsCollected': cardsCollected});
     }
     return '';
   }

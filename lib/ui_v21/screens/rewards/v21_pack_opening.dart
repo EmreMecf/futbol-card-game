@@ -13,6 +13,7 @@ import '../../../features/store/presentation/viewmodel/pack_opening_view_model.d
 import '../../../features/store/domain/pack_texts.dart';
 import 'v21_walkout.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 PAKET AÇILIŞI (referans `packSeal.png` ve `packLegend.png`).
 ///
@@ -118,7 +119,7 @@ class _SealState extends State<_Seal> with SingleTickerProviderStateMixin {
               SafeArea(
                 child: Semantics(
                   button: true,
-                  label: 'Paketi açmak için dokun. $n kart seni bekliyor',
+                  label: 'Paketi açmak için dokun. {n} kart seni bekliyor'.trArgs({'n': n}),
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: _open,
@@ -141,7 +142,7 @@ class _SealState extends State<_Seal> with SingleTickerProviderStateMixin {
                               SizedBox(
                                 width: 150 * k,
                                 child: V21GameButton(
-                                  label: 'HEPSİNİ GÖSTER',
+                                  label: 'HEPSİNİ GÖSTER'.tr,
                                   tone: V21ButtonTone.blue,
                                   size: V21ButtonSize.small,
                                   scale: k * 1.1,
@@ -191,9 +192,9 @@ class _SealState extends State<_Seal> with SingleTickerProviderStateMixin {
                             ),
                           ),
                         ),
-                        V21HeroTitle('DOKUN!', size: 56 * k),
+                        V21HeroTitle('DOKUN!'.tr, size: 56 * k),
                         SizedBox(height: 8 * k),
-                        Text('$n kart seni bekliyor', style: V21Type.title(18 * k, color: const Color(0xFFD9CAFB))),
+                        Text('{n} kart seni bekliyor'.trArgs({'n': n}), style: V21Type.title(18 * k, color: const Color(0xFFD9CAFB))),
                         SizedBox(height: 22 * k),
                         _MiniBacks(count: n, scale: k),
                         SizedBox(height: 40 * k),
@@ -306,7 +307,7 @@ class _RevealState extends State<_Reveal> {
                       padding: EdgeInsets.symmetric(horizontal: 24 * k, vertical: 16 * k),
                       child: Column(
                         children: [
-                          Text('YENİ KART!', style: V21Type.title(20 * k, color: const Color(0xFFFFE6A0))),
+                          Text('YENİ KART!'.tr, style: V21Type.title(20 * k, color: const Color(0xFFFFE6A0))),
                           SizedBox(height: 2 * k),
                           V21HeroTitle('${r.name}!', size: 64 * k),
                           SizedBox(height: 14 * k),
@@ -316,7 +317,7 @@ class _RevealState extends State<_Reveal> {
                             radius: 16 * cardW / V21PlayerCard.baseWidth,
                             child: V21CardFlip(
                               showFront: _front,
-                              back: V21CardBack(width: cardW, semanticsLabel: 'Kart açılıyor'),
+                              back: V21CardBack(width: cardW, semanticsLabel: 'Kart açılıyor'.tr),
                               front: front,
                             ),
                           ),
@@ -325,15 +326,15 @@ class _RevealState extends State<_Reveal> {
                           SizedBox(height: 10 * k),
                           Text(
                             best
-                                ? 'Paketteki en iyi kart · ${vm.progressText}'
-                                : 'Koleksiyonuna eklendi · ${vm.progressText}',
+                                ? 'Paketteki en iyi kart · {progressText}'.trArgs({'progressText': vm.progressText})
+                                : 'Koleksiyonuna eklendi · {progressText}'.trArgs({'progressText': vm.progressText}),
                             style: V21Type.label(13 * k, weight: FontWeight.w800, color: const Color(0xFFE3D6FF)),
                           ),
                           SizedBox(height: 26 * k),
                           SizedBox(
                             width: 300 * k,
                             child: V21GameButton(
-                              label: last ? 'PAKETİ GÖR' : 'DEVAM',
+                              label: last ? 'PAKETİ GÖR'.tr : 'DEVAM'.tr,
                               size: V21ButtonSize.large,
                               scale: k * 1.05,
                               onPressed: vm.next,
@@ -344,7 +345,7 @@ class _RevealState extends State<_Reveal> {
                             TextButton(
                               onPressed: vm.revealAll,
                               child: Text(
-                                'Hepsini göster',
+                                'Hepsini göster'.tr,
                                 style: V21Type.label(13 * k, weight: FontWeight.w800, color: V21Colors.textMuted),
                               ),
                             ),
@@ -398,7 +399,7 @@ class _Summary extends StatelessWidget {
                         padding: EdgeInsets.fromLTRB(16 * k, 16 * k, 16 * k, 24 * k),
                         children: [
                           Text(
-                            'PAKET AÇILDI',
+                            'PAKET AÇILDI'.tr,
                             textAlign: TextAlign.center,
                             style: V21Type.title(18 * k, color: const Color(0xFFFFE6A0)),
                           ),
@@ -406,7 +407,7 @@ class _Summary extends StatelessWidget {
                           SizedBox(height: 14 * k),
                           if (best != null) ...[
                             Text(
-                              'EN İYİ KART',
+                              'EN İYİ KART'.tr,
                               textAlign: TextAlign.center,
                               style: V21Type.label(12 * k, weight: FontWeight.w900, color: V21Colors.textMuted),
                             ),
@@ -468,7 +469,7 @@ class _Summary extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('GELİŞİM KOPYASI', style: V21Type.title(16 * k, color: V21Colors.successText)),
+                                  Text('GELİŞİM KOPYASI'.tr, style: V21Type.title(16 * k, color: V21Colors.successText)),
                                   SizedBox(height: 4 * k),
                                   Text(
                                     progressSummary(result.progress),
@@ -480,14 +481,13 @@ class _Summary extends StatelessWidget {
                           ],
                           SizedBox(height: 14 * k),
                           Text(
-                            '${result.cards.length} kart koleksiyonuna eklendi · kalan '
-                            '${V21Format.thousands(result.coinsLeft)} altın',
+                            '{length} kart koleksiyonuna eklendi · kalan {p} altın'.trArgs({'length': result.cards.length, 'p': V21Format.thousands(result.coinsLeft)}),
                             textAlign: TextAlign.center,
                             style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
                           ),
                           SizedBox(height: 16 * k),
                           V21GameButton(
-                            label: 'KOLEKSİYONA GİT',
+                            label: 'KOLEKSİYONA GİT'.tr,
                             size: V21ButtonSize.large,
                             scale: k,
                             onPressed: () {
@@ -497,7 +497,7 @@ class _Summary extends StatelessWidget {
                           ),
                           SizedBox(height: 10 * k),
                           V21GameButton(
-                            label: 'MAĞAZAYA DÖN',
+                            label: 'MAĞAZAYA DÖN'.tr,
                             tone: V21ButtonTone.blue,
                             size: V21ButtonSize.medium,
                             scale: k,

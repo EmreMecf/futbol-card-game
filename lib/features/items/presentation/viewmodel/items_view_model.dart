@@ -7,6 +7,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/utils/result.dart';
 import '../../cosmetics/equipped_cosmetics.dart';
 import '../../domain/items_repository.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// ENVANTER (Ekonomi V2, FAZ 3). Her eylem bir idempotency anahtarı
 /// alır; ağ hatasında aynı eylem aynı anahtarla tekrar denenir.
@@ -52,18 +53,18 @@ class ItemsViewModel extends BaseViewModel {
   Future<bool> use(ItemDefinition d) => _eylem(d.slug, 'use:${d.slug}:${_envanter?.quantity(d.slug)}',
       (k) => _repository.use(d.slug, idempotencyKey: k), (sonuc) {
     _bilgi = d.category == 'energy_drink' && sonuc['energy'] != null
-        ? 'Sandık hakkın ${sonuc['energy']} oldu.'
-        : '${d.name} kullanıldı.';
+        ? 'Sandık hakkın {p} oldu.'.trArgs({'p': sonuc['energy']})
+        : '{name} kullanıldı.'.trArgs({'name': d.name});
   });
 
   Future<bool> equip(ItemDefinition d) =>
       _eylem(d.slug, 'equip:${d.slug}', (k) => _repository.equip(d.slug, idempotencyKey: k), (_) {
-        _bilgi = '${d.name} giyildi.';
+        _bilgi = '{name} giyildi.'.trArgs({'name': d.name});
       });
 
   Future<bool> unequip(ItemDefinition d) => _eylem(d.slug, 'unequip:${d.cosmeticSlot}',
       (k) => _repository.unequip(d.cosmeticSlot!, idempotencyKey: k), (_) {
-    _bilgi = '${d.name} çıkarıldı.';
+    _bilgi = '{name} çıkarıldı.'.trArgs({'name': d.name});
   });
 
   Future<bool> _eylem<T>(String slug, String eylem, Future<Result<T>> Function(String) is_, void Function(T) ok) async {

@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'display_text.dart';
 
 /// Saha pozisyonlari.
 ///
@@ -21,13 +22,16 @@ enum CardPosition {
   /// Veritabanindaki deger
   final String code;
 
-  /// Ekranda gosterilecek tam ad
-  final String label;
+  final String _label;
+  final String _shortLabel;
+
+  /// Ekranda gosterilecek tam ad (oyuncunun dilinde)
+  String get label => displayText(_label);
 
   /// Kart uzerindeki kisa rozet
-  final String shortLabel;
+  String get shortLabel => displayText(_shortLabel);
 
-  const CardPosition(this.code, this.label, this.shortLabel);
+  const CardPosition(this.code, this._label, this._shortLabel);
 
   /// Zorunlu formasyonda bu pozisyondan kac kart olmali?
   /// (1 kaleci, 4 defans, 4 orta saha, 2 forvet = 11)
@@ -65,12 +69,15 @@ enum CardTier {
   legend('legend', 'Legend', 5);
 
   final String code;
-  final String label;
+  final String _label;
+
+  /// Ekranda gosterilecek ad (oyuncunun dilinde)
+  String get label => displayText(_label);
 
   /// Sayisal siralama (karsilastirma icin)
   final int rank;
 
-  const CardTier(this.code, this.label, this.rank);
+  const CardTier(this.code, this._label, this.rank);
 
   bool get isLegend => this == CardTier.legend;
 
@@ -145,16 +152,20 @@ enum MatchTactic {
   /// API ve veritabanindaki deger
   final String code;
 
-  /// Ekranda gosterilecek ad
-  final String label;
+  final String _label;
+
+  /// Ekranda gosterilecek ad (oyuncunun dilinde)
+  String get label => displayText(_label);
 
   /// Enerji maliyeti (gosterim icin; dogrulamayi sunucu yapar)
   final int cost;
 
-  /// Kisa aciklama
-  final String hint;
+  final String _hint;
 
-  const MatchTactic(this.code, this.label, this.cost, this.hint);
+  /// Kisa aciklama
+  String get hint => _hint.isEmpty ? '' : displayText(_hint);
+
+  const MatchTactic(this.code, this._label, this.cost, this._hint);
 
   /// Kullanilabilir (taktik yok disindaki) taktikler
   static const playable = [highPress, counterAttack, defensiveWall];

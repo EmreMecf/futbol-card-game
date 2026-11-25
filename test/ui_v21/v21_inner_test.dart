@@ -4,6 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:futbol_card/core/auth/session_manager.dart';
 import 'package:futbol_card/core/di/injection.dart';
+import 'package:futbol_card/core/l10n/app_language.dart';
+import 'package:futbol_card/core/l10n/language_rebuilder.dart';
 import 'package:futbol_card/core/utils/result.dart';
 import 'package:futbol_card/core/storage/favorites_store.dart';
 import 'package:futbol_card/core/theme/app_theme.dart';
@@ -288,6 +290,29 @@ void main() {
       expect(vm.vibration, !before);
       final sound = t.getSemantics(find.bySemanticsLabel('Ses efektleri, yakında'));
       expect(sound.flagsCollection.isEnabled.name, 'isFalse');
+      await unmount(t);
+    });
+
+    testWidgets('DİL: English seçilince ekran İngilizceye, Türkçe seçilince geri döner', (t) async {
+      addTearDown(() => AppLanguageController.instance.value = AppLanguage.tr);
+      await pump(t, const LanguageRebuilder(child: V21SettingsScreen()), const Size(390, 844));
+      expect(find.text('AYARLAR'), findsWidgets);
+      final english = find.byKey(const ValueKey('dil-en'));
+      await t.scrollUntilVisible(english, 200, scrollable: find.byType(Scrollable).first);
+      await t.tap(english);
+      await t.pump(const Duration(milliseconds: 300));
+      expect(AppLanguageController.instance.value, AppLanguage.en);
+      expect(find.text('SETTINGS'), findsWidgets);
+      expect(find.text('LANGUAGE'), findsOneWidget);
+      expect(find.text('AYARLAR'), findsNothing);
+      // Seçim cihazda saklanır
+      final depo = await SharedPreferences.getInstance();
+      expect(depo.getString(AppLanguageController.prefsKey), 'en');
+
+      await t.tap(find.byKey(const ValueKey('dil-tr')));
+      await t.pump(const Duration(milliseconds: 300));
+      expect(find.text('AYARLAR'), findsWidgets);
+      expect(find.text('DİL'), findsOneWidget);
       await unmount(t);
     });
 

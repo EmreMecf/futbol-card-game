@@ -10,6 +10,7 @@ import '../viewmodel/auth_view_model.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/auth_validators.dart';
 import '../widgets/social_auth_buttons.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Kayıt ekranı.
 class RegisterView extends StatefulWidget {
@@ -51,7 +52,7 @@ class _RegisterViewState extends State<RegisterView> {
     if (!mounted) return;
 
     if (basarili) {
-      AppSnackBar.showSuccess(context, 'Hesabın oluşturuldu! Başlangıç kadron hazır.');
+      AppSnackBar.showSuccess(context, 'Hesabın oluşturuldu! Başlangıç kadron hazır.'.tr);
       context.go(hedef);
     } else {
       setState(() => _hata = viewModel.error);
@@ -70,8 +71,8 @@ class _RegisterViewState extends State<RegisterView> {
 
     return AuthScaffold(
       showBack: true,
-      title: 'KADRONU KUR',
-      subtitle: 'Hesabını oluştur; başlangıç kadron hemen hazır olsun.',
+      title: 'KADRONU KUR'.tr,
+      subtitle: 'Hesabını oluştur; başlangıç kadron hemen hazır olsun.'.tr,
       child: Form(
         key: _formKey,
         child: Column(
@@ -85,9 +86,9 @@ class _RegisterViewState extends State<RegisterView> {
               onChanged: (_) => _hataTemizle(),
               style: V21Type.label(15, weight: FontWeight.w700, color: Colors.white),
               decoration: authFieldDecoration(
-                'Kullanıcı adı',
+                'Kullanıcı adı'.tr,
                 Icons.person_outline_rounded,
-                helper: 'Rakiplerin seni bu adla görecek',
+                helper: 'Rakiplerin seni bu adla görecek'.tr,
               ),
               validator: AuthValidators.username,
             ),
@@ -99,7 +100,7 @@ class _RegisterViewState extends State<RegisterView> {
               autofillHints: const [AutofillHints.email],
               onChanged: (_) => _hataTemizle(),
               style: V21Type.label(15, weight: FontWeight.w700, color: Colors.white),
-              decoration: authFieldDecoration('E-posta', Icons.mail_outline_rounded),
+              decoration: authFieldDecoration('E-posta'.tr, Icons.mail_outline_rounded),
               validator: AuthValidators.email,
             ),
             const SizedBox(height: 12),
@@ -112,11 +113,11 @@ class _RegisterViewState extends State<RegisterView> {
               onFieldSubmitted: (_) => _submit(),
               style: V21Type.label(15, weight: FontWeight.w700, color: Colors.white),
               decoration: authFieldDecoration(
-                'Şifre',
+                'Şifre'.tr,
                 Icons.lock_outline_rounded,
-                helper: 'En az ${AuthValidators.minPasswordLength} karakter',
+                helper: 'En az {minPasswordLength} karakter'.trArgs({'minPasswordLength': AuthValidators.minPasswordLength}),
                 suffix: IconButton(
-                  tooltip: _obscurePassword ? 'Şifreyi göster' : 'Şifreyi gizle',
+                  tooltip: _obscurePassword ? 'Şifreyi göster'.tr : 'Şifreyi gizle'.tr,
                   color: V21Colors.textMuted,
                   icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -130,7 +131,7 @@ class _RegisterViewState extends State<RegisterView> {
             ],
             const SizedBox(height: 16),
             V21GameButton(
-              label: 'HESAP OLUŞTUR',
+              label: 'HESAP OLUŞTUR'.tr,
               size: V21ButtonSize.large,
               status: viewModel.isBusy ? V21ButtonStatus.loading : V21ButtonStatus.normal,
               onPressed: _submit,

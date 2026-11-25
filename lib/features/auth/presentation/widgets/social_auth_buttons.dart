@@ -13,6 +13,7 @@ import '../../domain/repositories/social_auth_repository.dart';
 import '../viewmodel/auth_view_model.dart';
 import 'auth_scaffold.dart';
 import 'auth_validators.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Giriş ve kayıt ekranlarındaki "Google / Apple ile devam et" bölümü.
 /// Ayarlı sağlayıcı yoksa hiç yer kaplamaz.
@@ -100,7 +101,7 @@ class _SocialAuthButtonsState extends State<SocialAuthButtons> {
             const Expanded(child: Divider(color: V21Colors.textMuted, height: 1)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Text('VEYA', style: V21Type.label(12, weight: FontWeight.w800, color: V21Colors.textMuted)),
+              child: Text('VEYA'.tr, style: V21Type.label(12, weight: FontWeight.w800, color: V21Colors.textMuted)),
             ),
             const Expanded(child: Divider(color: V21Colors.textMuted, height: 1)),
           ],
@@ -108,7 +109,7 @@ class _SocialAuthButtonsState extends State<SocialAuthButtons> {
         const SizedBox(height: 12),
         if (vm.appleAvailable) ...[
           _ProviderButton(
-            label: 'Apple ile devam et',
+            label: 'Apple ile devam et'.tr,
             background: Colors.black,
             foreground: Colors.white,
             icon: const Icon(Icons.apple, color: Colors.white, size: 24),
@@ -126,7 +127,7 @@ class _SocialAuthButtonsState extends State<SocialAuthButtons> {
             )
           else
             _ProviderButton(
-              label: 'Google ile devam et',
+              label: 'Google ile devam et'.tr,
               background: Colors.white,
               foreground: const Color(0xFF1F1F1F),
               icon: const SizedBox.square(dimension: 20, child: CustomPaint(painter: _GoogleLogoPainter())),
@@ -254,10 +255,10 @@ class _UsernameDialogState extends State<_UsernameDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('ADINI SEÇ', textAlign: TextAlign.center, style: V21Type.title(24, color: V21Colors.goldTop)),
+                Text('ADINI SEÇ'.tr, textAlign: TextAlign.center, style: V21Type.title(24, color: V21Colors.goldTop)),
                 const SizedBox(height: 6),
                 Text(
-                  'Rakiplerin seni bu adla görecek.',
+                  'Rakiplerin seni bu adla görecek.'.tr,
                   textAlign: TextAlign.center,
                   style: V21Type.label(13, weight: FontWeight.w700, color: V21Colors.textMuted),
                 ),
@@ -269,7 +270,7 @@ class _UsernameDialogState extends State<_UsernameDialog> {
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => _submit(),
                   style: V21Type.label(15, weight: FontWeight.w700, color: Colors.white),
-                  decoration: authFieldDecoration('Kullanıcı adı', Icons.person_outline_rounded),
+                  decoration: authFieldDecoration('Kullanıcı adı'.tr, Icons.person_outline_rounded),
                   validator: AuthValidators.username,
                 ),
                 if (error != null) ...[
@@ -278,7 +279,7 @@ class _UsernameDialogState extends State<_UsernameDialog> {
                 ],
                 const SizedBox(height: 12),
                 V21GameButton(
-                  label: 'OYUNA BAŞLA',
+                  label: 'OYUNA BAŞLA'.tr,
                   size: V21ButtonSize.large,
                   status: vm.isBusy ? V21ButtonStatus.loading : V21ButtonStatus.normal,
                   onPressed: _submit,
@@ -286,7 +287,7 @@ class _UsernameDialogState extends State<_UsernameDialog> {
                 const SizedBox(height: 4),
                 TextButton(
                   onPressed: vm.isBusy ? null : () => Navigator.of(context).pop(false),
-                  child: Text('VAZGEÇ', style: V21Type.label(13, weight: FontWeight.w800, color: V21Colors.textMuted)),
+                  child: Text('VAZGEÇ'.tr, style: V21Type.label(13, weight: FontWeight.w800, color: V21Colors.textMuted)),
                 ),
               ],
             ),

@@ -5,6 +5,7 @@ import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
 import '../../domain/deck_rules.dart';
 import '../../domain/repositories/deck_repository.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Kadro düzenleme ekranının beyni.
 ///
@@ -114,7 +115,7 @@ class DeckViewModel extends BaseViewModel {
       final eksik = p.requiredCount - countFor(p);
       if (eksik > 0) eksikler.add('$eksik ${p.label.toLowerCase()}');
     }
-    return eksikler.isEmpty ? duplicateMessage : 'Eksik: ${eksikler.join(', ')}';
+    return eksikler.isEmpty ? duplicateMessage : 'Eksik: {p}'.trArgs({'p': eksikler.join(', ')});
   }
 
   bool isSelected(String userCardId) =>
@@ -206,7 +207,7 @@ class DeckViewModel extends BaseViewModel {
     _aktifDeste = aktif.isNotEmpty ? aktif.first : liste.firstOrNull;
 
     if (_aktifDeste == null) {
-      final yeni = await _repository.createDeck('Kadrom');
+      final yeni = await _repository.createDeck('Kadrom'.tr);
       _aktifDeste = yeni.dataOrNull;
       if (_aktifDeste == null) {
         setError(yeni.errorOrNull!);
@@ -618,7 +619,7 @@ class DeckViewModel extends BaseViewModel {
 
     _degisiklikVar = false;
     GameAudio.sfx(Sfx.squadSave);
-    _kayitMesaji = 'Kadro kaydedildi';
+    _kayitMesaji = 'Kadro kaydedildi'.tr;
     safeNotify();
 
     // Sunucudaki kimyayı tazele: yerel hesapla uyuşmalı

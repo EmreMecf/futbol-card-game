@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../ui_v21/screens/auth/v21_splash_art.dart';
 import '../../../../ui_v21/ui_v21.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Giriş ve kayıt ekranlarının ortak iskeleti (referans login.png):
 /// stadyum, logo, üç karakter ve altta form paneli.
@@ -167,7 +168,7 @@ class AuthErrorBanner extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                isConnection ? '$message\nİnternet bağlantını kontrol edip tekrar dene.' : message,
+                isConnection ? '{message}\nİnternet bağlantını kontrol edip tekrar dene.'.trArgs({'message': message}) : message,
                 style: V21Type.label(12.5, weight: FontWeight.w700, color: Colors.white, height: 1.4),
               ),
             ),

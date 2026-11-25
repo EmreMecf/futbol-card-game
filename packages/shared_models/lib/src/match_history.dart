@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'display_text.dart';
 
 part 'match_history.freezed.dart';
 part 'match_history.g.dart';
@@ -17,16 +18,16 @@ enum MatchOutcome {
   bool get isDraw => this == MatchOutcome.draw;
 
   String get label => switch (this) {
-        MatchOutcome.win => 'Galibiyet',
-        MatchOutcome.loss => 'Mağlubiyet',
-        MatchOutcome.draw => 'Beraberlik',
+        MatchOutcome.win => 'Galibiyet'.dt,
+        MatchOutcome.loss => 'Mağlubiyet'.dt,
+        MatchOutcome.draw => 'Beraberlik'.dt,
       };
 
   /// Kisa hali: mac listesinde skorun yaninda duran tek kelime
   String get shortLabel => switch (this) {
-        MatchOutcome.win => 'Kazandın',
-        MatchOutcome.loss => 'Kaybettin',
-        MatchOutcome.draw => 'Berabere',
+        MatchOutcome.win => 'Kazandın'.dt,
+        MatchOutcome.loss => 'Kaybettin'.dt,
+        MatchOutcome.draw => 'Berabere'.dt,
       };
 }
 
@@ -72,8 +73,8 @@ abstract class MatchHistoryEntry with _$MatchHistoryEntry {
   /// Beraberlikte ve korumanin tuttugu maclarda kart degismedigi icin
   /// bos donuyor; arayuz o zaman satiri hic cizmiyor.
   String? get transferText {
-    if (cardsWon > 0) return '$cardsWon kart aldın';
-    if (cardsLost > 0) return '$cardsLost kart kaptırdın';
+    if (cardsWon > 0) return '{cardsWon} kart aldın'.dtArgs({'cardsWon': cardsWon});
+    if (cardsLost > 0) return '{cardsLost} kart kaptırdın'.dtArgs({'cardsLost': cardsLost});
     return null;
   }
 }

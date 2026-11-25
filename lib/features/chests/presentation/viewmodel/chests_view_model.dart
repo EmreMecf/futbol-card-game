@@ -13,6 +13,7 @@ import '../../../../core/utils/result.dart';
 import '../../domain/chest_messages.dart';
 import '../../../items/domain/items_repository.dart';
 import '../../domain/chest_repository.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Sandıklar (Ekonomi V2, FAZ 1) — ana sayfa şeridi ve sandık ekranı.
 ///
@@ -79,7 +80,7 @@ class ChestsViewModel extends BaseViewModel {
     final bedel = gemCost(c);
     if (bedel == null) return Future.value(false);
     if (gems < bedel) {
-      _hata = 'Yeterli elmas yok ($bedel gerekli, sende $gems).';
+      _hata = 'Yeterli elmas yok ({bedel} gerekli, sende {gems}).'.trArgs({'bedel': bedel, 'gems': gems});
       safeNotify();
       return Future.value(false);
     }

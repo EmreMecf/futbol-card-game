@@ -17,6 +17,7 @@ import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
 import '../../web/web_kit.dart';
 import '../../web/web_screens.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 MAÇA HAZIRLAN + RAKİP ARAMA (referans matchPrep, hf3–hf6).
 ///
@@ -261,49 +262,49 @@ class _Prep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        V21PageTitle(title: 'MAÇA HAZIRLAN', scale: k, onBack: () => context.go(AppRoutes.home)),
+        V21PageTitle(title: 'MAÇA HAZIRLAN'.tr, scale: k, onBack: () => context.go(AppRoutes.home)),
         SizedBox(height: 10 * k),
         _Hero(
           scale: k,
-          status: checking ? 'Kadro kontrol ediliyor…' : (v?.displayMessage ?? 'Kadro bulunamadı'),
+          status: checking ? 'Kadro kontrol ediliyor…'.tr : (v?.displayMessage ?? 'Kadro bulunamadı'.tr),
           valid: valid,
-          tag: vm.cardLossEnabled ? 'KORUMA ${vm.protectedCardIds.length}/${vm.maxProtection}' : 'KART KAYBI YOK',
+          tag: vm.cardLossEnabled ? 'KORUMA {length}/{maxProtection}'.trArgs({'length': vm.protectedCardIds.length, 'maxProtection': vm.maxProtection}) : 'KART KAYBI YOK'.tr,
         ),
         if (vm.tutorial?.shouldOffer ?? false) ...[SizedBox(height: 12 * k), _TutorialOffer(vm: vm, scale: k)],
         SizedBox(height: 14 * k),
         V21GameButton(
-          label: 'RAKİP BUL',
+          label: 'RAKİP BUL'.tr,
           size: V21ButtonSize.large,
           leadingIcon: Icons.sports_soccer_rounded,
           scale: k,
-          semanticsLabel: valid ? 'Rakip bul: dereceli maç' : 'Rakip bul: önce kadroyu düzelt',
+          semanticsLabel: valid ? 'Rakip bul: dereceli maç'.tr : 'Rakip bul: önce kadroyu düzelt'.tr,
           status: checking || v == null ? V21ButtonStatus.disabled : V21ButtonStatus.normal,
           onPressed: onFind,
         ),
         SizedBox(height: 10 * k),
         V21GameButton(
-          label: 'ARKADAŞINLA OYNA',
+          label: 'ARKADAŞINLA OYNA'.tr,
           tone: V21ButtonTone.purple,
           leadingIcon: Icons.person_add_alt_1_rounded,
           scale: k,
-          semanticsLabel: 'Arkadaşınla özel ve ödülsüz maç aç',
+          semanticsLabel: 'Arkadaşınla özel ve ödülsüz maç aç'.tr,
           onPressed: () => context.push(AppRoutes.friends),
         ),
         if (vm.trainingEnabled) ...[
           SizedBox(height: 10 * k),
           V21GameButton(
-            label: 'BOTLA ANTRENMAN',
+            label: 'BOTLA ANTRENMAN'.tr,
             tone: V21ButtonTone.green,
             leadingIcon: Icons.smart_toy_rounded,
             scale: k,
-            semanticsLabel: 'Botla antrenman: ödülsüz ve puansız',
+            semanticsLabel: 'Botla antrenman: ödülsüz ve puansız'.tr,
             status: vm.canSearch ? V21ButtonStatus.normal : V21ButtonStatus.disabled,
             onPressed: vm.startTraining,
           ),
         ],
         SizedBox(height: 10 * k),
         V21GameButton(
-          label: 'KADROYU DÜZENLE',
+          label: 'KADROYU DÜZENLE'.tr,
           tone: V21ButtonTone.purple,
           leadingIcon: Icons.groups_rounded,
           scale: k,
@@ -314,8 +315,7 @@ class _Prep extends StatelessWidget {
           _Protection(vm: vm, scale: k)
         else
           Text(
-            'Dereceli maçta kart kaybı yok: kartların sende kalır. Kazanırsan kadrondaki bir futbolcu +1 gelişim '
-            'kopyası alır.',
+            'Dereceli maçta kart kaybı yok: kartların sende kalır. Kazanırsan kadrondaki bir futbolcu +1 gelişim kopyası alır.'.tr,
             textAlign: TextAlign.center,
             style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted, height: 1.4),
           ),
@@ -380,7 +380,7 @@ class _Hero extends StatelessWidget {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text('Takımın hazır mı?', style: V21Type.title(26 * k, shadows: V21Type.inkShadow(k))),
+                      child: Text('Takımın hazır mı?'.tr, style: V21Type.title(26 * k, shadows: V21Type.inkShadow(k))),
                     ),
                     const Spacer(),
                     Semantics(
@@ -419,7 +419,7 @@ class _TutorialOffer extends StatelessWidget {
   final double scale;
   const _TutorialOffer({required this.vm, required this.scale});
 
-  static const _steps = ['MEVKİ', 'KART', 'TAKTİK'];
+  static List<String> get _steps => ['MEVKİ'.tr, 'KART'.tr, 'TAKTİK'.tr];
 
   @override
   Widget build(BuildContext context) {
@@ -433,7 +433,7 @@ class _TutorialOffer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'ÖĞRETİCİ · $step/3',
+            'ÖĞRETİCİ · {step}/3'.trArgs({'step': step}),
             textAlign: TextAlign.center,
             style: V21Type.title(22 * k, color: V21Colors.goldTop, shadows: V21Type.inkShadow(k)),
           ),
@@ -441,13 +441,13 @@ class _TutorialOffer extends StatelessWidget {
           V21StepTracker(labels: _steps, current: step, scale: k),
           SizedBox(height: 6 * k),
           Text(
-            'Bota karşı kısa maç (6 kart), puan ve ödül yok. 3 adımı bitirince Gümüş sandık kazanırsın.',
+            'Bota karşı kısa maç (6 kart), puan ve ödül yok. 3 adımı bitirince Gümüş sandık kazanırsın.'.tr,
             textAlign: TextAlign.center,
             style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted, height: 1.35),
           ),
           SizedBox(height: 10 * k),
           V21GameButton(
-            label: 'ÖĞRETİCİYİ BAŞLAT',
+            label: 'ÖĞRETİCİYİ BAŞLAT'.tr,
             tone: V21ButtonTone.blue,
             scale: k,
             status: vm.canSearch ? V21ButtonStatus.normal : V21ButtonStatus.disabled,
@@ -473,12 +473,12 @@ class _Protection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: V21SectionTitle('KARTLARINI KORU ${vm.protectedCardIds.length}/${vm.maxProtection}', scale: k),
+              child: V21SectionTitle('KARTLARINI KORU {length}/{maxProtection}'.trArgs({'length': vm.protectedCardIds.length, 'maxProtection': vm.maxProtection}), scale: k),
             ),
             SizedBox(
               width: 132 * k,
               child: V21GameButton(
-                label: 'EN İYİLERİ KORU',
+                label: 'EN İYİLERİ KORU'.tr,
                 tone: V21ButtonTone.blue,
                 size: V21ButtonSize.small,
                 scale: k,
@@ -489,8 +489,7 @@ class _Protection extends StatelessWidget {
         ),
         SizedBox(height: 6 * k),
         Text(
-          'Maçı kaybedersen korumaya ALMADIĞIN kartlardan ${GameRules.penaltyCardCount} tanesi rastgele seçilip '
-          'kalıcı olarak rakibe geçer. Her galibiyette 1 koruma hakkı kazanırsın.',
+          'Maçı kaybedersen korumaya ALMADIĞIN kartlardan {penaltyCardCount} tanesi rastgele seçilip kalıcı olarak rakibe geçer. Her galibiyette 1 koruma hakkı kazanırsın.'.trArgs({'penaltyCardCount': GameRules.penaltyCardCount}),
           style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted, height: 1.4),
         ),
         SizedBox(height: 10 * k),
@@ -510,7 +509,7 @@ class _Protection extends StatelessWidget {
                     protected: vm.isProtected(c.userCardId),
                     onTap: () {
                       if (!vm.isProtected(c.userCardId) && !vm.canProtectMore) {
-                        AppSnackBar.showInfo(context, 'Koruma hakkın doldu. Her galibiyette 1 hak kazanırsın.');
+                        AppSnackBar.showInfo(context, 'Koruma hakkın doldu. Her galibiyette 1 hak kazanırsın.'.tr);
                         return;
                       }
                       vm.toggleProtection(c.userCardId);
@@ -537,7 +536,7 @@ class _ProtectCard extends StatelessWidget {
     return Semantics(
       button: true,
       selected: protected,
-      label: '${card.fullName}, ${card.power} güç, ${protected ? 'korumada' : 'korumasız'}',
+      label: '{fullName}, {power} güç, {p}'.trArgs({'fullName': card.fullName, 'power': card.power, 'p': protected ? 'korumada'.tr : 'korumasız'.tr}),
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
@@ -588,17 +587,17 @@ class _Search extends StatelessWidget {
     final d = vm.searchDuration;
     final clock = '${d.inMinutes.toString().padLeft(2, '0')}:${(d.inSeconds % 60).toString().padLeft(2, '0')}';
     final (title, text) = switch (phase) {
-      V21SearchPhase.searching => ('RAKİP ARANIYOR', 'Benzer güçte rakip aranıyor'),
-      V21SearchPhase.widened => ('ARAMA DEVAM EDİYOR', 'Arama aralığı genişletiliyor'),
+      V21SearchPhase.searching => ('RAKİP ARANIYOR'.tr, 'Benzer güçte rakip aranıyor'.tr),
+      V21SearchPhase.widened => ('ARAMA DEVAM EDİYOR'.tr, 'Arama aralığı genişletiliyor'.tr),
       V21SearchPhase.notFound => (
-        'HENÜZ RAKİP BULUNAMADI',
+        'HENÜZ RAKİP BULUNAMADI'.tr,
         vm.trainingEnabled
-            ? 'Şu anda uygun rakip yok. Arama sürüyor; istersen botla antrenman yap.'
-            : 'Şu anda uygun rakip yok. Arama sürüyor, biri gelince maç başlar.',
+            ? 'Şu anda uygun rakip yok. Arama sürüyor; istersen botla antrenman yap.'.tr
+            : 'Şu anda uygun rakip yok. Arama sürüyor, biri gelince maç başlar.'.tr,
       ),
       V21SearchPhase.offline => (
-        'BAĞLANTI KONTROL EDİLİYOR',
-        'Bağlantın yeniden deneniyor. Rakip arama otomatik sürüyor.',
+        'BAĞLANTI KONTROL EDİLİYOR'.tr,
+        'Bağlantın yeniden deneniyor. Rakip arama otomatik sürüyor.'.tr,
       ),
     };
     final offerTraining = vm.trainingEnabled && phase != V21SearchPhase.searching && phase != V21SearchPhase.offline;
@@ -620,7 +619,7 @@ class _Search extends StatelessWidget {
         SizedBox(height: 16 * k),
         Center(
           child: Semantics(
-            label: 'Arama süresi ${d.inSeconds} saniye',
+            label: 'Arama süresi {inSeconds} saniye'.trArgs({'inSeconds': d.inSeconds}),
             excludeSemantics: true,
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 18 * k, vertical: 6 * k),
@@ -656,24 +655,24 @@ class _Search extends StatelessWidget {
         ],
         SizedBox(height: 6 * k),
         Text(
-          vm.cardLossEnabled ? '${vm.protectedCardIds.length} kart korumada' : 'Kart kaybı yok',
+          vm.cardLossEnabled ? '{length} kart korumada'.trArgs({'length': vm.protectedCardIds.length}) : 'Kart kaybı yok'.tr,
           textAlign: TextAlign.center,
           style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
         ),
         SizedBox(height: 18 * k),
         if (offerTraining) ...[
           V21GameButton(
-            label: 'BOTLA ANTRENMAN',
+            label: 'BOTLA ANTRENMAN'.tr,
             tone: V21ButtonTone.green,
             leadingIcon: Icons.smart_toy_rounded,
             scale: k,
-            semanticsLabel: 'Aramayı bırak, botla antrenman yap',
+            semanticsLabel: 'Aramayı bırak, botla antrenman yap'.tr,
             onPressed: onTrain,
           ),
           SizedBox(height: 10 * k),
         ],
         V21GameButton(
-          label: 'ARAMAYI İPTAL ET',
+          label: 'ARAMAYI İPTAL ET'.tr,
           tone: phase == V21SearchPhase.searching ? V21ButtonTone.blue : V21ButtonTone.red,
           size: V21ButtonSize.large,
           scale: k,

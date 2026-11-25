@@ -15,6 +15,7 @@ import '../../../../core/network/websocket_service.dart';
 import '../../../../core/utils/result.dart';
 import '../../domain/repositories/social_auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Google ve Apple SDK'larını sunucudaki `/auth/social` ucuna bağlar.
 ///
@@ -83,7 +84,7 @@ class SocialAuthRepositoryImpl implements SocialAuthRepository {
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
       throw AppException(
-        message: 'Google ile giriş tamamlanamadı. Lütfen tekrar dene.',
+        message: 'Google ile giriş tamamlanamadı. Lütfen tekrar dene.'.tr,
         technicalDetail: e.toString(),
       );
     }
@@ -103,13 +104,13 @@ class SocialAuthRepositoryImpl implements SocialAuthRepository {
             : null,
       );
       final token = credential.identityToken;
-      if (token == null) throw const SignInWithAppleCredentialsException(message: 'identityToken yok');
+      if (token == null) throw SignInWithAppleCredentialsException(message: 'identityToken yok');
       return SocialCredential(provider: SocialProvider.apple, idToken: token, nonce: nonce);
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) return null;
-      throw AppException(message: 'Apple ile giriş tamamlanamadı. Lütfen tekrar dene.', technicalDetail: e.toString());
+      throw AppException(message: 'Apple ile giriş tamamlanamadı. Lütfen tekrar dene.'.tr, technicalDetail: e.toString());
     } on SignInWithAppleException catch (e) {
-      throw AppException(message: 'Apple ile giriş tamamlanamadı. Lütfen tekrar dene.', technicalDetail: e.toString());
+      throw AppException(message: 'Apple ile giriş tamamlanamadı. Lütfen tekrar dene.'.tr, technicalDetail: e.toString());
     }
   }
 

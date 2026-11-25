@@ -7,6 +7,7 @@ import '../../../../core/error/app_exception.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/utils/result.dart';
 import '../../domain/season_repository.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// SEZON YOLU (Ekonomi V2, FAZ 4). Ödül alma her eylemde bir idempotency
 /// anahtarı taşır; ağ hatasında aynı eylem aynı anahtarla tekrar denenir,
@@ -56,7 +57,7 @@ class SeasonViewModel extends BaseViewModel {
       _eylem('$track:${t.tier}', 'claim:${t.tier}:$track', (k) => _repository.claim(t.tier, track, idempotencyKey: k),
           (sonuc) {
         GameAudio.sfx(Sfx.seasonClaim);
-        _bilgi = '${t.tier}. kademe ödülü alındı: ${rewardLabel(track == 'free' ? t.free : t.premium)}.';
+        _bilgi = '{tier}. kademe ödülü alındı: {p}.'.trArgs({'tier': t.tier, 'p': rewardLabel(track == 'free' ? t.free : t.premium)});
       });
 
   Future<bool> claimAll() {
@@ -64,7 +65,7 @@ class SeasonViewModel extends BaseViewModel {
     return _eylem('all', 'all:${s?.xp}:${s?.claimableCount}', (k) => _repository.claimAll(idempotencyKey: k), (sonuc) {
       final n = (sonuc['count'] as num?)?.toInt() ?? 0;
       if (n > 0) GameAudio.sfx(Sfx.seasonClaim);
-      _bilgi = n == 0 ? 'Alınacak ödül yok.' : '$n ödül alındı.';
+      _bilgi = n == 0 ? 'Alınacak ödül yok.'.tr : '{n} ödül alındı.'.trArgs({'n': n});
     });
   }
 
@@ -95,16 +96,16 @@ class SeasonViewModel extends BaseViewModel {
 
 /// "93 altın", "Gümüş sandık", "Altın joker parça ×3"
 String rewardLabel(SeasonReward r) {
-  if (r.isCoins) return '${r.amount} altın';
+  if (r.isCoins) return '{amount} altın'.trArgs({'amount': r.amount});
   if (r.isChest) {
     final ad = switch (r.chestType) {
-      'bronze' => 'Bronz',
-      'silver' => 'Gümüş',
-      'gold' => 'Altın',
-      'legend' => 'Efsane',
+      'bronze' => 'Bronz'.tr,
+      'silver' => 'Gümüş'.tr,
+      'gold' => 'Altın'.tr,
+      'legend' => 'Efsane'.tr,
       _ => r.chestType ?? '',
     };
-    return '$ad sandık';
+    return '{ad} sandık'.trArgs({'ad': ad});
   }
   final ad = r.name ?? r.slug ?? 'Item';
   return r.qty > 1 ? '$ad ×${r.qty}' : ad;

@@ -9,6 +9,7 @@ import '../screens/home/v21_home_nav.dart';
 import '../theme/v21_theme.dart';
 import '../utilities/v21_scale.dart';
 import 'v21_screen_layout.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Yüklenme durumu: veri yok + yükleniyor / hata / kapalı / hazır
 enum V21PageState { loading, error, disabled, ready }
@@ -98,9 +99,9 @@ class V21InnerPage extends StatelessWidget {
             V21PageState.error => [
               V21EmptyState(
                 icon: Icons.cloud_off_rounded,
-                title: 'BAĞLANTI SORUNU',
-                message: errorMessage ?? 'Bilgi yüklenemedi. Bağlantını kontrol edip tekrar dene.',
-                actionLabel: onRetry == null ? null : 'TEKRAR DENE',
+                title: 'BAĞLANTI SORUNU'.tr,
+                message: errorMessage ?? 'Bilgi yüklenemedi. Bağlantını kontrol edip tekrar dene.'.tr,
+                actionLabel: onRetry == null ? null : 'TEKRAR DENE'.tr,
                 onAction: onRetry,
                 scale: k,
               ),
@@ -108,8 +109,8 @@ class V21InnerPage extends StatelessWidget {
             V21PageState.disabled => [
               V21EmptyState(
                 icon: Icons.hourglass_top_rounded,
-                title: disabledTitle,
-                message: disabledMessage,
+                title: disabledTitle.tr,
+                message: disabledMessage.tr,
                 scale: k,
               ),
             ],

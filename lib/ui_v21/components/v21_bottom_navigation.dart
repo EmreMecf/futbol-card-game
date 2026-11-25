@@ -8,6 +8,7 @@ import 'v21_item_art.dart';
 import 'v21_mascot.dart';
 import 'v21_painters.dart';
 import 'v21_tap.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Alt menü maddesi
 @immutable
@@ -49,19 +50,19 @@ class V21BottomNavigation extends StatelessWidget {
     required String season,
   }) => [
     V21NavItem(
-      label: 'KARTLAR',
+      label: 'KARTLAR'.tr,
       route: cards,
       icon: (s) => V21CardStackIcon(size: s * 1.2),
     ),
-    V21NavItem(label: 'KADRO', route: squad, icon: (s) => V21MascotHead(size: s)),
-    V21NavItem(label: 'ARENA', route: arena, icon: (s) => _RoundArt(V21Assets.navArenaStadium, s)),
+    V21NavItem(label: 'KADRO'.tr, route: squad, icon: (s) => V21MascotHead(size: s)),
+    V21NavItem(label: 'ARENA'.tr, route: arena, icon: (s) => _RoundArt(V21Assets.navArenaStadium, s)),
     V21NavItem(
-      label: 'MAĞAZA',
+      label: 'MAĞAZA'.tr,
       route: store,
       icon: (s) => V21ChestArt(width: s * 1.3),
     ),
     V21NavItem(
-      label: 'SEZON',
+      label: 'SEZON'.tr,
       route: season,
       icon: (s) => V21StarIcon(size: s * 0.8),
     ),

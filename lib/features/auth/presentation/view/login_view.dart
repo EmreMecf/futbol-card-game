@@ -9,6 +9,7 @@ import '../viewmodel/auth_view_model.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/auth_validators.dart';
 import '../widgets/social_auth_buttons.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Giriş ekranı.
 ///
@@ -62,8 +63,8 @@ class _LoginViewState extends State<LoginView> {
     final hata = _hata;
 
     return AuthScaffold(
-      title: 'HOŞ GELDİN!',
-      subtitle: 'Kadrona dönmek için giriş yap.',
+      title: 'HOŞ GELDİN!'.tr,
+      subtitle: 'Kadrona dönmek için giriş yap.'.tr,
       child: Form(
         key: _formKey,
         child: Column(
@@ -76,7 +77,7 @@ class _LoginViewState extends State<LoginView> {
               autofillHints: const [AutofillHints.email],
               onChanged: (_) => _hataTemizle(),
               style: V21Type.label(15, weight: FontWeight.w700, color: Colors.white),
-              decoration: authFieldDecoration('E-posta', Icons.mail_outline_rounded),
+              decoration: authFieldDecoration('E-posta'.tr, Icons.mail_outline_rounded),
               validator: AuthValidators.email,
             ),
             const SizedBox(height: 12),
@@ -89,10 +90,10 @@ class _LoginViewState extends State<LoginView> {
               onFieldSubmitted: (_) => _submit(),
               style: V21Type.label(15, weight: FontWeight.w700, color: Colors.white),
               decoration: authFieldDecoration(
-                'Şifre',
+                'Şifre'.tr,
                 Icons.lock_outline_rounded,
                 suffix: IconButton(
-                  tooltip: _obscurePassword ? 'Şifreyi göster' : 'Şifreyi gizle',
+                  tooltip: _obscurePassword ? 'Şifreyi göster'.tr : 'Şifreyi gizle'.tr,
                   color: V21Colors.textMuted,
                   icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -106,7 +107,7 @@ class _LoginViewState extends State<LoginView> {
             ],
             const SizedBox(height: 16),
             V21GameButton(
-              label: 'GİRİŞ YAP',
+              label: 'GİRİŞ YAP'.tr,
               size: V21ButtonSize.large,
               status: viewModel.isBusy ? V21ButtonStatus.loading : V21ButtonStatus.normal,
               onPressed: _submit,
@@ -118,14 +119,14 @@ class _LoginViewState extends State<LoginView> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
-                  'Hesabın yok mu?',
+                  'Hesabın yok mu?'.tr,
                   style: V21Type.label(13, weight: FontWeight.w700, color: V21Colors.textMuted),
                 ),
                 TextButton(
                   onPressed: viewModel.isBusy
                       ? null
                       : () => context.push(AppRoutes.registerFrom(GoRouterState.of(context).uri)),
-                  child: Text('KAYDOL', style: V21Type.title(17, color: V21Colors.goldTop)),
+                  child: Text('KAYDOL'.tr, style: V21Type.title(17, color: V21Colors.goldTop)),
                 ),
               ],
             ),

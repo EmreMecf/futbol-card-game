@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../core/feedback/game_feedback.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
+import '../../core/l10n/app_language.dart';
 
 /// EKONOMİ V2 (FAZ 6) — kozmetiklerin ÇİZİMİ.
 ///
@@ -106,7 +107,7 @@ class CaptainBandBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        label: 'Kaptan bandı',
+        label: 'Kaptan bandı'.tr,
         child: Container(
           width: size * 1.3,
           height: size * 0.8,
@@ -132,9 +133,9 @@ class SeasonBadgeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (renk, ad) = switch (slug) {
-      'badge_s1_gold' => (V21Colors.goldTop, 'SEZON 1 · ALTIN'),
-      'badge_s1_bronze' => (const Color(0xFFD8945A), 'SEZON 1 · BRONZ'),
-      _ => (V21Colors.textMuted, 'SEZON ROZETİ'),
+      'badge_s1_gold' => (V21Colors.goldTop, 'SEZON 1 · ALTIN'.tr),
+      'badge_s1_bronze' => (const Color(0xFFD8945A), 'SEZON 1 · BRONZ'.tr),
+      _ => (V21Colors.textMuted, 'SEZON ROZETİ'.tr),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),

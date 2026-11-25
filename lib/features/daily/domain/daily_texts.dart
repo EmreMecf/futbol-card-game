@@ -1,18 +1,17 @@
 import 'package:shared_models/shared_models.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// Günlük panel metinleri (test edilebilsin diye ayrı)
 abstract final class DailyPanelTexts {
-  static String sandikAdi(String t) => t == 'silver' ? 'Gümüş' : 'Bronz';
+  static String sandikAdi(String t) => t == 'silver' ? 'Gümüş'.tr : 'Bronz'.tr;
 
   static (String, String) texts(DailyStatus d) {
     final sandik = d.claimedToday
-        ? 'Bugünkü ${sandikAdi(d.chestType)} sandığı alındı. Seri: ${d.streak} gün.'
-        : 'Bugün ücretsiz ${sandikAdi(d.chestType)} sandık seni bekliyor.'
-            // yeni oyuncuya "Seri: 0 gün" gösterme
-            '${d.streak > 0 ? ' Seri: ${d.streak} gün.' : ''}';
+        ? 'Bugünkü {p} sandığı alındı. Seri: {streak} gün.'.trArgs({'p': sandikAdi(d.chestType), 'streak': d.streak})
+        : 'Bugün ücretsiz {p} sandık seni bekliyor.{p2}'.trArgs({'p': sandikAdi(d.chestType), 'p2': d.streak > 0 ? ' Seri: {streak} gün.'.trArgs({'streak': d.streak}) : ''});
     final galibiyet = d.firstWinToday
-        ? 'Günün ilk galibiyeti alındı (çift XP).'
-        : 'Günün ilk dereceli galibiyeti ${d.firstWinMultiplier} kat sezon XP\'si verir.';
+        ? 'Günün ilk galibiyeti alındı (çift XP).'.tr
+        : 'Günün ilk dereceli galibiyeti {firstWinMultiplier} kat sezon XP\'si verir.'.trArgs({'firstWinMultiplier': d.firstWinMultiplier});
     return (sandik, galibiyet);
   }
 }

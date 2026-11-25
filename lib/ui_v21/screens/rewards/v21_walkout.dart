@@ -8,6 +8,7 @@ import '../../../ui_v21/components/v21_club_crest.dart';
 import '../../../ui_v21/components/v21_confetti.dart';
 import '../../../ui_v21/components/v21_nation_flag.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 WALKOUT: Elmas/Efsane kartın açılış sahnesi (paket açılışında,
 /// karar mevcut `PackOpeningViewModel.styleFor`).
@@ -142,8 +143,8 @@ class _V21WalkoutScreenState extends State<V21WalkoutScreen> with SingleTickerPr
           final cardW = (230 * k).clamp(96.0, (box.maxHeight * 0.36).clamp(96.0, 230.0 * k));
           return Semantics(
             label: _done
-                ? '${r.name} kart: ${card.fullName}, ${card.position.label}, ${card.power} güç. Devam etmek için dokun.'
-                : 'Özel kart açılıyor. Atlamak için dokun.',
+                ? '{name} kart: {fullName}, {label}, {power} güç. Devam etmek için dokun.'.trArgs({'name': r.name, 'fullName': card.fullName, 'label': card.position.label, 'power': card.power})
+                : 'Özel kart açılıyor. Atlamak için dokun.'.tr,
             liveRegion: true,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -175,7 +176,7 @@ class _V21WalkoutScreenState extends State<V21WalkoutScreen> with SingleTickerPr
                           _layer(
                             _stage(t, _flagAt, _posAt),
                             _Clue(
-                              label: 'ÜLKE',
+                              label: 'ÜLKE'.tr,
                               scale: k,
                               child: NationFlag(code: card.nationality, width: 170 * k),
                             ),
@@ -184,7 +185,7 @@ class _V21WalkoutScreenState extends State<V21WalkoutScreen> with SingleTickerPr
                           _layer(
                             _stage(t, _clubAt, _cardAt),
                             _Clue(
-                              label: 'KULÜP',
+                              label: 'KULÜP'.tr,
                               scale: k,
                               child: ClubCrest(clubName: card.club, size: 140 * k),
                             ),
@@ -240,14 +241,14 @@ class _V21WalkoutScreenState extends State<V21WalkoutScreen> with SingleTickerPr
                             ? SizedBox(
                                 width: 280 * k,
                                 child: V21GameButton(
-                                  label: 'DEVAM',
+                                  label: 'DEVAM'.tr,
                                   size: V21ButtonSize.large,
                                   scale: k,
                                   onPressed: widget.onContinue,
                                 ),
                               )
                             : Text(
-                                'Atlamak için dokun',
+                                'Atlamak için dokun'.tr,
                                 style: V21Type.label(13 * k, weight: FontWeight.w800, color: const Color(0xB3FFFFFF)),
                               ),
                       ),
@@ -303,7 +304,7 @@ class _Position extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('MEVKİ', style: V21Type.title(22 * k, color: const Color(0xFFFFE6A0), letterSpacing: 3)),
+        Text('MEVKİ'.tr, style: V21Type.title(22 * k, color: const Color(0xFFFFE6A0), letterSpacing: 3)),
         V21HeroTitle(position.code, size: 110 * k),
         Text(
           V21Format.upper(position.label),

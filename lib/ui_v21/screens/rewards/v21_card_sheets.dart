@@ -10,6 +10,7 @@ import '../../../core/feedback/game_feedback.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/progress/domain/progress_repository.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 KART AYRINTISI (referans HTML demo `cardModal`: "KOLEKSİYON /
 /// OYUNCU KARTI", açıklama paneli, oyun düğmeleri).
@@ -40,7 +41,7 @@ class V21CardDetailSheet extends StatelessWidget {
     return showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: 'Kapat',
+      barrierLabel: 'Kapat'.tr,
       barrierColor: const Color(0xC0120933),
       transitionDuration: reduced ? Duration.zero : const Duration(milliseconds: 220),
       pageBuilder: (_, _, _) =>
@@ -75,7 +76,7 @@ class V21CardDetailSheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            'KOLEKSİYON',
+                            'KOLEKSİYON'.tr,
                             textAlign: TextAlign.center,
                             style: V21Type.label(
                               13,
@@ -85,7 +86,7 @@ class V21CardDetailSheet extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'OYUNCU KARTI',
+                            'OYUNCU KARTI'.tr,
                             textAlign: TextAlign.center,
                             style: V21Type.title(
                               30,
@@ -114,17 +115,17 @@ class V21CardDetailSheet extends StatelessWidget {
                           const SizedBox(height: 14),
                           Row(
                             children: [
-                              _Fact(value: '${card.power}', label: 'GÜÇ'),
+                              _Fact(value: '${card.power}', label: 'GÜÇ'.tr),
                               const SizedBox(width: 8),
-                              _Fact(value: r.name, label: 'NADİRLİK', color: r.frameLight),
+                              _Fact(value: r.name, label: 'NADİRLİK'.tr, color: r.frameLight),
                               const SizedBox(width: 8),
-                              _Fact(value: card.position.code, label: 'MEVKİ'),
+                              _Fact(value: card.position.code, label: 'MEVKİ'.tr),
                             ],
                           ),
                           if (card.level > 1) ...[
                             const SizedBox(height: 8),
                             Text(
-                              'Gelişim seviyesi ${card.level}',
+                              'Gelişim seviyesi {level}'.trArgs({'level': card.level}),
                               textAlign: TextAlign.center,
                               style: V21Type.label(12, weight: FontWeight.w800, color: V21Colors.successText),
                             ),
@@ -132,12 +133,12 @@ class V21CardDetailSheet extends StatelessWidget {
                           if (a != null && a.isNotEmpty) ...[
                             const SizedBox(height: 12),
                             for (final (label, v) in [
-                              ('ŞUT', a.shooting),
-                              ('HIZ', a.pace),
-                              ('DRİBLİNG', a.dribbling),
-                              ('HIZLANMA', a.acceleration),
-                              ('DEFANS', a.defending),
-                              ('FİZİK', a.physical),
+                              ('ŞUT'.tr, a.shooting),
+                              ('HIZ'.tr, a.pace),
+                              ('DRİBLİNG'.tr, a.dribbling),
+                              ('HIZLANMA'.tr, a.acceleration),
+                              ('DEFANS'.tr, a.defending),
+                              ('FİZİK'.tr, a.physical),
                             ])
                               _AttributeBar(label: label, value: v),
                           ],
@@ -150,21 +151,20 @@ class V21CardDetailSheet extends StatelessWidget {
                             ),
                           ],
                           if (card.isLocked)
-                            const _Note(
+                            _Note(
                               icon: Icons.lock_rounded,
-                              text: 'Bu kart devam eden bir maçta kilitli. Maç bitene kadar kadrondan çıkaramazsın.',
+                              text: 'Bu kart devam eden bir maçta kilitli. Maç bitene kadar kadrondan çıkaramazsın.'.tr,
                             ),
                           if (card.isLegend)
-                            const _Note(
+                            _Note(
                               icon: Icons.auto_awesome_rounded,
                               text:
-                                  'Efsane kart: gücü ne olursa olsun alttaki 4 nadirliği yener. Sadece gücü daha yüksek '
-                                  'bir Efsane yenebilir.',
+                                  'Efsane kart: gücü ne olursa olsun alttaki 4 nadirliği yener. Sadece gücü daha yüksek bir Efsane yenebilir.'.tr,
                             ),
                           const SizedBox(height: 14),
                           if (getIt.isRegistered<ProgressRepository>()) ...[
                             V21GameButton(
-                              label: 'GELİŞİME GİT',
+                              label: 'GELİŞİME GİT'.tr,
                               size: V21ButtonSize.medium,
                               onPressed: () {
                                 Navigator.of(context).maybePop();
@@ -178,7 +178,7 @@ class V21CardDetailSheet extends StatelessWidget {
                             const SizedBox(height: 8),
                           ],
                           V21GameButton(
-                            label: 'KAPAT',
+                            label: 'KAPAT'.tr,
                             tone: V21ButtonTone.purple,
                             size: V21ButtonSize.medium,
                             onPressed: () => Navigator.of(context).maybePop(),
@@ -337,12 +337,12 @@ class _FavoriteButtonState extends State<_FavoriteButton> {
     setState(() => _fav = before);
     ScaffoldMessenger.maybeOf(
       context,
-    )?.showSnackBar(const SnackBar(content: Text('En fazla 50 favori kartın olabilir.')));
+    )?.showSnackBar(SnackBar(content: Text('En fazla 50 favori kartın olabilir.'.tr)));
   }
 
   @override
   Widget build(BuildContext context) => V21GameButton(
-    label: _fav ? 'FAVORİDEN ÇIKAR' : 'FAVORİLERE EKLE',
+    label: _fav ? 'FAVORİDEN ÇIKAR'.tr : 'FAVORİLERE EKLE'.tr,
     leadingIcon: _fav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
     tone: V21ButtonTone.blue,
     size: V21ButtonSize.medium,
@@ -429,7 +429,7 @@ class V21CardPickerSheet extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'KADRO YÖNETİMİ',
+                'KADRO YÖNETİMİ'.tr,
                 style: V21Type.label(12, weight: FontWeight.w900, color: const Color(0xFFFEDB70), letterSpacing: 1.5),
               ),
               Padding(
@@ -438,12 +438,12 @@ class V21CardPickerSheet extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        '${V21Format.upper(position.label)} SEÇ',
+                        '{p} SEÇ'.trArgs({'p': V21Format.upper(position.label)}),
                         style: V21Type.title(28, shadows: V21Type.inkShadow(1)),
                       ),
                     ),
                     V21Tag(
-                      text: '${cards.length} KART',
+                      text: '{length} KART'.trArgs({'length': cards.length}),
                       background: V21Colors.panel,
                       foreground: V21Colors.textMuted,
                       fontSize: 12,
@@ -455,7 +455,7 @@ class V21CardPickerSheet extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
                   child: Text(
-                    'Şu an: ${current!.fullName} (${current!.power}). Değiştirmemek için aşağı kaydır.',
+                    'Şu an: {fullName} ({power}). Değiştirmemek için aşağı kaydır.'.trArgs({'fullName': current!.fullName, 'power': current!.power}),
                     style: V21Type.label(12, weight: FontWeight.w700, color: V21Colors.textMuted),
                   ),
                 ),
@@ -466,10 +466,9 @@ class V21CardPickerSheet extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         child: V21EmptyState(
                           icon: Icons.person_search_rounded,
-                          title: 'UYGUN KART YOK',
+                          title: 'UYGUN KART YOK'.tr,
                           message:
-                              '${position.label} mevkisinde kullanabileceğin kart yok. Mağazadan paket açarak yeni '
-                              'kartlar kazanabilirsin; devam eden maçta kilitli kartlar burada görünmez.',
+                              '{label} mevkisinde kullanabileceğin kart yok. Mağazadan paket açarak yeni kartlar kazanabilirsin; devam eden maçta kilitli kartlar burada görünmez.'.trArgs({'label': position.label}),
                         ),
                       )
                     : GridView.builder(
@@ -504,9 +503,9 @@ class V21CardPickerSheet extends StatelessWidget {
                                     right: -4,
                                     bottom: -6,
                                     child: Semantics(
-                                      label: 'Kimya $chem',
+                                      label: 'Kimya {chem}'.trArgs({'chem': chem}),
                                       child: V21Tag(
-                                        text: '+$chem KİMYA',
+                                        text: '+{chem} KİMYA'.trArgs({'chem': chem}),
                                         background: chem >= 5
                                             ? V21Colors.success
                                             : (chem > 0 ? const Color(0xFFFFB01B) : const Color(0xFF6B5A9C)),

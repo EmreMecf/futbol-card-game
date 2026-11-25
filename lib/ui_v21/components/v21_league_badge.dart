@@ -7,6 +7,7 @@ import '../utilities/v21_format.dart';
 import 'v21_painters.dart';
 import 'v21_progress_bar.dart';
 import 'v21_tap.dart';
+import '../../core/l10n/app_language.dart';
 
 /// V2.1 LİG ROZETİ (referans 62..315 × 72..143):
 /// mor kalkan ("M2") + altın panel (lig adı, puan, ilerleme).
@@ -48,9 +49,9 @@ class V21LeagueBadge extends StatelessWidget {
   static String shortCode(String leagueCode, int division) {
     final harf = switch (leagueCode) {
       'amateur' => 'A',
-      'usta' => 'U',
+      'usta' => isEnglish ? 'E' : 'U', // Usta = Expert
       'master' => 'M',
-      'master_class' => 'MC',
+      'master_class' => 'MC'.tr,
       _ => leagueCode.isEmpty ? '?' : leagueCode[0].toUpperCase(),
     };
     return '$harf$division';
@@ -90,7 +91,7 @@ class V21LeagueBadge extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    loading ? 'LİG' : title!,
+                    loading ? 'LİG'.tr : title!,
                     maxLines: 1,
                     style: V21Type.title(26 * k, letterSpacing: 0.2, shadows: V21Type.inkShadow(k)),
                   ),
@@ -116,7 +117,7 @@ class V21LeagueBadge extends StatelessWidget {
             value: progress,
             height: 12 * k,
             trackColor: V21Colors.trackBrown,
-            semanticsLabel: 'Lig ilerlemesi',
+            semanticsLabel: 'Lig ilerlemesi'.tr,
           ),
         ],
       ),
@@ -160,8 +161,8 @@ class V21LeagueBadge extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       label: loading
-          ? 'Lig bilgisi yükleniyor'
-          : ['Lig: $title', if (points != null) '${V21Format.thousands(points!)} puan', ?detail].join(', '),
+          ? 'Lig bilgisi yükleniyor'.tr
+          : ['Lig: {title}'.trArgs({'title': title}), if (points != null) '{p} puan'.trArgs({'p': V21Format.thousands(points!)}), ?detail].join(', '),
       excludeSemantics: true,
       child: V21Tap(
         onTap: onTap,

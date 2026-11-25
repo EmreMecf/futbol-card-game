@@ -7,6 +7,7 @@ import '../../../core/audio/game_audio.dart';
 import '../../../core/audio/sound_cues.dart';
 import '../../../features/match/domain/clash_event.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// TUR SONUCU: iki kart karşılaşır, sonuç şeridi çıkar. Sonucu sunucu
 /// belirler ([ClashEvent]); sahne yalnız gösterir. Dokununca atlanır.
@@ -180,8 +181,8 @@ class _Side extends StatelessWidget {
       return Stack(
         alignment: Alignment.center,
         children: [
-          V21CardBack(width: width, semanticsLabel: 'Pas'),
-          Text('PAS', style: V21Type.title(30 * scale, shadows: V21Type.inkShadow(scale))),
+          V21CardBack(width: width, semanticsLabel: 'Pas'.tr),
+          Text('PAS'.tr, style: V21Type.title(30 * scale, shadows: V21Type.inkShadow(scale))),
         ],
       );
     }

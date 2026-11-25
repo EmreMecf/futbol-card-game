@@ -7,6 +7,7 @@ import 'package:shared_models/shared_models.dart';
 import '../auth/session_manager.dart';
 import '../config/app_config.dart';
 import '../utils/logger.dart';
+import '../l10n/server_text.dart';
 
 /// Backend ile konusan tek istemci.
 ///
@@ -61,6 +62,8 @@ class ApiClient {
   }
 
   void _onResponse(Response response, ResponseInterceptorHandler handler) {
+    // Sunucunun Türkçe içerik metinleri (görev, eşya, hata) oyuncunun dilinde
+    response.data = ServerText.translateJson(response.data);
     if (AppConfig.enableLogging) {
       AppLogger.info(
         '<-- ${response.statusCode} ${response.requestOptions.path}',

@@ -1,6 +1,7 @@
 import 'package:shared_models/shared_models.dart';
 
 import '../../../core/utils/result.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// Futbolcu seviyesi (Ekonomi V2, FAZ 2). K1: dereceli gücü etkilemez.
 abstract class ProgressRepository {
@@ -12,16 +13,16 @@ abstract class ProgressRepository {
 
 /// Sunucu hata kodu -> Türkçe mesaj
 String progressErrorMessage(String? code, String fallback) => switch (code) {
-      'economy_disabled' => 'Gelişim sistemi henüz açık değil.',
-      'card_not_owned' => 'Bu futbolcu koleksiyonunda yok.',
-      'max_level' => 'Futbolcu en yüksek seviyede.',
-      'not_enough_copies' => 'Yeterli gelişim kopyası yok.',
-      'not_enough_jokers' => 'Yeterli joker parça yok.',
-      'not_enough_coins' => 'Yeterli altın yok.',
-      'not_convertible' => 'Bu kadar kopya dönüştürülemez (destedeki ve maçtaki kartlar sayılmaz).',
-      'invalid_count' => 'Geçersiz adet.',
-      'not_enough_items' => 'Yeterli item yok.',
-      'item_not_applicable' => 'Bu item bu futbolcuya kullanılamaz.',
-      'idempotency_in_progress' => 'İstek hâlâ işleniyor, birazdan tekrar dene.',
+      'economy_disabled' => 'Gelişim sistemi henüz açık değil.'.tr,
+      'card_not_owned' => 'Bu futbolcu koleksiyonunda yok.'.tr,
+      'max_level' => 'Futbolcu en yüksek seviyede.'.tr,
+      'not_enough_copies' => 'Yeterli gelişim kopyası yok.'.tr,
+      'not_enough_jokers' => 'Yeterli joker parça yok.'.tr,
+      'not_enough_coins' => 'Yeterli altın yok.'.tr,
+      'not_convertible' => 'Bu kadar kopya dönüştürülemez (destedeki ve maçtaki kartlar sayılmaz).'.tr,
+      'invalid_count' => 'Geçersiz adet.'.tr,
+      'not_enough_items' => 'Yeterli item yok.'.tr,
+      'item_not_applicable' => 'Bu item bu futbolcuya kullanılamaz.'.tr,
+      'idempotency_in_progress' => 'İstek hâlâ işleniyor, birazdan tekrar dene.'.tr,
       _ => fallback,
     };

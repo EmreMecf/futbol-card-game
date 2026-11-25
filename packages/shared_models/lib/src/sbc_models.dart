@@ -4,6 +4,7 @@ import 'card_model.dart';
 import 'chemistry.dart';
 import 'enums.dart';
 import 'game_rules.dart';
+import 'display_text.dart';
 
 part 'sbc_models.freezed.dart';
 part 'sbc_models.g.dart';
@@ -82,28 +83,28 @@ abstract class SbcRequirement with _$SbcRequirement {
   /// Ekranda gösterilecek Türkçe açıklama
   String get label => switch (type) {
         SbcRequirementType.exactTier =>
-          'Tüm kartlar ${tier?.label ?? ''} seviyesinde olmalı',
+          'Tüm kartlar {p} seviyesinde olmalı'.dtArgs({'p': tier?.label ?? ''}),
         SbcRequirementType.minTier =>
-          'Tüm kartlar en az ${tier?.label ?? ''} seviyesinde olmalı',
+          'Tüm kartlar en az {p} seviyesinde olmalı'.dtArgs({'p': tier?.label ?? ''}),
         SbcRequirementType.maxTier =>
-          'Hiçbir kart ${tier?.label ?? ''} seviyesini geçmemeli',
+          'Hiçbir kart {p} seviyesini geçmemeli'.dtArgs({'p': tier?.label ?? ''}),
         SbcRequirementType.minChemistry =>
-          'En az ${_int(targetValue)} takım kimyası',
+          'En az {p} takım kimyası'.dtArgs({'p': _int(targetValue)}),
         SbcRequirementType.minAvgPower =>
-          'En az ${_int(targetValue)} ortalama güç',
+          'En az {p} ortalama güç'.dtArgs({'p': _int(targetValue)}),
         SbcRequirementType.minDistinctNations =>
-          'En az ${_int(targetValue)} farklı uyruk',
+          'En az {p} farklı uyruk'.dtArgs({'p': _int(targetValue)}),
         SbcRequirementType.minDistinctLeagues =>
-          'En az ${_int(targetValue)} farklı lig',
+          'En az {p} farklı lig'.dtArgs({'p': _int(targetValue)}),
         SbcRequirementType.minDistinctClubs =>
-          'En az ${_int(targetValue)} farklı kulüp',
+          'En az {p} farklı kulüp'.dtArgs({'p': _int(targetValue)}),
         SbcRequirementType.minCardsOfTier =>
-          'En az ${_int(targetValue)} adet ${tier?.label ?? ''} kart',
+          'En az {p} adet {p2} kart'.dtArgs({'p': _int(targetValue), 'p2': tier?.label ?? ''}),
         SbcRequirementType.minCardsOfLeague =>
-          '$league liginden en az ${_int(targetValue)} kart',
+          '{league} liginden en az {p} kart'.dtArgs({'league': league, 'p': _int(targetValue)}),
         SbcRequirementType.minCardsOfNation =>
-          '$nation uyruklu en az ${_int(targetValue)} kart',
-        SbcRequirementType.unknown => 'Bilinmeyen şart',
+          '{nation} uyruklu en az {p} kart'.dtArgs({'nation': nation, 'p': _int(targetValue)}),
+        SbcRequirementType.unknown => 'Bilinmeyen şart'.dt,
       };
 
   static int _int(num? v) => (v ?? 0).round();
@@ -157,10 +158,10 @@ abstract class SbcReward with _$SbcReward {
       _$SbcRewardFromJson(json);
 
   String get label => switch (type) {
-        'coins' => '${amount ?? 0} coin',
-        'pack' => 'Paket',
-        'card' => 'Özel kart',
-        _ => 'Ödül',
+        'coins' => '{n} altın'.dtArgs({'n': amount ?? 0}),
+        'pack' => 'Paket'.dt,
+        'card' => 'Özel kart'.dt,
+        _ => 'Ödül'.dt,
       };
 }
 
@@ -197,10 +198,10 @@ abstract class SbcChallenge with _$SbcChallenge {
 
   /// Kategori etiketi
   String get categoryLabel => switch (category) {
-        'baslangic' => 'Başlangıç',
-        'gunluk' => 'Günlük',
-        'ozel' => 'Özel',
-        _ => 'Genel',
+        'baslangic' => 'Başlangıç'.dt,
+        'gunluk' => 'Günlük'.dt,
+        'ozel' => 'Özel'.dt,
+        _ => 'Genel'.dt,
       };
 
   /// Ödüllerin özet metni: "Paket + 500 coin"
@@ -264,7 +265,7 @@ abstract class SbcEvaluation with _$SbcEvaluation {
       return SbcEvaluation(
         isValid: false,
         blockingError:
-            '${GameRules.squadSize - kartlar.length} kart daha yerleştir',
+            '{p} kart daha yerleştir'.dtArgs({'p': GameRules.squadSize - kartlar.length}),
         chemistry: DeckChemistry.calculate(slots).total,
         requirements: requirements
             .map((s) => _degerlendir(s, kartlar, slots))

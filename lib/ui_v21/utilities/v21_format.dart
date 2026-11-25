@@ -1,3 +1,4 @@
+import '../../core/l10n/app_language.dart';
 /// V2.1 metin biçimleri (Türkçe).
 abstract final class V21Format {
   /// 2450 → "2.450"
@@ -24,16 +25,19 @@ abstract final class V21Format {
 
   /// Kısa süre: 21600 sn → "6 sa", 2700 sn → "45 dk", 0 → "Anında"
   static String shortDuration(int seconds) {
-    if (seconds <= 0) return 'Anında';
-    if (seconds >= 3600 && seconds % 3600 == 0) return '${seconds ~/ 3600} sa';
+    if (seconds <= 0) return 'Anında'.tr;
+    if (seconds >= 3600 && seconds % 3600 == 0) return '{h} sa'.trArgs({'h': seconds ~/ 3600});
     if (seconds >= 3600) {
       final h = seconds ~/ 3600;
       final m = (seconds % 3600) ~/ 60;
-      return '$h sa $m dk';
+      return '{h} sa {m} dk'.trArgs({'h': h, 'm': m});
     }
-    return '${(seconds / 60).ceil()} dk';
+    return '{m} dk'.trArgs({'m': (seconds / 60).ceil()});
   }
 
   /// Türkçe büyük harf (i → İ, ı → I)
-  static String upper(String s) => s.replaceAll('i', 'İ').replaceAll('ı', 'I').toUpperCase();
+  ///
+  /// İngilizcede düz `toUpperCase` ("win" → "WIN", "WİN" değil).
+  static String upper(String s) =>
+      isEnglish ? s.toUpperCase() : s.replaceAll('i', 'İ').replaceAll('ı', 'I').toUpperCase();
 }

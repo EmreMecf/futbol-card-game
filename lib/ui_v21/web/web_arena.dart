@@ -8,6 +8,7 @@ import '../../features/match/domain/hand_order.dart';
 import '../../features/match/presentation/viewmodel/match_view_model.dart';
 import '../ui_v21.dart';
 import 'web_kit.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Web maç ekranı: skor, adımlar, VS kartları, el, taktikler, OYNA.
 /// Kurallar ve hamleler [MatchViewModel]'de; burası yalnız yerleşimdir.
@@ -46,13 +47,13 @@ class WebArena extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = vm.matchState!;
-    final me = vm.myUsername ?? Provider.of<SessionManager?>(context, listen: false)?.user?.username ?? 'Sen';
-    final opp = d.opponent?.username ?? 'Rakip';
+    final me = vm.myUsername ?? Provider.of<SessionManager?>(context, listen: false)?.user?.username ?? 'Sen'.tr;
+    final opp = d.opponent?.username ?? 'Rakip'.tr;
     final mine = vm.myTableMove;
     final rival = vm.opponentTableMove;
     final round = d.isTutorial && d.earlyFinishCards != null
-        ? 'TUR ${d.roundNumber} · HEDEF ${d.earlyFinishCards}'
-        : 'TUR ${d.roundNumber}/${GameRules.squadSize}';
+        ? 'TUR {roundNumber} · HEDEF {earlyFinishCards}'.trArgs({'roundNumber': d.roundNumber, 'earlyFinishCards': d.earlyFinishCards})
+        : 'TUR {roundNumber}/{squadSize}'.trArgs({'roundNumber': d.roundNumber, 'squadSize': GameRules.squadSize});
 
     final Widget myCard = mine != null && !mine.isPass
         ? _move(mine)
@@ -68,8 +69,8 @@ class WebArena extends StatelessWidget {
       overlays: overlays,
       children: [
         wBox(265, 92, 1672, 660, wImage('arena_bg', fit: BoxFit.fill)),
-        wBox(578, 116, 862, 208, _side('SEN', me, 'oyuncu-${vm.myUserId ?? me}', const [Color(0xFF3AA2FF), Color(0xFF1560D8)], false)),
-        wBox(1034, 116, 1324, 208, _side('RAKİP', opp, 'oyuncu-${d.opponent?.id ?? opp}', const [Color(0xFFFF6B7D), Color(0xFFD92A4A)], true)),
+        wBox(578, 116, 862, 208, _side('SEN'.tr, me, 'oyuncu-${vm.myUserId ?? me}', const [Color(0xFF3AA2FF), Color(0xFF1560D8)], false)),
+        wBox(1034, 116, 1324, 208, _side('RAKİP'.tr, opp, 'oyuncu-${d.opponent?.id ?? opp}', const [Color(0xFFFF6B7D), Color(0xFFD92A4A)], true)),
         wBox(
           876,
           106,
@@ -114,7 +115,7 @@ class WebArena extends StatelessWidget {
           624,
           1290,
           650,
-          Center(child: Text(d.opponentHasPlayed ? 'Rakip seçti' : 'Rakip seçiyor...', style: wBody(20))),
+          Center(child: Text(d.opponentHasPlayed ? 'Rakip seçti'.tr : 'Rakip seçiyor...'.tr, style: wBody(20))),
         ),
         wBox(
           282,
@@ -155,7 +156,7 @@ class WebArena extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: V21Tap(
               onTap: onSurrender,
-              child: Text('Teslim ol', style: wBody(18, color: const Color(0xFFFF9BB0))),
+              child: Text('Teslim ol'.tr, style: wBody(18, color: const Color(0xFFFF9BB0))),
             ),
           ),
         ),
@@ -165,16 +166,16 @@ class WebArena extends StatelessWidget {
   }
 
   String _heading() {
-    if (vm.isPositionPhase) return vm.matchState!.amILead ? 'MEVKİNİ SEÇ' : 'RAKİP MEVKİ SEÇİYOR';
+    if (vm.isPositionPhase) return vm.matchState!.amILead ? 'MEVKİNİ SEÇ'.tr : 'RAKİP MEVKİ SEÇİYOR'.tr;
     final need = vm.requiredPosition;
-    return need == null ? 'KARTINI SEÇ' : '${V21Format.upper(need.label)} KARTINI SEÇ';
+    return need == null ? 'KARTINI SEÇ'.tr : '{p} KARTINI SEÇ'.trArgs({'p': V21Format.upper(need.label)});
   }
 
   String _hint() {
     if (vm.isPositionPhase) return '';
     final need = vm.requiredPosition;
     final cards = vm.hand.where((c) => !c.isPlayed && (need == null || c.position == need)).length;
-    return '$cards kart uygun';
+    return '{cards} kart uygun'.trArgs({'cards': cards});
   }
 
   Widget _move(MatchMove m) => WCard(
@@ -259,7 +260,7 @@ class WebArena extends StatelessWidget {
                       children: [
                         Text(p.code, style: wTitle(50)),
                         FittedBox(child: Text(V21Format.upper(p.label), style: wTitle(26))),
-                        Text('${counts[p] ?? 0} kart', style: wBody(20, color: const Color(0xFFD9CCF7))),
+                        Text('{n} kart'.trArgs({'n': counts[p] ?? 0}), style: wBody(20, color: const Color(0xFFD9CCF7))),
                       ],
                     ),
                   ),
@@ -277,15 +278,15 @@ class WebArena extends StatelessWidget {
     final on = !locked && vm.canUseTactic(t);
     final sel = vm.selectedTactic == t;
     final (label, c1, c2) = switch (t) {
-      MatchTactic.highPress => ('PRES', const Color(0xFFFF7A8A), const Color(0xFFD92A4A)),
-      MatchTactic.counterAttack => ('KONTRA', const Color(0xFFFFD94E), const Color(0xFFFF9A12)),
-      _ => ('DUVAR', const Color(0xFF6FC4FF), const Color(0xFF1F6FE0)),
+      MatchTactic.highPress => ('PRES'.tr, const Color(0xFFFF7A8A), const Color(0xFFD92A4A)),
+      MatchTactic.counterAttack => ('KONTRA'.tr, const Color(0xFFFFD94E), const Color(0xFFFF9A12)),
+      _ => ('DUVAR'.tr, const Color(0xFF6FC4FF), const Color(0xFF1F6FE0)),
     };
     return Semantics(
       button: true,
       enabled: on,
       selected: sel,
-      label: '${t.label}, ${vm.tacticCost(t)} enerji. ${t.hint}',
+      label: '{label}, {p} enerji. {hint}'.trArgs({'label': t.label, 'p': vm.tacticCost(t), 'hint': t.hint}),
       excludeSemantics: true,
       child: V21Tap(
         onTap: on || sel ? () => vm.selectTactic(t) : null,
@@ -319,7 +320,7 @@ class WebArena extends StatelessWidget {
   Widget _energy() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text('ENERJİ', style: wBody(22, color: const Color(0xFFD9CCF7))),
+      Text('ENERJİ'.tr, style: wBody(22, color: const Color(0xFFD9CCF7))),
       const SizedBox(height: 10),
       Row(
         children: [
@@ -343,16 +344,16 @@ class WebArena extends StatelessWidget {
   Widget _action(MatchState d) {
     if (vm.isPositionPhase) {
       return d.amILead
-          ? WButton('DEVAM ET', tone: V21ButtonTone.green, fontSize: 60, busy: vm.isSubmittingMove, onTap: pickedPosition == null ? null : onConfirmPosition)
-          : const WButton('RAKİP MEVKİ SEÇİYOR', tone: V21ButtonTone.purple, fontSize: 44, onTap: null);
+          ? WButton('DEVAM ET'.tr, tone: V21ButtonTone.green, fontSize: 60, busy: vm.isSubmittingMove, onTap: pickedPosition == null ? null : onConfirmPosition)
+          : WButton('RAKİP MEVKİ SEÇİYOR'.tr, tone: V21ButtonTone.purple, fontSize: 44, onTap: null);
     }
     if (vm.mustPass && vm.isMyTurn) {
-      return WButton('PAS GEÇ · TURU KAYBET', tone: V21ButtonTone.red, fontSize: 44, busy: vm.isSubmittingMove, onTap: vm.pass);
+      return WButton('PAS GEÇ · TURU KAYBET'.tr, tone: V21ButtonTone.red, fontSize: 44, busy: vm.isSubmittingMove, onTap: vm.pass);
     }
     if (vm.waitingOpponentPick || vm.myTableMove != null) {
-      return const WButton('RAKİP BEKLENİYOR', tone: V21ButtonTone.purple, fontSize: 46, onTap: null);
+      return WButton('RAKİP BEKLENİYOR'.tr, tone: V21ButtonTone.purple, fontSize: 46, onTap: null);
     }
-    if (!vm.isMyTurn) return const WButton('SIRA RAKİPTE', tone: V21ButtonTone.purple, fontSize: 46, onTap: null);
-    return WButton('OYNA!', tone: V21ButtonTone.green, fontSize: 72, busy: vm.isSubmittingMove, onTap: selected == null ? null : onPlay);
+    if (!vm.isMyTurn) return WButton('SIRA RAKİPTE'.tr, tone: V21ButtonTone.purple, fontSize: 46, onTap: null);
+    return WButton('OYNA!'.tr, tone: V21ButtonTone.green, fontSize: 72, busy: vm.isSubmittingMove, onTap: selected == null ? null : onPlay);
   }
 }

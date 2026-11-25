@@ -7,6 +7,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../features/season/presentation/viewmodel/season_view_model.dart';
 import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 SEZON YOLU (referans `assets/v21/screens/season.png`).
 ///
@@ -38,10 +39,10 @@ class V21SeasonScreen extends StatelessWidget {
 
 /// "22g 14s" (referans biçimi); bir günden azsa "5s 12dk"
 String v21SeasonRemaining(Duration d) {
-  if (d.isNegative) return 'Bitti';
-  if (d.inDays > 0) return '${d.inDays}g ${d.inHours % 24}s';
-  if (d.inHours > 0) return '${d.inHours}s ${d.inMinutes % 60}dk';
-  return '${d.inMinutes}dk';
+  if (d.isNegative) return 'Bitti'.tr;
+  if (d.inDays > 0) return '{inDays}g {p}s'.trArgs({'inDays': d.inDays, 'p': d.inHours % 24});
+  if (d.inHours > 0) return '{inHours}s {p}dk'.trArgs({'inHours': d.inHours, 'p': d.inMinutes % 60});
+  return '{m}dk'.trArgs({'m': d.inMinutes});
 }
 
 class _Body extends StatelessWidget {
@@ -58,7 +59,7 @@ class _Body extends StatelessWidget {
     final title = Padding(
       padding: EdgeInsets.fromLTRB(16 * k, 15 * k, 8 * k, 0),
       child: V21PageTitle(
-        title: 'SEZON YOLU',
+        title: 'SEZON YOLU'.tr,
         scale: k,
         trailing: remaining == null ? null : _RemainingPill(remaining: remaining, scale: k),
       ),
@@ -75,9 +76,9 @@ class _Body extends StatelessWidget {
         else
           V21EmptyState(
             icon: Icons.cloud_off_rounded,
-            title: 'BAĞLANTI SORUNU',
-            message: vm.errorMessage ?? 'Sezon bilgisi yüklenemedi.',
-            actionLabel: 'TEKRAR DENE',
+            title: 'BAĞLANTI SORUNU'.tr,
+            message: vm.errorMessage ?? 'Sezon bilgisi yüklenemedi.'.tr,
+            actionLabel: 'TEKRAR DENE'.tr,
             onAction: vm.load,
             scale: k,
           ),
@@ -86,8 +87,8 @@ class _Body extends StatelessWidget {
       content = [
         V21EmptyState(
           icon: Icons.star_rounded,
-          title: 'SEZON YAKINDA',
-          message: 'Sezon yolu henüz açık değil. Açıldığında maç oynayarak XP toplayıp ödül kazanacaksın.',
+          title: 'SEZON YAKINDA'.tr,
+          message: 'Sezon yolu henüz açık değil. Açıldığında maç oynayarak XP toplayıp ödül kazanacaksın.'.tr,
           scale: k,
         ),
       ];
@@ -111,9 +112,9 @@ class _Body extends StatelessWidget {
         _RewardRoad(s: s, vm: vm, scale: k),
         if (missions != null && missions.enabled && missions.missions.isNotEmpty) ...[
           SizedBox(height: 16 * k),
-          Text('GÖREVLER', style: V21Type.title(26 * k, shadows: V21Type.inkShadow(k))),
+          Text('GÖREVLER'.tr, style: V21Type.title(26 * k, shadows: V21Type.inkShadow(k))),
           SizedBox(height: 10 * k),
-          for (final (period, label) in const [('daily', 'GÜNLÜK'), ('weekly', 'HAFTALIK'), ('season', 'SEZON')])
+          for (final (period, label) in [('daily', 'GÜNLÜK'.tr), ('weekly', 'HAFTALIK'.tr), ('season', 'SEZON'.tr)])
             for (final m in missions.period(period)) ...[
               _MissionRow(mission: m, tag: label, scale: k),
               SizedBox(height: 10 * k),
@@ -121,8 +122,7 @@ class _Body extends StatelessWidget {
         ],
         SizedBox(height: 8 * k),
         Text(
-          'Sezon XP\'si ve ödüller dereceli maçta güç vermez. Kademe başına ${V21Format.thousands(s.xpPerTier)} XP. '
-          'Sezon bitince ulaşıp almadığın ödüller otomatik verilir.',
+          'Sezon XP\'si ve ödüller dereceli maçta güç vermez. Kademe başına {p} XP. Sezon bitince ulaşıp almadığın ödüller otomatik verilir.'.trArgs({'p': V21Format.thousands(s.xpPerTier)}),
           textAlign: TextAlign.center,
           style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textDim, height: 1.4),
         ),
@@ -161,7 +161,7 @@ class _RemainingPill extends StatelessWidget {
     final k = scale;
     final text = v21SeasonRemaining(remaining);
     return Semantics(
-      label: 'Sezonun bitmesine $text',
+      label: 'Sezonun bitmesine {text}'.trArgs({'text': text}),
       excludeSemantics: true,
       child: Container(
         height: 32 * k,
@@ -223,26 +223,26 @@ class _TierCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('KADEME ${s.tier} / ${s.maxTier}', style: V21Type.title(23 * k, shadows: V21Type.inkShadow(k))),
+                Text('KADEME {tier} / {maxTier}'.trArgs({'tier': s.tier, 'maxTier': s.maxTier}), style: V21Type.title(23 * k, shadows: V21Type.inkShadow(k))),
                 SizedBox(height: 8 * k),
                 V21ProgressBar(
                   value: s.tierProgress,
                   height: 16 * k,
                   trackColor: const Color(0xFF201046),
                   fillColors: const [Color(0xFF9EDCFF), Color(0xFF3FA2F5)],
-                  semanticsLabel: 'Kademe ilerlemesi',
+                  semanticsLabel: 'Kademe ilerlemesi'.tr,
                 ),
                 SizedBox(height: 6 * k),
                 Text(
                   s.isMaxed
-                      ? 'Son kademeye ulaştın.'
-                      : '${V21Format.thousands(s.xpToNext)} XP sonra kademe ${s.tier + 1}',
+                      ? 'Son kademeye ulaştın.'.tr
+                      : '{p} XP sonra kademe {p2}'.trArgs({'p': V21Format.thousands(s.xpToNext), 'p2': s.tier + 1}),
                   style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
                 ),
                 if (n > 0) ...[
                   SizedBox(height: 8 * k),
                   V21GameButton(
-                    label: 'TÜMÜNÜ AL ($n)',
+                    label: 'TÜMÜNÜ AL ({n})'.trArgs({'n': n}),
                     tone: V21ButtonTone.green,
                     size: V21ButtonSize.small,
                     scale: k,
@@ -340,10 +340,10 @@ class _TierNode extends StatelessWidget {
     final claimable = vm.canClaim(t, 'free') || vm.canClaim(t, 'premium');
     final label = rewardLabel(t.free);
     final state = t.freeClaimed
-        ? 'alındı'
+        ? 'alındı'.tr
         : claimable
-        ? 'alınabilir'
-        : (reached ? '' : 'ulaşılmadı');
+        ? 'alınabilir'.tr
+        : (reached ? '' : 'ulaşılmadı'.tr);
 
     Widget box(double glow) => Container(
       width: 70 * k,
@@ -384,7 +384,7 @@ class _TierNode extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: 'Kademe ${t.tier}: $label${state.isEmpty ? '' : ', $state'}',
+      label: 'Kademe {tier}: {label}{p}'.trArgs({'tier': t.tier, 'label': label, 'p': state.isEmpty ? '' : ', $state'}),
       excludeSemantics: true,
       child: GestureDetector(
         onTap: () => _showTier(context, k),
@@ -417,24 +417,24 @@ class _TierNode extends StatelessWidget {
     final canPremium = vm.canClaim(t, 'premium');
     String line(String track, SeasonReward r, bool claimed, bool can, {bool locked = false}) {
       final st = claimed
-          ? 'alındı'
-          : (can ? 'alınabilir' : (locked ? 'kilitli' : (s.isReached(t.tier) ? '' : 'ulaşılmadı')));
+          ? 'alındı'.tr
+          : (can ? 'alınabilir'.tr : (locked ? 'kilitli' : (s.isReached(t.tier) ? '' : 'ulaşılmadı'.tr)));
       return '$track: ${rewardLabel(r)}${st.isEmpty ? '' : ' ($st)'}';
     }
 
     final choice = await V21GameDialog.show<String>(
       context,
-      subtitle: 'SEZON YOLU',
-      title: 'KADEME ${t.tier}',
+      subtitle: 'SEZON YOLU'.tr,
+      title: 'KADEME {tier}'.trArgs({'tier': t.tier}),
       icon: _RewardIcon(t.free, size: 64),
       message: [
-        line('Ücretsiz', t.free, t.freeClaimed, canFree),
-        line(s.premium ? 'Premium' : 'Premium (yakında)', t.premium, t.premiumClaimed, canPremium, locked: !s.premium),
+        line('Ücretsiz'.tr, t.free, t.freeClaimed, canFree),
+        line(s.premium ? 'Premium'.tr : 'Premium (yakında)'.tr, t.premium, t.premiumClaimed, canPremium, locked: !s.premium),
       ].join('\n'),
       actions: [
-        if (canFree) const V21DialogAction('ÜCRETSİZ ÖDÜLÜ AL', tone: V21ButtonTone.green, result: 'free'),
-        if (canPremium) const V21DialogAction('PREMIUM ÖDÜLÜ AL', result: 'premium'),
-        const V21DialogAction('KAPAT', tone: V21ButtonTone.blue),
+        if (canFree) V21DialogAction('ÜCRETSİZ ÖDÜLÜ AL'.tr, tone: V21ButtonTone.green, result: 'free'),
+        if (canPremium) V21DialogAction('PREMIUM ÖDÜLÜ AL'.tr, result: 'premium'),
+        V21DialogAction('KAPAT'.tr, tone: V21ButtonTone.blue),
       ],
     );
     if (choice == 'free' || choice == 'premium') await vm.claim(t, choice!);
@@ -473,8 +473,7 @@ class _MissionRow extends StatelessWidget {
     };
     return Semantics(
       label:
-          '$tag görev: ${m.title}, ${m.progress} / ${m.target}, '
-          '${done ? 'tamamlandı, ${m.xp} XP alındı' : '${m.xp} XP ödül'}',
+          '{tag} görev: {title}, {progress} / {target}, {p}'.trArgs({'tag': tag, 'title': m.title, 'progress': m.progress, 'target': m.target, 'p': done ? 'tamamlandı, {xp} XP alındı'.trArgs({'xp': m.xp}) : '{xp} XP ödül'.trArgs({'xp': m.xp})}),
       excludeSemantics: true,
       child: Container(
         padding: EdgeInsets.fromLTRB(12 * k, 10 * k, 10 * k, 10 * k),
@@ -541,7 +540,7 @@ class _MissionRow extends StatelessWidget {
                         SizedBox(width: 2 * k),
                       ],
                       Text(
-                        done ? 'ALINDI' : '+${V21Format.thousands(m.xp)} XP',
+                        done ? 'ALINDI'.tr : '+{p} XP'.trArgs({'p': V21Format.thousands(m.xp)}),
                         style: V21Type.title(
                           16 * k,
                           shadows: [

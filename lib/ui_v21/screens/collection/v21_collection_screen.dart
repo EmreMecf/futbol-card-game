@@ -12,6 +12,7 @@ import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
 import '../../web/web_kit.dart';
 import '../../web/web_screens.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 KOLEKSİYON — "KARTLARIM" (referans `assets/v21/screens/collection.png`).
 ///
@@ -63,12 +64,12 @@ class V21CollectionScreen extends StatelessWidget {
 }
 
 /// Referans nadirlik daireleri (soldan sağa)
-const _tierChips = <(CardTier, Color, String)>[
-  (CardTier.bronze, Color(0xFFFFAB76), 'Bronz'),
-  (CardTier.silver, Color(0xFFE8EEF6), 'Gümüş'),
-  (CardTier.gold, Color(0xFFFFE07A), 'Altın'),
-  (CardTier.diamond, Color(0xFF7FF3FF), 'Elmas'),
-  (CardTier.legend, Color(0xFFE3A9FA), 'Efsane'),
+List<(CardTier, Color, String)> get _tierChips => [
+  (CardTier.bronze, Color(0xFFFFAB76), 'Bronz'.tr),
+  (CardTier.silver, Color(0xFFE8EEF6), 'Gümüş'.tr),
+  (CardTier.gold, Color(0xFFFFE07A), 'Altın'.tr),
+  (CardTier.diamond, Color(0xFF7FF3FF), 'Elmas'.tr),
+  (CardTier.legend, Color(0xFFE3A9FA), 'Efsane'.tr),
 ];
 
 /// Referans mevki hapları
@@ -114,7 +115,7 @@ class _BodyState extends State<_Body> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           V21PageTitle(
-            title: 'KARTLARIM',
+            title: 'KARTLARIM'.tr,
             scale: k,
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -125,9 +126,9 @@ class _BodyState extends State<_Body> {
                   V21IconPill(
                     key: const Key('gelisim-dugmesi'),
                     icon: Icons.trending_up_rounded,
-                    badge: 'GELİŞİM',
+                    badge: 'GELİŞİM'.tr,
                     iconColor: V21Colors.successText,
-                    semanticsLabel: 'Gelişim: futbolcu seviyeleri',
+                    semanticsLabel: 'Gelişim: futbolcu seviyeleri'.tr,
                     scale: k * 0.9,
                     onTap: () => context.push(AppRoutes.progress),
                   ),
@@ -176,10 +177,10 @@ class _CountPill extends StatelessWidget {
       icon: V21OrbIcon(size: 24 * scale),
       value: loading ? null : owned,
       text: loading ? null : (total == null ? '$owned' : '$owned / $total'),
-      semanticsName: 'kart',
+      semanticsName: 'kart'.tr,
       semanticsLabel: loading
-          ? 'Kartlar yükleniyor'
-          : (total == null ? '$owned farklı kart' : '$total kartın $owned tanesi toplandı'),
+          ? 'Kartlar yükleniyor'.tr
+          : (total == null ? '{owned} farklı kart'.trArgs({'owned': owned}) : '{total} kartın {owned} tanesi toplandı'.trArgs({'total': total, 'owned': owned})),
       scale: scale,
       width: 120,
     );
@@ -199,7 +200,7 @@ class _CatalogBar extends StatelessWidget {
       height: 14 * scale,
       trackColor: const Color(0xFF201046),
       fillColors: const [Color(0xFFE4B3FF), Color(0xFF9B4BFF)],
-      semanticsLabel: 'Koleksiyon ilerlemesi',
+      semanticsLabel: 'Koleksiyon ilerlemesi'.tr,
     );
     // Referans: bu alan Gelişim ekranına götürür (hotspot "Gelişim")
     final canProgress = getIt.isRegistered<ProgressRepository>();
@@ -207,7 +208,7 @@ class _CatalogBar extends StatelessWidget {
       padding: EdgeInsets.only(right: 8 * scale),
       child: Semantics(
         button: canProgress,
-        label: canProgress ? 'Gelişim: futbolcu seviyeleri' : null,
+        label: canProgress ? 'Gelişim: futbolcu seviyeleri'.tr : null,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: canProgress ? () => context.push(AppRoutes.progress) : null,
@@ -236,10 +237,10 @@ class _TierRow extends StatelessWidget {
       child: Row(
         children: [
           V21FilterPill(
-            label: 'TÜMÜ',
+            label: 'TÜMÜ'.tr,
             selected: !vm.hasCategoryFilter,
             onTap: vm.clearCategoryFilters,
-            semanticsLabel: 'Tüm kartlar',
+            semanticsLabel: 'Tüm kartlar'.tr,
             scale: k,
             width: 70,
             height: 42,
@@ -250,7 +251,7 @@ class _TierRow extends StatelessWidget {
               color: color,
               selected: vm.tierFilter == tier,
               onTap: () => vm.setTierFilter(tier),
-              semanticsLabel: '$name kartlar, ${counts[tier] ?? 0} kart',
+              semanticsLabel: '{name} kartlar, {p} kart'.trArgs({'name': name, 'p': counts[tier] ?? 0}),
               scale: k,
             ),
           ],
@@ -284,7 +285,7 @@ class _PositionRow extends StatelessWidget {
                     color: color,
                     selected: vm.positionFilter == pos,
                     onTap: () => vm.setPositionFilter(pos),
-                    semanticsLabel: '${pos.label}, ${counts[pos] ?? 0} kart',
+                    semanticsLabel: '{label}, {p} kart'.trArgs({'label': pos.label, 'p': counts[pos] ?? 0}),
                     scale: k,
                     width: c.maxWidth / k,
                   );
@@ -315,11 +316,11 @@ class _Content extends StatelessWidget {
       return _Message(
         scale: k,
         icon: error ? Icons.cloud_off_rounded : Icons.style_rounded,
-        title: error ? 'BAĞLANTI SORUNU' : 'HENÜZ KART YOK',
+        title: error ? 'BAĞLANTI SORUNU'.tr : 'HENÜZ KART YOK'.tr,
         text: error
-            ? (vm.errorMessage ?? 'Kartlar yüklenemedi.')
-            : 'Henüz kartın yok. Mağazadan paket açarak koleksiyonuna başla.',
-        action: error ? 'TEKRAR DENE' : 'MAĞAZAYA GİT',
+            ? (vm.errorMessage ?? 'Kartlar yüklenemedi.'.tr)
+            : 'Henüz kartın yok. Mağazadan paket açarak koleksiyonuna başla.'.tr,
+        action: error ? 'TEKRAR DENE'.tr : 'MAĞAZAYA GİT'.tr,
         onAction: error ? () => vm.load() : () => context.go(AppRoutes.store),
       );
     }
@@ -328,9 +329,9 @@ class _Content extends StatelessWidget {
       return _Message(
         scale: k,
         icon: Icons.filter_alt_off_rounded,
-        title: 'KART BULUNAMADI',
-        text: 'Bu filtrede kart yok.',
-        action: 'FİLTRELERİ TEMİZLE',
+        title: 'KART BULUNAMADI'.tr,
+        text: 'Bu filtrede kart yok.'.tr,
+        action: 'FİLTRELERİ TEMİZLE'.tr,
         onAction: onClearAll,
       );
     }
@@ -431,7 +432,7 @@ class _ToolRow extends StatelessWidget {
           Expanded(
             child: V21SearchField(
               controller: controller,
-              hint: 'Futbolcu, kulüp, ülke ara',
+              hint: 'Futbolcu, kulüp, ülke ara'.tr,
               onChanged: vm.setSearch,
               scale: k,
             ),
@@ -444,8 +445,8 @@ class _ToolRow extends StatelessWidget {
             selected: vm.favoritesOnly,
             onTap: () => vm.setFavoritesOnly(!vm.favoritesOnly),
             semanticsLabel: vm.favoritesOnly
-                ? 'Yalnız favoriler gösteriliyor (${vm.favoriteCount}). Tümünü göstermek için dokun'
-                : 'Yalnız favorileri göster (${vm.favoriteCount})',
+                ? 'Yalnız favoriler gösteriliyor ({favoriteCount}). Tümünü göstermek için dokun'.trArgs({'favoriteCount': vm.favoriteCount})
+                : 'Yalnız favorileri göster ({favoriteCount})'.trArgs({'favoriteCount': vm.favoriteCount}),
             scale: k,
           ),
           SizedBox(width: 8 * k),
@@ -453,7 +454,7 @@ class _ToolRow extends StatelessWidget {
             icon: Icons.swap_vert_rounded,
             selected: sorted,
             onTap: () => _showSortSheet(context, vm, k),
-            semanticsLabel: 'Sıralama: ${vm.sort.label}',
+            semanticsLabel: 'Sıralama: {label}'.trArgs({'label': vm.sort.label}),
             scale: k,
           ),
         ],
@@ -476,7 +477,7 @@ Future<void> _showSortSheet(BuildContext context, CollectionViewModel vm, double
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('SIRALA', style: V21Type.title(24 * k, shadows: V21Type.inkShadow(k))),
+              Text('SIRALA'.tr, style: V21Type.title(24 * k, shadows: V21Type.inkShadow(k))),
               SizedBox(height: 8 * k),
               for (final s in CollectionSort.values)
                 Semantics(

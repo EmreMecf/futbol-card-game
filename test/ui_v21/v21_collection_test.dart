@@ -67,7 +67,7 @@ class _Repo implements CollectionRepository {
 
   @override
   Future<Result<List<CardModel>>> fetchCatalog() async => catalogFails
-      ? const Failure(AppException.network())
+      ? Failure(AppException.network())
       : Success([
           for (var i = 0; i < 100; i++)
             CardModel(

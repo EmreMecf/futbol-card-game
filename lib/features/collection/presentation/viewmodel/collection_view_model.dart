@@ -7,6 +7,7 @@ import '../../../../core/base/view_state.dart';
 import '../../../../core/storage/favorites_store.dart';
 import '../../../../core/utils/turkish_text.dart';
 import '../../domain/repositories/collection_repository.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Koleksiyonun siralama secenekleri
 enum CollectionSort {
@@ -15,8 +16,11 @@ enum CollectionSort {
   tierDesc('Seviyeye göre'),
   nameAsc('İsme göre');
 
-  final String label;
-  const CollectionSort(this.label);
+  final String _label;
+  const CollectionSort(this._label);
+
+  /// Şu anki dilde ad
+  String get label => _label.tr;
 }
 
 /// Koleksiyon ekraninin beyni.

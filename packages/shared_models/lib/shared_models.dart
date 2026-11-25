@@ -18,6 +18,7 @@ export 'src/character_models.dart';
 export 'src/chemistry.dart';
 export 'src/chest_models.dart';
 export 'src/deck_models.dart';
+export 'src/display_text.dart';
 export 'src/economy_models.dart';
 export 'src/enums.dart';
 export 'src/game_rules.dart';

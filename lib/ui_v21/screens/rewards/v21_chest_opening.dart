@@ -7,6 +7,7 @@ import '../../../core/audio/game_audio.dart';
 import '../../../core/audio/sound_cues.dart';
 import '../../../features/chests/domain/chest_texts.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 SANDIK AÇILIŞI (paket açılışından ayrı sahne; referansın kutlama
 /// dili: ışın arka planı, altın başlık, ödül kartları).
@@ -106,7 +107,7 @@ class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProv
           padding: EdgeInsets.fromLTRB(16 * k, 18 * k, 16 * k, 24 * k),
           children: [
             Text(
-              'SANDIK AÇILDI',
+              'SANDIK AÇILDI'.tr,
               textAlign: TextAlign.center,
               style: V21Type.title(18 * k, color: const Color(0xFFFFE6A0)),
             ),
@@ -147,7 +148,7 @@ class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProv
                     V21RewardCard(
                       icon: V21GemIcon(size: 46 * k),
                       value: '+${r.gems}',
-                      label: 'ELMAS',
+                      label: 'ELMAS'.tr,
                       scale: k,
                     ),
                   if (r.jokers.values.any((v) => v > 0))
@@ -158,14 +159,14 @@ class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProv
                         size: 48 * k,
                       ),
                       value: '+${r.jokers.values.fold<int>(0, (a, b) => a + b)}',
-                      label: 'JOKER',
+                      label: 'JOKER'.tr,
                       scale: k,
                     ),
                   if (r.extras.values.any((v) => v > 0))
                     V21RewardCard(
                       icon: Icon(Icons.card_giftcard_rounded, size: 46 * k, color: const Color(0xFFFFC832)),
                       value: '+${r.extras.values.fold<int>(0, (a, b) => a + b)}',
-                      label: 'EŞYA',
+                      label: 'EŞYA'.tr,
                       scale: k,
                     ),
                 ],
@@ -176,9 +177,9 @@ class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProv
               opacity: summary,
               child: Text(
                 [
-                  if (r.coinsAfter != null) 'Bakiye ${V21Format.thousands(r.coinsAfter!)} altın',
-                  if (r.jokers.isNotEmpty) 'Joker: ${jokerSummary(r.jokers)}',
-                  if (r.extras.isNotEmpty) 'Ek ödül: ${extrasSummary(r.extras)}',
+                  if (r.coinsAfter != null) 'Bakiye {p} altın'.trArgs({'p': V21Format.thousands(r.coinsAfter!)}),
+                  if (r.jokers.isNotEmpty) 'Joker: {p}'.trArgs({'p': jokerSummary(r.jokers)}),
+                  if (r.extras.isNotEmpty) 'Ek ödül: {p}'.trArgs({'p': extrasSummary(r.extras)}),
                   _explain(r),
                 ].join('\n'),
                 textAlign: TextAlign.center,
@@ -186,7 +187,7 @@ class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProv
               ),
             ),
             SizedBox(height: 18 * k),
-            V21GameButton(label: 'TAMAM', size: V21ButtonSize.large, scale: k, onPressed: widget.onClose),
+            V21GameButton(label: 'TAMAM'.tr, size: V21ButtonSize.large, scale: k, onPressed: widget.onClose),
           ],
         ),
       ),
@@ -197,9 +198,9 @@ class _V21ChestOpeningState extends State<V21ChestOpening> with SingleTickerProv
     final copies = r.cards.where((c) => c.isCopy).length;
     final guard = r.cards.where((c) => c.isSquadGuard).length;
     return [
-      if (copies > 0) '+1 GELİŞİM: zaten sahip olduğun futbolcunun gelişim kopyası.',
-      if (guard > 0) 'KADRO KORUMASI: kadronda eksik olan mevkiden kart verildi.',
-      if (copies == 0 && guard == 0) 'Kartlar koleksiyonuna eklendi.',
+      if (copies > 0) '+1 GELİŞİM: zaten sahip olduğun futbolcunun gelişim kopyası.'.tr,
+      if (guard > 0) 'KADRO KORUMASI: kadronda eksik olan mevkiden kart verildi.'.tr,
+      if (copies == 0 && guard == 0) 'Kartlar koleksiyonuna eklendi.'.tr,
     ].join(' ');
   }
 }
@@ -214,11 +215,11 @@ class _ChestCardReveal extends StatelessWidget {
   Widget build(BuildContext context) {
     final k = width / 120;
     final (label, color) = switch (card.outcome) {
-      ChestCardOutcome.isNew => ('YENİ', V21Colors.success),
-      ChestCardOutcome.copy => ('+1 GELİŞİM', const Color(0xFF3FA2F5)),
-      ChestCardOutcome.squadGuard => ('KADRO KORUMASI', const Color(0xFFFF9500)),
-      ChestCardOutcome.joker => ('JOKER', const Color(0xFFB98AF0)),
-      _ => ('KART', V21Colors.dash),
+      ChestCardOutcome.isNew => ('YENİ'.tr, V21Colors.success),
+      ChestCardOutcome.copy => ('+1 GELİŞİM'.tr, const Color(0xFF3FA2F5)),
+      ChestCardOutcome.squadGuard => ('KADRO KORUMASI'.tr, const Color(0xFFFF9500)),
+      ChestCardOutcome.joker => ('JOKER'.tr, const Color(0xFFB98AF0)),
+      _ => ('KART'.tr, V21Colors.dash),
     };
     return Opacity(
       opacity: t,

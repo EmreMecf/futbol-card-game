@@ -6,6 +6,7 @@ import '../foundation/v21_typography.dart';
 import 'v21_game_button.dart';
 import 'v21_game_panel.dart';
 import 'v21_tap.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Diyalog düğmesi tanımı
 @immutable
@@ -59,7 +60,7 @@ class V21GameDialog extends StatelessWidget {
     return showGeneralDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
-      barrierLabel: 'Kapat',
+      barrierLabel: 'Kapat'.tr,
       barrierColor: const Color(0xB3120933),
       transitionDuration: reduced ? Duration.zero : V21Motion.enter,
       pageBuilder: (context, _, _) => V21GameDialog(
@@ -176,7 +177,7 @@ class V21LoadingOverlay extends StatelessWidget {
         if (loading)
           Positioned.fill(
             child: Semantics(
-              label: message ?? 'Yükleniyor',
+              label: message ?? 'Yükleniyor'.tr,
               liveRegion: true,
               child: ColoredBox(
                 color: const Color(0x99120933),
@@ -216,9 +217,12 @@ enum V21Connection {
   reconnecting('Yeniden bağlanıyor…', Color(0xFFFFC832)),
   offline('Bağlantı yok', Color(0xFFFF5A6E));
 
-  final String label;
+  final String _label;
   final Color dot;
-  const V21Connection(this.label, this.dot);
+  const V21Connection(this._label, this.dot);
+
+  /// Şu anki dilde ad
+  String get label => _label.tr;
 }
 
 /// V2.1 AĞ DURUMU hapı (referans HTML `.connection`: koyu yarı saydam hap,
@@ -246,7 +250,7 @@ class V21NetworkStatus extends StatelessWidget {
     return Semantics(
       liveRegion: true,
       button: onRetry != null,
-      label: onRetry == null ? status.label : '${status.label}. Yeniden denemek için dokun',
+      label: onRetry == null ? status.label : '{label}. Yeniden denemek için dokun'.trArgs({'label': status.label}),
       excludeSemantics: true,
       child: V21Tap(
         onTap: onRetry,

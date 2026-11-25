@@ -8,6 +8,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../auth/session_manager.dart';
 import '../config/app_config.dart';
 import '../utils/logger.dart';
+import '../l10n/server_text.dart';
 
 /// Kanal ureten fonksiyon (testlerde sahte kanal verilebilir)
 typedef WebSocketConnector = WebSocketChannel Function(Uri uri);
@@ -166,7 +167,7 @@ class WebSocketService {
   void _mesajGeldi(dynamic mesaj) {
     _sonMesaj = DateTime.now();
     try {
-      final json = jsonDecode(mesaj as String) as Map<String, dynamic>;
+      final json = ServerText.translateJson(jsonDecode(mesaj as String)) as Map<String, dynamic>;
       final olay = RealtimeEvent.fromJson(json);
 
       // pong ve connected sadece baglantiyi ilgilendirir, ekrani degil

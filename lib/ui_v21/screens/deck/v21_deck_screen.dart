@@ -17,6 +17,7 @@ import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
 import '../../web/web_kit.dart';
 import '../../web/web_screens.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 KADROM (referans `assets/v21/screens/deck.png`).
 ///
@@ -69,12 +70,12 @@ class _Root extends StatelessWidget {
 Future<bool> _askLeave(BuildContext context) async {
   final r = await V21GameDialog.show<bool>(
     context,
-    subtitle: 'KAYDEDİLMEDİ',
-    title: 'KADRODAN ÇIK?',
-    message: 'Kadroda yaptığın değişiklikler kaydedilmedi. Çıkarsan kaybolur.',
-    actions: const [
-      V21DialogAction('VAZGEÇ', tone: V21ButtonTone.green, result: false),
-      V21DialogAction('ÇIK', tone: V21ButtonTone.red, result: true),
+    subtitle: 'KAYDEDİLMEDİ'.tr,
+    title: 'KADRODAN ÇIK?'.tr,
+    message: 'Kadroda yaptığın değişiklikler kaydedilmedi. Çıkarsan kaybolur.'.tr,
+    actions: [
+      V21DialogAction('VAZGEÇ'.tr, tone: V21ButtonTone.green, result: false),
+      V21DialogAction('ÇIK'.tr, tone: V21ButtonTone.red, result: true),
     ],
   );
   return r ?? false;
@@ -164,15 +165,15 @@ class _BodyState extends State<_Body> {
     final header = Padding(
       padding: EdgeInsets.fromLTRB(12 * k, 12 * k, 8 * k, 0),
       child: V21PageTitle(
-        title: 'KADROM',
+        title: 'KADROM'.tr,
         scale: k,
         onBack: () => _back(vm),
         trailing: V21ResourcePill(
           icon: V21OrbIcon(size: 24 * k, color: const Color(0xFFFF5A6E)),
           value: vm.averagePower,
-          text: '${vm.averagePower} GÜÇ',
-          semanticsName: 'takım gücü',
-          semanticsLabel: 'Takım gücü ${vm.averagePower}',
+          text: '{averagePower} GÜÇ'.trArgs({'averagePower': vm.averagePower}),
+          semanticsName: 'takım gücü'.tr,
+          semanticsLabel: 'Takım gücü {averagePower}'.trArgs({'averagePower': vm.averagePower}),
           scale: k,
         ),
       ),
@@ -187,9 +188,9 @@ class _BodyState extends State<_Body> {
         children: [
           V21EmptyState(
             icon: Icons.cloud_off_rounded,
-            title: 'BAĞLANTI SORUNU',
-            message: vm.errorMessage ?? 'Kadro yüklenemedi.',
-            actionLabel: 'TEKRAR DENE',
+            title: 'BAĞLANTI SORUNU'.tr,
+            message: vm.errorMessage ?? 'Kadro yüklenemedi.'.tr,
+            actionLabel: 'TEKRAR DENE'.tr,
             onAction: vm.load,
             scale: k,
           ),
@@ -215,10 +216,10 @@ class _BodyState extends State<_Body> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            V21StatOrb(value: '${vm.averagePower}', label: 'GÜÇ', color: V21StatOrb.red, scale: k),
+            V21StatOrb(value: '${vm.averagePower}', label: 'GÜÇ'.tr, color: V21StatOrb.red, scale: k),
             V21StatOrb(
               value: '${vm.totalSelected}/${GameRules.squadSize}',
-              label: 'KADRO',
+              label: 'KADRO'.tr,
               color: V21StatOrb.blue,
               scale: k,
             ),
@@ -293,7 +294,7 @@ class _HintPanel extends StatelessWidget {
         ? (missing, const Color(0xFFFF8A9B))
         : saved != null
         ? (saved, V21Colors.successText)
-        : ('Kartı seçmek için boş yuvaya dokun, yer değiştirmek için sürükle', V21Colors.textMuted);
+        : ('Kartı seçmek için boş yuvaya dokun, yer değiştirmek için sürükle'.tr, V21Colors.textMuted);
     return Container(
       padding: EdgeInsets.fromLTRB(14 * k, 8 * k, 14 * k, 8 * k),
       constraints: BoxConstraints(minHeight: 48 * k),
@@ -325,11 +326,11 @@ class _Actions extends StatelessWidget {
     final k = scale;
     if (!vm.hasUnsavedChanges) {
       return V21GameButton(
-        label: 'OTOMATİK DİZ',
+        label: 'OTOMATİK DİZ'.tr,
         tone: V21ButtonTone.green,
         size: V21ButtonSize.large,
         scale: k,
-        semanticsLabel: 'Otomatik diz: en güçlü kartlarla doldur',
+        semanticsLabel: 'Otomatik diz: en güçlü kartlarla doldur'.tr,
         onPressed: vm.autoFillBest,
       );
     }
@@ -337,7 +338,7 @@ class _Actions extends StatelessWidget {
       children: [
         Expanded(
           child: V21GameButton(
-            label: 'OTOMATİK DİZ',
+            label: 'OTOMATİK DİZ'.tr,
             tone: V21ButtonTone.blue,
             size: V21ButtonSize.large,
             scale: k,
@@ -347,13 +348,13 @@ class _Actions extends StatelessWidget {
         SizedBox(width: 10 * k),
         Expanded(
           child: V21GameButton(
-            label: 'KAYDET',
+            label: 'KAYDET'.tr,
             tone: V21ButtonTone.green,
             size: V21ButtonSize.large,
             scale: k,
             // Eksik kadroda da basılabilir: KADRO EKSİK uyarısını açar (hf17)
             status: vm.isSaving ? V21ButtonStatus.loading : V21ButtonStatus.normal,
-            semanticsLabel: vm.canSave ? 'Kadroyu kaydet' : 'Kaydet: kadro eksik, eksik mevkileri göster',
+            semanticsLabel: vm.canSave ? 'Kadroyu kaydet'.tr : 'Kaydet: kadro eksik, eksik mevkileri göster'.tr,
             onPressed: onSave,
           ),
         ),

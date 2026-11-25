@@ -7,6 +7,7 @@ import '../utilities/v21_format.dart';
 import 'v21_item_art.dart';
 import 'v21_painters.dart';
 import 'v21_tap.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Kaynak hapı (altın, elmas, kart sayısı…). Referans (268..388 × 18..54).
 ///
@@ -46,7 +47,7 @@ class V21ResourcePill extends StatelessWidget {
         key: key,
         icon: V21CoinIcon(size: 24 * scale),
         value: coins,
-        semanticsName: 'altın',
+        semanticsName: 'altın'.tr,
         onTap: onTap,
         scale: scale,
         width: 117,
@@ -58,7 +59,7 @@ class V21ResourcePill extends StatelessWidget {
         key: key,
         icon: V21GemIcon(size: 24 * scale),
         value: gems,
-        semanticsName: 'elmas',
+        semanticsName: 'elmas'.tr,
         onTap: onTap,
         scale: scale,
         width: 88,
@@ -72,7 +73,7 @@ class V21ResourcePill extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       label:
-          semanticsLabel ?? (this.text == null && value == null ? '$semanticsName yükleniyor' : '$text $semanticsName'),
+          semanticsLabel ?? (this.text == null && value == null ? '{semanticsName} yükleniyor'.trArgs({'semanticsName': semanticsName}) : '$text $semanticsName'),
       excludeSemantics: true,
       child: V21Tap(
         onTap: onTap,

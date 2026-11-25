@@ -13,11 +13,12 @@ import '../../ui_v21/ui_v21.dart';
 import 'friend_room_api.dart';
 import '../../ui_v21/web/web_kit.dart';
 import '../../ui_v21/web/web_screens.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Sunucunun kural mesajını gösterir ('Oda dolu.' gibi); bağlantı hatası ayrıdır.
 String friendRoomErrorText(Object e) => e is AppException
     ? e.message
-    : 'İşlem tamamlanamadı. Bağlantını kontrol edip tekrar dene.';
+    : 'İşlem tamamlanamadı. Bağlantını kontrol edip tekrar dene.'.tr;
 
 /// İki kişilik davet odası. Geçerli durum her zaman sunucudan gelir.
 class FriendRoomView extends StatefulWidget {
@@ -37,7 +38,7 @@ class _FriendRoomViewState extends State<FriendRoomView> {
   Map<String, dynamic>? _room;
   bool _busy = false;
   bool _transitioning = false;
-  static const _baglantiKesildi = 'Bağlantı kesildi, yeniden deneniyor.';
+  static String get _baglantiKesildi => 'Bağlantı kesildi, yeniden deneniyor.'.tr;
 
   @override
   void initState() {
@@ -115,7 +116,7 @@ class _FriendRoomViewState extends State<FriendRoomView> {
   Future<void> _join(String code) async {
     final normalized = code.trim().toLowerCase();
     if (!RegExp(r'^[0-9a-f]{30}$').hasMatch(normalized)) {
-      setState(() => _error = '30 karakterlik davet kodunu gir.');
+      setState(() => _error = '30 karakterlik davet kodunu gir.'.tr);
       return;
     }
     await _perform(() => _api.join(normalized));
@@ -135,7 +136,7 @@ class _FriendRoomViewState extends State<FriendRoomView> {
     } catch (e) {
       if (mounted) {
         setState(() => _error = e.toString().contains('active_deck_missing')
-            ? 'Önce 11 kartlık aktif bir kadro hazırla.'
+            ? 'Önce 11 kartlık aktif bir kadro hazırla.'.tr
             : friendRoomErrorText(e));
       }
     } finally {
@@ -159,10 +160,8 @@ class _FriendRoomViewState extends State<FriendRoomView> {
   Future<void> _share() async {
     final code = _code;
     if (code == null) return;
-    final text = 'Futbol Card Arena: benimle oyna!\n'
-        '${FriendRoomApi.inviteUrl(code)}\n'
-        'Davet kodu: $code';
-    await SharePlus.instance.share(ShareParams(text: text, subject: 'Futbol Card Arena daveti'));
+    final text = 'Futbol Card Arena: benimle oyna!\n{p}\nDavet kodu: {code}'.trArgs({'p': FriendRoomApi.inviteUrl(code), 'code': code});
+    await SharePlus.instance.share(ShareParams(text: text, subject: 'Futbol Card Arena daveti'.tr));
   }
 
   @override
@@ -187,13 +186,13 @@ class _FriendRoomViewState extends State<FriendRoomView> {
         onCopy: () async {
           await Clipboard.setData(ClipboardData(text: _code ?? ''));
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Davet kodu kopyalandı')));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Davet kodu kopyalandı'.tr)));
           }
         },
       );
     }
     return V21InnerPage(
-      title: 'ARKADAŞINLA OYNA',
+      title: 'ARKADAŞINLA OYNA'.tr,
       route: AppRoutes.friends,
       fallbackRoute: AppRoutes.home,
       children: (context, k) {
@@ -227,65 +226,65 @@ class _FriendRoomViewState extends State<FriendRoomView> {
                   children: [
                     Icon(Icons.sports_soccer_rounded, size: 52 * k, color: V21Colors.goldTop),
                     SizedBox(height: 8 * k),
-                    Text('ÖZEL MAÇ', textAlign: TextAlign.center, style: V21Type.title(26 * k)),
+                    Text('ÖZEL MAÇ'.tr, textAlign: TextAlign.center, style: V21Type.title(26 * k)),
                     SizedBox(height: 6 * k),
                     Text(
-                      'Arkadaşını davet et. Dereceli puanın ve kartların etkilenmez.',
+                      'Arkadaşını davet et. Dereceli puanın ve kartların etkilenmez.'.tr,
                       textAlign: TextAlign.center,
                       style: V21Type.label(13 * k, weight: FontWeight.w700, color: V21Colors.textMuted, height: 1.35),
                     ),
                     SizedBox(height: 16 * k),
                     if (_code == null) ...[
-                      dugme('DAVET OLUŞTUR', _busy ? null : _create, ton: V21ButtonTone.gold, simge: Icons.add_link_rounded),
+                      dugme('DAVET OLUŞTUR'.tr, _busy ? null : _create, ton: V21ButtonTone.gold, simge: Icons.add_link_rounded),
                       SizedBox(height: 6 * k),
                       TextField(
                         controller: _codeController,
                         style: govde,
-                        decoration: const InputDecoration(labelText: 'Davet kodu', border: OutlineInputBorder()),
+                        decoration: InputDecoration(labelText: 'Davet kodu'.tr, border: OutlineInputBorder()),
                         textCapitalization: TextCapitalization.none,
                       ),
                       SizedBox(height: 10 * k),
                       dugme(
-                        'ODA KODUYLA KATIL',
+                        'ODA KODUYLA KATIL'.tr,
                         _busy ? null : () => _join(_codeController.text),
                         simge: Icons.login_rounded,
                       ),
                     ] else ...[
-                      SelectableText('Davet kodu: ${_code!}', textAlign: TextAlign.center, style: govde),
+                      SelectableText('Davet kodu: {code}'.trArgs({'code': _code!}), textAlign: TextAlign.center, style: govde),
                       SizedBox(height: 12 * k),
-                      dugme('BAĞLANTIYI PAYLAŞ', _busy ? null : _share, ton: V21ButtonTone.blue, simge: Icons.share_rounded),
-                      dugme('BAĞLANTIYI KOPYALA', () async {
+                      dugme('BAĞLANTIYI PAYLAŞ'.tr, _busy ? null : _share, ton: V21ButtonTone.blue, simge: Icons.share_rounded),
+                      dugme('BAĞLANTIYI KOPYALA'.tr, () async {
                         await Clipboard.setData(ClipboardData(text: FriendRoomApi.inviteUrl(_code!)));
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Davet bağlantısı kopyalandı')),
+                            SnackBar(content: Text('Davet bağlantısı kopyalandı'.tr)),
                           );
                         }
                       }, simge: Icons.copy_rounded),
                       Divider(height: 24 * k, color: V21Colors.pillBorder),
-                      Text('Oda sahibi: ${room?['host_name'] ?? 'Bağlanıyor...'}', style: govde),
-                      Text('Rakip: ${room?['guest_name'] ?? 'Bekleniyor...'}', style: govde),
+                      Text('Oda sahibi: {p}'.trArgs({'p': room?['host_name'] ?? 'Bağlanıyor...'.tr}), style: govde),
+                      Text('Rakip: {p}'.trArgs({'p': room?['guest_name'] ?? 'Bekleniyor...'.tr}), style: govde),
                       SizedBox(height: 6 * k),
-                      Text('Sen: ${myReady ? 'Hazırsın' : 'Hazır değilsin'}', style: govde),
+                      Text('Sen: {p}'.trArgs({'p': myReady ? 'Hazırsın'.tr : 'Hazır değilsin'.tr}), style: govde),
                       SizedBox(height: 12 * k),
                       if (status == 'waiting') ...[
                         dugme(
-                          myReady ? 'RAKİP BEKLENİYOR...' : 'HAZIRIM',
+                          myReady ? 'RAKİP BEKLENİYOR...'.tr : 'HAZIRIM'.tr,
                           _busy || (!isHost && !guestPresent) || myReady ? null : _ready,
                           ton: V21ButtonTone.green,
                         ),
-                        dugme('ODADAN ÇIK', _busy ? null : _leave),
+                        dugme('ODADAN ÇIK'.tr, _busy ? null : _leave),
                       ] else ...[
                         Text(
                           status == 'expired'
-                              ? 'Davetin süresi doldu.'
+                              ? 'Davetin süresi doldu.'.tr
                               : status == 'cancelled'
-                              ? 'Oda kapatıldı.'
-                              : 'Oda durumu: $status',
+                              ? 'Oda kapatıldı.'.tr
+                              : 'Oda durumu: {status}'.trArgs({'status': status}),
                           style: govde,
                         ),
                         SizedBox(height: 10 * k),
-                        dugme('GERİ DÖN', _leave),
+                        dugme('GERİ DÖN'.tr, _leave),
                       ],
                     ],
                     if (_busy)

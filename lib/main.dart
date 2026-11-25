@@ -7,10 +7,12 @@ import 'app.dart';
 import 'core/audio/game_audio.dart';
 import 'core/config/app_config.dart';
 import 'core/di/injection.dart';
+import 'package:shared_models/shared_models.dart' show displayText;
 import 'core/platform/orientation_policy.dart';
 import 'core/utils/logger.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/settings/presentation/viewmodel/settings_view_model.dart';
+import 'core/l10n/app_language.dart';
 
 /// Uygulamanin giris noktasi.
 ///
@@ -40,6 +42,11 @@ Future<void> main() async {
     // önce okunmalı. Aksi halde ayarlar ekranı açılana kadar her yer
     // varsayılanlarla çalışır ve oyuncunun kapattığı titreşim gelir.
     await getIt<SettingsViewModel>().load();
+
+    // Dil: kayıtlı seçim, yoksa cihaz dili. Modellerdeki etiketler
+    // (mevki, taktik, görev şartı) de aynı çeviriden geçer.
+    await AppLanguageController.instance.load();
+    displayText = (s) => s.tr;
 
     // Ses: hangi müzik/efekt dosyalarının eklendiğini öğrenir. Başarısız
     // olursa oyun sessiz açılır; açılışı engellemez.
@@ -100,16 +107,11 @@ class _BaslatmaHatasiEkrani extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline,
-                    size: 64, color: Color(0xFFE5484D)),
+                const Icon(Icons.error_outline, size: 64, color: Color(0xFFE5484D)),
                 const SizedBox(height: 16),
-                const Text(
-                  'Uygulama baslatilamadi',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                Text(
+                  'Uygulama baslatilamadi'.tr,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 12),
                 Text(

@@ -8,6 +8,7 @@ import 'v21_game_panel.dart';
 import 'v21_item_art.dart';
 import 'v21_painters.dart';
 import 'v21_tap.dart';
+import '../../core/l10n/app_language.dart';
 
 /// V2.1 ÖDÜL KARTI (referans Zafer "ÖDÜLLERİN": 108×116 karo).
 ///
@@ -35,7 +36,7 @@ class V21RewardCard extends StatelessWidget {
     key: key,
     icon: V21CoinIcon(size: 46 * scale),
     value: '+$amount',
-    label: 'ALTIN',
+    label: 'ALTIN'.tr,
     scale: scale,
   );
 
@@ -44,7 +45,7 @@ class V21RewardCard extends StatelessWidget {
     key: key,
     icon: V21StarIcon(size: 46 * scale, color: const Color(0xFFFFD45E)),
     value: amount >= 0 ? '+$amount' : '$amount',
-    label: 'KUPA',
+    label: 'KUPA'.tr,
     scale: scale,
   );
 
@@ -53,7 +54,7 @@ class V21RewardCard extends StatelessWidget {
     key: key,
     icon: V21ChestArt(height: 54 * scale),
     value: V21Format.upper(typeName),
-    label: 'SANDIK',
+    label: 'SANDIK'.tr,
     valueColor: const Color(0xFFFFC832),
     scale: scale,
   );
@@ -146,7 +147,7 @@ class V21ChestCard extends StatelessWidget {
                   Icon(Icons.add_rounded, size: 40 * k, color: V21Colors.dash),
                   SizedBox(height: 8 * k),
                   Text(
-                    'BOŞ YUVA',
+                    'BOŞ YUVA'.tr,
                     style: V21Type.label(12 * k, weight: FontWeight.w800, color: V21Colors.textDim),
                   ),
                 ],

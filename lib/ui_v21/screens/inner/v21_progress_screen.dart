@@ -9,6 +9,7 @@ import '../../../features/progress/presentation/viewmodel/progress_view_model.da
 import '../../ui_v21.dart';
 import '../../web/web_kit.dart';
 import '../../web/web_screens.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 GELİŞİM (referans `assets/v21/screens/progress.png`).
 ///
@@ -33,7 +34,7 @@ class V21ProgressScreen extends StatelessWidget {
 }
 
 const _tierOrder = ['bronze', 'silver', 'gold', 'diamond', 'legend'];
-const _tierName = {'bronze': 'Bronz', 'silver': 'Gümüş', 'gold': 'Altın', 'diamond': 'Elmas', 'legend': 'Efsane'};
+Map<String, String> get _tierName => {'bronze': 'Bronz'.tr, 'silver': 'Gümüş'.tr, 'gold': 'Altın'.tr, 'diamond': 'Elmas'.tr, 'legend': 'Efsane'.tr};
 
 class _Body extends StatelessWidget {
   const _Body();
@@ -44,7 +45,7 @@ class _Body extends StatelessWidget {
     final o = vm.overview;
     if (v21IsWeb(context) && o != null && o.enabled) return WebProgress(vm: vm, overview: o);
     return V21InnerPage(
-      title: 'GELİŞİM',
+      title: 'GELİŞİM'.tr,
       route: AppRoutes.progress,
       highlightRoute: AppRoutes.collection,
       fallbackRoute: AppRoutes.collection,
@@ -54,8 +55,8 @@ class _Body extends StatelessWidget {
       errorMessage: vm.errorMessage,
       onRetry: vm.load,
       onRefresh: vm.load,
-      disabledTitle: 'GELİŞİM YAKINDA',
-      disabledMessage: 'Futbolcu seviyeleri henüz açık değil.',
+      disabledTitle: 'GELİŞİM YAKINDA'.tr,
+      disabledMessage: 'Futbolcu seviyeleri henüz açık değil.'.tr,
       trailing: (context, k) => V21ResourcePill.coins(coins: o?.coins, scale: k),
       children: (context, k) {
         final items = vm.visibleItems;
@@ -65,7 +66,7 @@ class _Body extends StatelessWidget {
           Row(
             children: [
               V21FilterPill(
-                label: 'TÜMÜ',
+                label: 'TÜMÜ'.tr,
                 selected: !vm.onlyReady,
                 onTap: () => vm.setOnlyReady(false),
                 scale: k,
@@ -73,7 +74,7 @@ class _Body extends StatelessWidget {
               ),
               SizedBox(width: 8 * k),
               V21FilterPill(
-                label: 'ATLAYABİLİR (${o.suggestedCount})',
+                label: 'ATLAYABİLİR ({suggestedCount})'.trArgs({'suggestedCount': o.suggestedCount}),
                 color: V21Colors.success,
                 selected: vm.onlyReady,
                 onTap: () => vm.setOnlyReady(true),
@@ -94,14 +95,14 @@ class _Body extends StatelessWidget {
           if (items.isEmpty)
             V21EmptyState(
               icon: Icons.trending_up_rounded,
-              title: 'ŞİMDİLİK YOK',
-              message: 'Şu an seviye atlayabilecek futbolcu yok. Gelişim kopyaları sandıklardan gelir.',
+              title: 'ŞİMDİLİK YOK'.tr,
+              message: 'Şu an seviye atlayabilecek futbolcu yok. Gelişim kopyaları sandıklardan gelir.'.tr,
               scale: k,
             )
           else
             for (final i in items) ...[_Row(item: i, overview: o, vm: vm, scale: k), SizedBox(height: 12 * k)],
           Text(
-            'Seviye dereceli maçta kartın gücünü değiştirmez; ustalık göstergesidir. Kart kaybedilse de seviye korunur.',
+            'Seviye dereceli maçta kartın gücünü değiştirmez; ustalık göstergesidir. Kart kaybedilse de seviye korunur.'.tr,
             textAlign: TextAlign.center,
             style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textDim, height: 1.4),
           ),
@@ -121,7 +122,7 @@ class _Jokers extends StatelessWidget {
     final k = scale;
     return Semantics(
       container: true,
-      label: 'Joker parçalar: ${[for (final t in _tierOrder) '${_tierName[t]} ${overview.jokers[t] ?? 0}'].join(', ')}',
+      label: 'Joker parçalar: {p}'.trArgs({'p': [for (final t in _tierOrder) '${_tierName[t]} ${overview.jokers[t] ?? 0}'].join(', ')}),
       excludeSemantics: true,
       child: V21GamePanel(
         scale: k,
@@ -131,7 +132,7 @@ class _Jokers extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'JOKER PARÇALAR',
+              'JOKER PARÇALAR'.tr,
               style: V21Type.label(13 * k, weight: FontWeight.w900, color: V21Colors.textMuted, letterSpacing: 0.4),
             ),
             SizedBox(height: 8 * k),
@@ -188,35 +189,35 @@ class _Row extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('EN YÜKSEK SEVİYE ', style: V21Type.title(17 * k, color: V21Colors.goldTop)),
+              Text('EN YÜKSEK SEVİYE '.tr, style: V21Type.title(17 * k, color: V21Colors.goldTop)),
               V21StarIcon(size: 16 * k, color: V21Colors.goldTop),
             ],
           ),
           Text(
-            'Gelecek kopyalar joker parçaya döner',
+            'Gelecek kopyalar joker parçaya döner'.tr,
             style: V21Type.label(12 * k, weight: FontWeight.w600, color: V21Colors.textMuted),
           ),
         ],
       );
     } else if (ready || withJokers || busy) {
       action = V21GameButton(
-        label: ready ? 'SEVİYE ATLA' : 'JOKERLE ATLA',
+        label: ready ? 'SEVİYE ATLA'.tr : 'JOKERLE ATLA'.tr,
         tone: ready ? V21ButtonTone.green : V21ButtonTone.blue,
         size: V21ButtonSize.medium,
         scale: k,
         status: busy ? V21ButtonStatus.loading : V21ButtonStatus.normal,
         semanticsLabel: ready
-            ? '${i.fullName}: seviye ${i.level + 1}\'e atla, ${next!.coins} altın'
-            : '${i.fullName}: ${i.missingCopies} joker ve ${next!.coins} altınla atla',
+            ? '{fullName}: seviye {p}\'e atla, {coins} altın'.trArgs({'fullName': i.fullName, 'p': i.level + 1, 'coins': next!.coins})
+            : '{fullName}: {missingCopies} joker ve {coins} altınla atla'.trArgs({'fullName': i.fullName, 'missingCopies': i.missingCopies, 'coins': next!.coins}),
         onPressed: () => _levelUp(context, vm, i, useJokers: !ready),
       );
     } else {
       action = Text(
         !i.isOwned
-            ? 'Bu futbolcu şu an koleksiyonunda yok; seviyesi korunuyor.'
+            ? 'Bu futbolcu şu an koleksiyonunda yok; seviyesi korunuyor.'.tr
             : i.missingCopies > 0
-            ? '${i.missingCopies} kopya daha gerekli · ${V21Format.thousands(next!.coins)} altın'
-            : 'Yeterli altın yok (${V21Format.thousands(next!.coins)} altın)',
+            ? '{missingCopies} kopya daha gerekli · {p} altın'.trArgs({'missingCopies': i.missingCopies, 'p': V21Format.thousands(next!.coins)})
+            : 'Yeterli altın yok ({p} altın)'.trArgs({'p': V21Format.thousands(next!.coins)}),
         style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
       );
     }
@@ -251,7 +252,7 @@ class _Row extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'SEVİYE ${i.level}',
+                        'SEVİYE {level}'.trArgs({'level': i.level}),
                         style: V21Type.title(
                           30 * k,
                           color: i.isMax ? V21Colors.goldTop : Colors.white,
@@ -262,7 +263,7 @@ class _Row extends StatelessWidget {
                     if (hasOptions && !busy)
                       V21IconPill(
                         icon: Icons.more_horiz_rounded,
-                        semanticsLabel: '${i.fullName}: diğer seçenekler',
+                        semanticsLabel: '{fullName}: diğer seçenekler'.trArgs({'fullName': i.fullName}),
                         scale: k * 0.85,
                         onTap: () => _options(context, i),
                       ),
@@ -275,7 +276,7 @@ class _Row extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'Kopya',
+                        'Kopya'.tr,
                         style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
                       ),
                       SizedBox(width: 8 * k),
@@ -286,7 +287,7 @@ class _Row extends StatelessWidget {
                           height: 14 * k,
                           trackColor: const Color(0xFF201046),
                           fillColors: const [Color(0xFF9EDCFF), Color(0xFF3FA2F5)],
-                          semanticsLabel: 'Kopya ${i.copies} / ${next.copies}',
+                          semanticsLabel: 'Kopya {copies} / {copies2}'.trArgs({'copies': i.copies, 'copies2': next.copies}),
                         ),
                       ),
                       SizedBox(width: 8 * k),
@@ -312,21 +313,20 @@ class _Row extends StatelessWidget {
     final coins = overview.coins;
     final choice = await V21GameDialog.show<String>(
       context,
-      subtitle: 'GELİŞİM',
+      subtitle: 'GELİŞİM'.tr,
       title: V21Format.upper(i.fullName),
       message:
-          'Seviye ${i.level} · ${i.copies}/${next.copies} kopya · ${V21Format.thousands(next.coins)} altın'
-          '${i.jokersAvailable > 0 ? '\n${_tierName[i.tier.name] ?? ''} joker: ${i.jokersAvailable}' : ''}',
+          'Seviye {level} · {copies}/{copies2} kopya · {p} altın{p2}'.trArgs({'level': i.level, 'copies': i.copies, 'copies2': next.copies, 'p': V21Format.thousands(next.coins), 'p2': i.jokersAvailable > 0 ? '\n{p} joker: {jokersAvailable}'.trArgs({'p': _tierName[i.tier.name] ?? '', 'jokersAvailable': i.jokersAvailable}) : ''}),
       actions: [
         if (i.canLevelWithJokers(coins))
-          V21DialogAction('JOKERLE ATLA (${i.missingCopies})', tone: V21ButtonTone.blue, result: 'jokers'),
+          V21DialogAction('JOKERLE ATLA ({missingCopies})'.trArgs({'missingCopies': i.missingCopies}), tone: V21ButtonTone.blue, result: 'jokers'),
         if (i.canLevelUp(coins) && overview.discounts > 0)
-          V21DialogAction('%25 İNDİRİMLE ATLA (${V21Format.thousands(next.coins * 3 ~/ 4)})', result: 'discount'),
+          V21DialogAction('%25 İNDİRİMLE ATLA ({p})'.trArgs({'p': V21Format.thousands(next.coins * 3 ~/ 4)}), result: 'discount'),
         if (vm.canUseItems && i.booksAvailable > 0 && i.missingCopies > 0)
-          V21DialogAction('USTALIK KİTABI (${i.booksAvailable})', tone: V21ButtonTone.green, result: 'book'),
+          V21DialogAction('USTALIK KİTABI ({booksAvailable})'.trArgs({'booksAvailable': i.booksAvailable}), tone: V21ButtonTone.green, result: 'book'),
         if (i.convertibleCopies > 0)
-          V21DialogAction('${i.convertibleCopies} KOPYAYI ÇEVİR', tone: V21ButtonTone.red, result: 'convert'),
-        const V21DialogAction('KAPAT', tone: V21ButtonTone.purple),
+          V21DialogAction('{convertibleCopies} KOPYAYI ÇEVİR'.trArgs({'convertibleCopies': i.convertibleCopies}), tone: V21ButtonTone.red, result: 'convert'),
+        V21DialogAction('KAPAT'.tr, tone: V21ButtonTone.purple),
       ],
     );
     if (!context.mounted) return;
@@ -340,15 +340,13 @@ class _Row extends StatelessWidget {
       case 'convert':
         final ok = await V21GameDialog.show<bool>(
           context,
-          subtitle: 'GERİ ALINAMAZ',
-          title: 'KOPYALAR ÇEVRİLSİN Mİ?',
+          subtitle: 'GERİ ALINAMAZ'.tr,
+          title: 'KOPYALAR ÇEVRİLSİN Mİ?'.tr,
           message:
-              '${i.fullName}: ${i.convertibleCopies} fiziksel kopya gelişim kopyasına dönüşecek ve koleksiyonundan '
-              'çıkacak. Bu işlem GERİ ALINAMAZ. Koleksiyonunda en az ${overview.convertKeep} kopya kalır; destedeki ve '
-              'maçtaki kartlara dokunulmaz.',
+              '{fullName}: {convertibleCopies} fiziksel kopya gelişim kopyasına dönüşecek ve koleksiyonundan çıkacak. Bu işlem GERİ ALINAMAZ. Koleksiyonunda en az {convertKeep} kopya kalır; destedeki ve maçtaki kartlara dokunulmaz.'.trArgs({'fullName': i.fullName, 'convertibleCopies': i.convertibleCopies, 'convertKeep': overview.convertKeep}),
           actions: [
-            V21DialogAction('ÇEVİR (${i.convertibleCopies})', tone: V21ButtonTone.red, result: true),
-            const V21DialogAction('VAZGEÇ', tone: V21ButtonTone.blue, result: false),
+            V21DialogAction('ÇEVİR ({convertibleCopies})'.trArgs({'convertibleCopies': i.convertibleCopies}), tone: V21ButtonTone.red, result: true),
+            V21DialogAction('VAZGEÇ'.tr, tone: V21ButtonTone.blue, result: false),
           ],
         );
         if (ok == true) await vm.convert(i, i.convertibleCopies);
@@ -367,7 +365,7 @@ class _Pips extends StatelessWidget {
   Widget build(BuildContext context) {
     final k = scale;
     return Semantics(
-      label: 'Seviye $level / $max',
+      label: 'Seviye {level} / {max}'.trArgs({'level': level, 'max': max}),
       excludeSemantics: true,
       child: LayoutBuilder(
         builder: (context, c) {
@@ -409,22 +407,22 @@ Future<void> _levelUp(
   if (!ok || r == null || !context.mounted) return;
   GameAudio.sfx(Sfx.levelUp);
   final satirlar = [
-    if (r.coinsSpent > 0) '${V21Format.thousands(r.coinsSpent)} altın harcandı',
-    if (r.jokersUsed > 0) '${r.jokersUsed} joker parça kullanıldı',
-    if (r.discount > 0) '%25 indirimle ${V21Format.thousands(r.discount)} altın kazandın',
-    if (r.masteryCoins > 0) 'Ustalık ödülü: +${V21Format.thousands(r.masteryCoins)} altın!',
+    if (r.coinsSpent > 0) '{p} altın harcandı'.trArgs({'p': V21Format.thousands(r.coinsSpent)}),
+    if (r.jokersUsed > 0) '{jokersUsed} joker parça kullanıldı'.trArgs({'jokersUsed': r.jokersUsed}),
+    if (r.discount > 0) '%25 indirimle {p} altın kazandın'.trArgs({'p': V21Format.thousands(r.discount)}),
+    if (r.masteryCoins > 0) 'Ustalık ödülü: +{p} altın!'.trArgs({'p': V21Format.thousands(r.masteryCoins)}),
     if (r.next != null)
-      'Sonraki seviye: ${r.next!.copies} kopya · ${V21Format.thousands(r.next!.coins)} altın'
+      'Sonraki seviye: {copies} kopya · {p} altın'.trArgs({'copies': r.next!.copies, 'p': V21Format.thousands(r.next!.coins)})
     else
-      'En yüksek seviyeye ulaştı!',
+      'En yüksek seviyeye ulaştı!'.tr,
   ];
   await V21GameDialog.show<void>(
     context,
     subtitle: V21Format.upper(i.fullName),
-    title: 'SEVİYE ${r.level}!',
+    title: 'SEVİYE {level}!'.trArgs({'level': r.level}),
     icon: V21PlayerCard(name: i.fullName, position: i.position, tier: i.tier, power: i.power, width: 110),
     message: satirlar.join('\n'),
-    actions: const [V21DialogAction('HARİKA', tone: V21ButtonTone.green)],
+    actions: [V21DialogAction('HARİKA'.tr, tone: V21ButtonTone.green)],
   );
   vm.clearLastLevelUp();
 }

@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Visually curated positional illustration pools covering 550 artworks.
 /// GK is determined from depicted keeper gloves; other roles are artistic
@@ -111,7 +112,7 @@ abstract final class V21Characters {
   static String assetFor(String key, {required String position}) {
     final pool = reviewedByPosition[position.toUpperCase()];
     if (pool == null || pool.isEmpty) {
-      throw ArgumentError.value(position, 'position', 'Invalid football position');
+      throw ArgumentError.value(position, 'position', 'Invalid football position'.tr);
     }
     return _assetNumber(pool[indexFor(key) % pool.length]);
   }

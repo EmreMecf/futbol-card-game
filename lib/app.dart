@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 import 'core/audio/audio_route_listener.dart';
 import 'core/auth/session_manager.dart';
 import 'core/di/injection.dart';
+import 'core/l10n/app_language.dart';
+import 'core/l10n/language_rebuilder.dart';
 import 'core/router/app_router.dart';
 import 'core/router/app_routes.dart';
 import 'core/theme/app_theme.dart';
@@ -37,6 +39,7 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
   @override
   void initState() {
     super.initState();
+    AppLanguageController.instance.addListener(_dilDegisti);
     // Ekran değiştikçe doğru müzik (menü / arama / maç)
     _music.attach();
     // Webde davet adresi doğrudan rotaya gelir; uygulama bağlantısı eklentisi yok
@@ -48,8 +51,15 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
     });
   }
 
+  /// Dil değişti: MaterialApp yeni dille kurulur (tarih seçici gibi
+  /// Flutter metinleri). Ekranların kendisini [LanguageRebuilder] çizer.
+  void _dilDegisti() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    AppLanguageController.instance.removeListener(_dilDegisti);
     _music.detach();
     _inviteSubscription?.cancel();
     super.dispose();
@@ -62,12 +72,8 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
     return MultiProvider(
       providers: [
         // Oturum durumu: her ekran kullanici adini, coin'ini buradan okur
-        ChangeNotifierProvider<SessionManager>.value(
-          value: getIt<SessionManager>(),
-        ),
-        ChangeNotifierProvider<AuthViewModel>(
-          create: (_) => getIt<AuthViewModel>(),
-        ),
+        ChangeNotifierProvider<SessionManager>.value(value: getIt<SessionManager>()),
+        ChangeNotifierProvider<AuthViewModel>(create: (_) => getIt<AuthViewModel>()),
       ],
       child: MaterialApp.router(
         title: 'Futbol Card Arena',
@@ -81,12 +87,12 @@ class _FutbolCardAppState extends State<FutbolCardApp> {
         builder: (context, child) => MediaQuery.withClampedTextScaling(
           minScaleFactor: 0.9,
           maxScaleFactor: 1.2,
-          child: child ?? const SizedBox.shrink(),
+          child: LanguageRebuilder(child: child ?? const SizedBox.shrink()),
         ),
 
-        // Uygulama dili Turkce
-        locale: const Locale('tr', 'TR'),
-        supportedLocales: const [Locale('tr', 'TR')],
+        // Uygulama dili: Ayarlar > DİL (Türkçe / English)
+        locale: AppLanguageController.instance.value.locale,
+        supportedLocales: [for (final l in AppLanguage.values) l.locale],
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,

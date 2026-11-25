@@ -8,6 +8,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../features/leaderboard/presentation/viewmodel/leaderboard_view_model.dart';
 import '../../ui_v21.dart';
 import 'v21_league_screen.dart' show leagueShield;
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 SIRALAMA (liderlik tablosu). HTML referansında karşılığı yok;
 /// Lig Yolu ve Profil ekranlarının dilinden türetildi.
@@ -38,7 +39,7 @@ class _Body extends StatelessWidget {
     final vm = context.watch<LeaderboardViewModel>();
     final entries = vm.entries;
     return V21InnerPage(
-      title: 'SIRALAMA',
+      title: 'SIRALAMA'.tr,
       route: AppRoutes.leaderboard,
       highlightRoute: AppRoutes.home,
       fallbackRoute: AppRoutes.home,
@@ -46,7 +47,7 @@ class _Body extends StatelessWidget {
       trailing: (context, k) => V21ResourcePill(
         icon: V21CoinIcon(size: 24 * k),
         value: vm.myRank?.mmr,
-        semanticsName: 'kupa',
+        semanticsName: 'kupa'.tr,
         scale: k,
         width: 117,
       ),
@@ -61,9 +62,9 @@ class _Body extends StatelessWidget {
         else if (entries.isEmpty)
           V21EmptyState(
             icon: vm.hasError ? Icons.cloud_off_rounded : Icons.emoji_events_rounded,
-            title: vm.hasError ? 'BAĞLANTI SORUNU' : 'SIRALAMA BOŞ',
-            message: vm.errorMessage ?? 'Henüz sıralamada oyuncu yok. İlk dereceli maçı oynayan sen ol!',
-            actionLabel: vm.hasError ? 'TEKRAR DENE' : null,
+            title: vm.hasError ? 'BAĞLANTI SORUNU'.tr : 'SIRALAMA BOŞ'.tr,
+            message: vm.errorMessage ?? 'Henüz sıralamada oyuncu yok. İlk dereceli maçı oynayan sen ol!'.tr,
+            actionLabel: vm.hasError ? 'TEKRAR DENE'.tr : null,
             onAction: vm.hasError ? vm.refresh : null,
             scale: k,
           )
@@ -79,7 +80,7 @@ class _Body extends StatelessWidget {
               onTap: () => context.push(AppRoutes.playerFor(e.userId)),
               child: _Row(
                 position: e.rankPosition,
-                name: e.userId == vm.myUserId ? '${e.username} (sen)' : e.username,
+                name: e.userId == vm.myUserId ? '{username} (sen)'.trArgs({'username': e.username}) : e.username,
                 league: e.rankLabel,
                 points: e.mmr,
                 me: e.userId == vm.myUserId,
@@ -98,7 +99,7 @@ class _Body extends StatelessWidget {
             ),
             _Row(
               position: vm.myPosition!,
-              name: 'Sen',
+              name: 'Sen'.tr,
               league: vm.myRank!.label,
               points: vm.myRank!.mmr,
               me: true,
@@ -112,7 +113,7 @@ class _Body extends StatelessWidget {
           children: [
             Expanded(
               child: V21GameButton(
-                label: 'LİG YOLU',
+                label: 'LİG YOLU'.tr,
                 tone: V21ButtonTone.blue,
                 size: V21ButtonSize.medium,
                 scale: k,
@@ -122,10 +123,10 @@ class _Body extends StatelessWidget {
             SizedBox(width: 10 * k),
             Expanded(
               child: V21GameButton(
-                label: 'MAÇ OYNA',
+                label: 'MAÇ OYNA'.tr,
                 size: V21ButtonSize.medium,
                 scale: k,
-                semanticsLabel: 'Dereceli maç oyna',
+                semanticsLabel: 'Dereceli maç oyna'.tr,
                 onPressed: () => context.go(AppRoutes.matchmaking),
               ),
             ),
@@ -149,17 +150,17 @@ class _MyRank extends StatelessWidget {
     final (colors, code) = leagueShield(r?.leagueCode ?? '');
     final String detail;
     if (r == null) {
-      detail = 'Lig bilgisi yükleniyor';
+      detail = 'Lig bilgisi yükleniyor'.tr;
     } else if (r.isTopTier || r.nextLabel == null) {
-      detail = 'En üst basamaktasın';
+      detail = 'En üst basamaktasın'.tr;
     } else {
-      detail = '${r.pointsToNext} kupa sonra ${r.nextLabel} (${r.winsToNext} galibiyet)';
+      detail = '{pointsToNext} kupa sonra {nextLabel} ({winsToNext} galibiyet)'.trArgs({'pointsToNext': r.pointsToNext, 'nextLabel': r.nextLabel, 'winsToNext': r.winsToNext});
     }
     return Semantics(
       container: true,
       label: [
-        if (r != null) 'Ligin ${r.label}, ${r.mmr} kupa',
-        if (position != null) 'sıralamada $position.',
+        if (r != null) 'Ligin {label}, {mmr} kupa'.trArgs({'label': r.label, 'mmr': r.mmr}),
+        if (position != null) 'sıralamada {position}.'.trArgs({'position': position}),
         detail,
       ].join(', '),
       excludeSemantics: true,
@@ -219,7 +220,7 @@ class _MyRank extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          r == null ? 'LİG' : V21Format.upper(r.label),
+                          r == null ? 'LİG'.tr : V21Format.upper(r.label),
                           style: V21Type.title(24 * k, shadows: V21Type.inkShadow(k)),
                         ),
                       ),
@@ -237,7 +238,7 @@ class _MyRank extends StatelessWidget {
                   V21ProgressBar(
                     value: r == null ? 0 : (r.isTopTier ? 1 : r.progress),
                     height: 12 * k,
-                    semanticsLabel: 'Basamak ilerlemesi',
+                    semanticsLabel: 'Basamak ilerlemesi'.tr,
                   ),
                   SizedBox(height: 5 * k),
                   Text(
@@ -275,7 +276,7 @@ class _Podium extends StatelessWidget {
           behavior: HitTestBehavior.opaque,
           onTap: () => context.push(AppRoutes.playerFor(e.userId)),
           child: Semantics(
-            label: '${e.rankPosition}. sıra, ${e.username}${me ? ' (sen)' : ''}, ${e.mmr} kupa, ${e.rankLabel}',
+            label: '{rankPosition}. sıra, {username}{p}, {mmr} kupa, {rankLabel}'.trArgs({'rankPosition': e.rankPosition, 'username': e.username, 'p': me ? ' (sen)' : '', 'mmr': e.mmr, 'rankLabel': e.rankLabel}),
             excludeSemantics: true,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -291,7 +292,7 @@ class _Podium extends StatelessWidget {
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    me ? '${e.username} (sen)' : e.username,
+                    me ? '{username} (sen)'.trArgs({'username': e.username}) : e.username,
                     maxLines: 1,
                     style: V21Type.title(15 * k, color: me ? V21Colors.goldTop : Colors.white),
                   ),
@@ -353,7 +354,7 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) {
     final k = scale;
     return Semantics(
-      label: '$position. sıra, $name, $points kupa, $league${me ? ', sen' : ''}',
+      label: '{position}. sıra, {name}, {points} kupa, {league}{p}'.trArgs({'position': position, 'name': name, 'points': points, 'league': league, 'p': me ? ', sen'.tr : ''}),
       excludeSemantics: true,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10 * k, vertical: 8 * k),

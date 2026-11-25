@@ -54,7 +54,7 @@ void main() {
 
   test('ağ hatasında aynı hedef seviye AYNI anahtarla tekrar (altın iki kez düşmez)', () async {
     final item = kGoldenProgress.items.first;
-    depo.hatalar.add(const AppException.network());
+    depo.hatalar.add(AppException.network());
     expect(await vm.levelUp(item), isFalse);
     expect(await vm.levelUp(item), isTrue);
     expect(depo.anahtarlar[0], depo.anahtarlar[1]);

@@ -9,6 +9,7 @@ import '../../core/router/app_routes.dart';
 import '../../features/home/presentation/viewmodel/home_view_model.dart';
 import '../../features/season/presentation/viewmodel/season_view_model.dart';
 import '../ui_v21.dart';
+import '../../core/l10n/app_language.dart';
 
 /// WEB TASARIMI: bütün ekranlar 1672×941 tuvale çizilir ve pencereye sığacak
 /// şekilde ölçeklenir. Böylece her masaüstü boyutunda tasarımla aynı yerleşim
@@ -140,13 +141,13 @@ class _Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <(String, String, String, String?)>[
-      ('ARENA', AppRoutes.home, 'nav_arena', 'nav_arena_on'),
-      ('KARTLAR', AppRoutes.collection, 'nav_cards', 'nav_cards_on'),
-      ('KADRO', AppRoutes.deck, 'nav_squad', 'nav_squad_on'),
-      ('MAĞAZA', AppRoutes.store, 'nav_store', 'nav_store_on'),
-      ('SEZON', AppRoutes.season, 'nav_season', null),
-      if (extra == WebExtraNav.progress) ('GELİŞİM', AppRoutes.progress, 'nav_progress_on', 'nav_progress_on'),
-      if (extra == WebExtraNav.chests) ('SANDIKLAR', AppRoutes.chests, 'nav_chests_on', 'nav_chests_on'),
+      ('ARENA'.tr, AppRoutes.home, 'nav_arena', 'nav_arena_on'),
+      ('KARTLAR'.tr, AppRoutes.collection, 'nav_cards', 'nav_cards_on'),
+      ('KADRO'.tr, AppRoutes.deck, 'nav_squad', 'nav_squad_on'),
+      ('MAĞAZA'.tr, AppRoutes.store, 'nav_store', 'nav_store_on'),
+      ('SEZON'.tr, AppRoutes.season, 'nav_season', null),
+      if (extra == WebExtraNav.progress) ('GELİŞİM'.tr, AppRoutes.progress, 'nav_progress_on', 'nav_progress_on'),
+      if (extra == WebExtraNav.chests) ('SANDIKLAR'.tr, AppRoutes.chests, 'nav_chests_on', 'nav_chests_on'),
     ];
     return Positioned(
       left: 0,
@@ -404,7 +405,7 @@ class _TopBarState extends State<_TopBar> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    r == null ? 'LİG' : V21Format.upper(r.label),
+                                    r == null ? 'LİG'.tr : V21Format.upper(r.label),
                                     maxLines: 1,
                                     style: wTitle(28),
                                   ),
@@ -449,11 +450,11 @@ class _TopBarState extends State<_TopBar> {
                 const V21CoinIcon(size: 44),
                 V21Format.thousands(user?.coins ?? 0),
                 () => context.go(AppRoutes.store),
-                'Altın al: mağaza',
+                'Altın al: mağaza'.tr,
               ),
             ),
-            wBox(1526, 16, 1588, 80, _square(Icons.notifications_rounded, 'Görevler', () => context.go(AppRoutes.season))),
-            wBox(1600, 16, 1662, 80, _square(Icons.settings_rounded, 'Ayarlar', () => context.push(AppRoutes.settings))),
+            wBox(1526, 16, 1588, 80, _square(Icons.notifications_rounded, 'Görevler'.tr, () => context.go(AppRoutes.season))),
+            wBox(1600, 16, 1662, 80, _square(Icons.settings_rounded, 'Ayarlar'.tr, () => context.push(AppRoutes.settings))),
           ],
         ),
       ),
@@ -684,7 +685,7 @@ class WCard extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       selected: selected,
-      label: '$name, $position, $power güç',
+      label: '{name}, {position}, {power} güç'.trArgs({'name': name, 'position': position, 'power': power}),
       excludeSemantics: true,
       child: V21Tap(
         onTap: onTap,

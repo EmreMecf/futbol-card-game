@@ -21,6 +21,7 @@ import '../../../shared/widgets/error_snackbar.dart';
 import '../../ui_v21.dart';
 import '../../web/web_arena.dart';
 import '../../web/web_kit.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 CANLI ARENA (referans arena.png, hf7–hf11).
 ///
@@ -53,7 +54,7 @@ class V21ArenaScreen extends StatelessWidget {
 
 /// Seçim aşamasının adımları (hf7–hf9 çizelgesi)
 ({List<String> labels, int current}) arenaSteps(MatchViewModel vm, {required bool cardSelected}) {
-  final labels = [if (vm.isSimultaneous) 'MEVKİ', 'KART', if (vm.tacticsEnabled) 'TAKTİK'];
+  final labels = [if (vm.isSimultaneous) 'MEVKİ'.tr, 'KART'.tr, if (vm.tacticsEnabled) 'TAKTİK'.tr];
   int current;
   if (vm.isPositionPhase) {
     current = 1;
@@ -62,7 +63,7 @@ class V21ArenaScreen extends StatelessWidget {
   } else if (cardSelected && vm.tacticsEnabled) {
     current = labels.length;
   } else {
-    current = labels.indexOf('KART') + 1;
+    current = labels.indexOf('KART'.tr) + 1;
   }
   return (labels: labels, current: current);
 }
@@ -74,35 +75,34 @@ String arenaStatus(MatchViewModel vm, HandCard? selected) {
   String text;
   if (vm.isSimultaneous && d != null && vm.isPositionPhase) {
     text = d.amILead
-        ? 'Mevkiyi sen seçiyorsun. İkiniz de o mevkiden kartınızı aynı anda, gizlice seçeceksiniz.'
-        : 'Rakip mevkiyi seçiyor. Sonra ikiniz aynı anda gizlice kart seçeceksiniz.';
+        ? 'Mevkiyi sen seçiyorsun. İkiniz de o mevkiden kartınızı aynı anda, gizlice seçeceksiniz.'.tr
+        : 'Rakip mevkiyi seçiyor. Sonra ikiniz aynı anda gizlice kart seçeceksiniz.'.tr;
   } else if (vm.waitingOpponentPick) {
-    text = 'Hamlen kilitlendi. Rakip seçince iki kart birlikte açılır.';
+    text = 'Hamlen kilitlendi. Rakip seçince iki kart birlikte açılır.'.tr;
   } else if (vm.mustPass && vm.isMyTurn) {
-    text = 'Bu mevkide kartın yok: pas geçmek zorundasın (tur rakibe yazılır).';
+    text = 'Bu mevkide kartın yok: pas geçmek zorundasın (tur rakibe yazılır).'.tr;
   } else if (!vm.isMyTurn) {
-    text = 'Rakip düşünüyor…';
+    text = 'Rakip düşünüyor…'.tr;
   } else if (!vm.selectedTactic.isNone) {
     text = '${vm.selectedTactic.label}: ${vm.selectedTactic.hint}';
   } else if (selected != null) {
     text =
         '${selected.fullName}: ${selected.power}'
-        '${selected.hasChemistry ? ' + ${selected.chemistry} kimya = ${selected.effectivePower}' : ''}. '
-        '${vm.tacticsEnabled ? 'İstersen taktik seç, sonra OYNA!' : 'Hazırsan OYNA!'}';
+        '${selected.hasChemistry ? ' + {chemistry} kimya = {effectivePower}'.trArgs({'chemistry': selected.chemistry, 'effectivePower': selected.effectivePower}) : ''}. '
+        '${vm.tacticsEnabled ? 'İstersen taktik seç, sonra OYNA!'.tr : 'Hazırsan OYNA!'.tr}';
   } else if (need != null && vm.isSimultaneous) {
     text =
-        'Mevki: ${need.label.toLowerCase()}. ${vm.tacticsEnabled ? 'Kartını ve taktiğini' : 'Kartını'} gizlice seç; '
-        'rakip seçimini göremez.';
+        'Mevki: {p}. {p2} gizlice seç; rakip seçimini göremez.'.trArgs({'p': need.label.toLowerCase(), 'p2': vm.tacticsEnabled ? 'Kartını ve taktiğini'.tr : 'Kartını'.tr});
   } else if (need != null) {
-    text = 'Rakip ${need.label.toLowerCase()} açtı: ${need.label.toLowerCase()} kartı oynamalısın.';
+    text = 'Rakip {p} açtı: {p} kartı oynamalısın.'.trArgs({'p': need.label.toLowerCase()});
   } else {
-    text = vm.tacticsEnabled ? 'Kart ve istersen taktik seç, sonra OYNA!' : 'Bir kart seçip oyna.';
+    text = vm.tacticsEnabled ? 'Kart ve istersen taktik seç, sonra OYNA!'.tr : 'Bir kart seçip oyna.'.tr;
   }
   final last = vm.lastResolvedRound;
   if (last != null && vm.isMyTurn && selected == null && vm.selectedTactic.isNone) {
     final r = last.isDraw
-        ? 'Son tur berabere bitti.'
-        : (last.winnerId == vm.myUserId ? 'Son turu sen kazandın.' : 'Son turu rakip kazandı.');
+        ? 'Son tur berabere bitti.'.tr
+        : (last.winnerId == vm.myUserId ? 'Son turu sen kazandın.'.tr : 'Son turu rakip kazandı.'.tr);
     text = '$r $text';
   }
   return text;
@@ -198,12 +198,12 @@ class _BodyState extends State<_Body> {
     final free = d?.mode == 'friendly' || (d?.isTraining ?? false) || (d?.isTutorial ?? false);
     final ok = await V21GameDialog.show<bool>(
       context,
-      subtitle: free ? null : 'GERİ ALINAMAZ',
-      title: 'TESLİM OL?',
+      subtitle: free ? null : 'GERİ ALINAMAZ'.tr,
+      title: 'TESLİM OL?'.tr,
       message: surrenderWarning(d),
-      actions: const [
-        V21DialogAction('DEVAM ET', tone: V21ButtonTone.green, result: false),
-        V21DialogAction('TESLİM OL', tone: V21ButtonTone.red, result: true),
+      actions: [
+        V21DialogAction('DEVAM ET'.tr, tone: V21ButtonTone.green, result: false),
+        V21DialogAction('TESLİM OL'.tr, tone: V21ButtonTone.red, result: true),
       ],
     );
     if (ok == true) await vm.surrender();
@@ -241,7 +241,7 @@ class _BodyState extends State<_Body> {
     // Maç bittiyse sonuç; son turun sahnesi oynadıktan sonra
     if (vm.isOver && vm.currentClash == null) {
       return V21MatchResultView(
-        newMatchLabel: vm.result == null ? 'YENİ MAÇ' : newMatchLabel(vm.result!),
+        newMatchLabel: vm.result == null ? 'YENİ MAÇ'.tr : newMatchLabel(vm.result!),
         result: vm.result,
         rewardDelta: vm.rewardDelta,
         onClose: () => context.go(AppRoutes.home),
@@ -408,22 +408,22 @@ class _Scoreboard extends StatelessWidget {
   Widget build(BuildContext context) {
     final k = scale;
     final d = vm.matchState!;
-    final me = vm.myUsername ?? context.watch<SessionManager?>()?.user?.username ?? 'Sen';
-    final opp = d.opponent?.username ?? 'Rakip';
+    final me = vm.myUsername ?? context.watch<SessionManager?>()?.user?.username ?? 'Sen'.tr;
+    final opp = d.opponent?.username ?? 'Rakip'.tr;
     final round = d.isTutorial && d.earlyFinishCards != null
-        ? 'TUR ${d.roundNumber} · HEDEF ${d.earlyFinishCards}'
-        : 'TUR ${d.roundNumber}/${GameRules.squadSize}';
-    final mode = d.mode == 'friendly' ? 'ARKADAŞ MAÇI · ÖDÜL YOK' : (d.isTutorial ? 'ÖĞRETİCİ · ÖDÜLSÜZ' : (d.isTraining ? 'ANTRENMAN · ÖDÜLSÜZ' : 'DERECELİ'));
+        ? 'TUR {roundNumber} · HEDEF {earlyFinishCards}'.trArgs({'roundNumber': d.roundNumber, 'earlyFinishCards': d.earlyFinishCards})
+        : 'TUR {roundNumber}/{squadSize}'.trArgs({'roundNumber': d.roundNumber, 'squadSize': GameRules.squadSize});
+    final mode = d.mode == 'friendly' ? 'ARKADAŞ MAÇI · ÖDÜL YOK'.tr : (d.isTutorial ? 'ÖĞRETİCİ · ÖDÜLSÜZ'.tr : (d.isTraining ? 'ANTRENMAN · ÖDÜLSÜZ'.tr : 'DERECELİ'.tr));
     return Semantics(
       container: true,
-      label: 'Skor: sen ${d.myScore}, $opp ${d.opponentScore}. $round. $mode',
+      label: 'Skor: sen {myScore}, {opp} {opponentScore}. {round}. {mode}'.trArgs({'myScore': d.myScore, 'opp': opp, 'opponentScore': d.opponentScore, 'round': round, 'mode': mode}),
       excludeSemantics: true,
       child: Column(
         children: [
           Row(
             children: [
               Expanded(
-                child: _Side(name: 'SEN', sub: me, seed: 'oyuncu-${vm.myUserId ?? me}', mine: true, scale: k),
+                child: _Side(name: 'SEN'.tr, sub: me, seed: 'oyuncu-${vm.myUserId ?? me}', mine: true, scale: k),
               ),
               SizedBox(width: 6 * k),
               Container(
@@ -449,7 +449,7 @@ class _Scoreboard extends StatelessWidget {
               ),
               SizedBox(width: 6 * k),
               Expanded(
-                child: _Side(name: 'RAKİP', sub: opp, seed: 'oyuncu-${d.opponent?.id ?? opp}', mine: false, scale: k),
+                child: _Side(name: 'RAKİP'.tr, sub: opp, seed: 'oyuncu-${d.opponent?.id ?? opp}', mine: false, scale: k),
               ),
             ],
           ),
@@ -527,7 +527,7 @@ class _TimerRow extends StatelessWidget {
     final k = scale;
     return Center(
       child: Semantics(
-        label: 'Kalan süre ${vm.remainingSeconds} saniye',
+        label: 'Kalan süre {remainingSeconds} saniye'.trArgs({'remainingSeconds': vm.remainingSeconds}),
         excludeSemantics: true,
         child: V21MatchTimer(
           seconds: vm.remainingSeconds,
@@ -562,7 +562,7 @@ class _VsRow extends StatelessWidget {
     String myCaption;
     if (mine != null && !mine.isPass) {
       myCard = _MoveCard(move: mine, width: w, locked: locked);
-      myCaption = locked ? 'SEÇİMİN KİLİTLENDİ' : 'SENİN KARTIN';
+      myCaption = locked ? 'SEÇİMİN KİLİTLENDİ'.tr : 'SENİN KARTIN'.tr;
     } else if (selected != null) {
       myCard = V21PlayerCard(
         name: selected!.fullName,
@@ -572,29 +572,29 @@ class _VsRow extends StatelessWidget {
         width: w,
         selected: true,
       );
-      myCaption = 'SEÇİLİ KART';
+      myCaption = 'SEÇİLİ KART'.tr;
     } else if (vm.waitingOpponentPick) {
       // Hamle gitti ama masada henüz görünmüyor: kilitli sırt (hf10)
-      myCard = _Hidden(width: w, lock: true, semantics: 'Seçimin kilitlendi');
-      myCaption = 'SEÇİMİN KİLİTLENDİ';
+      myCard = _Hidden(width: w, lock: true, semantics: 'Seçimin kilitlendi'.tr);
+      myCaption = 'SEÇİMİN KİLİTLENDİ'.tr;
     } else {
-      myCard = _Hidden(width: w, mark: '?', semantics: 'Kart seçilmedi');
+      myCard = _Hidden(width: w, mark: '?', semantics: 'Kart seçilmedi'.tr);
       myCaption = vm.isPositionPhase
-          ? (vm.matchState!.amILead ? 'Önce mevkiyi seç' : 'Rakip mevki seçiyor')
-          : (!vm.isMyTurn ? 'Sıra rakipte' : (vm.mustPass ? 'Bu mevkide kartın yok' : 'Kartını gizlice seç'));
+          ? (vm.matchState!.amILead ? 'Önce mevkiyi seç'.tr : 'Rakip mevki seçiyor'.tr)
+          : (!vm.isMyTurn ? 'Sıra rakipte'.tr : (vm.mustPass ? 'Bu mevkide kartın yok'.tr : 'Kartını gizlice seç'.tr));
     }
 
     Widget oppCard;
     String oppCaption;
     if (opp != null && !opp.isPass) {
       oppCard = _MoveCard(move: opp, width: w, locked: false);
-      oppCaption = 'RAKİP KARTI';
+      oppCaption = 'RAKİP KARTI'.tr;
     } else if (vm.isSimultaneous && vm.matchState!.opponentHasPlayed) {
-      oppCard = _Hidden(width: w, lock: true, semantics: 'Rakip seçti, kart gizli');
-      oppCaption = 'Rakip seçti · gizli';
+      oppCard = _Hidden(width: w, lock: true, semantics: 'Rakip seçti, kart gizli'.tr);
+      oppCaption = 'Rakip seçti · gizli'.tr;
     } else {
-      oppCard = _Hidden(width: w, mark: '?', semantics: 'Rakip kartı gizli');
-      oppCaption = locked ? 'Rakip bekleniyor…' : 'Rakip seçiyor…';
+      oppCard = _Hidden(width: w, mark: '?', semantics: 'Rakip kartı gizli'.tr);
+      oppCaption = locked ? 'Rakip bekleniyor…'.tr : 'Rakip seçiyor…'.tr;
     }
 
     Widget column(Widget card, String caption, Color color) => Column(
@@ -731,7 +731,7 @@ class _PositionPicker extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          lead ? 'Bu tur oynayacağın mevkiyi seç' : 'Rakip bu turun mevkisini seçiyor',
+          lead ? 'Bu tur oynayacağın mevkiyi seç'.tr : 'Rakip bu turun mevkisini seçiyor'.tr,
           textAlign: TextAlign.center,
           style: V21Type.title(17 * k, color: lead ? Colors.white : V21Colors.textMuted),
         ),
@@ -784,7 +784,7 @@ class _PositionTile extends StatelessWidget {
       button: true,
       enabled: enabled,
       selected: selected,
-      label: '$label, elinde $count kart',
+      label: '{label}, elinde {count} kart'.trArgs({'label': label, 'count': count}),
       excludeSemantics: true,
       child: GestureDetector(
         onTap: enabled ? onTap : null,
@@ -854,13 +854,13 @@ class _Hand extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                need == null ? 'KARTINI SEÇ' : '${V21Format.upper(need.label)} KARTINI SEÇ',
+                need == null ? 'KARTINI SEÇ'.tr : '{p} KARTINI SEÇ'.trArgs({'p': V21Format.upper(need.label)}),
                 style: V21Type.title(15 * k, color: V21Colors.goldTop),
               ),
             ),
             if (pot > 0) ...[
               V21Tag(
-                text: 'MASADA $pot',
+                text: 'MASADA {pot}'.trArgs({'pot': pot}),
                 background: const Color(0xFF3B2F66),
                 foreground: Colors.white,
                 scale: k,
@@ -869,7 +869,7 @@ class _Hand extends StatelessWidget {
               SizedBox(width: 6 * k),
             ],
             Text(
-              '$playable kart uygun',
+              '{playable} kart uygun'.trArgs({'playable': playable}),
               style: V21Type.label(11 * k, weight: FontWeight.w800, color: V21Colors.textMuted),
             ),
           ],
@@ -925,12 +925,12 @@ class _Tactics extends StatelessWidget {
 
   static (String, IconData, List<Color>) _look(MatchTactic t) => switch (t) {
     MatchTactic.highPress => (
-      'PRES',
+      'PRES'.tr,
       Icons.keyboard_double_arrow_up_rounded,
       const [Color(0xFFFF6B83), Color(0xFFC21E45)],
     ),
-    MatchTactic.counterAttack => ('KONTRA', Icons.fast_forward_rounded, const [Color(0xFFFFD84D), Color(0xFFE89A1A)]),
-    MatchTactic.defensiveWall => ('DUVAR', Icons.grid_view_rounded, const [Color(0xFF6FE4FF), Color(0xFF1F7EEB)]),
+    MatchTactic.counterAttack => ('KONTRA'.tr, Icons.fast_forward_rounded, const [Color(0xFFFFD84D), Color(0xFFE89A1A)]),
+    MatchTactic.defensiveWall => ('DUVAR'.tr, Icons.grid_view_rounded, const [Color(0xFF6FE4FF), Color(0xFF1F7EEB)]),
     MatchTactic.none => ('', Icons.block, const [Colors.grey, Colors.grey]),
   };
 
@@ -940,7 +940,7 @@ class _Tactics extends StatelessWidget {
     final locked = vm.isSubmittingMove || vm.myTableMove != null;
     return Column(
       children: [
-        Text('Taktiğini seç', style: V21Type.title(15 * k, color: Colors.white)),
+        Text('Taktiğini seç'.tr, style: V21Type.title(15 * k, color: Colors.white)),
         SizedBox(height: 6 * k),
         Row(
           children: [
@@ -959,7 +959,7 @@ class _Tactics extends StatelessWidget {
             SizedBox(
               width: 104 * k,
               child: Semantics(
-                label: 'Enerji ${vm.myEnergy} / ${vm.maxEnergy}',
+                label: 'Enerji {myEnergy} / {maxEnergy}'.trArgs({'myEnergy': vm.myEnergy, 'maxEnergy': vm.maxEnergy}),
                 excludeSemantics: true,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -1000,7 +1000,7 @@ class _TacticOrb extends StatelessWidget {
       button: true,
       selected: selected,
       enabled: enabled,
-      label: '${tactic.label}, $cost enerji. ${tactic.hint}',
+      label: '{label}, {cost} enerji. {hint}'.trArgs({'label': tactic.label, 'cost': cost, 'hint': tactic.hint}),
       excludeSemantics: true,
       child: GestureDetector(
         onTap: enabled || selected ? onTap : null,
@@ -1079,18 +1079,18 @@ class _ActionBar extends StatelessWidget {
     if (vm.isPositionPhase) {
       button = d.amILead
           ? V21GameButton(
-              label: 'DEVAM ET',
+              label: 'DEVAM ET'.tr,
               tone: V21ButtonTone.green,
               size: V21ButtonSize.large,
               scale: k,
-              semanticsLabel: pickedPosition == null ? 'Devam et: önce mevki seç' : 'Mevkiyi onayla',
+              semanticsLabel: pickedPosition == null ? 'Devam et: önce mevki seç'.tr : 'Mevkiyi onayla'.tr,
               status: vm.isSubmittingMove
                   ? V21ButtonStatus.loading
                   : (pickedPosition == null ? V21ButtonStatus.disabled : V21ButtonStatus.normal),
               onPressed: onConfirmPosition,
             )
           : V21GameButton(
-              label: 'RAKİP MEVKİ SEÇİYOR',
+              label: 'RAKİP MEVKİ SEÇİYOR'.tr,
               tone: V21ButtonTone.purple,
               size: V21ButtonSize.large,
               scale: k,
@@ -1099,7 +1099,7 @@ class _ActionBar extends StatelessWidget {
             );
     } else if (vm.mustPass && vm.isMyTurn) {
       button = V21GameButton(
-        label: 'PAS GEÇ · TURU KAYBET',
+        label: 'PAS GEÇ · TURU KAYBET'.tr,
         tone: V21ButtonTone.red,
         size: V21ButtonSize.large,
         scale: k,
@@ -1108,7 +1108,7 @@ class _ActionBar extends StatelessWidget {
       );
     } else if (vm.waitingOpponentPick || vm.myTableMove != null) {
       button = V21GameButton(
-        label: 'RAKİP BEKLENİYOR',
+        label: 'RAKİP BEKLENİYOR'.tr,
         tone: V21ButtonTone.purple,
         size: V21ButtonSize.large,
         leadingIcon: Icons.lock_rounded,
@@ -1118,7 +1118,7 @@ class _ActionBar extends StatelessWidget {
       );
     } else if (!vm.isMyTurn) {
       button = V21GameButton(
-        label: 'SIRA RAKİPTE',
+        label: 'SIRA RAKİPTE'.tr,
         tone: V21ButtonTone.purple,
         size: V21ButtonSize.large,
         scale: k,
@@ -1128,13 +1128,13 @@ class _ActionBar extends StatelessWidget {
     } else {
       final tactic = vm.selectedTactic;
       button = V21GameButton(
-        label: 'OYNA!',
+        label: 'OYNA!'.tr,
         tone: V21ButtonTone.green,
         size: V21ButtonSize.large,
         scale: k,
         semanticsLabel: selected == null
-            ? 'Oyna: önce kart seç'
-            : 'Oyna: ${selected!.fullName}${tactic.isNone ? '' : ' ve ${tactic.label}'}, tek hamle',
+            ? 'Oyna: önce kart seç'.tr
+            : 'Oyna: {fullName}{p}, tek hamle'.trArgs({'fullName': selected!.fullName, 'p': tactic.isNone ? '' : ' ve {label}'.trArgs({'label': tactic.label})}),
         status: vm.isSubmittingMove
             ? V21ButtonStatus.loading
             : (selected == null ? V21ButtonStatus.disabled : V21ButtonStatus.normal),
@@ -1161,7 +1161,7 @@ class _ActionBar extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 12 * k),
             ),
             child: Text(
-              'Teslim ol',
+              'Teslim ol'.tr,
               style: V21Type.label(12 * k, weight: FontWeight.w800, color: const Color(0xFFFF8A9B)),
             ),
           ),
@@ -1194,7 +1194,7 @@ class _Reconnecting extends StatelessWidget {
           return Center(
             child: Semantics(
               liveRegion: true,
-              label: 'Bağlantı yeniden kuruluyor. Maç devam ediyor.',
+              label: 'Bağlantı yeniden kuruluyor. Maç devam ediyor.'.tr,
               child: Container(
                 constraints: BoxConstraints(maxWidth: 360 * k),
                 margin: EdgeInsets.symmetric(horizontal: 12 * k),
@@ -1215,13 +1215,13 @@ class _Reconnecting extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'BAĞLANTI YENİDEN KURULUYOR',
+                            'BAĞLANTI YENİDEN KURULUYOR'.tr,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: V21Type.label(12 * k, weight: FontWeight.w900, color: V21Colors.goldTop),
                           ),
                           Text(
-                            'Maç sürüyor, hamleni yapabilirsin.',
+                            'Maç sürüyor, hamleni yapabilirsin.'.tr,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: V21Type.label(11 * k, weight: FontWeight.w700, color: const Color(0xFFE6DBFF)),
@@ -1237,7 +1237,7 @@ class _Reconnecting extends StatelessWidget {
                         minimumSize: Size(0, 36 * k),
                       ),
                       child: Text(
-                        'TEKRAR DENE',
+                        'TEKRAR DENE'.tr,
                         style: V21Type.label(11 * k, weight: FontWeight.w900, color: const Color(0xFF6FE4FF)),
                       ),
                     ),
@@ -1283,9 +1283,9 @@ class _ErrorView extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               child: V21EmptyState(
                 icon: Icons.wifi_off_rounded,
-                title: 'MAÇ YÜKLENEMEDİ',
-                message: vm.errorMessage ?? 'Bağlantını kontrol edip tekrar dene.',
-                actionLabel: 'TEKRAR DENE',
+                title: 'MAÇ YÜKLENEMEDİ'.tr,
+                message: vm.errorMessage ?? 'Bağlantını kontrol edip tekrar dene.'.tr,
+                actionLabel: 'TEKRAR DENE'.tr,
                 onAction: vm.refresh,
               ),
             ),
@@ -1297,7 +1297,7 @@ class _ErrorView extends StatelessWidget {
             child: TextButton(
               onPressed: () => context.go(AppRoutes.home),
               child: Text(
-                'ANA SAYFAYA DÖN',
+                'ANA SAYFAYA DÖN'.tr,
                 style: V21Type.label(13, weight: FontWeight.w900, color: Colors.white),
               ),
             ),

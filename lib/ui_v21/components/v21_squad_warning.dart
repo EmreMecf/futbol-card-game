@@ -6,6 +6,7 @@ import '../foundation/v21_typography.dart';
 import 'v21_feedback.dart';
 import 'v21_game_button.dart';
 import 'v21_painters.dart';
+import '../../core/l10n/app_language.dart';
 
 /// V2.1 GEÇERSİZ KADRO UYARISI (referans hf17 "KADRO EKSİK").
 ///
@@ -27,13 +28,13 @@ abstract final class V21SquadWarning {
     ];
     final r = await V21GameDialog.show<bool>(
       context,
-      title: message == null ? 'KADRO EKSİK' : 'KADRO GEÇERSİZ',
+      title: message == null ? 'KADRO EKSİK'.tr : 'KADRO GEÇERSİZ'.tr,
       icon: const _Crest(),
-      message: message ?? 'Maça çıkmak için ${GameRules.squadSize} geçerli kart gerekli.',
+      message: message ?? 'Maça çıkmak için {squadSize} geçerli kart gerekli.'.trArgs({'squadSize': GameRules.squadSize}),
       content: entries.isEmpty ? null : MissingPositions(entries: entries),
-      actions: const [
-        V21DialogAction('KADROYU DÜZENLE', tone: V21ButtonTone.gold, result: true),
-        V21DialogAction('KAPAT', tone: V21ButtonTone.blue, result: false),
+      actions: [
+        V21DialogAction('KADROYU DÜZENLE'.tr, tone: V21ButtonTone.gold, result: true),
+        V21DialogAction('KAPAT'.tr, tone: V21ButtonTone.blue, result: false),
       ],
     );
     return r ?? false;
@@ -77,7 +78,7 @@ class MissingPositions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       container: true,
-      label: 'Eksik mevkiler: ${entries.map((e) => '${e.$2} ${e.$1.label.toLowerCase()}').join(', ')}',
+      label: 'Eksik mevkiler: {p}'.trArgs({'p': entries.map((e) => '${e.$2} ${e.$1.label.toLowerCase()}').join(', ')}),
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
@@ -89,7 +90,7 @@ class MissingPositions extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              'EKSİK MEVKİLER',
+              'EKSİK MEVKİLER'.tr,
               style: V21Type.label(12, weight: FontWeight.w900, color: const Color(0xFFFEDB70), letterSpacing: 1.2),
             ),
             const SizedBox(height: 8),

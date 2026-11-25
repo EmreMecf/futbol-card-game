@@ -195,5 +195,5 @@ void main() {
 
 class _FailingRank extends GoldenLeaderboardRepo {
   @override
-  Future<Result<PlayerRank>> fetchMyRank() async => const Failure(AppException.network());
+  Future<Result<PlayerRank>> fetchMyRank() async => Failure(AppException.network());
 }

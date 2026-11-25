@@ -10,6 +10,7 @@ import '../../../features/chests/presentation/viewmodel/chests_view_model.dart';
 import '../../ui_v21.dart';
 import '../../web/web_kit.dart';
 import '../../web/web_screens.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 SANDIKLAR (referans `assets/v21/screens/chests.png`).
 ///
@@ -54,7 +55,7 @@ class _Body extends StatelessWidget {
       );
     }
     return V21InnerPage(
-      title: 'SANDIKLAR',
+      title: 'SANDIKLAR'.tr,
       route: AppRoutes.chests,
       highlightRoute: AppRoutes.home,
       fallbackRoute: AppRoutes.home,
@@ -64,8 +65,8 @@ class _Body extends StatelessWidget {
       errorMessage: vm.errorMessage,
       onRetry: vm.load,
       onRefresh: vm.refresh,
-      disabledTitle: 'SANDIKLAR YAKINDA',
-      disabledMessage: 'Sandık sistemi henüz açık değil. Açıldığında her dereceli maç bir sandık kazandıracak.',
+      disabledTitle: 'SANDIKLAR YAKINDA'.tr,
+      disabledMessage: 'Sandık sistemi henüz açık değil. Açıldığında her dereceli maç bir sandık kazandıracak.'.tr,
       children: (context, k) => _content(context, vm, env!, k),
     );
   }
@@ -75,7 +76,7 @@ class _Body extends StatelessWidget {
     return [
       _EnergyPanel(energy: env.energy, now: vm.serverNow, scale: k),
       SizedBox(height: 14 * k),
-      V21SectionTitle('YUVALAR', trailing: 'Aynı anda 1 sandık açılır', scale: k),
+      V21SectionTitle('YUVALAR'.tr, trailing: 'Aynı anda 1 sandık açılır'.tr, scale: k),
       _SlotGrid(vm: vm, env: env, unlocking: unlocking, scale: k),
       if (vm.actionError != null) ...[
         SizedBox(height: 10 * k),
@@ -88,30 +89,29 @@ class _Body extends StatelessWidget {
       for (final c in env.instant) ...[
         SizedBox(height: 12 * k),
         _WideChest(
-          name: '${V21Format.upper(c.typeName)} SANDIK',
+          name: '{p} SANDIK'.trArgs({'p': V21Format.upper(c.typeName)}),
           tier: c.chestType,
-          subtitle: 'Maç ödülü · hazır',
-          action: 'AÇ!',
+          subtitle: 'Maç ödülü · hazır'.tr,
+          action: 'AÇ!'.tr,
           busy: vm.busyChestId == c.id,
           scale: k,
           onPressed: () => openChest(context, vm, c),
         ),
       ],
       SizedBox(height: 16 * k),
-      V21SectionTitle('POSTA KUTUSU', trailing: '${env.mailbox.length} / ${env.mailboxCapacity}', scale: k),
+      V21SectionTitle('POSTA KUTUSU'.tr, trailing: '${env.mailbox.length} / ${env.mailboxCapacity}', scale: k),
       if (env.mailbox.isEmpty)
         Text(
-          'Yuvalar doluyken kazandığın sandıklar burada ${env.mailboxDays} gün bekler. Süre dolarsa ya da kutu '
-          'dolarsa sandık kaybolmaz, telafi altınına döner.',
+          'Yuvalar doluyken kazandığın sandıklar burada {mailboxDays} gün bekler. Süre dolarsa ya da kutu dolarsa sandık kaybolmaz, telafi altınına döner.'.trArgs({'mailboxDays': env.mailboxDays}),
           style: V21Type.label(12 * k, weight: FontWeight.w600, color: V21Colors.textMuted, height: 1.4),
         )
       else
         for (final c in env.mailbox) ...[
           _WideChest(
-            name: '${V21Format.upper(c.typeName)} SANDIK',
+            name: '{p} SANDIK'.trArgs({'p': V21Format.upper(c.typeName)}),
             tier: c.chestType,
-            subtitle: '${_daysLeft(c, env, vm.serverNow)} gün içinde yuvaya taşı',
-            action: 'TAŞI',
+            subtitle: '{p} gün içinde yuvaya taşı'.trArgs({'p': _daysLeft(c, env, vm.serverNow)}),
+            action: 'TAŞI'.tr,
             tone: V21ButtonTone.blue,
             busy: vm.busyChestId == c.id,
             scale: k,
@@ -121,12 +121,12 @@ class _Body extends StatelessWidget {
         ],
       SizedBox(height: 16 * k),
       V21GameButton(
-        label: 'OLASILIKLAR',
+        label: 'OLASILIKLAR'.tr,
         tone: V21ButtonTone.purple,
         size: V21ButtonSize.medium,
         leadingIcon: Icons.percent_rounded,
         scale: k,
-        semanticsLabel: 'Sandık olasılıklarını gör (sürüm ${env.rulesVersion})',
+        semanticsLabel: 'Sandık olasılıklarını gör (sürüm {rulesVersion})'.trArgs({'rulesVersion': env.rulesVersion}),
         onPressed: () => context.push(AppRoutes.chestOdds),
       ),
     ];
@@ -171,10 +171,10 @@ class _EnergyPanel extends StatelessWidget {
     final k = scale;
     final e = energy;
     final next = e.nextAt == null || e.isFull ? null : e.nextAt!.difference(now);
-    final nextText = next == null ? '' : ' · sonraki ${(next.inSeconds / 60).ceil().clamp(0, 9999)} dk';
+    final nextText = next == null ? '' : ' · sonraki {p} dk'.trArgs({'p': (next.inSeconds / 60).ceil().clamp(0, 9999)});
     return Semantics(
       container: true,
-      label: 'Sandık hakkı ${e.energy} / ${e.max}. Her ${e.refillMinutes} dakikada bir hak yenilenir$nextText',
+      label: 'Sandık hakkı {energy} / {max}. Her {refillMinutes} dakikada bir hak yenilenir{nextText}'.trArgs({'energy': e.energy, 'max': e.max, 'refillMinutes': e.refillMinutes, 'nextText': nextText}),
       excludeSemantics: true,
       child: Container(
         padding: EdgeInsets.fromLTRB(14 * k, 12 * k, 14 * k, 12 * k),
@@ -193,7 +193,7 @@ class _EnergyPanel extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text('SANDIK HAKKI', style: V21Type.title(19 * k, shadows: V21Type.inkShadow(k * 0.7))),
+                  child: Text('SANDIK HAKKI'.tr, style: V21Type.title(19 * k, shadows: V21Type.inkShadow(k * 0.7))),
                 ),
                 Text('${e.energy}/${e.max}', style: V21Type.title(28 * k, shadows: V21Type.inkShadow(k))),
               ],
@@ -225,7 +225,7 @@ class _EnergyPanel extends StatelessWidget {
             ),
             SizedBox(height: 7 * k),
             Text(
-              'Her ${e.refillMinutes} dk\'da 1 hak yenilenir$nextText',
+              'Her {refillMinutes} dk\'da 1 hak yenilenir{nextText}'.trArgs({'refillMinutes': e.refillMinutes, 'nextText': nextText}),
               style: V21Type.label(12 * k, weight: FontWeight.w700, color: const Color(0xFFFFE6DC)),
             ),
           ],
@@ -248,9 +248,9 @@ class _SlotGrid extends StatelessWidget {
     Widget slot(int no) {
       final c = env.slot(no);
       if (c == null) {
-        return V21ChestCard(state: V21ChestSlotState.empty, semanticsLabel: 'Yuva $no boş', scale: 1);
+        return V21ChestCard(state: V21ChestSlotState.empty, semanticsLabel: 'Yuva {no} boş'.trArgs({'no': no}), scale: 1);
       }
-      final name = '${V21Format.upper(c.typeName)} SANDIK';
+      final name = '{p} SANDIK'.trArgs({'p': V21Format.upper(c.typeName)});
       final busy = vm.busyChestId == c.id;
       VoidCallback? onTap;
       if (busy) {
@@ -270,7 +270,7 @@ class _SlotGrid extends StatelessWidget {
           name: name,
           footer: left,
           onTap: onTap,
-          semanticsLabel: '$name açılıyor, kalan $left${onTap == null ? '' : ', seçenekler için dokun'}',
+          semanticsLabel: '{name} açılıyor, kalan {left}{p}'.trArgs({'name': name, 'left': left, 'p': onTap == null ? '' : ', seçenekler için dokun'.tr}),
         );
       }
       if (c.isReady) {
@@ -278,9 +278,9 @@ class _SlotGrid extends StatelessWidget {
           state: V21ChestSlotState.ready,
           tier: c.chestType,
           name: name,
-          footer: 'AÇ!',
+          footer: 'AÇ!'.tr,
           onTap: onTap,
-          semanticsLabel: '$name hazır, açmak için dokun',
+          semanticsLabel: '{name} hazır, açmak için dokun'.trArgs({'name': name}),
         );
       }
       final d = V21Format.shortDuration(c.unlockSeconds);
@@ -291,8 +291,8 @@ class _SlotGrid extends StatelessWidget {
         footer: d,
         onTap: onTap,
         semanticsLabel: onTap == null
-            ? '$name kilitli, $d. Başka bir sandık açılıyor'
-            : '$name kilitli, $d. Sayacı başlatmak için dokun',
+            ? '{name} kilitli, {d}. Başka bir sandık açılıyor'.trArgs({'name': name, 'd': d})
+            : '{name} kilitli, {d}. Sayacı başlatmak için dokun'.trArgs({'name': name, 'd': d}),
       );
     }
 
@@ -325,29 +325,29 @@ class _SlotGrid extends StatelessWidget {
 Future<void> _options(BuildContext context, ChestsViewModel vm, Chest c, bool unlocking) async {
   final choice = await V21GameDialog.show<String>(
     context,
-    subtitle: 'SANDIK',
-    title: '${V21Format.upper(c.typeName)} SANDIK',
+    subtitle: 'SANDIK'.tr,
+    title: '{p} SANDIK'.trArgs({'p': V21Format.upper(c.typeName)}),
     icon: V21ChestArt.tier(c.chestType, height: 80),
     message: c.isUnlocking
-        ? 'Sayaç çalışıyor. Beklemeden açmak için elmas ya da anahtar kullanabilirsin.'
-        : 'Sayacı başlatabilir ya da elmasla hemen açabilirsin.',
+        ? 'Sayaç çalışıyor. Beklemeden açmak için elmas ya da anahtar kullanabilirsin.'.tr
+        : 'Sayacı başlatabilir ya da elmasla hemen açabilirsin.'.tr,
     actions: [
       if (c.isSealed && !unlocking)
         V21DialogAction(
-          'KİLİDİ AÇ (${V21Format.shortDuration(c.unlockSeconds)})',
+          'KİLİDİ AÇ ({p})'.trArgs({'p': V21Format.shortDuration(c.unlockSeconds)}),
           tone: V21ButtonTone.green,
           result: 'unlock',
         ),
       if (vm.canOpenWithGems(c))
         V21DialogAction(
-          'ELMASLA AÇ (${vm.gemCost(c)} ELMAS · sende ${vm.gems})',
+          'ELMASLA AÇ ({p} ELMAS · sende {gems})'.trArgs({'p': vm.gemCost(c), 'gems': vm.gems}),
           tone: V21ButtonTone.blue,
           result: 'gems',
         ),
-      if (vm.canUseKey(c)) V21DialogAction('ANAHTARLA AÇ (${vm.keyCost(c)} / ${vm.keys})', result: 'key'),
+      if (vm.canUseKey(c)) V21DialogAction('ANAHTARLA AÇ ({p} / {keys})'.trArgs({'p': vm.keyCost(c), 'keys': vm.keys}), result: 'key'),
       if (vm.canSpeedUp(c))
-        V21DialogAction('2 SAAT HIZLANDIR (${vm.speedups})', tone: V21ButtonTone.blue, result: 'speed'),
-      const V21DialogAction('VAZGEÇ', tone: V21ButtonTone.purple),
+        V21DialogAction('2 SAAT HIZLANDIR ({speedups})'.trArgs({'speedups': vm.speedups}), tone: V21ButtonTone.blue, result: 'speed'),
+      V21DialogAction('VAZGEÇ'.tr, tone: V21ButtonTone.purple),
     ],
   );
   switch (choice) {

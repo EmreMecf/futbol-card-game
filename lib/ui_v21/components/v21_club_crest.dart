@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:material_ui/material_ui.dart';
 
 import '../../core/utils/turkish_text.dart';
+import '../../core/l10n/app_language.dart';
 
 /// KULÜP ARMASI — kulüp adından TÜRETİLEN prosedürel arma.
 ///
@@ -49,7 +50,7 @@ class ClubCrest extends StatelessWidget {
         SizedBox(
           width: size * 1.9,
           child: Text(
-            ad.isEmpty ? 'SERBEST OYUNCU' : ad.toUpperTr(),
+            ad.isEmpty ? 'SERBEST OYUNCU'.tr : ad.toUpperTr(),
             maxLines: 2,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,

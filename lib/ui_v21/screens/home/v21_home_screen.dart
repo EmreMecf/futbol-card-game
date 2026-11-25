@@ -16,6 +16,7 @@ import 'v21_daily_strip.dart';
 import 'v21_home_nav.dart';
 import '../../web/web_kit.dart';
 import '../../web/web_screens.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 ANA SAYFA (referans `assets/v21/screens/home.png`, 390×844).
 ///
@@ -239,7 +240,7 @@ class _Header extends StatelessWidget {
       username: user?.username ?? '',
       level: hasSeason ? season.tier : null,
       levelProgress: hasSeason ? season.tierProgress.clamp(0.0, 1.0) : null,
-      levelMeaning: 'Sezon kademesi',
+      levelMeaning: 'Sezon kademesi'.tr,
       onProfileTap: () => context.push(AppRoutes.profile),
       trailing: [
         // 056: elmas — mağazadaki elmas bölümüne götürür
@@ -262,7 +263,7 @@ class _League extends StatelessWidget {
     final PlayerRank? r = context.watch<HomeViewModel>().rank;
     String? detail;
     if (r != null) {
-      detail = r.isTopTier || r.nextLabel == null ? 'En üst ligdesin' : '${r.pointsToNext} puan sonra ${r.nextLabel}';
+      detail = r.isTopTier || r.nextLabel == null ? 'En üst ligdesin'.tr : '{pointsToNext} puan sonra {nextLabel}'.trArgs({'pointsToNext': r.pointsToNext, 'nextLabel': r.nextLabel});
     }
     return V21LeagueBadge(
       scale: k,
@@ -319,16 +320,16 @@ class _PlayButton extends StatelessWidget {
     final activeMatch = _maybeWatch<AuthViewModel>(context)?.activeMatchId;
     if (activeMatch != null) {
       return V21GameButton(
-        label: 'MAÇA DÖN',
+        label: 'MAÇA DÖN'.tr,
         size: V21ButtonSize.hero,
         tone: V21ButtonTone.green,
         scale: scale,
-        semanticsLabel: 'Maça dön: devam eden maçın var',
+        semanticsLabel: 'Maça dön: devam eden maçın var'.tr,
         onPressed: () => context.push(AppRoutes.matchWithId(activeMatch)),
       );
     }
     return V21GameButton(
-      label: 'MAÇA BAŞLA',
+      label: 'MAÇA BAŞLA'.tr,
       size: V21ButtonSize.hero,
       scale: scale,
       onPressed: () => context.go(AppRoutes.matchmaking),
@@ -360,13 +361,13 @@ class _ChestRow extends StatelessWidget {
 
     Widget slot(int no) {
       if (env == null) {
-        return V21ChestSlot(state: V21ChestSlotState.loading, semanticsLabel: 'Sandık yuvası $no yükleniyor', scale: k);
+        return V21ChestSlot(state: V21ChestSlotState.loading, semanticsLabel: 'Sandık yuvası {no} yükleniyor'.trArgs({'no': no}), scale: k);
       }
       final c = env.slot(no);
       if (c == null) {
         return V21ChestSlot(
           state: V21ChestSlotState.empty,
-          semanticsLabel: 'Sandık yuvası $no boş',
+          semanticsLabel: 'Sandık yuvası {no} boş'.trArgs({'no': no}),
           onTap: open,
           scale: k,
         );
@@ -376,11 +377,11 @@ class _ChestRow extends StatelessWidget {
         final left = V21Format.countdown(vm.remaining(c) ?? Duration.zero);
         return V21ChestSlot(
           state: V21ChestSlotState.unlocking,
-          label: 'AÇILIYOR',
+          label: 'AÇILIYOR'.tr,
           footer: left,
           accent: V21Colors.success,
           tier: c.chestType,
-          semanticsLabel: '${c.typeName} sandık açılıyor, kalan $left',
+          semanticsLabel: '{typeName} sandık açılıyor, kalan {left}'.trArgs({'typeName': c.typeName, 'left': left}),
           onTap: open,
           scale: k,
         );
@@ -388,11 +389,11 @@ class _ChestRow extends StatelessWidget {
       if (c.isReady) {
         return V21ChestSlot(
           state: V21ChestSlotState.ready,
-          label: 'HAZIR',
-          footer: 'AÇ!',
+          label: 'HAZIR'.tr,
+          footer: 'AÇ!'.tr,
           accent: accentFor(c.chestType),
           tier: c.chestType,
-          semanticsLabel: '${c.typeName} sandık açılmaya hazır',
+          semanticsLabel: '{typeName} sandık açılmaya hazır'.trArgs({'typeName': c.typeName}),
           onTap: open,
           scale: k,
         );
@@ -404,7 +405,7 @@ class _ChestRow extends StatelessWidget {
         footer: sure,
         accent: accentFor(c.chestType),
         tier: c.chestType,
-        semanticsLabel: '${c.typeName} sandık, açılma süresi $sure',
+        semanticsLabel: '{typeName} sandık, açılma süresi {sure}'.trArgs({'typeName': c.typeName, 'sure': sure}),
         onTap: open,
         scale: k,
       );

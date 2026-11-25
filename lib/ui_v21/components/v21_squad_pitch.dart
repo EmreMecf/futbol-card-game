@@ -10,6 +10,7 @@ import '../foundation/v21_typography.dart';
 import 'v21_game_panel.dart';
 import 'v21_player_card.dart';
 import 'v21_tap.dart';
+import '../../core/l10n/app_language.dart';
 
 /// V2.1 KADRO SAHASI (referans Kadrom: 364×448, 3 px lacivert kenar, köşe 16).
 ///
@@ -136,8 +137,8 @@ class V21SquadPitch extends StatelessWidget {
         body = Semantics(
           button: true,
           label: card == null
-              ? '${position.label} yuvası boş, kart seç'
-              : '${position.label}: ${card.fullName}, güç ${card.power}, değiştirmek için dokun',
+              ? '{label} yuvası boş, kart seç'.trArgs({'label': position.label})
+              : '{label}: {fullName}, güç {power}, değiştirmek için dokun'.trArgs({'label': position.label, 'fullName': card.fullName, 'power': card.power}),
           excludeSemantics: true,
           child: V21Tap(
             onTap: () => onTapSlot(slot),

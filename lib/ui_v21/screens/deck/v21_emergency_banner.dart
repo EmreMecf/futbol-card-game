@@ -7,6 +7,7 @@ import '../../../features/chests/domain/chest_messages.dart';
 import '../../../features/chests/domain/chest_repository.dart';
 import '../../../features/chests/domain/chest_texts.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// ACİL KADRO uyarısı: koleksiyon 4-4-2 kuracak kadar kart içermiyorsa oyuncu
 /// eksik sayıda Bronz kartı ücretsiz alır (24 saatte bir). Koleksiyon yetiyorsa
@@ -31,7 +32,8 @@ class _EmergencySquadBannerState extends State<EmergencySquadBanner> {
   String? _error;
   String? _key;
 
-  static const _names = {'GK': 'kaleci', 'DEF': 'defans', 'MID': 'orta saha', 'FWD': 'forvet'};
+  static Map<String, String> get _names =>
+      {'GK': 'kaleci'.tr, 'DEF': 'defans'.tr, 'MID': 'orta saha'.tr, 'FWD': 'forvet'.tr};
 
   @override
   void initState() {
@@ -84,10 +86,9 @@ class _EmergencySquadBannerState extends State<EmergencySquadBanner> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('ACİL KADRO ALINDI', style: V21Type.title(18 * k)),
+              Text('ACİL KADRO ALINDI'.tr, style: V21Type.title(18 * k)),
               Text(
-                '${_claimed.map((c) => '${c.fullName} (${c.position.shortLabel})').join(', ')} koleksiyonuna eklendi. '
-                'Boş yuvalara dokunarak kadronu tamamla.',
+                '{p} koleksiyonuna eklendi. Boş yuvalara dokunarak kadronu tamamla.'.trArgs({'p': _claimed.map((c) => '${c.fullName} (${c.position.shortLabel})').join(', ')}),
                 style: body,
               ),
             ],
@@ -108,11 +109,10 @@ class _EmergencySquadBannerState extends State<EmergencySquadBanner> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('KADRON KURULAMIYOR', style: V21Type.title(18 * k)),
+            Text('KADRON KURULAMIYOR'.tr, style: V21Type.title(18 * k)),
             SizedBox(height: 4 * k),
             Text(
-              'Koleksiyonunda eksik: $missing. Ücretsiz Bronz kart alabilirsin (24 saatte bir); '
-              'her mevki bir yedekle birlikte tamamlanır.',
+              'Koleksiyonunda eksik: {missing}. Ücretsiz Bronz kart alabilirsin (24 saatte bir); her mevki bir yedekle birlikte tamamlanır.'.trArgs({'missing': missing}),
               style: body,
             ),
             if (_error != null) ...[
@@ -125,7 +125,7 @@ class _EmergencySquadBannerState extends State<EmergencySquadBanner> {
             SizedBox(height: 10 * k),
             if (d.eligible)
               V21GameButton(
-                label: 'ACİL KADRO AL (${d.grantCount > 0 ? d.grantCount : d.missingCount} BRONZ KART)',
+                label: 'ACİL KADRO AL ({p} BRONZ KART)'.trArgs({'p': d.grantCount > 0 ? d.grantCount : d.missingCount}),
                 tone: V21ButtonTone.green,
                 scale: k,
                 status: _busy ? V21ButtonStatus.loading : V21ButtonStatus.normal,
@@ -134,9 +134,8 @@ class _EmergencySquadBannerState extends State<EmergencySquadBanner> {
             else
               Text(
                 d.nextAt == null
-                    ? 'Acil kadro şu an alınamıyor.'
-                    : 'Sonraki acil kadro: ${chestDuration(d.nextAt!.difference(d.serverTime))} sonra. '
-                          'Bu arada mağazadan paket alabilir ya da sandıklarını açabilirsin.',
+                    ? 'Acil kadro şu an alınamıyor.'.tr
+                    : 'Sonraki acil kadro: {p} sonra. Bu arada mağazadan paket alabilir ya da sandıklarını açabilirsin.'.trArgs({'p': chestDuration(d.nextAt!.difference(d.serverTime))}),
                 style: V21Type.label(12.5 * k, weight: FontWeight.w800, color: V21Colors.goldTop),
               ),
           ],

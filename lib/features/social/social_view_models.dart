@@ -7,19 +7,20 @@ import '../../core/error/app_exception.dart';
 import '../../core/network/api_client.dart';
 import '../../core/utils/result.dart';
 import 'social_api.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Sosyal hata kodları → Türkçe
 String socialErrorText(AppException e) => switch (e.technicalDetail) {
-  'friend_self' => 'Kendine arkadaşlık isteği gönderemezsin.',
-  'player_not_found' => 'Oyuncu bulunamadı.',
-  'friend_limit' => 'En fazla 100 arkadaşın olabilir.',
-  'friend_request_limit' => 'Bekleyen çok fazla isteğin var. Önce bazılarını geri çek.',
-  'friend_request_not_found' => 'Bu istek artık geçerli değil.',
-  'match_not_found' => 'Maç bulunamadı.',
-  'match_not_finished' => 'Rakibin kadrosu maç bitince görünür.',
-  'not_enough_gems' => 'Yeterli elmas yok.',
-  'offer_not_found' => 'Teklif bulunamadı.',
-  'idempotency_in_progress' => 'İstek hâlâ işleniyor, birazdan tekrar dene.',
+  'friend_self' => 'Kendine arkadaşlık isteği gönderemezsin.'.tr,
+  'player_not_found' => 'Oyuncu bulunamadı.'.tr,
+  'friend_limit' => 'En fazla 100 arkadaşın olabilir.'.tr,
+  'friend_request_limit' => 'Bekleyen çok fazla isteğin var. Önce bazılarını geri çek.'.tr,
+  'friend_request_not_found' => 'Bu istek artık geçerli değil.'.tr,
+  'match_not_found' => 'Maç bulunamadı.'.tr,
+  'match_not_finished' => 'Rakibin kadrosu maç bitince görünür.'.tr,
+  'not_enough_gems' => 'Yeterli elmas yok.'.tr,
+  'offer_not_found' => 'Teklif bulunamadı.'.tr,
+  'idempotency_in_progress' => 'İstek hâlâ işleniyor, birazdan tekrar dene.'.tr,
   _ => e.message,
 };
 
@@ -108,16 +109,16 @@ class FriendsViewModel extends BaseViewModel {
     } else {
       final durum = FriendStatus.parse(s.dataOrNull);
       _sonuclar = [for (final p in _sonuclar) p.id == id ? p.withStatus(durum) : p];
-      _bilgi = durum == FriendStatus.friends ? 'Artık arkadaşsınız!' : basari;
+      _bilgi = durum == FriendStatus.friends ? 'Artık arkadaşsınız!'.tr : basari;
       await refresh();
     }
     safeNotify();
   }
 
-  Future<void> sendRequest(PlayerSummary p) => _eylem(p.id, () => _api.request(p.id), 'İstek gönderildi: ${p.username}');
-  Future<void> accept(PlayerSummary p) => _eylem(p.id, () => _api.accept(p.id), 'Artık arkadaşsınız!');
-  Future<void> decline(PlayerSummary p) => _eylem(p.id, () => _api.decline(p.id), 'İstek reddedildi.');
-  Future<void> remove(PlayerSummary p) => _eylem(p.id, () => _api.remove(p.id), '${p.username} listeden çıkarıldı.');
+  Future<void> sendRequest(PlayerSummary p) => _eylem(p.id, () => _api.request(p.id), 'İstek gönderildi: {username}'.trArgs({'username': p.username}));
+  Future<void> accept(PlayerSummary p) => _eylem(p.id, () => _api.accept(p.id), 'Artık arkadaşsınız!'.tr);
+  Future<void> decline(PlayerSummary p) => _eylem(p.id, () => _api.decline(p.id), 'İstek reddedildi.'.tr);
+  Future<void> remove(PlayerSummary p) => _eylem(p.id, () => _api.remove(p.id), '{username} listeden çıkarıldı.'.trArgs({'username': p.username}));
 
   @override
   void dispose() {
@@ -226,7 +227,7 @@ class GemStoreViewModel extends BaseViewModel {
   Future<bool> buy(GemOffer o) async {
     if (_islenen != null) return false;
     if (!canBuy(o)) {
-      _hata = 'Yeterli elmas yok (${o.gems} gerekli).';
+      _hata = 'Yeterli elmas yok ({gems} gerekli).'.trArgs({'gems': o.gems});
       safeNotify();
       return false;
     }
@@ -258,7 +259,7 @@ class GemStoreViewModel extends BaseViewModel {
       );
     }
     await _oturum(gems: yeniElmas, coins: yeniAltin);
-    _bilgi = '+${o.coins} altın hesabına eklendi.';
+    _bilgi = '+{coins} altın hesabına eklendi.'.trArgs({'coins': o.coins});
     safeNotify();
     return true;
   }

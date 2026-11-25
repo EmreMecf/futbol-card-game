@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_models/shared_models.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// BAŞARIMLAR (MD bölüm 4-J) — sadece gerçek veriden, ödülsüz.
 ///
@@ -79,8 +80,8 @@ class Achievement {
     return [
       Achievement(
         id: 'ilk_mac',
-        title: 'İlk Düdük',
-        description: 'İlk maçını tamamla',
+        title: 'İlk Düdük'.tr,
+        description: 'İlk maçını tamamla'.tr,
         icon: Icons.sports_rounded,
         // Kilitli karoların grisinden (0xFF94A3B8) AYRI olmalı; aynı
         // renkte açılmış rozet kilitli sanılıyordu.
@@ -90,8 +91,8 @@ class Achievement {
       ),
       Achievement(
         id: 'ilk_galibiyet',
-        title: 'İlk Zafer',
-        description: 'İlk maçını kazan',
+        title: 'İlk Zafer'.tr,
+        description: 'İlk maçını kazan'.tr,
         icon: Icons.emoji_events_rounded,
         color: const Color(0xFF10B981),
         current: g,
@@ -99,8 +100,8 @@ class Achievement {
       ),
       Achievement(
         id: 'on_galibiyet',
-        title: 'Seri Galip',
-        description: '10 maç kazan',
+        title: 'Seri Galip'.tr,
+        description: '10 maç kazan'.tr,
         icon: Icons.local_fire_department_rounded,
         color: const Color(0xFFF59E0B),
         current: g,
@@ -108,8 +109,8 @@ class Achievement {
       ),
       Achievement(
         id: 'elli_mac',
-        title: 'Arena Emektarı',
-        description: '50 maç oyna',
+        title: 'Arena Emektarı'.tr,
+        description: '50 maç oyna'.tr,
         icon: Icons.stadium_rounded,
         color: const Color(0xFF22D3EE),
         current: toplam,
@@ -117,8 +118,8 @@ class Achievement {
       ),
       Achievement(
         id: 'usta_ligi',
-        title: 'Usta',
-        description: 'Usta ligine yüksel',
+        title: 'Usta'.tr,
+        description: 'Usta ligine yüksel'.tr,
         icon: Icons.shield_rounded,
         color: const Color(0xFFD4AF37),
         current: lig >= 1 ? 1 : 0,
@@ -126,8 +127,8 @@ class Achievement {
       ),
       Achievement(
         id: 'master_ligi',
-        title: 'Master',
-        description: 'Master ligine yüksel',
+        title: 'Master'.tr,
+        description: 'Master ligine yüksel'.tr,
         icon: Icons.workspace_premium_rounded,
         color: const Color(0xFF8B5CF6),
         current: lig >= 2 ? 1 : 0,

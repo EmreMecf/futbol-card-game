@@ -12,6 +12,7 @@ import '../../../ui_v21/components/v21_cosmetics.dart';
 import '../../../ui_v21/components/v21_confetti.dart';
 import '../../ui_v21.dart';
 import 'v21_match_panels.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 MAÇ SONUCU (referans `assets/v21/screens/win.png`).
 ///
@@ -171,8 +172,8 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
       if (!ranked)
         Text(
           s.mode == 'tutorial'
-              ? 'ÖĞRETİCİ ${s.tutorialStep ?? 1}/3 · ÖDÜL VE PUAN YOK'
-              : (s.mode == 'training' ? 'ANTRENMAN · ÖDÜL VE PUAN YOK' : 'ÖDÜL VE PUAN YOK'),
+              ? 'ÖĞRETİCİ {p}/3 · ÖDÜL VE PUAN YOK'.trArgs({'p': s.tutorialStep ?? 1})
+              : (s.mode == 'training' ? 'ANTRENMAN · ÖDÜL VE PUAN YOK'.tr : 'ÖDÜL VE PUAN YOK'.tr),
           textAlign: TextAlign.center,
           style: V21Type.label(12 * k, weight: FontWeight.w900, color: const Color(0xFFFEDB70), letterSpacing: 1),
         ),
@@ -214,7 +215,7 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
       if (s.mode == 'tutorial' && s.tutorialStep == 3) ...[
         SizedBox(height: 10 * k),
         Text(
-          'Öğretici tamamlandı! Gümüş sandığın Sandıklar ekranında.',
+          'Öğretici tamamlandı! Gümüş sandığın Sandıklar ekranında.'.tr,
           textAlign: TextAlign.center,
           style: V21Type.label(13 * k, weight: FontWeight.w800, color: V21Colors.goldTop),
         ),
@@ -222,7 +223,7 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
       if (d != null && ranked) ...[
         SizedBox(height: 14 * k),
         Text(
-          'ÖDÜLLERİN',
+          'ÖDÜLLERİN'.tr,
           textAlign: TextAlign.center,
           style: V21Type.label(12 * k, weight: FontWeight.w900, color: const Color(0xFFFFE3A6), letterSpacing: 1),
         ),
@@ -234,7 +235,7 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
                 child: V21RewardCard(
                   icon: const V21CoinIcon(size: 46),
                   value: _signed(d.coins),
-                  label: 'ALTIN',
+                  label: 'ALTIN'.tr,
                   valueColor: d.coins < 0 ? V21Colors.danger : Colors.white,
                 ),
               ),
@@ -245,7 +246,7 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
                 child: V21RewardCard(
                   icon: const V21StarIcon(size: 46, color: Color(0xFFFFD45E)),
                   value: _signed(d.rating),
-                  label: 'KUPA',
+                  label: 'KUPA'.tr,
                   valueColor: d.rating < 0 ? V21Colors.danger : Colors.white,
                 ),
               ),
@@ -256,7 +257,7 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
                 child: V21RewardCard(
                   icon: const Icon(Icons.shield_rounded, size: 46, color: Color(0xFF8FC8FF)),
                   value: _signed(d.protectionSlots),
-                  label: 'KORUMA',
+                  label: 'KORUMA'.tr,
                 ),
               ),
             ),
@@ -264,13 +265,13 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
         ),
       ],
       if (s.cardsWon.isNotEmpty)
-        _CardsRow(title: '+${s.cardsWon.length} KART KAZANDIN', cards: s.cardsWon, good: true, scale: k),
+        _CardsRow(title: '+{length} KART KAZANDIN'.trArgs({'length': s.cardsWon.length}), cards: s.cardsWon, good: true, scale: k),
       if (s.cardsLost.isNotEmpty)
-        _CardsRow(title: '-${s.cardsLost.length} KART KAYBETTİN', cards: s.cardsLost, good: false, scale: k),
+        _CardsRow(title: '-{length} KART KAYBETTİN'.trArgs({'length': s.cardsLost.length}), cards: s.cardsLost, good: false, scale: k),
       if (!s.hasCardTransfers && !s.noCardLossRules) ...[
         SizedBox(height: 12 * k),
         Text(
-          s.isDraw ? 'Beraberlikte kimse kart kaybetmez.' : 'Hiçbir kart el değiştirmedi.',
+          s.isDraw ? 'Beraberlikte kimse kart kaybetmez.'.tr : 'Hiçbir kart el değiştirmedi.'.tr,
           textAlign: TextAlign.center,
           style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
         ),
@@ -280,7 +281,7 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
         children: [
           Expanded(
             child: V21GameButton(
-              label: 'ANA MENÜ',
+              label: 'ANA MENÜ'.tr,
               tone: V21ButtonTone.blue,
               size: V21ButtonSize.large,
               scale: k,
@@ -291,7 +292,7 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
             SizedBox(width: 10 * k),
             Expanded(
               child: V21GameButton(
-                label: widget.newMatchLabel,
+                label: widget.newMatchLabel.tr,
                 size: V21ButtonSize.large,
                 scale: k,
                 onPressed: widget.onNewMatch,
@@ -318,28 +319,28 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
   (String, List<Color>, String) _look(MatchResultSummary s) {
     const gold = [Color(0xFFFFF1A8), Color(0xFFFFC21F), Color(0xFFFF7A00)];
     const red = [Color(0xFFFFC2CB), Color(0xFFFF5A6E), Color(0xFFB0193A)];
-    if (s.isDraw) return ('BERABERLİK', gold, 'Skor eşit bitti. Kimse kart kaybetmedi.');
+    if (s.isDraw) return ('BERABERLİK'.tr, gold, 'Skor eşit bitti. Kimse kart kaybetmedi.'.tr);
     // Kazanan daha fazla kart toplamadıysa maç skorla değil hükmen bitti:
     // teslim olundu ya da üst üste iki turda hamle yapılmadı
     final hukmen = matchEndedByForfeit(s);
     if (s.noCardLossRules) {
       if (hukmen) {
         return s.didIWin
-            ? ('ZAFER!', gold, 'Rakip maçı bıraktı, hükmen kazandın.')
-            : ('HÜKMEN YENİLGİ', red, 'Teslim olundu ya da üst üste iki turda hamle yapılmadı; skor sayılmadı.');
+            ? ('ZAFER!'.tr, gold, 'Rakip maçı bıraktı, hükmen kazandın.'.tr)
+            : ('HÜKMEN YENİLGİ'.tr, red, 'Teslim olundu ya da üst üste iki turda hamle yapılmadı; skor sayılmadı.'.tr);
       }
       return s.didIWin
-          ? ('ZAFER!', gold, '${s.myScore} kart topladın, maçı kazandın.')
-          : ('MÜCADELE BİTTİ', red, 'Bu maçta kart kaybı yok: kartların sende kaldı.');
+          ? ('ZAFER!'.tr, gold, '{myScore} kart topladın, maçı kazandın.'.trArgs({'myScore': s.myScore}))
+          : ('MÜCADELE BİTTİ'.tr, red, 'Bu maçta kart kaybı yok: kartların sende kaldı.'.tr);
     }
     if (s.didIWin) {
       final n = s.cardsWon.length;
-      final kart = n > 0 ? 'Rakibinden $n kart aldın.' : 'Rakibinin korumasız kartı kalmamıştı.';
-      return ('ZAFER!', gold, hukmen ? 'Rakip maçı bıraktı, hükmen kazandın. $kart' : kart);
+      final kart = n > 0 ? 'Rakibinden {n} kart aldın.'.trArgs({'n': n}) : 'Rakibinin korumasız kartı kalmamıştı.'.tr;
+      return ('ZAFER!'.tr, gold, hukmen ? 'Rakip maçı bıraktı, hükmen kazandın. {kart}'.trArgs({'kart': kart}) : kart);
     }
     final n = s.cardsLost.length;
-    final kart = n > 0 ? '$n kartını kalıcı olarak kaptırdın.' : 'Korumadaki kartların sayesinde hiç kart kaybetmedin.';
-    return (hukmen ? 'HÜKMEN YENİLGİ' : 'MÜCADELE BİTTİ', red, kart);
+    final kart = n > 0 ? '{n} kartını kalıcı olarak kaptırdın.'.trArgs({'n': n}) : 'Korumadaki kartların sayesinde hiç kart kaybetmedin.'.tr;
+    return (hukmen ? 'HÜKMEN YENİLGİ'.tr : 'MÜCADELE BİTTİ'.tr, red, kart);
   }
 }
 
@@ -355,7 +356,7 @@ class _ScorePanel extends StatelessWidget {
     final k = scale;
     final opp = result.opponent;
     return Semantics(
-      label: 'Skor ${result.myScore} - ${result.opponentScore}, rakip ${opp?.username ?? 'Rakip'}',
+      label: 'Skor {myScore} - {opponentScore}, rakip {p}'.trArgs({'myScore': result.myScore, 'opponentScore': result.opponentScore, 'p': opp?.username ?? 'Rakip'.tr}),
       excludeSemantics: true,
       child: Container(
         height: 72 * k,
@@ -370,7 +371,7 @@ class _ScorePanel extends StatelessWidget {
           children: [
             V21PlayerAvatar(
               seed: 'oyuncu-${me?.id ?? me?.username ?? 'ben'}',
-              semanticsLabel: 'Sen',
+              semanticsLabel: 'Sen'.tr,
               name: me?.username,
               size: 52 * k,
               background: const Color(0xFF7FC0FF),
@@ -385,7 +386,7 @@ class _ScorePanel extends StatelessWidget {
             ),
             V21PlayerAvatar(
               seed: 'oyuncu-${opp?.id ?? opp?.username ?? 'rakip'}',
-              semanticsLabel: 'Rakip',
+              semanticsLabel: 'Rakip'.tr,
               name: opp?.username,
               size: 52 * k,
               background: const Color(0xFFFF8A9B),
@@ -428,7 +429,7 @@ class _CardsRow extends StatelessWidget {
       children: [
         Text(title, style: V21Type.title(20 * k, color: good ? V21Colors.successText : const Color(0xFFFF8A9B))),
         Text(
-          good ? 'Bu kartlar artık senin; koleksiyonunda.' : 'Bu kartlar KALICI olarak rakibine geçti.',
+          good ? 'Bu kartlar artık senin; koleksiyonunda.'.tr : 'Bu kartlar KALICI olarak rakibine geçti.'.tr,
           style: V21Type.label(11 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
         ),
       ],
@@ -473,6 +474,6 @@ class _CardsRow extends StatelessWidget {
 
 /// Sonuç ekranının ana düğmesi: öğreticide sıradaki adıma yönlendirir.
 String newMatchLabel(MatchResultSummary s) {
-  if (s.mode != 'tutorial') return 'YENİ MAÇ';
-  return (s.tutorialStep ?? 1) >= 3 ? 'DERECELİ MAÇA GEÇ' : 'ÖĞRETİCİYE DEVAM';
+  if (s.mode != 'tutorial') return 'YENİ MAÇ'.tr;
+  return (s.tutorialStep ?? 1) >= 3 ? 'DERECELİ MAÇA GEÇ'.tr : 'ÖĞRETİCİYE DEVAM'.tr;
 }

@@ -7,6 +7,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../features/chests/presentation/viewmodel/chests_view_model.dart';
 import '../../../features/chests/domain/chest_texts.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 SANDIK OLASILIKLARI (HTML referansında karşılığı yok; Sandıklar
 /// ekranının dilinden).
@@ -29,7 +30,7 @@ class V21ChestOddsScreen extends StatelessWidget {
   );
 }
 
-const _outcomes = {'win': 'Galibiyet', 'draw': 'Beraberlik', 'loss': 'Yenilgi'};
+Map<String, String> get _outcomes => {'win': 'Galibiyet'.tr, 'draw': 'Beraberlik'.tr, 'loss': 'Yenilgi'.tr};
 const _tiers = ['bronze', 'silver', 'gold', 'diamond', 'legend'];
 const _tierColor = {
   'bronze': Color(0xFFFFAB76),
@@ -38,7 +39,7 @@ const _tierColor = {
   'diamond': Color(0xFF7FF3FF),
   'legend': Color(0xFFE3A9FA),
 };
-const _tierShort = {'bronze': 'BRZ', 'silver': 'GMŞ', 'gold': 'ALT', 'diamond': 'ELM', 'legend': 'EFS'};
+Map<String, String> get _tierShort => {'bronze': 'BRZ'.tr, 'silver': 'GMŞ'.tr, 'gold': 'ALT'.tr, 'diamond': 'ELM'.tr, 'legend': 'EFS'.tr};
 
 class _Body extends StatelessWidget {
   const _Body();
@@ -48,7 +49,7 @@ class _Body extends StatelessWidget {
     final vm = context.watch<ChestsViewModel>();
     final o = vm.odds;
     return V21InnerPage(
-      title: 'OLASILIKLAR',
+      title: 'OLASILIKLAR'.tr,
       route: AppRoutes.chestOdds,
       highlightRoute: AppRoutes.home,
       fallbackRoute: AppRoutes.chests,
@@ -58,7 +59,7 @@ class _Body extends StatelessWidget {
       trailing: o == null
           ? null
           : (context, k) => V21Tag(
-              text: 'SÜRÜM ${o.version}',
+              text: 'SÜRÜM {version}'.trArgs({'version': o.version}),
               background: V21Colors.panel,
               foreground: V21Colors.textMuted,
               scale: k,
@@ -68,7 +69,7 @@ class _Body extends StatelessWidget {
         final odds = o!;
         final types = odds.types.keys.toList()..sort((a, b) => odds.types[a]!.sort.compareTo(odds.types[b]!.sort));
         return [
-          V21SectionTitle('MAÇ SONUNDA HANGİ SANDIK?', scale: k),
+          V21SectionTitle('MAÇ SONUNDA HANGİ SANDIK?'.tr, scale: k),
           V21GamePanel(
             scale: k,
             radius: 16,
@@ -88,8 +89,7 @@ class _Body extends StatelessWidget {
                 ),
                 SizedBox(height: 8 * k),
                 Text(
-                  'Şanssızlık koruması: ${odds.pity['gold_after'] ?? 15} sandıktır Altın ya da üstü gelmediyse sıradaki '
-                  'en az Altın; ${odds.pity['legend_after'] ?? 60} sandıktır Efsane gelmediyse sıradaki Efsane.',
+                  'Şanssızlık koruması: {p} sandıktır Altın ya da üstü gelmediyse sıradaki en az Altın; {p2} sandıktır Efsane gelmediyse sıradaki Efsane.'.trArgs({'p': odds.pity['gold_after'] ?? 15, 'p2': odds.pity['legend_after'] ?? 60}),
                   style: V21Type.label(12 * k, weight: FontWeight.w600, color: V21Colors.textMuted, height: 1.4),
                 ),
               ],
@@ -98,9 +98,7 @@ class _Body extends StatelessWidget {
           for (final t in types) ...[SizedBox(height: 14 * k), _TypePanel(odds: odds, type: t, scale: k)],
           SizedBox(height: 14 * k),
           Text(
-            'Oranlar sunucuda sürümlü tutulur. Her sandık üretildiği sürümün oranlarıyla açılır; bir oran değişirse '
-            'yeni sürüm yayınlanır, eskisi değişmez.'
-            '${odds.activeFrom != null ? ' Bu sürüm ${_date(odds.activeFrom!)} tarihinden beri geçerli.' : ''}',
+            'Oranlar sunucuda sürümlü tutulur. Her sandık üretildiği sürümün oranlarıyla açılır; bir oran değişirse yeni sürüm yayınlanır, eskisi değişmez.{p}'.trArgs({'p': odds.activeFrom != null ? ' Bu sürüm {p} tarihinden beri geçerli.'.trArgs({'p': _date(odds.activeFrom!)}) : ''}),
             textAlign: TextAlign.center,
             style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textDim, height: 1.4),
           ),
@@ -142,13 +140,11 @@ class _TypePanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${V21Format.upper(rule.name)} SANDIK',
+                      '{p} SANDIK'.trArgs({'p': V21Format.upper(rule.name)}),
                       style: V21Type.title(20 * k, color: _tierColor[type] ?? Colors.white),
                     ),
                     Text(
-                      '${rule.unlockSeconds == 0 ? 'Anında açılır' : 'Kilit: ${V21Format.shortDuration(rule.unlockSeconds)}'}'
-                      ' · ${rule.coins.first}–${rule.coins.last} altın'
-                      '${rule.jokers.isEmpty ? '' : ' · Joker: ${jokerSummary(rule.jokers)}'}',
+                      '{p} · {first}–{last} altın{p2}'.trArgs({'p': rule.unlockSeconds == 0 ? 'Anında açılır'.tr : 'Kilit: {p}'.trArgs({'p': V21Format.shortDuration(rule.unlockSeconds)}), 'first': rule.coins.first, 'last': rule.coins.last, 'p2': rule.jokers.isEmpty ? '' : ' · Joker: {p}'.trArgs({'p': jokerSummary(rule.jokers)})}),
                       style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
                     ),
                   ],
@@ -158,7 +154,7 @@ class _TypePanel extends StatelessWidget {
           ),
           SizedBox(height: 8 * k),
           _Table(
-            header: ['KART', for (final n in _tiers) _tierShort[n]!],
+            header: ['KART'.tr, for (final n in _tiers) _tierShort[n]!],
             headerColors: [null, for (final n in _tiers) _tierColor[n]],
             rows: [
               for (var i = 0; i < slots.length; i++)
@@ -171,8 +167,7 @@ class _TypePanel extends StatelessWidget {
           ),
           SizedBox(height: 6 * k),
           Text(
-            '${type != ChestTypes.bronze ? 'Garanti yuvası daha yüksek nadirlik verir. ' : ''}'
-            'Yuvalar ve posta kutusu doluysa: ${rule.compensation} altın telafi.',
+            '{p}Yuvalar ve posta kutusu doluysa: {compensation} altın telafi.'.trArgs({'p': type != ChestTypes.bronze ? 'Garanti yuvası daha yüksek nadirlik verir. '.tr : '', 'compensation': rule.compensation}),
             style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textMuted),
           ),
         ],

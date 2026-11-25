@@ -1,3 +1,4 @@
+import '../../../../core/l10n/app_language.dart';
 /// Giriş ve kayıt formlarının doğrulama kuralları.
 ///
 /// ===================================================================
@@ -22,29 +23,29 @@ class AuthValidators {
 
   static String? email(String? value) {
     final v = value?.trim() ?? '';
-    if (v.isEmpty) return 'E-posta adresini gir.';
+    if (v.isEmpty) return 'E-posta adresini gir.'.tr;
     if (!v.contains('@') || !v.contains('.')) {
-      return 'Geçerli bir e-posta adresi gir.';
+      return 'Geçerli bir e-posta adresi gir.'.tr;
     }
     return null;
   }
 
   static String? password(String? value) {
-    if (value == null || value.isEmpty) return 'Şifreni gir.';
+    if (value == null || value.isEmpty) return 'Şifreni gir.'.tr;
     if (value.length < minPasswordLength) {
-      return 'Şifre en az $minPasswordLength karakter olmalı.';
+      return 'Şifre en az {minPasswordLength} karakter olmalı.'.trArgs({'minPasswordLength': minPasswordLength});
     }
     return null;
   }
 
   static String? username(String? value) {
     final v = value?.trim() ?? '';
-    if (v.isEmpty) return 'Bir kullanıcı adı seç.';
+    if (v.isEmpty) return 'Bir kullanıcı adı seç.'.tr;
     if (v.length < minUsernameLength) {
-      return 'Kullanıcı adı en az $minUsernameLength karakter olmalı.';
+      return 'Kullanıcı adı en az {minUsernameLength} karakter olmalı.'.trArgs({'minUsernameLength': minUsernameLength});
     }
     if (v.length > maxUsernameLength) {
-      return 'Kullanıcı adı en fazla $maxUsernameLength karakter olabilir.';
+      return 'Kullanıcı adı en fazla {maxUsernameLength} karakter olabilir.'.trArgs({'maxUsernameLength': maxUsernameLength});
     }
     return null;
   }

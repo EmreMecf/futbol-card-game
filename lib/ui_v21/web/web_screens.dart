@@ -20,6 +20,7 @@ import '../../features/store/presentation/viewmodel/store_view_model.dart';
 import '../../shared/widgets/error_snackbar.dart';
 import '../ui_v21.dart';
 import 'web_kit.dart';
+import '../../core/l10n/app_language.dart';
 
 // ====================================================================
 // ANA SAYFA
@@ -43,7 +44,7 @@ class WebHome extends StatelessWidget {
           980,
           670,
           WButton(
-            active == null ? 'MAÇA BAŞLA' : 'MAÇA DÖN',
+            active == null ? 'MAÇA BAŞLA'.tr : 'MAÇA DÖN'.tr,
             tone: active == null ? V21ButtonTone.gold : V21ButtonTone.green,
             fontSize: 58,
             onTap: () => active == null ? context.go(AppRoutes.matchmaking) : context.push(AppRoutes.matchWithId(active)),
@@ -56,7 +57,7 @@ class WebHome extends StatelessWidget {
           1660,
           366,
           WPanel(
-            title: 'SANDIKLAR',
+            title: 'SANDIKLAR'.tr,
             icon: wImage('chest_small', fit: BoxFit.contain),
             trailing: const _DailyChip(),
             child: _ChestSlots(vm: chests),
@@ -68,11 +69,11 @@ class WebHome extends StatelessWidget {
           1660,
           666,
           WPanel(
-            title: 'GÜNLÜK GÖREVLER',
+            title: 'GÜNLÜK GÖREVLER'.tr,
             icon: const Icon(Icons.track_changes_rounded, color: Color(0xFFFF6B6B), size: 40),
             trailing: V21Tap(
               onTap: () => context.go(AppRoutes.season),
-              child: Text('Tümünü Gör  ›', style: wBody(20, color: const Color(0xFFD9CCF7))),
+              child: Text('Tümünü Gör  ›'.tr, style: wBody(20, color: const Color(0xFFD9CCF7))),
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
@@ -80,7 +81,7 @@ class WebHome extends StatelessWidget {
                 children: [
                   for (final m in daily) Expanded(child: _MissionRow(m: m)),
                   if (daily.isEmpty)
-                    Expanded(child: Center(child: Text('Görevler yükleniyor', style: wBody(20)))),
+                    Expanded(child: Center(child: Text('Görevler yükleniyor'.tr, style: wBody(20)))),
                 ],
               ),
             ),
@@ -93,7 +94,7 @@ class WebHome extends StatelessWidget {
           912,
           Semantics(
             button: true,
-            label: 'Sezon ödülleri',
+            label: 'Sezon ödülleri'.tr,
             child: V21Tap(onTap: () => context.go(AppRoutes.season), child: wImage('season_banner', fit: BoxFit.fill)),
           ),
         ),
@@ -134,7 +135,7 @@ class _MissionRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 7),
             alignment: Alignment.center,
             decoration: BoxDecoration(color: const Color(0xFF3A2388), borderRadius: BorderRadius.circular(20)),
-            child: Text('+${m.xp} XP', maxLines: 1, style: wBody(18, color: V21Colors.goldTop, weight: FontWeight.w900)),
+            child: Text('+{xp} XP'.trArgs({'xp': m.xp}), maxLines: 1, style: wBody(18, color: V21Colors.goldTop, weight: FontWeight.w900)),
           ),
         ],
       ),
@@ -173,9 +174,9 @@ class _DailyChipState extends State<_DailyChip> {
     try {
       await _s?.claim();
       chestInventoryChanged.value++;
-      if (mounted) AppSnackBar.showInfo(context, 'Günlük sandığın eklendi.');
+      if (mounted) AppSnackBar.showInfo(context, 'Günlük sandığın eklendi.'.tr);
     } catch (_) {
-      if (mounted) AppSnackBar.showInfo(context, 'Sandık alınamadı. Tekrar dene.');
+      if (mounted) AppSnackBar.showInfo(context, 'Sandık alınamadı. Tekrar dene.'.tr);
     }
     if (mounted) setState(() => _busy = false);
     await _load();
@@ -188,7 +189,7 @@ class _DailyChipState extends State<_DailyChip> {
     return SizedBox(
       width: 210,
       height: 46,
-      child: WButton('GÜNLÜK SANDIK AL', tone: V21ButtonTone.green, fontSize: 20, busy: _busy, onTap: _claim),
+      child: WButton('GÜNLÜK SANDIK AL'.tr, tone: V21ButtonTone.green, fontSize: 20, busy: _busy, onTap: _claim),
     );
   }
 }
@@ -227,7 +228,7 @@ class _ChestSlots extends StatelessWidget {
         ? ''
         : c.isUnlocking
         ? V21Format.countdown(v?.remaining(c) ?? Duration.zero)
-        : (c.isReady ? 'AÇ!' : V21Format.shortDuration(c.unlockSeconds));
+        : (c.isReady ? 'AÇ!'.tr : V21Format.shortDuration(c.unlockSeconds));
     final color = c == null ? const Color(0xFF6B58A8) : (c.isUnlocking ? const Color(0xFF3DD15A) : accent(c.chestType));
     return V21Tap(
       onTap: () => context.go(AppRoutes.chests),
@@ -237,7 +238,7 @@ class _ChestSlots extends StatelessWidget {
             height: 24,
             child: FittedBox(
               child: Text(
-                c == null ? ' ' : (c.isUnlocking ? 'AÇILIYOR' : V21Format.upper(c.typeName)),
+                c == null ? ' ' : (c.isUnlocking ? 'AÇILIYOR'.tr : V21Format.upper(c.typeName)),
                 style: wBody(18, weight: FontWeight.w900),
               ),
             ),
@@ -277,7 +278,7 @@ class _DeckStrip extends StatelessWidget {
       child: Builder(
         builder: (context) {
           final cards = [...context.watch<DeckViewModel>().selectedCards]..sort((a, b) => b.power.compareTo(a.power));
-          return WebDeckRow(cards: cards.take(5).toList(), label: 'KADROM', onTap: () => context.go(AppRoutes.deck));
+          return WebDeckRow(cards: cards.take(5).toList(), label: 'KADROM'.tr, onTap: () => context.go(AppRoutes.deck));
         },
       ),
     );
@@ -355,7 +356,7 @@ class _WebCollectionState extends State<WebCollection> {
     return WebShell(
       route: AppRoutes.collection,
       children: [
-        wBox(258, 100, 1010, 165, Text('KARTLARIM / KOLEKSİYON', maxLines: 1, style: wTitle(56))),
+        wBox(258, 100, 1010, 165, Text('KARTLARIM / KOLEKSİYON'.tr, maxLines: 1, style: wTitle(56))),
         wBox(
           1020,
           110,
@@ -372,7 +373,7 @@ class _WebCollectionState extends State<WebCollection> {
           176,
           350,
           224,
-          WButton('TÜMÜ', fontSize: 25, onTap: vm.clearCategoryFilters),
+          WButton('TÜMÜ'.tr, fontSize: 25, onTap: vm.clearCategoryFilters),
         ),
         for (final (i, t) in tiers.indexed)
           wBox(
@@ -561,7 +562,7 @@ class _CardDetail extends StatelessWidget {
           SizedBox(
             height: 168,
             child: WPanel(
-              title: 'KART BİLGİSİ',
+              title: 'KART BİLGİSİ'.tr,
               headerHeight: 46,
               titleSize: 27,
               icon: const Icon(Icons.fact_check_rounded, color: Colors.white, size: 34),
@@ -569,9 +570,9 @@ class _CardDetail extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                 child: Column(
                   children: [
-                    info('Pozisyon', Text(card.position.code, style: wTitle(23))),
-                    info('Nadirlik', Text(V21Format.upper(V21Rarity.of(card.tier).name), style: wTitle(23, color: wTierColor(card.tier)))),
-                    info('Takım', Text(V21Format.upper(card.club ?? '-'), maxLines: 1, style: wTitle(23, color: wTierColor(card.tier)))),
+                    info('Pozisyon'.tr, Text(card.position.code, style: wTitle(23))),
+                    info('Nadirlik'.tr, Text(V21Format.upper(V21Rarity.of(card.tier).name), style: wTitle(23, color: wTierColor(card.tier)))),
+                    info('Takım'.tr, Text(V21Format.upper(card.club ?? '-'), maxLines: 1, style: wTitle(23, color: wTierColor(card.tier)))),
                   ],
                 ),
               ),
@@ -580,7 +581,7 @@ class _CardDetail extends StatelessWidget {
           const SizedBox(height: 10),
           Expanded(
             child: WPanel(
-              title: 'ÖZELLİKLER',
+              title: 'ÖZELLİKLER'.tr,
               headerHeight: 46,
               titleSize: 27,
               icon: const Icon(Icons.upgrade_rounded, color: Colors.white, size: 36),
@@ -588,9 +589,9 @@ class _CardDetail extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
                 child: Column(
                   children: [
-                    stat(Icons.sports_soccer_rounded, 'Şut', a?.shooting ?? card.power),
-                    stat(Icons.directions_run_rounded, 'Hız', a?.pace ?? card.power),
-                    stat(Icons.shield_rounded, 'Fizik', a?.physical ?? card.power),
+                    stat(Icons.sports_soccer_rounded, 'Şut'.tr, a?.shooting ?? card.power),
+                    stat(Icons.directions_run_rounded, 'Hız'.tr, a?.pace ?? card.power),
+                    stat(Icons.shield_rounded, 'Fizik'.tr, a?.physical ?? card.power),
                   ],
                 ),
               ),
@@ -599,7 +600,7 @@ class _CardDetail extends StatelessWidget {
           const SizedBox(height: 10),
           SizedBox(
             height: 84,
-            child: WButton('GELİŞTİR', fontSize: 40, onTap: () => context.push(AppRoutes.progress)),
+            child: WButton('GELİŞTİR'.tr, fontSize: 40, onTap: () => context.push(AppRoutes.progress)),
           ),
         ],
       ),
@@ -638,7 +639,7 @@ class _WebDeckState extends State<WebDeck> {
     return WebShell(
       route: AppRoutes.deck,
       children: [
-        wBox(296, 100, 900, 168, Text('KADROM', style: wTitle(58))),
+        wBox(296, 100, 900, 168, Text('KADROM'.tr, style: wTitle(58))),
         wBox(
           935,
           114,
@@ -647,7 +648,7 @@ class _WebDeckState extends State<WebDeck> {
           Container(
             alignment: Alignment.center,
             decoration: BoxDecoration(color: const Color(0xFF1C0D4C), borderRadius: BorderRadius.circular(26)),
-            child: Text('${vm.averagePower} GÜÇ', style: wTitle(32)),
+            child: Text('{averagePower} GÜÇ'.trArgs({'averagePower': vm.averagePower}), style: wTitle(32)),
           ),
         ),
         wBox(
@@ -675,11 +676,11 @@ class _WebDeckState extends State<WebDeck> {
           1656,
           502,
           WPanel(
-            title: 'KART DETAYI',
+            title: 'KART DETAYI'.tr,
             titleSize: 35,
             icon: wImage('nav_cards', fit: BoxFit.contain),
             child: sel == null
-                ? Center(child: WButton('KART SEÇ', onTap: () => widget.onPick(_slot)))
+                ? Center(child: WButton('KART SEÇ'.tr, onTap: () => widget.onPick(_slot)))
                 : Padding(
                     padding: const EdgeInsets.all(14),
                     child: Row(
@@ -698,7 +699,7 @@ class _WebDeckState extends State<WebDeck> {
           1656,
           798,
           WPanel(
-            title: 'KADRO BİLGİSİ',
+            title: 'KADRO BİLGİSİ'.tr,
             titleSize: 35,
             icon: const Icon(Icons.assignment_rounded, color: Colors.white, size: 40),
             child: Padding(
@@ -709,8 +710,8 @@ class _WebDeckState extends State<WebDeck> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _orb('${vm.averagePower}', 'GÜÇ', const Color(0xFFFF5A7A)),
-                        _orb('${vm.totalSelected}/${GameRules.squadSize}', 'KADRO', const Color(0xFF4FA8F5)),
+                        _orb('${vm.averagePower}', 'GÜÇ'.tr, const Color(0xFFFF5A7A)),
+                        _orb('${vm.totalSelected}/${GameRules.squadSize}', 'KADRO'.tr, const Color(0xFF4FA8F5)),
                       ],
                     ),
                   ),
@@ -723,7 +724,7 @@ class _WebDeckState extends State<WebDeck> {
                       padding: const EdgeInsets.symmetric(horizontal: 18),
                       decoration: BoxDecoration(color: wInset, borderRadius: BorderRadius.circular(12)),
                       child: Text(
-                        vm.saveMessage ?? 'Kartı seçmek için yuvaya dokun, yer değiştirmek için sürükle',
+                        vm.saveMessage ?? 'Kartı seçmek için yuvaya dokun, yer değiştirmek için sürükle'.tr,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: wBody(21),
@@ -734,14 +735,14 @@ class _WebDeckState extends State<WebDeck> {
             ),
           ),
         ),
-        wBox(1136, 815, 1398, 898, WButton('OTOMATİK DİZ', tone: V21ButtonTone.green, fontSize: 31, icon: Icons.shuffle_rounded, onTap: vm.autoFillBest)),
+        wBox(1136, 815, 1398, 898, WButton('OTOMATİK DİZ'.tr, tone: V21ButtonTone.green, fontSize: 31, icon: Icons.shuffle_rounded, onTap: vm.autoFillBest)),
         wBox(
           1414,
           815,
           1656,
           898,
           WButton(
-            'KAYDET',
+            'KAYDET'.tr,
             fontSize: 31,
             icon: Icons.check_rounded,
             busy: vm.isSaving,
@@ -845,10 +846,10 @@ class _DeckCardInfo extends StatelessWidget {
         const SizedBox(height: 4),
         WTierLabel(tier: card.tier, size: 19),
         const SizedBox(height: 8),
-        row(Icons.fitness_center_rounded, 'Güç', card.power),
-        row(Icons.directions_run_rounded, 'Hız', a?.pace ?? card.power),
-        row(Icons.sports_soccer_rounded, 'Şut', a?.shooting ?? card.power),
-        row(Icons.shield_outlined, 'Defans', a?.defending ?? card.power),
+        row(Icons.fitness_center_rounded, 'Güç'.tr, card.power),
+        row(Icons.directions_run_rounded, 'Hız'.tr, a?.pace ?? card.power),
+        row(Icons.sports_soccer_rounded, 'Şut'.tr, a?.shooting ?? card.power),
+        row(Icons.shield_outlined, 'Defans'.tr, a?.defending ?? card.power),
       ],
     );
   }
@@ -910,7 +911,7 @@ class _WebChestsState extends State<WebChests> {
       extra: WebExtraNav.chests,
       children: [
         wBox(292, 118, 368, 190, wImage('chest_small', fit: BoxFit.contain)),
-        wBox(392, 116, 1100, 190, Text('SANDIKLAR', style: wTitle(60))),
+        wBox(392, 116, 1100, 190, Text('SANDIKLAR'.tr, style: wTitle(60))),
         wBox(
           288,
           212,
@@ -931,7 +932,7 @@ class _WebChestsState extends State<WebChests> {
                     children: [
                       Row(
                         children: [
-                          Text('SANDIK HAKKI', style: wTitle(32)),
+                          Text('SANDIK HAKKI'.tr, style: wTitle(32)),
                           const SizedBox(width: 36),
                           for (var i = 0; i < e.max; i++)
                             Container(
@@ -947,7 +948,7 @@ class _WebChestsState extends State<WebChests> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text('Her ${e.refillMinutes} dk\'da 1 hak yenilenir', style: wBody(23, color: const Color(0xFFFFE6DC))),
+                      Text('Her {refillMinutes} dk\'da 1 hak yenilenir'.trArgs({'refillMinutes': e.refillMinutes}), style: wBody(23, color: const Color(0xFFFFE6DC))),
                     ],
                   ),
                 ),
@@ -956,8 +957,8 @@ class _WebChestsState extends State<WebChests> {
             ),
           ),
         ),
-        wBox(297, 335, 700, 392, Text('YUVALAR', style: wTitle(44))),
-        wBox(800, 345, 1100, 385, Align(alignment: Alignment.centerRight, child: Text('Aynı anda 1 sandık açılır', style: wBody(24, color: const Color(0xFFB9A4F0))))),
+        wBox(297, 335, 700, 392, Text('YUVALAR'.tr, style: wTitle(44))),
+        wBox(800, 345, 1100, 385, Align(alignment: Alignment.centerRight, child: Text('Aynı anda 1 sandık açılır'.tr, style: wBody(24, color: const Color(0xFFB9A4F0))))),
         wBox(
           284,
           396,
@@ -987,7 +988,7 @@ class _WebChestsState extends State<WebChests> {
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: Text(
-                        'Yuvalar doluyken kazandığın sandıklar burada ${env.mailboxDays} gün bekler.',
+                        'Yuvalar doluyken kazandığın sandıklar burada {mailboxDays} gün bekler.'.trArgs({'mailboxDays': env.mailboxDays}),
                         textAlign: TextAlign.center,
                         style: wBody(24, color: const Color(0xFFD9CCF7)),
                       ),
@@ -1029,9 +1030,9 @@ class _WebChestsState extends State<WebChests> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${V21Format.upper(c.typeName)} SANDIK', style: wTitle(38, color: const Color(0xFFFFC77A))),
+                  Text('{p} SANDIK'.trArgs({'p': V21Format.upper(c.typeName)}), style: wTitle(38, color: const Color(0xFFFFC77A))),
                   const SizedBox(height: 6),
-                  Text(mailbox ? 'Posta kutusunda' : 'Maç ödülü · hazır', style: wBody(26)),
+                  Text(mailbox ? 'Posta kutusunda'.tr : 'Maç ödülü · hazır'.tr, style: wBody(26)),
                 ],
               ),
             ),
@@ -1039,7 +1040,7 @@ class _WebChestsState extends State<WebChests> {
               width: 210,
               height: 84,
               child: WButton(
-                mailbox ? 'TAŞI' : 'AÇ!',
+                mailbox ? 'TAŞI'.tr : 'AÇ!'.tr,
                 tone: V21ButtonTone.green,
                 fontSize: 42,
                 busy: widget.vm.busyChestId == c.id,
@@ -1063,7 +1064,7 @@ class _WebChestsState extends State<WebChests> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.add_rounded, color: Color(0xFF7D69BC), size: 70),
-            Text('BOŞ YUVA', style: wBody(24, color: const Color(0xFF8E7FBE))),
+            Text('BOŞ YUVA'.tr, style: wBody(24, color: const Color(0xFF8E7FBE))),
           ],
         ),
       );
@@ -1081,7 +1082,7 @@ class _WebChestsState extends State<WebChests> {
         child: Column(
           children: [
             Expanded(child: Padding(padding: const EdgeInsets.all(10), child: wImage('chest_slot', fit: BoxFit.contain))),
-            FittedBox(child: Text('${V21Format.upper(c.typeName)} SANDIK', style: wTitle(28, color: const Color(0xFFFFD98A)))),
+            FittedBox(child: Text('{p} SANDIK'.trArgs({'p': V21Format.upper(c.typeName)}), style: wTitle(28, color: const Color(0xFFFFD98A)))),
             const SizedBox(height: 8),
             Container(
               height: 46,
@@ -1101,7 +1102,7 @@ class _WebChestsState extends State<WebChests> {
                       if (c.isSealed) const Icon(Icons.lock_rounded, color: V21Colors.goldTop, size: 28),
                       const SizedBox(width: 6),
                       Text(
-                        c.isReady ? 'AÇ!' : (c.isUnlocking ? V21Format.countdown(vm.remaining(c) ?? Duration.zero) : V21Format.shortDuration(c.unlockSeconds)),
+                        c.isReady ? 'AÇ!'.tr : (c.isUnlocking ? V21Format.countdown(vm.remaining(c) ?? Duration.zero) : V21Format.shortDuration(c.unlockSeconds)),
                         style: wTitle(28),
                       ),
                     ],
@@ -1118,12 +1119,12 @@ class _WebChestsState extends State<WebChests> {
   Widget _detail(Chest? c, ChestsViewModel vm) {
     final action = c == null ? null : widget.actionOf(c);
     final label = c == null
-        ? 'SANDIK YOK'
+        ? 'SANDIK YOK'.tr
         : c.isReady
-        ? 'AÇ!'
+        ? 'AÇ!'.tr
         : c.isUnlocking
-        ? '${V21Format.countdown(vm.remaining(c) ?? Duration.zero)} SONRA AÇILACAK'
-        : 'SAYACI BAŞLAT';
+        ? '{p} SONRA AÇILACAK'.trArgs({'p': V21Format.countdown(vm.remaining(c) ?? Duration.zero)})
+        : 'SAYACI BAŞLAT'.tr;
     Widget reward(String asset, String l) => Expanded(
       child: Column(
         children: [
@@ -1138,14 +1139,14 @@ class _WebChestsState extends State<WebChests> {
       children: [
         SizedBox(height: 258, child: wImage('chest_hero', fit: BoxFit.cover)),
         const SizedBox(height: 8),
-        FittedBox(fit: BoxFit.scaleDown, child: Text(c == null ? 'SANDIK' : '${V21Format.upper(c.typeName)} SANDIK', style: wTitle(50))),
+        FittedBox(fit: BoxFit.scaleDown, child: Text(c == null ? 'SANDIK'.tr : '{p} SANDIK'.trArgs({'p': V21Format.upper(c.typeName)}), style: wTitle(50))),
         const SizedBox(height: 6),
         Center(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
             decoration: BoxDecoration(color: const Color(0xFFD9CCF7), borderRadius: BorderRadius.circular(18)),
             child: Text(
-              c == null ? 'BOŞ' : (c.isUnlocking ? 'AÇILIYOR' : (c.isReady ? 'HAZIR' : 'SIRADA')),
+              c == null ? 'BOŞ'.tr : (c.isUnlocking ? 'AÇILIYOR'.tr : (c.isReady ? 'HAZIR'.tr : 'SIRADA'.tr)),
               style: V21Type.title(25, color: const Color(0xFF2A1567)),
             ),
           ),
@@ -1153,28 +1154,28 @@ class _WebChestsState extends State<WebChests> {
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 26),
-          child: Text('İçinden oyuncu kartları, altın ve çeşitli ödüller çıkar.', textAlign: TextAlign.center, style: wBody(23)),
+          child: Text('İçinden oyuncu kartları, altın ve çeşitli ödüller çıkar.'.tr, textAlign: TextAlign.center, style: wBody(23)),
         ),
         const SizedBox(height: 12),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18),
             child: WPanel(
-              title: 'OLASI ÖDÜLLER',
+              title: 'OLASI ÖDÜLLER'.tr,
               headerHeight: 46,
               titleSize: 27,
               icon: const Icon(Icons.card_giftcard_rounded, color: V21Colors.goldTop, size: 34),
               trailing: V21Tap(
                 onTap: () => context.push(AppRoutes.chestOdds),
-                child: Text('Oranlar ›', style: wBody(19, color: const Color(0xFFD9CCF7))),
+                child: Text('Oranlar ›'.tr, style: wBody(19, color: const Color(0xFFD9CCF7))),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(10),
                 child: Row(
                   children: [
-                    reward('reward_cards', 'Oyuncu Kartları'),
-                    reward('reward_coins', 'Altın'),
-                    reward('reward_xp', 'Gelişim'),
+                    reward('reward_cards', 'Oyuncu Kartları'.tr),
+                    reward('reward_coins', 'Altın'.tr),
+                    reward('reward_xp', 'Gelişim'.tr),
                   ],
                 ),
               ),
@@ -1222,7 +1223,7 @@ class _PackArt extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [BoxShadow(color: accent.withValues(alpha: 0.55), blurRadius: 14)],
               ),
-              child: const V21CardBack(width: 104, semanticsLabel: 'Kart paketi'),
+              child: V21CardBack(width: 104, semanticsLabel: 'Kart paketi'.tr),
             ),
           ),
         ),
@@ -1267,7 +1268,7 @@ class WebStore extends StatelessWidget {
     return WebShell(
       route: AppRoutes.store,
       children: [
-        wBox(296, 100, 900, 170, Text('MAĞAZA', style: wTitle(60))),
+        wBox(296, 100, 900, 170, Text('MAĞAZA'.tr, style: wTitle(60))),
         wBox(
           292,
           180,
@@ -1293,8 +1294,8 @@ class WebStore extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(offer?.name ?? 'Teklif yok', maxLines: 1, style: wTitle(52)),
-              Text(offer == null ? 'Yeni teklif yakında' : '${offer.cardCount} kart · %${offer.discountPct} indirim', style: wBody(25, color: const Color(0xFFFFE6DC))),
+              Text(offer?.name ?? 'Teklif yok'.tr, maxLines: 1, style: wTitle(52)),
+              Text(offer == null ? 'Yeni teklif yakında'.tr : '{cardCount} kart · %{discountPct} indirim'.trArgs({'cardCount': offer.cardCount, 'discountPct': offer.discountPct}), style: wBody(25, color: const Color(0xFFFFE6DC))),
             ],
           ),
         ),
@@ -1305,7 +1306,7 @@ class WebStore extends StatelessWidget {
             652,
             412,
             WButton(
-              offer.boughtToday ? 'ALINDI' : V21Format.thousands(offer.discountedPrice),
+              offer.boughtToday ? 'ALINDI'.tr : V21Format.thousands(offer.discountedPrice),
               tone: V21ButtonTone.green,
               fontSize: 38,
               leading: offer.boughtToday ? null : const V21CoinIcon(size: 42),
@@ -1323,7 +1324,7 @@ class WebStore extends StatelessWidget {
                   create: (_) => getIt<ChestsViewModel>()..load(),
                   child: Builder(
                     builder: (context) => WPanel(
-                      title: 'SANDIKLAR',
+                      title: 'SANDIKLAR'.tr,
                       icon: wImage('chest_small', fit: BoxFit.contain),
                       child: _ChestSlots(vm: context.watch<ChestsViewModel>()),
                     ),
@@ -1331,7 +1332,7 @@ class WebStore extends StatelessWidget {
                 )
               : const SizedBox.shrink(),
         ),
-        wBox(292, 436, 1000, 498, Text('KART PAKETLERİ', style: wTitle(46))),
+        wBox(292, 436, 1000, 498, Text('KART PAKETLERİ'.tr, style: wTitle(46))),
         for (final (i, p) in packs.indexed)
           wBox(292.0 + i * 319, 502, 610.0 + i * 319, 724, _packCard(p, _art(p, i))),
         wBox(
@@ -1351,7 +1352,7 @@ class WebStore extends StatelessWidget {
             decoration: BoxDecoration(color: const Color(0xFF3A2088), borderRadius: BorderRadius.circular(16)),
             child: Row(
               children: [
-                Text('ÇIKMA İHTİMALİ', style: wBody(22, color: const Color(0xFFD9CCF7), weight: FontWeight.w800)),
+                Text('ÇIKMA İHTİMALİ'.tr, style: wBody(22, color: const Color(0xFFD9CCF7), weight: FontWeight.w800)),
                 const SizedBox(width: 24),
                 Expanded(
                   child: FittedBox(
@@ -1380,13 +1381,13 @@ class WebStore extends StatelessWidget {
           924,
           Semantics(
             selected: true,
-            label: 'Paketler, seçili sekme',
+            label: 'Paketler, seçili sekme'.tr,
             excludeSemantics: true,
-            child: IgnorePointer(child: WButton('PAKETLER', fontSize: 38, onTap: () {})),
+            child: IgnorePointer(child: WButton('PAKETLER'.tr, fontSize: 38, onTap: () {})),
           ),
         ),
-        wBox(796, 840, 1126, 924, WButton('TEKLİFLER', tone: V21ButtonTone.blue, fontSize: 38, onTap: () => context.push(AppRoutes.sbc))),
-        wBox(1158, 840, 1488, 924, WButton('KOZMETİK', tone: V21ButtonTone.blue, fontSize: 38, onTap: () => context.push(AppRoutes.inventory))),
+        wBox(796, 840, 1126, 924, WButton('TEKLİFLER'.tr, tone: V21ButtonTone.blue, fontSize: 38, onTap: () => context.push(AppRoutes.sbc))),
+        wBox(1158, 840, 1488, 924, WButton('KOZMETİK'.tr, tone: V21ButtonTone.blue, fontSize: 38, onTap: () => context.push(AppRoutes.inventory))),
       ],
     );
   }
@@ -1403,7 +1404,7 @@ class WebStore extends StatelessWidget {
             width: 132,
             child: Column(
               children: [
-                FittedBox(fit: BoxFit.scaleDown, child: Text(V21Format.upper(p.name.replaceAll(' Paketi', '').replaceAll(' Paket', '')), maxLines: 1, style: wTitle(32))),
+                FittedBox(fit: BoxFit.scaleDown, child: Text(V21Format.upper(p.name.replaceAll(' Paketi'.tr, '').replaceAll(' Paket'.tr, '')), maxLines: 1, style: wTitle(32))),
                 const SizedBox(height: 6),
                 Text('${p.cardCount} kart', style: wBody(21, color: const Color(0xFFD9CCF7))),
                 const SizedBox(height: 18),
@@ -1425,7 +1426,7 @@ class WebStore extends StatelessWidget {
             Positioned(
               right: 10,
               bottom: 8,
-              child: Text('${V21Format.thousands(missing)} altın eksik', style: wBody(18, color: const Color(0xFFFF9BC0))),
+              child: Text('{p} altın eksik'.trArgs({'p': V21Format.thousands(missing)}), style: wBody(18, color: const Color(0xFFFF9BC0))),
             ),
         ],
       ),
@@ -1467,7 +1468,7 @@ class _WebProgressState extends State<WebProgress> {
       extra: WebExtraNav.progress,
       children: [
         wBox(292, 100, 350, 160, const Icon(Icons.keyboard_double_arrow_up_rounded, color: Color(0xFFFFC94F), size: 62)),
-        wBox(370, 96, 900, 166, Text('GELİŞİM', style: wTitle(58))),
+        wBox(370, 96, 900, 166, Text('GELİŞİM'.tr, style: wTitle(58))),
         wBox(262, 180, 930, 484, _main(sel, o, vm)),
         wBox(
           945,
@@ -1475,7 +1476,7 @@ class _WebProgressState extends State<WebProgress> {
           1256,
           466,
           WPanel(
-            title: 'JOKER PARÇALAR',
+            title: 'JOKER PARÇALAR'.tr,
             titleSize: 31,
             child: Padding(
               padding: const EdgeInsets.all(14),
@@ -1509,21 +1510,21 @@ class _WebProgressState extends State<WebProgress> {
           1654,
           928,
           WPanel(
-            title: 'GELİŞİM MATERYALLERİ',
+            title: 'GELİŞİM MATERYALLERİ'.tr,
             icon: wImage('nav_cards', fit: BoxFit.contain),
             headerHeight: 64,
             trailing: Row(
               children: [
-                _menu<bool>(vm.onlyReady ? 'Atlayabilir' : 'Tümü', const {'Tümü': false, 'Atlayabilir': true}, vm.setOnlyReady),
+                _menu<bool>(vm.onlyReady ? 'Atlayabilir'.tr : 'Tümü'.tr, const {'Tümü': false, 'Atlayabilir': true}, vm.setOnlyReady),
                 const SizedBox(width: 18),
                 _menu<CardPosition?>(
-                  'Rol: ${_role?.code ?? 'Tümü'}',
+                  'Rol: {p}'.trArgs({'p': _role?.code ?? 'Tümü'.tr}),
                   <String, CardPosition?>{'Tümü': null, for (final p in CardPosition.values) p.code: p},
                   (v) => setState(() => _role = v),
                 ),
                 const SizedBox(width: 18),
                 _menu<bool>(
-                  'Sıralama: Seviye (${_asc ? 'Artan' : 'Azalan'})',
+                  'Sıralama: Seviye ({p})'.trArgs({'p': _asc ? 'Artan'.tr : 'Azalan'.tr}),
                   const {'Azalan': false, 'Artan': true},
                   (v) => setState(() => _asc = v),
                 ),
@@ -1558,7 +1559,7 @@ class _WebProgressState extends State<WebProgress> {
 
   Widget _menu<T>(String label, Map<String, T> options, ValueChanged<T> onPick) => PopupMenuButton<T>(
     onSelected: onPick,
-    itemBuilder: (_) => [for (final e in options.entries) PopupMenuItem<T>(value: e.value, child: Text(e.key))],
+    itemBuilder: (_) => [for (final e in options.entries) PopupMenuItem<T>(value: e.value, child: Text(e.key.tr))],
     child: Container(
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -1580,7 +1581,7 @@ class _WebProgressState extends State<WebProgress> {
 
   Widget _main(PlayerProgressItem? i, ProgressOverview o, ProgressViewModel vm) {
     if (i == null) {
-      return WPanel(child: Center(child: Text('Şu an gelişecek futbolcu yok.', style: wBody(26))));
+      return WPanel(child: Center(child: Text('Şu an gelişecek futbolcu yok.'.tr, style: wBody(26))));
     }
     final next = i.next;
     final ready = i.canLevelUp(o.coins);
@@ -1601,7 +1602,7 @@ class _WebProgressState extends State<WebProgress> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 8),
-                  Text('SEVİYE ${i.level}', style: wTitle(58)),
+                  Text('SEVİYE {level}'.trArgs({'level': i.level}), style: wTitle(58)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -1622,7 +1623,7 @@ class _WebProgressState extends State<WebProgress> {
                   const SizedBox(height: 14),
                   Row(
                     children: [
-                      Text('Kopya', style: wBody(27)),
+                      Text('Kopya'.tr, style: wBody(27)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: WBar(
@@ -1632,18 +1633,18 @@ class _WebProgressState extends State<WebProgress> {
                         ),
                       ),
                       const SizedBox(width: 14),
-                      Text(i.isMax ? 'MAKS' : '${i.copies}/$need', style: wBody(27)),
+                      Text(i.isMax ? 'MAKS'.tr : '${i.copies}/$need', style: wBody(27)),
                     ],
                   ),
                   const Spacer(),
                   SizedBox(
                     height: 104,
                     child: WButton(
-                      i.isMax ? 'EN YÜKSEK SEVİYE' : (ready || !joker ? 'SEVİYE ATLA' : 'JOKERLE ATLA'),
+                      i.isMax ? 'EN YÜKSEK SEVİYE'.tr : (ready || !joker ? 'SEVİYE ATLA'.tr : 'JOKERLE ATLA'.tr),
                       tone: ready || i.isMax ? V21ButtonTone.green : V21ButtonTone.blue,
                       fontSize: 54,
                       busy: vm.busyCardId == i.cardId,
-                      semantics: next == null ? null : 'Seviye atla, ${next.coins} altın',
+                      semantics: next == null ? null : 'Seviye atla, {coins} altın'.trArgs({'coins': next.coins}),
                       onTap: ready ? () => vm.levelUp(i) : (joker ? () => vm.levelUp(i, useJokers: true) : null),
                     ),
                   ),
@@ -1677,18 +1678,18 @@ class _WebProgressState extends State<WebProgress> {
       ),
     );
     return WPanel(
-      title: 'YÜKSELTME SONRASI',
+      title: 'YÜKSELTME SONRASI'.tr,
       titleSize: 29,
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: i == null || next == null
-            ? Center(child: Text('En yüksek seviye', style: wBody(24)))
+            ? Center(child: Text('En yüksek seviye'.tr, style: wBody(24)))
             : Column(
                 children: [
-                  row(null, 'Seviye', '${i.level}', '${i.level + 1}'),
-                  row(null, 'Genel Reyting', '${i.power + _bonus(i.level)}', '${i.power + _bonus(i.level + 1)}'),
-                  row(Icons.style_rounded, 'Gereken Kopya', '${i.copies}', '${next.copies}'),
-                  row(Icons.monetization_on_rounded, 'Altın Bedeli', '-', V21Format.thousands(next.coins)),
+                  row(null, 'Seviye'.tr, '${i.level}', '${i.level + 1}'),
+                  row(null, 'Genel Reyting'.tr, '${i.power + _bonus(i.level)}', '${i.power + _bonus(i.level + 1)}'),
+                  row(Icons.style_rounded, 'Gereken Kopya'.tr, '${i.copies}', '${next.copies}'),
+                  row(Icons.monetization_on_rounded, 'Altın Bedeli'.tr, '-', V21Format.thousands(next.coins)),
                 ],
               ),
       ),
@@ -1754,20 +1755,20 @@ class WebReady extends StatelessWidget {
             652,
             WebDeckRow(
               cards: cards.take(5).toList(),
-              label: 'KADROM',
-              sub: '(${vm.deckCards.length} KART)',
+              label: 'KADROM'.tr,
+              sub: '({length} KART)'.trArgs({'length': vm.deckCards.length}),
               onTap: () => context.go(AppRoutes.deck),
             ),
           ),
-          wBox(378, 672, 1070, 806, WButton('RAKİP BUL', fontSize: 72, icon: Icons.sports_mma_rounded, onTap: vm.selectedDeck == null ? null : onFind)),
-          wBox(318, 826, 722, 914, WButton('ARKADAŞINLA OYNA', tone: V21ButtonTone.blue, fontSize: 36, icon: Icons.group_rounded, onTap: () => context.push(AppRoutes.friends))),
+          wBox(378, 672, 1070, 806, WButton('RAKİP BUL'.tr, fontSize: 72, icon: Icons.sports_mma_rounded, onTap: vm.selectedDeck == null ? null : onFind)),
+          wBox(318, 826, 722, 914, WButton('ARKADAŞINLA OYNA'.tr, tone: V21ButtonTone.blue, fontSize: 36, icon: Icons.group_rounded, onTap: () => context.push(AppRoutes.friends))),
           wBox(
             746,
             826,
             1146,
             914,
             WButton(
-              'BOTLA ANTRENMAN',
+              'BOTLA ANTRENMAN'.tr,
               tone: V21ButtonTone.green,
               fontSize: 36,
               icon: Icons.smart_toy_rounded,
@@ -1781,7 +1782,7 @@ class WebReady extends StatelessWidget {
           1656,
           416,
           WPanel(
-            title: 'KADRO DURUMU',
+            title: 'KADRO DURUMU'.tr,
             icon: Icon(valid ? Icons.check_circle_rounded : Icons.error_rounded, color: valid ? const Color(0xFF3DD15A) : const Color(0xFFFF6B7D), size: 44),
             titleSize: 34,
             headerHeight: 66,
@@ -1792,9 +1793,9 @@ class WebReady extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-                        check(vm.deckCards.length >= GameRules.squadSize, '${vm.deckCards.length}/${GameRules.squadSize} kart seçildi'),
-                        check(vm.selectedDeck != null, 'Aktif kadro seçili'),
-                        check(valid, valid ? 'Kadron geçerli' : (v?.displayMessage ?? 'Kadro kontrol ediliyor')),
+                        check(vm.deckCards.length >= GameRules.squadSize, '{length}/{squadSize} kart seçildi'.trArgs({'length': vm.deckCards.length, 'squadSize': GameRules.squadSize})),
+                        check(vm.selectedDeck != null, 'Aktif kadro seçili'.tr),
+                        check(valid, valid ? 'Kadron geçerli'.tr : (v?.displayMessage ?? 'Kadro kontrol ediliyor'.tr)),
                       ],
                     ),
                   ),
@@ -1810,7 +1811,7 @@ class WebReady extends StatelessWidget {
           1656,
           806,
           WPanel(
-            title: 'DERECELİ MAÇ KURALLARI',
+            title: 'DERECELİ MAÇ KURALLARI'.tr,
             icon: const Icon(Icons.emoji_events_rounded, color: V21Colors.goldTop, size: 46),
             titleSize: 34,
             headerHeight: 70,
@@ -1818,17 +1819,17 @@ class WebReady extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(26, 8, 18, 10),
               child: Column(
                 children: [
-                  rule(Icons.emoji_events_rounded, V21Colors.goldTop, 'Rakipler benzer lig seviyesinden eşleşir.'),
-                  rule(Icons.style_rounded, const Color(0xFFC9B6F5), '${GameRules.squadSize} kartlık kadronla oynarsın.'),
-                  rule(Icons.bolt_rounded, V21Colors.goldTop, 'Her dereceli maç 1 sandık hakkı harcar.'),
-                  rule(Icons.star_rounded, V21Colors.goldTop, 'Kazandıkça lig puanı kazanır, üst lige yükselirsin.'),
+                  rule(Icons.emoji_events_rounded, V21Colors.goldTop, 'Rakipler benzer lig seviyesinden eşleşir.'.tr),
+                  rule(Icons.style_rounded, const Color(0xFFC9B6F5), '{squadSize} kartlık kadronla oynarsın.'.trArgs({'squadSize': GameRules.squadSize})),
+                  rule(Icons.bolt_rounded, V21Colors.goldTop, 'Her dereceli maç 1 sandık hakkı harcar.'.tr),
+                  rule(Icons.star_rounded, V21Colors.goldTop, 'Kazandıkça lig puanı kazanır, üst lige yükselirsin.'.tr),
                 ],
               ),
             ),
           ),
         ),
         if (vm.tutorial?.shouldOffer ?? false)
-          wBox(1180, 826, 1656, 914, WButton('ÖĞRETİCİYİ BAŞLAT', tone: V21ButtonTone.purple, fontSize: 34, onTap: vm.startTutorial)),
+          wBox(1180, 826, 1656, 914, WButton('ÖĞRETİCİYİ BAŞLAT'.tr, tone: V21ButtonTone.purple, fontSize: 34, onTap: vm.startTutorial)),
       ],
     );
   }
@@ -1869,7 +1870,7 @@ class WebFriends extends StatelessWidget {
     final me = wWatch<SessionManager>(context)?.user?.username ?? '';
     final r = room;
     final isHost = r == null || r['is_host'] == true;
-    final host = r?['host_name']?.toString() ?? (code == null ? me : 'Bağlanıyor...');
+    final host = r?['host_name']?.toString() ?? (code == null ? me : 'Bağlanıyor...'.tr);
     final guest = r?['guest_name']?.toString();
     final myReady = r != null && (isHost ? r['host_ready'] == true : r['guest_ready'] == true);
     final waiting = r?['status'] == 'waiting';
@@ -1894,8 +1895,8 @@ class WebFriends extends StatelessWidget {
                 children: [
                   const Icon(Icons.groups_rounded, color: Color(0xFFD9CCF7), size: 66),
                   const SizedBox(width: 20),
-                  Text('ARKADAŞLAR / ', style: wTitle(52)),
-                  Text('ÖZEL ODA', style: wTitle(52, color: V21Colors.goldTop)),
+                  Text('ARKADAŞLAR / '.tr, style: wTitle(52)),
+                  Text('ÖZEL ODA'.tr, style: wTitle(52, color: V21Colors.goldTop)),
                 ],
               ),
             ),
@@ -1914,14 +1915,14 @@ class WebFriends extends StatelessWidget {
                 children: [
                   SizedBox(width: 72, height: 50, child: wImage('no_reward', fit: BoxFit.contain)),
                   const SizedBox(width: 12),
-                  Text('ÖDÜLSÜZ  •  KART KAYBI YOK', style: wTitle(35, color: V21Colors.goldTop)),
+                  Text('ÖDÜLSÜZ  •  KART KAYBI YOK'.tr, style: wTitle(35, color: V21Colors.goldTop)),
                 ],
               ),
             ),
           ),
         ),
-        wBox(472, 298, 854, 668, _player('ODA SAHİBİ', Icons.workspace_premium_rounded, host, 'oda-$host', const Color(0xFFFFC832), r?['host_ready'] == true, isHost)),
-        wBox(1048, 298, 1430, 668, _player('DAVETLİ', Icons.groups_rounded, guest ?? 'Bekleniyor...', guest == null ? null : 'oda-$guest', const Color(0xFF4FA8F5), r?['guest_ready'] == true, !isHost)),
+        wBox(472, 298, 854, 668, _player('ODA SAHİBİ'.tr, Icons.workspace_premium_rounded, host, 'oda-$host', const Color(0xFFFFC832), r?['host_ready'] == true, isHost)),
+        wBox(1048, 298, 1430, 668, _player('DAVETLİ'.tr, Icons.groups_rounded, guest ?? 'Bekleniyor...'.tr, guest == null ? null : 'oda-$guest', const Color(0xFF4FA8F5), r?['guest_ready'] == true, !isHost)),
         wBox(890, 470, 1020, 570, Center(child: Text('VS', style: wTitle(92, color: V21Colors.goldTop)))),
         wBox(
           380,
@@ -1938,7 +1939,7 @@ class WebFriends extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('DAVET KODU', style: wBody(23, color: const Color(0xFFD9CCF7))),
+                      Text('DAVET KODU'.tr, style: wBody(23, color: const Color(0xFFD9CCF7))),
                       const SizedBox(height: 4),
                       Container(
                         height: 54,
@@ -1951,7 +1952,7 @@ class WebFriends extends StatelessWidget {
                                 controller: codeController,
                                 style: wBody(22),
                                 textAlign: TextAlign.center,
-                                decoration: const InputDecoration(hintText: 'Kodu buraya yaz', border: InputBorder.none, isDense: true),
+                                decoration: InputDecoration(hintText: 'Kodu buraya yaz'.tr, border: InputBorder.none, isDense: true),
                               ),
                       ),
                     ],
@@ -1960,27 +1961,27 @@ class WebFriends extends StatelessWidget {
                 const SizedBox(width: 32),
                 Expanded(
                   child: code == null
-                      ? WButton('DAVET OLUŞTUR', fontSize: 32, icon: Icons.add_link_rounded, onTap: busy ? null : onCreate)
-                      : WButton('DAVET KODUNU KOPYALA', fontSize: 30, icon: Icons.copy_rounded, onTap: onCopy),
+                      ? WButton('DAVET OLUŞTUR'.tr, fontSize: 32, icon: Icons.add_link_rounded, onTap: busy ? null : onCreate)
+                      : WButton('DAVET KODUNU KOPYALA'.tr, fontSize: 30, icon: Icons.copy_rounded, onTap: onCopy),
                 ),
                 const SizedBox(width: 30),
                 Expanded(
                   child: code == null
-                      ? WButton('ODA KODUYLA KATIL', tone: V21ButtonTone.blue, fontSize: 30, icon: Icons.login_rounded, onTap: busy ? null : onJoin)
-                      : WButton('LİNKİ PAYLAŞ', tone: V21ButtonTone.blue, fontSize: 34, icon: Icons.share_rounded, onTap: onShare),
+                      ? WButton('ODA KODUYLA KATIL'.tr, tone: V21ButtonTone.blue, fontSize: 30, icon: Icons.login_rounded, onTap: busy ? null : onJoin)
+                      : WButton('LİNKİ PAYLAŞ'.tr, tone: V21ButtonTone.blue, fontSize: 34, icon: Icons.share_rounded, onTap: onShare),
                 ),
               ],
             ),
           ),
         ),
-        wBox(310, 832, 662, 916, WButton('KADROMU SEÇ', tone: V21ButtonTone.purple, fontSize: 36, icon: Icons.style_rounded, onTap: () => context.push(AppRoutes.deck))),
+        wBox(310, 832, 662, 916, WButton('KADROMU SEÇ'.tr, tone: V21ButtonTone.purple, fontSize: 36, icon: Icons.style_rounded, onTap: () => context.push(AppRoutes.deck))),
         wBox(
           708,
           826,
           1212,
           920,
           WButton(
-            myReady ? 'RAKİP BEKLENİYOR' : 'HAZIRIM',
+            myReady ? 'RAKİP BEKLENİYOR'.tr : 'HAZIRIM'.tr,
             tone: V21ButtonTone.green,
             fontSize: myReady ? 42 : 62,
             icon: Icons.check_rounded,
@@ -1988,7 +1989,7 @@ class WebFriends extends StatelessWidget {
             onTap: waiting && !myReady && (isHost || guest != null) ? onReady : null,
           ),
         ),
-        wBox(1264, 832, 1630, 916, WButton('ODAYI TERK ET', tone: V21ButtonTone.red, fontSize: 36, icon: Icons.logout_rounded, onTap: onLeave)),
+        wBox(1264, 832, 1630, 916, WButton('ODAYI TERK ET'.tr, tone: V21ButtonTone.red, fontSize: 36, icon: Icons.logout_rounded, onTap: onLeave)),
         if (error != null)
           wBox(
             472,
@@ -2025,7 +2026,7 @@ class WebFriends extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: wTitle(34)),
-                        Text(ready ? 'HAZIR' : 'Hazır değil', style: wBody(23, color: ready ? const Color(0xFF6BF07A) : V21Colors.goldTop)),
+                        Text(ready ? 'HAZIR'.tr : 'Hazır değil'.tr, style: wBody(23, color: ready ? const Color(0xFF6BF07A) : V21Colors.goldTop)),
                       ],
                     ),
                   ),
@@ -2037,7 +2038,7 @@ class WebFriends extends StatelessWidget {
                 child: AspectRatio(
                   aspectRatio: 0.8,
                   child: Transform.rotate(
-                    angle: tag == 'DAVETLİ' ? 0.02 : -0.04,
+                    angle: tag == 'DAVETLİ'.tr ? 0.02 : -0.04,
                     child: mine ? const _MyBestCard() : const WHiddenCard(),
                   ),
                 ),

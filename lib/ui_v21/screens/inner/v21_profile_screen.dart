@@ -13,6 +13,7 @@ import '../../../features/social/social_api.dart';
 import '../../../ui_v21/components/v21_cosmetics.dart';
 import '../../ui_v21.dart';
 import '../social/v21_social_screens.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 PROFİL (referans `assets/v21/screens/profile.png`).
 ///
@@ -43,7 +44,7 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<ProfileViewModel>();
     return V21InnerPage(
-      title: 'PROFİL',
+      title: 'PROFİL'.tr,
       route: AppRoutes.profile,
       fallbackRoute: AppRoutes.home,
       onRefresh: vm.refresh,
@@ -56,13 +57,13 @@ class _Body extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _StatTile(value: '${vm.totalMatches}', label: 'MAÇ', color: const Color(0xFF8FC8FF), scale: k),
+                child: _StatTile(value: '${vm.totalMatches}', label: 'MAÇ'.tr, color: const Color(0xFF8FC8FF), scale: k),
               ),
               SizedBox(width: 8 * k),
               Expanded(
                 child: _StatTile(
                   value: V21Format.thousands(u?.mmr ?? 0),
-                  label: 'KUPA',
+                  label: 'KUPA'.tr,
                   color: const Color(0xFFFFD45E),
                   scale: k,
                 ),
@@ -71,7 +72,7 @@ class _Body extends StatelessWidget {
               Expanded(
                 child: _StatTile(
                   value: V21Format.thousands(u?.coins ?? 0),
-                  label: 'ALTIN',
+                  label: 'ALTIN'.tr,
                   color: const Color(0xFFFFD45E),
                   scale: k,
                 ),
@@ -79,7 +80,7 @@ class _Body extends StatelessWidget {
             ],
           ),
           SizedBox(height: 16 * k),
-          V21SectionTitle('BAŞARIMLAR ${vm.unlockedAchievementCount}/${achievements.length}', scale: k),
+          V21SectionTitle('BAŞARIMLAR {unlockedAchievementCount}/{length}'.trArgs({'unlockedAchievementCount': vm.unlockedAchievementCount, 'length': achievements.length}), scale: k),
           LayoutBuilder(
             builder: (context, c) {
               final w = c.maxWidth / 3;
@@ -97,7 +98,7 @@ class _Body extends StatelessWidget {
           ),
           SizedBox(height: 18 * k),
           V21GameButton(
-            label: 'AYARLAR',
+            label: 'AYARLAR'.tr,
             tone: V21ButtonTone.blue,
             size: V21ButtonSize.large,
             scale: k,
@@ -109,7 +110,7 @@ class _Body extends StatelessWidget {
               if (getIt.isRegistered<ItemsRepository>()) ...[
                 Expanded(
                   child: V21GameButton(
-                    label: 'ENVANTER',
+                    label: 'ENVANTER'.tr,
                     tone: V21ButtonTone.purple,
                     size: V21ButtonSize.small,
                     scale: k * 1.1,
@@ -120,11 +121,11 @@ class _Body extends StatelessWidget {
               ],
               Expanded(
                 child: V21GameButton(
-                  label: 'SIRALAMA',
+                  label: 'SIRALAMA'.tr,
                   tone: V21ButtonTone.purple,
                   size: V21ButtonSize.small,
                   scale: k * 1.1,
-                  semanticsLabel: 'Lig sıralamasını gör',
+                  semanticsLabel: 'Lig sıralamasını gör'.tr,
                   onPressed: () => context.go(AppRoutes.leaderboard),
                 ),
               ),
@@ -135,27 +136,27 @@ class _Body extends StatelessWidget {
             SizedBox(height: 8 * k),
             V21GameButton(
               key: const Key('arkadaslar-dugmesi'),
-              label: 'ARKADAŞLAR',
+              label: 'ARKADAŞLAR'.tr,
               tone: V21ButtonTone.green,
               size: V21ButtonSize.small,
               scale: k * 1.1,
-              semanticsLabel: 'Arkadaşlar, istekler ve oyuncu ara',
+              semanticsLabel: 'Arkadaşlar, istekler ve oyuncu ara'.tr,
               onPressed: () => context.push(AppRoutes.social),
             ),
           ],
           SizedBox(height: 16 * k),
-          V21SectionTitle('SON MAÇLAR', trailing: '${vm.history.length} MAÇ', scale: k),
+          V21SectionTitle('SON MAÇLAR'.tr, trailing: '{length} MAÇ'.trArgs({'length': vm.history.length}), scale: k),
           if (vm.history.isNotEmpty && getIt.isRegistered<SocialApi>())
             Padding(
               padding: EdgeInsets.only(bottom: 6 * k),
               child: Text(
-                'Rakibin kadrosunu görmek için maça dokun.',
+                'Rakibin kadrosunu görmek için maça dokun.'.tr,
                 style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textDim),
               ),
             ),
           if (vm.history.isEmpty)
             Text(
-              'Henüz bitmiş maçın yok. İlk maçını oyna; sonuçların burada görünür.',
+              'Henüz bitmiş maçın yok. İlk maçını oyna; sonuçların burada görünür.'.tr,
               style: V21Type.label(12 * k, weight: FontWeight.w600, color: V21Colors.textMuted),
             )
           else
@@ -179,7 +180,7 @@ class _IdentityCard extends StatelessWidget {
     final rate = vm.winRate;
     final avatar = V21PlayerAvatar(
       seed: 'oyuncu-${u?.id ?? u?.username ?? '?'}',
-      semanticsLabel: 'Avatar',
+      semanticsLabel: 'Avatar'.tr,
       name: u?.username,
       size: 108 * k,
       ringColor: const Color(0xFFFFC832),
@@ -206,7 +207,7 @@ class _IdentityCard extends StatelessWidget {
               children: [
                 FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text(u?.username ?? 'Oyuncu', style: V21Type.title(28 * k, shadows: V21Type.inkShadow(k))),
+                  child: Text(u?.username ?? 'Oyuncu'.tr, style: V21Type.title(28 * k, shadows: V21Type.inkShadow(k))),
                 ),
                 SizedBox(height: 6 * k),
                 Container(
@@ -217,13 +218,13 @@ class _IdentityCard extends StatelessWidget {
                     gradient: const LinearGradient(colors: [Color(0xFFFFE27A), Color(0xFFE0A030)]),
                   ),
                   child: Text(
-                    r == null ? 'LİG' : V21Format.upper(r.label),
+                    r == null ? 'LİG'.tr : V21Format.upper(r.label),
                     style: V21Type.title(16 * k, color: const Color(0xFF3A1E00)),
                   ),
                 ),
                 SizedBox(height: 8 * k),
                 Text(
-                  u == null || u.totalMatches == 0 ? 'Henüz maç oynamadın' : '${u.wins}G · ${u.losses}M · ${u.draws}B',
+                  u == null || u.totalMatches == 0 ? 'Henüz maç oynamadın'.tr : '{wins}G · {losses}M · {draws}B'.trArgs({'wins': u.wins, 'losses': u.losses, 'draws': u.draws}),
                   style: V21Type.title(17 * k, color: V21Colors.textMuted),
                 ),
                 SizedBox(height: 6 * k),
@@ -232,11 +233,11 @@ class _IdentityCard extends StatelessWidget {
                   height: 12 * k,
                   trackColor: const Color(0xFF201046),
                   fillColors: const [Color(0xFFFFD94E), Color(0xFFFF9307)],
-                  semanticsLabel: 'Kazanma oranı',
+                  semanticsLabel: 'Kazanma oranı'.tr,
                 ),
                 SizedBox(height: 4 * k),
                 Text(
-                  vm.totalMatches == 0 ? 'Kazanma oranı —' : '%${(rate * 100).round()} kazanma',
+                  vm.totalMatches == 0 ? 'Kazanma oranı —'.tr : '%{p} kazanma'.trArgs({'p': (rate * 100).round()}),
                   style: V21Type.label(12 * k, weight: FontWeight.w800, color: const Color(0xFFFFE3A6)),
                 ),
               ],
@@ -296,7 +297,7 @@ class _Achievement extends StatelessWidget {
     final k = scale;
     final on = a.isUnlocked;
     return Semantics(
-      label: '${a.title}: ${a.description}. ${on ? 'Açıldı' : 'İlerleme ${a.progressText}'}',
+      label: '${a.title}: ${a.description}. ${on ? 'Açıldı'.tr : 'İlerleme {progressText}'.trArgs({'progressText': a.progressText})}',
       excludeSemantics: true,
       child: Column(
         children: [
@@ -357,7 +358,7 @@ class _MatchRow extends StatelessWidget {
       MatchOutcome.loss => entry.myScore >= entry.opponentScore,
       MatchOutcome.draw => false,
     };
-    final etiket = hukmen ? 'Hükmen' : entry.outcome.shortLabel;
+    final etiket = hukmen ? 'Hükmen'.tr : entry.outcome.shortLabel;
     final kadroVar = getIt.isRegistered<SocialApi>();
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -365,7 +366,7 @@ class _MatchRow extends StatelessWidget {
       child: Semantics(
         button: kadroVar,
         label:
-            '${entry.opponentUsername} karşı ${entry.scoreText}, ${hukmen ? '${entry.outcome.shortLabel}, hükmen' : entry.outcome.shortLabel}${transfer == null ? '' : ', $transfer'}',
+            '{opponentUsername} karşı {scoreText}, {p}{p2}'.trArgs({'opponentUsername': entry.opponentUsername, 'scoreText': entry.scoreText, 'p': hukmen ? '{shortLabel}, hükmen'.trArgs({'shortLabel': entry.outcome.shortLabel}) : entry.outcome.shortLabel, 'p2': transfer == null ? '' : ', $transfer'}),
         excludeSemantics: true,
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 12 * k, vertical: 10 * k),

@@ -6,6 +6,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../ui_v21/ui_v21.dart';
 import '../../data/social/google_web_button.dart';
 import '../../domain/repositories/social_auth_repository.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Ayarlar → HESAP: Google / Apple hesabını, giriş yapmış oyuncunun hesabına bağlar.
 ///
@@ -76,8 +77,8 @@ class _SocialLinksPanelState extends State<SocialLinksPanel> {
     setState(() {
       _busy = null;
       _message = sonuc.isSuccess
-          ? 'Hesap bağlandı.'
-          : (sonuc.errorOrNull?.message ?? 'Bağlanamadı. Tekrar dene.');
+          ? 'Hesap bağlandı.'.tr
+          : (sonuc.errorOrNull?.message ?? 'Bağlanamadı. Tekrar dene.'.tr);
     });
     if (sonuc.isSuccess) await _load();
   }
@@ -94,7 +95,7 @@ class _SocialLinksPanelState extends State<SocialLinksPanel> {
       final Widget sag;
       if (bagli) {
         sag = Text(
-          'BAĞLI',
+          'BAĞLI'.tr,
           style: V21Type.title(18 * k, color: V21Colors.successText),
         );
       } else if (p == SocialProvider.google && r.usesWebGoogleButton) {
@@ -103,14 +104,14 @@ class _SocialLinksPanelState extends State<SocialLinksPanel> {
         sag = SizedBox(
           width: 120 * k,
           child: V21GameButton(
-            label: 'BAĞLA',
+            label: 'BAĞLA'.tr,
             tone: V21ButtonTone.blue,
             size: V21ButtonSize.small,
             scale: k,
             status: _busy == p
                 ? V21ButtonStatus.loading
                 : V21ButtonStatus.normal,
-            semanticsLabel: '$ad hesabını bağla',
+            semanticsLabel: '{ad} hesabını bağla'.trArgs({'ad': ad}),
             onPressed: () => _start(p),
           ),
         );
@@ -137,7 +138,7 @@ class _SocialLinksPanelState extends State<SocialLinksPanel> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'BAĞLI HESAPLAR',
+            'BAĞLI HESAPLAR'.tr,
             style: V21Type.label(
               12 * k,
               weight: FontWeight.w900,

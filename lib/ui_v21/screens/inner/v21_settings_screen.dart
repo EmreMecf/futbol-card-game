@@ -9,11 +9,13 @@ import '../../../features/auth/presentation/viewmodel/auth_view_model.dart';
 import '../../../features/settings/presentation/viewmodel/settings_view_model.dart';
 import '../../ui_v21.dart';
 import '../../../features/auth/presentation/widgets/social_links_panel.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 AYARLAR (referans `assets/v21/screens/settings.png`; alt menü yok).
 ///
 ///   SES:   Ses efektleri (YAKINDA) · Müzik (YAKINDA) · Titreşim
 ///   OYUN:  Kart parıltısı · Süre uyarısı
+///   DİL:   Türkçe · English (hemen uygulanır, cihazda saklanır)
 ///   HESAP: avatar + kullanıcı adı, e-posta; değiştirme yakında
 ///   [ ÇIKIŞ YAP ]  (onaylı)
 ///
@@ -42,18 +44,18 @@ class _Body extends StatelessWidget {
     }
     final user = session?.user;
     return V21InnerPage(
-      title: 'AYARLAR',
+      title: 'AYARLAR'.tr,
       route: AppRoutes.settings,
       fallbackRoute: AppRoutes.profile,
       showNavigation: false,
       children: (context, k) => [
-        V21SectionTitle('SES', scale: k),
+        V21SectionTitle('SES'.tr, scale: k),
         _Group(
           scale: k,
           rows: [
             _ToggleRow(
               color: const Color(0xFF5FB4FF),
-              title: 'Ses efektleri',
+              title: 'Ses efektleri'.tr,
               soon: true,
               value: false,
               onChanged: null,
@@ -61,7 +63,7 @@ class _Body extends StatelessWidget {
             ),
             _ToggleRow(
               color: const Color(0xFFE3A9FA),
-              title: 'Müzik',
+              title: 'Müzik'.tr,
               soon: true,
               value: false,
               onChanged: null,
@@ -69,8 +71,8 @@ class _Body extends StatelessWidget {
             ),
             _ToggleRow(
               color: const Color(0xFFFFC832),
-              title: 'Titreşim',
-              subtitle: 'Nadir kart çıkınca telefon titrer',
+              title: 'Titreşim'.tr,
+              subtitle: 'Nadir kart çıkınca telefon titrer'.tr,
               value: vm.vibration,
               onChanged: vm.setVibration,
               scale: k,
@@ -78,22 +80,22 @@ class _Body extends StatelessWidget {
           ],
         ),
         SizedBox(height: 14 * k),
-        V21SectionTitle('OYUN', scale: k),
+        V21SectionTitle('OYUN'.tr, scale: k),
         _Group(
           scale: k,
           rows: [
             _ToggleRow(
               color: const Color(0xFF8BE38A),
-              title: 'Kart parıltısı',
-              subtitle: 'Efsane kart parıltısı ve kart gölgeleri',
+              title: 'Kart parıltısı'.tr,
+              subtitle: 'Efsane kart parıltısı ve kart gölgeleri'.tr,
               value: vm.cardAnimations,
               onChanged: vm.setCardAnimations,
               scale: k,
             ),
             _ToggleRow(
               color: const Color(0xFFFF5A6E),
-              title: 'Süre uyarısı',
-              subtitle: 'Son 10 saniyede sayaç kırmızıya döner',
+              title: 'Süre uyarısı'.tr,
+              subtitle: 'Son 10 saniyede sayaç kırmızıya döner'.tr,
               value: vm.turnWarning,
               onChanged: vm.setTurnWarning,
               scale: k,
@@ -101,7 +103,10 @@ class _Body extends StatelessWidget {
           ],
         ),
         SizedBox(height: 14 * k),
-        V21SectionTitle('HESAP', scale: k),
+        V21SectionTitle('DİL'.tr, scale: k),
+        _Group(scale: k, rows: [_LanguageRow(scale: k)]),
+        SizedBox(height: 14 * k),
+        V21SectionTitle('HESAP'.tr, scale: k),
         V21GamePanel(
           scale: k,
           radius: 16,
@@ -113,7 +118,7 @@ class _Body extends StatelessWidget {
                 children: [
                   V21PlayerAvatar(
                     seed: 'oyuncu-${user?.id ?? user?.username ?? '?'}',
-                    semanticsLabel: 'Avatar',
+                    semanticsLabel: 'Avatar'.tr,
                     name: user?.username,
                     size: 56 * k,
                     ringColor: const Color(0xFFFFC832),
@@ -126,7 +131,7 @@ class _Body extends StatelessWidget {
                       children: [
                         Text(user?.username ?? '—', style: V21Type.title(22 * k, shadows: V21Type.inkShadow(k))),
                         Text(
-                          'Kullanıcı adı',
+                          'Kullanıcı adı'.tr,
                           style: V21Type.label(11 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
                         ),
                         if (user != null && user.email.isNotEmpty)
@@ -144,7 +149,7 @@ class _Body extends StatelessWidget {
               SizedBox(height: 14 * k),
               SocialLinksPanel(scale: k),
               Text(
-                'Ad ve şifre değiştirme yakında eklenecek.',
+                'Ad ve şifre değiştirme yakında eklenecek.'.tr,
                 style: V21Type.label(13 * k, weight: FontWeight.w600, color: V21Colors.textMuted),
               ),
             ],
@@ -152,7 +157,7 @@ class _Body extends StatelessWidget {
         ),
         SizedBox(height: 20 * k),
         V21GameButton(
-          label: 'ÇIKIŞ YAP',
+          label: 'ÇIKIŞ YAP'.tr,
           tone: V21ButtonTone.blue,
           size: V21ButtonSize.large,
           scale: k,
@@ -165,12 +170,12 @@ class _Body extends StatelessWidget {
   Future<void> _signOut(BuildContext context) async {
     final ok = await V21GameDialog.show<bool>(
       context,
-      subtitle: 'HESAP',
-      title: 'ÇIKIŞ YAPILSIN MI?',
-      message: 'Bu cihazdaki oturumun kapanacak. Kartların ve ilerlemen hesabında kalır.',
-      actions: const [
-        V21DialogAction('ÇIKIŞ YAP', tone: V21ButtonTone.red, result: true),
-        V21DialogAction('VAZGEÇ', tone: V21ButtonTone.blue, result: false),
+      subtitle: 'HESAP'.tr,
+      title: 'ÇIKIŞ YAPILSIN MI?'.tr,
+      message: 'Bu cihazdaki oturumun kapanacak. Kartların ve ilerlemen hesabında kalır.'.tr,
+      actions: [
+        V21DialogAction('ÇIKIŞ YAP'.tr, tone: V21ButtonTone.red, result: true),
+        V21DialogAction('VAZGEÇ'.tr, tone: V21ButtonTone.blue, result: false),
       ],
     );
     if (ok != true || !context.mounted) return;
@@ -202,6 +207,49 @@ class _Group extends StatelessWidget {
             rows[i],
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Oyun dili: Türkçe / English. Seçim hemen uygulanır ve cihazda saklanır.
+/// Dil adları her zaman kendi dilinde yazılır (oyuncu bilmediği dilde
+/// kalsa bile kendi dilini bulabilsin).
+class _LanguageRow extends StatelessWidget {
+  final double scale;
+  const _LanguageRow({required this.scale});
+
+  @override
+  Widget build(BuildContext context) {
+    final k = scale;
+    return ValueListenableBuilder<AppLanguage>(
+      valueListenable: AppLanguageController.instance,
+      builder: (context, secili, _) => Padding(
+        padding: EdgeInsets.symmetric(vertical: 10 * k),
+        child: Row(
+          children: [
+            V21OrbIcon(size: 40 * k, color: const Color(0xFF6FE4FF)),
+            SizedBox(width: 14 * k),
+            Expanded(
+              child: Wrap(
+                spacing: 8 * k,
+                runSpacing: 8 * k,
+                children: [
+                  for (final dil in AppLanguage.values)
+                    V21GameButton(
+                      key: ValueKey('dil-${dil.code}'),
+                      label: dil.nativeName,
+                      tone: dil == secili ? V21ButtonTone.green : V21ButtonTone.purple,
+                      size: V21ButtonSize.small,
+                      scale: k,
+                      semanticsLabel: dil == secili ? '${dil.nativeName}, ${'seçili'.tr}' : dil.nativeName,
+                      onPressed: dil == secili ? () {} : () => AppLanguageController.instance.select(dil),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -242,7 +290,7 @@ class _ToggleRow extends StatelessWidget {
                 Text(title, style: V21Type.title(18 * k, color: soon ? const Color(0xFFB9ADD8) : Colors.white)),
                 if (soon) ...[
                   SizedBox(height: 4 * k),
-                  V21Tag(text: 'YAKINDA', background: const Color(0xFFFF9500), foreground: Colors.white, scale: k),
+                  V21Tag(text: 'YAKINDA'.tr, background: const Color(0xFFFF9500), foreground: Colors.white, scale: k),
                 ] else if (subtitle != null)
                   Text(
                     subtitle!,
@@ -251,7 +299,7 @@ class _ToggleRow extends StatelessWidget {
               ],
             ),
           ),
-          V21Toggle(value: value, onChanged: onChanged, semanticsLabel: soon ? '$title, yakında' : title, scale: k),
+          V21Toggle(value: value, onChanged: onChanged, semanticsLabel: soon ? '{title}, yakında'.trArgs({'title': title}) : title, scale: k),
         ],
       ),
     );

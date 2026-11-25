@@ -14,6 +14,7 @@ import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
 import '../../web/web_kit.dart';
 import '../../web/web_screens.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 MAĞAZA (referans `assets/v21/screens/store.png`).
 ///
@@ -148,9 +149,9 @@ class _BodyState extends State<_Body> {
       content = [
         V21EmptyState(
           icon: Icons.storefront_rounded,
-          title: vm.hasError ? 'BAĞLANTI SORUNU' : 'SATIŞTA PAKET YOK',
-          message: vm.errorMessage ?? 'Şu an satışta paket yok. Biraz sonra tekrar bak.',
-          actionLabel: 'TEKRAR DENE',
+          title: vm.hasError ? 'BAĞLANTI SORUNU'.tr : 'SATIŞTA PAKET YOK'.tr,
+          message: vm.errorMessage ?? 'Şu an satışta paket yok. Biraz sonra tekrar bak.'.tr,
+          actionLabel: 'TEKRAR DENE'.tr,
           onAction: vm.load,
           scale: k,
         ),
@@ -161,7 +162,7 @@ class _BodyState extends State<_Body> {
           _DailyOffer(vm: vm, scale: k, onBuy: () => _buyOffer(vm)),
           SizedBox(height: 18 * k),
         ],
-        Text('KART PAKETLERİ', style: V21Type.title(26 * k, shadows: V21Type.inkShadow(k))),
+        Text('KART PAKETLERİ'.tr, style: V21Type.title(26 * k, shadows: V21Type.inkShadow(k))),
         SizedBox(height: 10 * k),
         _PackGrid(
           vm: vm,
@@ -178,7 +179,7 @@ class _BodyState extends State<_Body> {
         _Tabs(scale: k),
         SizedBox(height: 14 * k),
         Text(
-          'Paketten çıkan kartları sunucu belirler; oranlar gerçekten uygulanan değerlerdir.',
+          'Paketten çıkan kartları sunucu belirler; oranlar gerçekten uygulanan değerlerdir.'.tr,
           textAlign: TextAlign.center,
           style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textDim, height: 1.4),
         ),
@@ -191,7 +192,7 @@ class _BodyState extends State<_Body> {
         Padding(
           padding: EdgeInsets.fromLTRB(16 * k, 15 * k, 8 * k, 0),
           child: V21PageTitle(
-            title: 'MAĞAZA',
+            title: 'MAĞAZA'.tr,
             scale: k,
             trailing: V21ResourcePill.coins(coins: vm.coins, scale: k),
           ),
@@ -230,7 +231,7 @@ class _DailyOffer extends StatelessWidget {
     final busy = vm.openingPackSlug == t.packSlug;
     return Semantics(
       container: true,
-      label: 'Günün teklifi: ${t.name}, ${t.cardCount} kart, %${t.discountPct} indirim',
+      label: 'Günün teklifi: {name}, {cardCount} kart, %{discountPct} indirim'.trArgs({'name': t.name, 'cardCount': t.cardCount, 'discountPct': t.discountPct}),
       child: Container(
         height: 168 * k,
         decoration: BoxDecoration(
@@ -271,7 +272,7 @@ class _DailyOffer extends StatelessWidget {
               left: -4 * k,
               top: 8 * k,
               child: V21Tag(
-                text: 'GÜNÜN TEKLİFİ',
+                text: 'GÜNÜN TEKLİFİ'.tr,
                 background: const Color(0xFFFFD84A),
                 foreground: const Color(0xFF5A2A00),
                 scale: k,
@@ -291,13 +292,13 @@ class _DailyOffer extends StatelessWidget {
                     child: Text(t.name, style: V21Type.title(28 * k, shadows: V21Type.inkShadow(k))),
                   ),
                   Text(
-                    '${t.cardCount} kart · ${V21Format.thousands(t.price)} yerine',
+                    '{cardCount} kart · {p} yerine'.trArgs({'cardCount': t.cardCount, 'p': V21Format.thousands(t.price)}),
                     style: V21Type.label(12 * k, weight: FontWeight.w700, color: const Color(0xFFFFE3D6)),
                   ),
                   const Spacer(),
                   if (t.boughtToday)
                     V21GameButton(
-                      label: 'BUGÜN ALINDI',
+                      label: 'BUGÜN ALINDI'.tr,
                       size: V21ButtonSize.small,
                       status: V21ButtonStatus.disabled,
                       scale: k,
@@ -338,7 +339,7 @@ class _PriceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = price == 0 ? 'ÜCRETSİZ' : V21Format.thousands(price);
+    final label = price == 0 ? 'ÜCRETSİZ'.tr : V21Format.thousands(price);
     return V21GameButton(
       label: label,
       leading: price == 0 ? null : V21CoinIcon(size: 22 * scale),
@@ -348,7 +349,7 @@ class _PriceButton extends StatelessWidget {
       status: busy
           ? V21ButtonStatus.loading
           : (affordable && onPressed != null ? V21ButtonStatus.normal : V21ButtonStatus.disabled),
-      semanticsLabel: price == 0 ? 'Ücretsiz al' : '$label altın ile satın al',
+      semanticsLabel: price == 0 ? 'Ücretsiz al'.tr : '{label} altın ile satın al'.trArgs({'label': label}),
       onPressed: onPressed,
     );
   }
@@ -430,7 +431,7 @@ class _PackCard extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${pack.name}, ${pack.cardCount} kart, oranları göster',
+      label: '{name}, {cardCount} kart, oranları göster'.trArgs({'name': pack.name, 'cardCount': pack.cardCount}),
       child: GestureDetector(
         onTap: onSelect,
         behavior: HitTestBehavior.opaque,
@@ -467,7 +468,7 @@ class _PackCard extends StatelessWidget {
               SizedBox(height: 6 * k),
               if (!purchasable)
                 Text(
-                  'SATIŞTA DEĞİL',
+                  'SATIŞTA DEĞİL'.tr,
                   style: V21Type.label(12 * k, weight: FontWeight.w800, color: V21Colors.textDim),
                 )
               else
@@ -486,7 +487,7 @@ class _PackCard extends StatelessWidget {
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            '${V21Format.thousands(missing)} altın eksik',
+                            '{p} altın eksik'.trArgs({'p': V21Format.thousands(missing)}),
                             style: V21Type.label(11 * k, weight: FontWeight.w800, color: const Color(0xFFFF7A8C)),
                           ),
                         ),
@@ -579,7 +580,7 @@ class _Odds extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'ÇIKMA İHTİMALİ · ${V21Format.upper(pack.name)}',
+          'ÇIKMA İHTİMALİ · {p}'.trArgs({'p': V21Format.upper(pack.name)}),
           style: V21Type.label(12 * k, weight: FontWeight.w800, color: V21Colors.textMuted, letterSpacing: 0.4),
         ),
         SizedBox(height: 8 * k),
@@ -634,11 +635,11 @@ class _Tabs extends StatelessWidget {
     );
     return Row(
       children: [
-        tab('PAKETLER', V21ButtonTone.gold, null, 'Paketler, şu an açık'),
+        tab('PAKETLER'.tr, V21ButtonTone.gold, null, 'Paketler, şu an açık'.tr),
         SizedBox(width: 8 * k),
-        tab('TEKLİFLER', V21ButtonTone.blue, () => context.push(AppRoutes.sbc), 'Teklifler: kart takası'),
+        tab('TEKLİFLER'.tr, V21ButtonTone.blue, () => context.push(AppRoutes.sbc), 'Teklifler: kart takası'.tr),
         SizedBox(width: 8 * k),
-        tab('KOZMETİK', V21ButtonTone.blue, () => context.push(AppRoutes.inventory), 'Kozmetik: envanter'),
+        tab('KOZMETİK'.tr, V21ButtonTone.blue, () => context.push(AppRoutes.inventory), 'Kozmetik: envanter'.tr),
       ],
     );
   }

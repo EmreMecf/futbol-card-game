@@ -6,6 +6,7 @@ import '../foundation/v21_typography.dart';
 import 'v21_character.dart';
 import 'v21_painters.dart';
 import 'v21_tap.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Nadirlik görünümü (referans Koleksiyon ekranı kenar ve zemin renkleri)
 @immutable
@@ -17,26 +18,26 @@ class V21Rarity {
   const V21Rarity(this.frame, this.frameLight, this.art, this.name);
 
   static V21Rarity of(CardTier t) => switch (t) {
-    CardTier.legend => const V21Rarity(Color(0xFFA35BEA), Color(0xFFDDB0FF), [
+    CardTier.legend => V21Rarity(Color(0xFFA35BEA), Color(0xFFDDB0FF), [
       Color(0xFF8E54E0),
       Color(0xFF4B1D9C),
-    ], 'EFSANE'),
-    CardTier.diamond => const V21Rarity(Color(0xFF37B5F0), Color(0xFFA7EBFF), [
+    ], 'EFSANE'.tr),
+    CardTier.diamond => V21Rarity(Color(0xFF37B5F0), Color(0xFFA7EBFF), [
       Color(0xFF58D2FF),
       Color(0xFF1C7FC2),
-    ], 'ELMAS'),
-    CardTier.gold => const V21Rarity(Color(0xFFF2B526), Color(0xFFFFE38A), [
+    ], 'ELMAS'.tr),
+    CardTier.gold => V21Rarity(Color(0xFFF2B526), Color(0xFFFFE38A), [
       Color(0xFFFFD55A),
       Color(0xFFE89A1A),
-    ], 'ALTIN'),
-    CardTier.silver => const V21Rarity(Color(0xFFA9B8C8), Color(0xFFE6EEF6), [
+    ], 'ALTIN'.tr),
+    CardTier.silver => V21Rarity(Color(0xFFA9B8C8), Color(0xFFE6EEF6), [
       Color(0xFFC9D5E2),
       Color(0xFF7D8DA3),
-    ], 'GÜMÜŞ'),
-    CardTier.bronze => const V21Rarity(Color(0xFFCB7F4E), Color(0xFFF5C49C), [
+    ], 'GÜMÜŞ'.tr),
+    CardTier.bronze => V21Rarity(Color(0xFFCB7F4E), Color(0xFFF5C49C), [
       Color(0xFFE6A276),
       Color(0xFF9B5530),
-    ], 'BRONZ'),
+    ], 'BRONZ'.tr),
   };
 }
 
@@ -254,7 +255,7 @@ class V21PlayerCard extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       selected: selected,
-      label: '${position.label}, ${r.name}, güç $power, $name${favorite ? ', favori' : ''}${locked ? ', kilitli' : ''}',
+      label: '{label}, {name}, güç {power}, {name2}{p}{p2}'.trArgs({'label': position.label, 'name': r.name, 'power': power, 'name2': name, 'p': favorite ? ', favori'.tr : '', 'p2': locked ? ', kilitli'.tr : ''}),
       excludeSemantics: true,
       child: V21Tap(onTap: onTap, behavior: HitTestBehavior.opaque, child: full),
     );

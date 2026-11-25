@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 
 import '../utils/logger.dart';
 import 'app_exception.dart';
+import '../../core/l10n/app_language.dart';
+import '../l10n/server_text.dart';
 
 /// Ham hatalari [AppException]'a cevirir.
 ///
@@ -25,10 +27,10 @@ class ErrorMapper {
 
     if (error is DioException) return _fromDio(error);
 
-    if (error is SocketException) return const AppException.network();
+    if (error is SocketException) return AppException.network();
 
     return AppException(
-      message: 'Beklenmeyen bir hata olustu. Lutfen tekrar deneyin.',
+      message: 'Beklenmeyen bir hata olustu. Lutfen tekrar deneyin.'.tr,
       type: AppErrorType.unknown,
       technicalDetail: error.toString(),
     );
@@ -39,20 +41,20 @@ class ErrorMapper {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return const AppException(
-          message: 'Sunucu yanit vermedi. Baglantinizi kontrol edip tekrar deneyin.',
+        return AppException(
+          message: 'Sunucu yanit vermedi. Baglantinizi kontrol edip tekrar deneyin.'.tr,
           type: AppErrorType.network,
         );
 
       case DioExceptionType.connectionError:
-        return const AppException(
-          message: 'Sunucuya ulasilamiyor. Backend calisiyor mu ve adres dogru mu?',
+        return AppException(
+          message: 'Sunucuya ulasilamiyor. Backend calisiyor mu ve adres dogru mu?'.tr,
           type: AppErrorType.network,
         );
 
       case DioExceptionType.cancel:
-        return const AppException(
-          message: 'Islem iptal edildi.',
+        return AppException(
+          message: 'Islem iptal edildi.'.tr,
           type: AppErrorType.unknown,
         );
 
@@ -61,7 +63,7 @@ class ErrorMapper {
 
       default:
         return AppException(
-          message: 'Beklenmeyen bir baglanti hatasi olustu.',
+          message: 'Beklenmeyen bir baglanti hatasi olustu.'.tr,
           type: AppErrorType.network,
           technicalDetail: error.message,
         );
@@ -76,13 +78,14 @@ class ErrorMapper {
     String? mesaj;
     String? kod;
     if (govde is Map) {
-      mesaj = govde['message'] as String?;
+      final ham = govde['message'] as String?;
+      mesaj = ham == null ? null : ServerText.translate(ham);
       kod = govde['code'] as String?;
     }
 
     if (durum == 401) {
       return AppException(
-        message: mesaj ?? 'Oturumunuzun suresi doldu. Lutfen tekrar giris yapin.',
+        message: mesaj ?? 'Oturumunuzun suresi doldu. Lutfen tekrar giris yapin.'.tr,
         type: AppErrorType.unauthorized,
         technicalDetail: kod,
       );
@@ -90,7 +93,7 @@ class ErrorMapper {
 
     if (durum == 403) {
       return AppException(
-        message: mesaj ?? 'Bu islem icin yetkiniz yok.',
+        message: mesaj ?? 'Bu islem icin yetkiniz yok.'.tr,
         type: AppErrorType.unauthorized,
         technicalDetail: kod,
       );
@@ -98,7 +101,7 @@ class ErrorMapper {
 
     if (durum >= 400 && durum < 500) {
       return AppException(
-        message: mesaj ?? 'Istek islenemedi.',
+        message: mesaj ?? 'Istek islenemedi.'.tr,
         // "game_rule" -> oyun kurali ihlali (ornek: sira sizde degil)
         type: kod == 'game_rule' ? AppErrorType.gameRule : AppErrorType.unknown,
         technicalDetail: kod,
@@ -107,14 +110,14 @@ class ErrorMapper {
 
     if (durum >= 500) {
       return AppException(
-        message: mesaj ?? 'Sunucuda bir sorun olustu. Lutfen tekrar deneyin.',
+        message: mesaj ?? 'Sunucuda bir sorun olustu. Lutfen tekrar deneyin.'.tr,
         type: AppErrorType.server,
         technicalDetail: '$durum ${kod ?? ''}',
       );
     }
 
     return AppException(
-      message: mesaj ?? 'Beklenmeyen bir hata olustu.',
+      message: mesaj ?? 'Beklenmeyen bir hata olustu.'.tr,
       type: AppErrorType.unknown,
       technicalDetail: '$durum',
     );

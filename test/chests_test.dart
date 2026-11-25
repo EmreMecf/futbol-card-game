@@ -64,7 +64,7 @@ void main() {
   test('açma: sonuç saklanır, aynı eylem ağ hatasında AYNI anahtarla tekrar', () async {
     await vm.load();
     final c = vm.inventory!.instant.first;
-    depo.hatalar.add(const AppException.network());
+    depo.hatalar.add(AppException.network());
     expect(await vm.open(c), isFalse);
     expect(await vm.open(c), isTrue);
     expect(depo.anahtarlar[0], depo.anahtarlar[1], reason: 'ağ hatası sonrası aynı anahtar: ödül iki kez verilmez');

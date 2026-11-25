@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'display_text.dart';
 
 part 'league_models.freezed.dart';
 part 'league_models.g.dart';
@@ -57,7 +58,7 @@ abstract class PlayerRank with _$PlayerRank {
       _$PlayerRankFromJson(json);
 
   /// "Usta 2"
-  String get label => '$leagueName $division';
+  String get label => '${displayText(leagueName)} $division';
 
   /// Bir sonraki basamagin adi: "Usta 3". En usttekiyse null.
   String? get nextLabel {
@@ -116,7 +117,7 @@ abstract class LeaderboardEntry with _$LeaderboardEntry {
       _$LeaderboardEntryFromJson(json);
 
   /// "Usta 2"
-  String get rankLabel => '$leagueName $division';
+  String get rankLabel => '${displayText(leagueName)} $division';
 
   int get totalMatches => wins + losses + draws;
 
@@ -183,7 +184,7 @@ abstract class LeagueTier with _$LeagueTier {
       _$LeagueTierFromJson(json);
 
   /// "Usta 2"
-  String get label => '$leagueName $division';
+  String get label => '${displayText(leagueName)} $division';
 }
 
 /// Basamaklarin lige gore gruplanmis hali.

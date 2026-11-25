@@ -1,6 +1,7 @@
 import 'package:shared_models/shared_models.dart';
 
 import '../../core/network/api_client.dart';
+import '../../core/l10n/app_language.dart';
 
 /// 056 — sosyal, elmas ve rakip kadrosu uçları.
 ///
@@ -79,7 +80,7 @@ class PlayerSummary {
 
   factory PlayerSummary.fromJson(Map<String, dynamic> j) => PlayerSummary(
     id: j['id'].toString(),
-    username: j['username']?.toString() ?? 'Oyuncu',
+    username: j['username']?.toString() ?? 'Oyuncu'.tr,
     mmr: _i(j['mmr'], 1000),
     wins: _i(j['wins']),
     losses: _i(j['losses']),
@@ -216,7 +217,7 @@ class PublicProfile {
     }
     return PublicProfile(
       id: j['id'].toString(),
-      username: j['username']?.toString() ?? 'Oyuncu',
+      username: j['username']?.toString() ?? 'Oyuncu'.tr,
       mmr: _i(j['mmr'], 1000),
       wins: _i(j['wins']),
       losses: _i(j['losses']),
@@ -314,7 +315,7 @@ class OpponentSquad {
     return OpponentSquad(
       matchId: j['match_id'].toString(),
       opponentId: o['id']?.toString() ?? '',
-      opponentUsername: o['username']?.toString() ?? 'Rakip',
+      opponentUsername: o['username']?.toString() ?? 'Rakip'.tr,
       opponentMmr: _i(o['mmr'], 1000),
       outcome: j['outcome']?.toString() ?? 'draw',
       cards: [for (final c in j['cards'] as List? ?? const []) ShownCard.fromJson(Map<String, dynamic>.from(c as Map))],
@@ -329,11 +330,11 @@ class OpponentSquad {
 
 /// Son görülme metni: "Çevrimiçi", "5 dk önce", "3 sa önce", "2 gün önce"
 String lastSeenText(bool online, DateTime? at, {DateTime? now}) {
-  if (online) return 'Çevrimiçi';
-  if (at == null) return 'Uzun süredir yok';
+  if (online) return 'Çevrimiçi'.tr;
+  if (at == null) return 'Uzun süredir yok'.tr;
   final d = (now ?? DateTime.now()).difference(at);
-  if (d.inMinutes < 60) return '${d.inMinutes.clamp(1, 59)} dk önce';
-  if (d.inHours < 24) return '${d.inHours} sa önce';
-  if (d.inDays < 30) return '${d.inDays} gün önce';
-  return 'Uzun süredir yok';
+  if (d.inMinutes < 60) return '{p} dk önce'.trArgs({'p': d.inMinutes.clamp(1, 59)});
+  if (d.inHours < 24) return '{inHours} sa önce'.trArgs({'inHours': d.inHours});
+  if (d.inDays < 30) return '{inDays} gün önce'.trArgs({'inDays': d.inDays});
+  return 'Uzun süredir yok'.tr;
 }

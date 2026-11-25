@@ -5,6 +5,7 @@ import '../foundation/v21_metrics.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_bottom_navigation.dart';
 import 'v21_tap.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Yan menünün ikincil maddesi (Sandıklar, Sıralama, Profil...)
 @immutable
@@ -51,9 +52,9 @@ class V21SideNavigation extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
           children: [
-            Text('FUTBOL', textAlign: TextAlign.center, style: V21Type.title(25, shadows: V21Type.inkShadow(1))),
+            Text('FUTBOL'.tr, textAlign: TextAlign.center, style: V21Type.title(25, shadows: V21Type.inkShadow(1))),
             Text(
-              'CARD ARENA',
+              'CARD ARENA'.tr,
               textAlign: TextAlign.center,
               style: V21Type.title(20, color: V21Colors.goldTop, shadows: V21Type.inkShadow(1)),
             ),

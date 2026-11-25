@@ -7,6 +7,7 @@ import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/leaderboard/presentation/viewmodel/league_tiers_view_model.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 LİG YOLU (referans `assets/v21/screens/league.png`).
 ///
@@ -31,9 +32,9 @@ class V21LeagueScreen extends StatelessWidget {
 
 /// Lig kodu → kalkan rengi ve kısa kod (referans Lig Yolu renkleri)
 (List<Color>, String) leagueShield(String code) => switch (code) {
-  'master_class' => (const [Color(0xFFE3A9FA), Color(0xFF8A3FD0)], 'MC'),
+  'master_class' => (const [Color(0xFFE3A9FA), Color(0xFF8A3FD0)], 'MC'.tr),
   'master' => (const [Color(0xFFFFE27A), Color(0xFFE0A030)], 'M'),
-  'usta' => (const [Color(0xFF9EF0FF), Color(0xFF3FB8E8)], 'U'),
+  'usta' => (const [Color(0xFF9EF0FF), Color(0xFF3FB8E8)], isEnglish ? 'E' : 'U'), // Usta = Expert
   'amateur' => (const [Color(0xFFF5B98A), Color(0xFFC0703F)], 'A'),
   _ => (const [Color(0xFFC6D3E0), Color(0xFF7D8DA3)], code.isEmpty ? '?' : code[0].toUpperCase()),
 };
@@ -52,7 +53,7 @@ class _Body extends StatelessWidget {
     }
     final mmr = vm.myRank?.mmr ?? user?.mmr;
     return V21InnerPage(
-      title: 'LİG YOLU',
+      title: 'LİG YOLU'.tr,
       route: AppRoutes.leagueTiers,
       highlightRoute: AppRoutes.home,
       fallbackRoute: AppRoutes.home,
@@ -92,9 +93,8 @@ class _Body extends StatelessWidget {
           SizedBox(height: 12 * k),
           Text(
             vm.trophyRoad == null
-                ? 'Ligden düşme yok: en alt basamak zemin. Üst ligler daha fazla net galibiyet ister.'
-                : 'Her lige İLK girişte ödül bir kez verilir. Sezon sonunda Usta ve üstü bir basamak geri iner; '
-                      'geri çıkınca aynı ödül tekrar verilmez.',
+                ? 'Ligden düşme yok: en alt basamak zemin. Üst ligler daha fazla net galibiyet ister.'.tr
+                : 'Her lige İLK girişte ödül bir kez verilir. Sezon sonunda Usta ve üstü bir basamak geri iner; geri çıkınca aynı ödül tekrar verilmez.'.tr,
             textAlign: TextAlign.center,
             style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textDim, height: 1.4),
           ),
@@ -208,12 +208,12 @@ class _LeagueRow extends StatelessWidget {
                 ),
                 SizedBox(height: 2 * k),
                 Text(
-                  '${V21Format.thousands(group.minMmr)}${locked && group.code == 'master_class' ? '+' : ''} kupa',
+                  '{p}{plus} kupa'.trArgs({'p': V21Format.thousands(group.minMmr), 'plus': locked && group.code == 'master_class' ? '+' : ''}),
                   style: V21Type.label(13 * k, weight: FontWeight.w800, color: V21Colors.textMuted),
                 ),
                 SizedBox(height: 6 * k),
                 Text(
-                  rewardText.isEmpty ? 'Başlangıç' : rewardText,
+                  rewardText.isEmpty ? 'Başlangıç'.tr : rewardText,
                   style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
                 ),
                 SizedBox(height: 8 * k),
@@ -245,7 +245,7 @@ class _LeagueRow extends StatelessWidget {
                   V21ProgressBar(
                     value: rank!.isTopTier ? 1 : rank!.progress,
                     height: 14 * k,
-                    semanticsLabel: 'Basamak ilerlemesi',
+                    semanticsLabel: 'Basamak ilerlemesi'.tr,
                   ),
                 ],
               ],
@@ -277,7 +277,7 @@ class _LeagueRow extends StatelessWidget {
               right: -6 * k,
               top: -28 * k,
               child: V21Tag(
-                text: 'SEN · ${V21LeagueBadge.shortCode(rank!.leagueCode, rank!.division)}',
+                text: 'SEN · {p}'.trArgs({'p': V21LeagueBadge.shortCode(rank!.leagueCode, rank!.division)}),
                 background: const Color(0xFFFFC832),
                 foreground: const Color(0xFF4A2A00),
                 scale: k,
@@ -290,12 +290,12 @@ class _LeagueRow extends StatelessWidget {
 
     final label = [
       V21Format.upper(group.name),
-      '${V21Format.thousands(group.minMmr)} kupadan başlar',
-      if (rewardText.isNotEmpty) 'ödül $rewardText${reward!.isGranted ? ', alındı' : ''}',
+      '{p} kupadan başlar'.trArgs({'p': V21Format.thousands(group.minMmr)}),
+      if (rewardText.isNotEmpty) 'ödül {rewardText}{p}'.trArgs({'rewardText': rewardText, 'p': reward!.isGranted ? ', alındı'.tr : ''}),
       switch (status) {
-        _Status.current => 'şu an bu ligdesin',
-        _Status.passed => 'geçildi',
-        _Status.locked => 'kilitli',
+        _Status.current => 'şu an bu ligdesin'.tr,
+        _Status.passed => 'geçildi'.tr,
+        _Status.locked => 'kilitli'.tr,
       },
     ].join(', ');
 

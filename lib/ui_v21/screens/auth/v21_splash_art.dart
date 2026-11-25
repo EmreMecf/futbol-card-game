@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 YÜKLEME EKRANI.
 ///
@@ -29,14 +30,14 @@ class V21SplashArt extends StatelessWidget {
   static const Color zemin = Color(0xFF0F1130);
 
   /// Yükleme ekranındaki oyun ipuçları (her açılışta biri gösterilir)
-  static const List<String> tips = [
-    'Efsane kartlar, gücü ne olursa olsun alttaki dört nadirliği yener.',
-    'Kadron 4-4-2 dizilir: 1 kaleci, 4 defans, 4 orta saha ve 2 forvet.',
-    'Aynı futbolcunun kopyalarını Gelişim\'de kullanarak seviye atlat.',
-    'Sandıkların süresini başlat; anahtarla beklemeden açabilirsin.',
-    'Alt menüde sağa-sola kaydırarak sayfalar arasında hızla geç.',
-    'Her gün ilk galibiyetin ve günlük sandık ekstra ödül getirir.',
-    'Maç sonunda kartlar el değiştirir; en değerli kartlarını koru.',
+  static List<String> get tips => [
+    'Efsane kartlar, gücü ne olursa olsun alttaki dört nadirliği yener.'.tr,
+    'Kadron 4-4-2 dizilir: 1 kaleci, 4 defans, 4 orta saha ve 2 forvet.'.tr,
+    'Aynı futbolcunun kopyalarını Gelişim\'de kullanarak seviye atlat.'.tr,
+    'Sandıkların süresini başlat; anahtarla beklemeden açabilirsin.'.tr,
+    'Alt menüde sağa-sola kaydırarak sayfalar arasında hızla geç.'.tr,
+    'Her gün ilk galibiyetin ve günlük sandık ekstra ödül getirir.'.tr,
+    'Maç sonunda kartlar el değiştirir; en değerli kartlarını koru.'.tr,
   ];
 
   @override
@@ -44,7 +45,7 @@ class V21SplashArt extends StatelessWidget {
     final t = Curves.easeOutCubic.transform(progress.clamp(0.0, 1.0));
     final ipucu = tips[tip % tips.length];
     return Semantics(
-      label: 'Futbol Card Arena yükleniyor. İpucu: $ipucu',
+      label: 'Futbol Card Arena yükleniyor. İpucu: {ipucu}'.trArgs({'ipucu': ipucu}),
       excludeSemantics: true,
       child: ColoredBox(
         color: zemin,
@@ -173,7 +174,7 @@ class _TipPanel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('İPUCU', style: V21Type.title(12 * k, color: V21Colors.goldTop, letterSpacing: 1.2)),
+                  Text('İPUCU'.tr, style: V21Type.title(12 * k, color: V21Colors.goldTop, letterSpacing: 1.2)),
                   SizedBox(height: 2 * k),
                   Text(
                     text,
@@ -202,7 +203,7 @@ class _LoadingBar extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('YÜKLENİYOR', style: V21Type.title(15 * k, letterSpacing: 1.4, shadows: V21Type.inkShadow(k))),
+          Text('YÜKLENİYOR'.tr, style: V21Type.title(15 * k, letterSpacing: 1.4, shadows: V21Type.inkShadow(k))),
           SizedBox(height: 6 * k),
           Container(
             height: 12 * k,
@@ -372,8 +373,8 @@ class V21Logo extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('FUTBOL', style: V21Type.title(58 * k, height: 1, shadows: V21Type.inkShadow(k * 1.4))),
-          V21HeroTitle('CARD ARENA', size: 46 * k),
+          Text('FUTBOL'.tr, style: V21Type.title(58 * k, height: 1, shadows: V21Type.inkShadow(k * 1.4))),
+          V21HeroTitle('CARD ARENA'.tr, size: 46 * k),
         ],
       ),
     );

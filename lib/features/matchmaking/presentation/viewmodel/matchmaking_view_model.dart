@@ -9,6 +9,7 @@ import '../../../../core/network/websocket_service.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../deck/domain/deck_rules.dart';
 import '../../domain/repositories/matchmaking_repository.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Eslestirme ekraninin asamalari
 enum MatchmakingStage {
@@ -377,7 +378,7 @@ class MatchmakingViewModel extends BaseViewModel {
         );
         if (_consecutivePollFailures >= 2) {
           _searchWarning =
-              'Sunucuya bağlantı kontrol ediliyor. Rakip arama otomatik sürüyor.';
+              'Sunucuya bağlantı kontrol ediliyor. Rakip arama otomatik sürüyor.'.tr;
         }
         // İstek başarısızsa kaçırılmış WebSocket bildirimini telafi et.
         // Kuyruk burada asla silinmez ya da yeniden kurulmaz.

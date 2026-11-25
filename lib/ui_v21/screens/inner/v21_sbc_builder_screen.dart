@@ -8,6 +8,7 @@ import '../../../features/sbc/presentation/viewmodel/sbc_builder_view_model.dart
 import '../../../shared/widgets/error_snackbar.dart';
 import '../../ui_v21.dart';
 import '../rewards/v21_card_sheets.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 KART TAKASI — KADRO KURMA (HTML referansında karşılığı yok; Kadrom
 /// ve Kart Takası ekranlarının dilinden).
@@ -55,13 +56,13 @@ class _BodyState extends State<_Body> {
   Future<void> _submit(SbcBuilderViewModel vm) async {
     final ok = await V21GameDialog.show<bool>(
       context,
-      subtitle: 'GERİ ALINAMAZ',
-      title: 'KARTLAR ERİTİLSİN Mİ?',
+      subtitle: 'GERİ ALINAMAZ'.tr,
+      title: 'KARTLAR ERİTİLSİN Mİ?'.tr,
       message:
-          '${vm.totalSelected} kart kalıcı olarak silinecek ve GERİ ALINAMAZ.\n\nÖdül: ${vm.challenge.rewardSummary}',
-      actions: const [
-        V21DialogAction('ERİT', tone: V21ButtonTone.red, result: true),
-        V21DialogAction('VAZGEÇ', tone: V21ButtonTone.blue, result: false),
+          '{totalSelected} kart kalıcı olarak silinecek ve GERİ ALINAMAZ.\n\nÖdül: {rewardSummary}'.trArgs({'totalSelected': vm.totalSelected, 'rewardSummary': vm.challenge.rewardSummary}),
+      actions: [
+        V21DialogAction('ERİT'.tr, tone: V21ButtonTone.red, result: true),
+        V21DialogAction('VAZGEÇ'.tr, tone: V21ButtonTone.blue, result: false),
       ],
     );
     if (ok != true || !mounted) return;
@@ -98,11 +99,11 @@ class _BodyState extends State<_Body> {
           children: [
             V21StatOrb(
               value: '${vm.totalSelected}/${GameRules.squadSize}',
-              label: 'KART',
+              label: 'KART'.tr,
               color: V21StatOrb.blue,
               scale: k * 0.85,
             ),
-            V21StatOrb(value: '${vm.burnValue}', label: 'ERİYECEK GÜÇ', color: V21StatOrb.red, scale: k * 0.85),
+            V21StatOrb(value: '${vm.burnValue}', label: 'ERİYECEK GÜÇ'.tr, color: V21StatOrb.red, scale: k * 0.85),
           ],
         ),
         SizedBox(height: 12 * k),
@@ -117,13 +118,13 @@ class _BodyState extends State<_Body> {
               if (label != 'EN DÜŞÜKLER') SizedBox(width: 6 * k),
               Expanded(
                 child: V21GameButton(
-                  label: label,
+                  label: label.tr,
                   tone: label == 'BOŞALT' ? V21ButtonTone.purple : V21ButtonTone.blue,
                   size: V21ButtonSize.small,
                   scale: k,
                   semanticsLabel: switch (label) {
-                    'EN DÜŞÜKLER' => 'En düşük kartlarla doldur',
-                    _ => 'Kadroyu boşalt',
+                    'EN DÜŞÜKLER' => 'En düşük kartlarla doldur'.tr,
+                    _ => 'Kadroyu boşalt'.tr,
                   },
                   onPressed: action,
                 ),
@@ -156,7 +157,7 @@ class _BodyState extends State<_Body> {
           SizedBox(height: 8 * k),
         ],
         V21GameButton(
-          label: vm.canSubmit ? 'KARTLARI ERİT VE ÖDÜLÜ AL' : 'ŞARTLAR TAMAMLANMADI',
+          label: vm.canSubmit ? 'KARTLARI ERİT VE ÖDÜLÜ AL'.tr : 'ŞARTLAR TAMAMLANMADI'.tr,
           tone: vm.canSubmit ? V21ButtonTone.green : V21ButtonTone.purple,
           size: V21ButtonSize.large,
           scale: k,
@@ -168,7 +169,7 @@ class _BodyState extends State<_Body> {
         ),
         SizedBox(height: 8 * k),
         Text(
-          'Verilen kartlar kalıcı olarak silinir',
+          'Verilen kartlar kalıcı olarak silinir'.tr,
           textAlign: TextAlign.center,
           style: V21Type.label(12 * k, weight: FontWeight.w800, color: const Color(0xFFFF8A9B)),
         ),
@@ -195,7 +196,7 @@ class _Requirements extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text('ŞARTLAR', style: V21Type.title(18 * k))),
+              Expanded(child: Text('ŞARTLAR'.tr, style: V21Type.title(18 * k))),
               V21Tag(
                 text: evaluation.progressText,
                 background: evaluation.canSubmit ? V21Colors.success : const Color(0xFF3B2F66),
@@ -206,7 +207,7 @@ class _Requirements extends StatelessWidget {
             ],
           ),
           SizedBox(height: 6 * k),
-          if (!complete) _Line(text: '11 kartlık kadroyu tamamla', met: false, progress: null, scale: k),
+          if (!complete) _Line(text: '11 kartlık kadroyu tamamla'.tr, met: false, progress: null, scale: k),
           for (final r in evaluation.requirements)
             _Line(text: r.label, met: r.isMet, progress: r.progressText, ratio: r.ratio, scale: k),
         ],
@@ -288,7 +289,7 @@ class V21SbcResultView extends StatelessWidget {
                         padding: EdgeInsets.fromLTRB(16 * k, 20 * k, 16 * k, 24 * k),
                         children: [
                           Text(
-                            'GÖREV TAMAMLANDI',
+                            'GÖREV TAMAMLANDI'.tr,
                             textAlign: TextAlign.center,
                             style: V21Type.title(18 * k, color: const Color(0xFFFFE6A0)),
                           ),
@@ -306,7 +307,7 @@ class V21SbcResultView extends StatelessWidget {
                                   color: const Color(0xFFFF7A3C),
                                 ),
                                 value: '${result.burnedCount}',
-                                label: 'ERİTİLEN',
+                                label: 'ERİTİLEN'.tr,
                                 scale: k,
                               ),
                               if (result.rewardCoins > 0) V21RewardCard.coins(result.rewardCoins, scale: k),
@@ -314,7 +315,7 @@ class V21SbcResultView extends StatelessWidget {
                                 V21RewardCard(
                                   icon: V21CardStackIcon(size: 46 * k),
                                   value: '+${cards.length}',
-                                  label: 'KART',
+                                  label: 'KART'.tr,
                                   scale: k,
                                 ),
                             ],
@@ -339,7 +340,7 @@ class V21SbcResultView extends StatelessWidget {
                             ),
                           ],
                           SizedBox(height: 20 * k),
-                          V21GameButton(label: 'TAMAM', size: V21ButtonSize.large, scale: k, onPressed: onClose),
+                          V21GameButton(label: 'TAMAM'.tr, size: V21ButtonSize.large, scale: k, onPressed: onClose),
                         ],
                       ),
                     ),

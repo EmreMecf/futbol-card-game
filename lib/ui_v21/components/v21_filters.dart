@@ -5,6 +5,7 @@ import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_match_widgets.dart';
 import 'v21_tap.dart';
+import '../../core/l10n/app_language.dart';
 
 /// V2.1 SAYFA BAŞLIĞI (referans Koleksiyon: "KARTLARIM" 16..180 × 22..53,
 /// sağda kaynak hapı). Sekme sayfalarında geri düğmesi yok.
@@ -270,7 +271,7 @@ class V21SearchField extends StatelessWidget {
             builder: (context, value, _) => value.text.isEmpty
                 ? const SizedBox.shrink()
                 : IconButton(
-                    tooltip: 'Aramayı temizle',
+                    tooltip: 'Aramayı temizle'.tr,
                     visualDensity: VisualDensity.compact,
                     iconSize: 18 * k,
                     color: V21Colors.textMuted,

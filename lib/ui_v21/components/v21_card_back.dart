@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_player_card.dart';
+import '../../core/l10n/app_language.dart';
 
 /// V2.1 KART ARKA YÜZÜ (referans Arena rakip kartı, Paket Mührü, alt menü
 /// KARTLAR): mor çapraz çizgili zemin, altın halkalı "?" madalyonu.
@@ -23,7 +24,7 @@ class V21CardBack extends StatelessWidget {
     final h = V21PlayerCard.baseHeight * k;
     final medal = 76 * k;
     return Semantics(
-      label: semanticsLabel,
+      label: semanticsLabel.tr,
       excludeSemantics: true,
       child: Container(
         width: width,

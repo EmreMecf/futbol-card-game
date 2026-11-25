@@ -6,6 +6,7 @@ import '../../../../core/base/base_view_model.dart';
 import '../../../../core/base/view_state.dart';
 import '../../../../core/error/app_exception.dart';
 import '../../domain/repositories/store_repository.dart';
+import '../../../../core/l10n/app_language.dart';
 
 /// Magaza ekraninin beyni.
 class StoreViewModel extends BaseViewModel {
@@ -100,7 +101,7 @@ class StoreViewModel extends BaseViewModel {
       _sonAcilis = await al();
     } catch (e) {
       _acilanPaket = null;
-      setError(AppException(message: 'Günün teklifi alınamadı. Tekrar dene.', technicalDetail: '$e', type: AppErrorType.gameRule));
+      setError(AppException(message: 'Günün teklifi alınamadı. Tekrar dene.'.tr, technicalDetail: '$e', type: AppErrorType.gameRule));
       safeNotify();
       return false;
     }

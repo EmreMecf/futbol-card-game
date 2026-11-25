@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
+import '../../core/l10n/app_language.dart';
 
 /// V2.1 ADIM ÇİZELGESİ (referans hf7–hf14):
 ///
@@ -72,7 +73,7 @@ class V21StepTracker extends StatelessWidget {
     );
 
     return Semantics(
-      label: 'Adım $current / ${labels.length}: ${labels[(current - 1).clamp(0, labels.length - 1)].toLowerCase()}',
+      label: 'Adım {current} / {length}: {p}'.trArgs({'current': current, 'length': labels.length, 'p': labels[(current - 1).clamp(0, labels.length - 1)].toLowerCase()}),
       excludeSemantics: true,
       child: Row(
         children: [

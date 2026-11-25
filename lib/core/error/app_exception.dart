@@ -1,3 +1,4 @@
+import '../../core/l10n/app_language.dart';
 /// Uygulama genelinde kullanilan tek tip hata sinifi.
 ///
 /// Amac: Supabase, Dio ve Dart'in kendi hatalarini tek bir yapiya indirgemek.
@@ -20,15 +21,15 @@ class AppException implements Exception {
   });
 
   /// Internet baglantisi yok
-  const AppException.network()
+  AppException.network()
       : message =
-            'Internet baglantiniz yok gibi gorunuyor. Lutfen kontrol edin.',
+            'Internet baglantiniz yok gibi gorunuyor. Lutfen kontrol edin.'.tr,
         type = AppErrorType.network,
         technicalDetail = null;
 
   /// Oturum gecersiz / suresi dolmus
-  const AppException.unauthorized()
-      : message = 'Oturumunuzun suresi doldu. Lutfen tekrar giris yapin.',
+  AppException.unauthorized()
+      : message = 'Oturumunuzun suresi doldu. Lutfen tekrar giris yapin.'.tr,
         type = AppErrorType.unauthorized,
         technicalDetail = null;
 

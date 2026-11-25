@@ -6,6 +6,7 @@ import '../animations/v21_motion.dart';
 import '../foundation/v21_colors.dart';
 import '../foundation/v21_typography.dart';
 import 'v21_tap.dart';
+import '../../core/l10n/app_language.dart';
 
 /// V2.1 OYUNCU AVATARI (referans Arena "SEN" / "RAKİP": çap 44, 3 px
 /// lacivert halka). Oyuncu adının baş harfi gösterilir; renk [seed]'den
@@ -56,7 +57,7 @@ class V21PlayerAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final ring = math.max(2.0, size * 0.07);
     return Semantics(
-      label: level == null ? semanticsLabel : '$semanticsLabel, seviye $level',
+      label: level == null ? semanticsLabel : '{semanticsLabel}, seviye {level}'.trArgs({'semanticsLabel': semanticsLabel, 'level': level}),
       excludeSemantics: true,
       child: SizedBox(
         width: size,
@@ -121,7 +122,7 @@ class V21EnergyBar extends StatelessWidget {
     final k = scale;
     final v = value.clamp(0, max);
     return Semantics(
-      label: 'Enerji $v / $max',
+      label: 'Enerji {v} / {max}'.trArgs({'v': v, 'max': max}),
       excludeSemantics: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -129,7 +130,7 @@ class V21EnergyBar extends StatelessWidget {
         children: [
           if (showLabel) ...[
             Text(
-              'ENERJİ',
+              'ENERJİ'.tr,
               style: V21Type.label(11 * k, weight: FontWeight.w800, color: const Color(0xFFB9A3F0), letterSpacing: 0.4),
             ),
             SizedBox(height: 6 * k),
@@ -215,7 +216,7 @@ class V21MatchTimer extends StatelessWidget {
     );
 
     return Semantics(
-      label: 'Kalan süre $s saniye',
+      label: 'Kalan süre {s} saniye'.trArgs({'s': s}),
       liveRegion: urgent,
       excludeSemantics: true,
       child: urgent ? V21Pulse(builder: (context, t) => dial(t)) : dial(0),
@@ -264,7 +265,7 @@ class V21BackButton extends StatelessWidget {
     final d = 43 * scale;
     return Semantics(
       button: true,
-      label: 'Geri',
+      label: 'Geri'.tr,
       excludeSemantics: true,
       child: V21Tap(
         onTap: onPressed,

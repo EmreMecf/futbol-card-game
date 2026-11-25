@@ -6,6 +6,7 @@ import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/items/presentation/viewmodel/items_view_model.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 ENVANTER (referans `assets/v21/screens/inventory.png`).
 ///
@@ -51,7 +52,7 @@ class _Body extends StatelessWidget {
     final vm = context.watch<ItemsViewModel>();
     final e = vm.inventory;
     return V21InnerPage(
-      title: 'ENVANTER',
+      title: 'ENVANTER'.tr,
       route: AppRoutes.inventory,
       fallbackRoute: AppRoutes.profile,
       state: e == null
@@ -60,8 +61,8 @@ class _Body extends StatelessWidget {
       errorMessage: vm.errorMessage,
       onRetry: vm.load,
       onRefresh: vm.load,
-      disabledTitle: 'ENVANTER YAKINDA',
-      disabledMessage: 'Envanter henüz açık değil.',
+      disabledTitle: 'ENVANTER YAKINDA'.tr,
+      disabledMessage: 'Envanter henüz açık değil.'.tr,
       children: (context, k) {
         final owned = e!.catalog.where((d) => e.quantity(d.slug) > 0).toList();
         return [
@@ -80,8 +81,8 @@ class _Body extends StatelessWidget {
           if (owned.isEmpty)
             V21EmptyState(
               icon: Icons.backpack_rounded,
-              title: 'HENÜZ EŞYA YOK',
-              message: 'Eşyalar sezon yolu, görev ve etkinlik ödüllerinden gelir.',
+              title: 'HENÜZ EŞYA YOK'.tr,
+              message: 'Eşyalar sezon yolu, görev ve etkinlik ödüllerinden gelir.'.tr,
               scale: k,
             )
           else
@@ -113,7 +114,7 @@ class _Body extends StatelessWidget {
               border: Border.all(color: V21Colors.ink, width: 2 * k),
             ),
             child: Text(
-              'Eşyaya dokun → ne işe yaradığını gör',
+              'Eşyaya dokun → ne işe yaradığını gör'.tr,
               textAlign: TextAlign.center,
               style: V21Type.label(13 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
             ),
@@ -133,9 +134,9 @@ class _ItemTile extends StatelessWidget {
 
   /// Karonun eylemi: (etiket, işlem) ya da null
   (String, Future<bool> Function())? get _action {
-    if (def.usableFromInventory) return ('KULLAN', () => vm.use(def));
+    if (def.usableFromInventory) return ('KULLAN'.tr, () => vm.use(def));
     if (def.isCosmetic) {
-      return inv.isEquipped(def.slug) ? ('ÇIKAR', () => vm.unequip(def)) : ('GİY', () => vm.equip(def));
+      return inv.isEquipped(def.slug) ? ('ÇIKAR'.tr, () => vm.unequip(def)) : ('GİY'.tr, () => vm.equip(def));
     }
     return null;
   }
@@ -146,11 +147,11 @@ class _ItemTile extends StatelessWidget {
           .where((i) => i.slug == def.slug && i.expiresAt != null)
           .map((i) => i.expiresAt!)
           .fold<DateTime?>(null, (a, b) => a == null || b.isBefore(a) ? b : a);
-      if (ends != null) return 'Bitiş: ${V21Format.shortDuration(ends.difference(inv.serverTime).inSeconds)} sonra';
+      if (ends != null) return 'Bitiş: {p} sonra'.trArgs({'p': V21Format.shortDuration(ends.difference(inv.serverTime).inSeconds)});
     }
     if (def.category == 'energy_drink') {
       final limit = (def.params['daily_limit'] as num?)?.toInt() ?? 2;
-      return 'Bugün ${inv.energyDrinksToday}/$limit kullanıldı';
+      return 'Bugün {energyDrinksToday}/{limit} kullanıldı'.trArgs({'energyDrinksToday': inv.energyDrinksToday, 'limit': limit});
     }
     return null;
   }
@@ -165,7 +166,7 @@ class _ItemTile extends StatelessWidget {
     final action = _action;
     return Semantics(
       button: true,
-      label: '${def.name}${def.isCosmetic ? (equipped ? ', giyili' : '') : ', $qty adet'}. Ayrıntı için dokun',
+      label: '{name}{p}. Ayrıntı için dokun'.trArgs({'name': def.name, 'p': def.isCosmetic ? (equipped ? ', giyili'.tr : '') : ', {qty} adet'.trArgs({'qty': qty})}),
       child: GestureDetector(
         onTap: () => _details(context),
         behavior: HitTestBehavior.opaque,
@@ -215,7 +216,7 @@ class _ItemTile extends StatelessWidget {
                       width: 120 * k,
                       child: V21GameButton(
                         label: action.$1,
-                        tone: action.$1 == 'ÇIKAR' ? V21ButtonTone.purple : V21ButtonTone.green,
+                        tone: action.$1 == 'ÇIKAR'.tr ? V21ButtonTone.purple : V21ButtonTone.green,
                         size: V21ButtonSize.small,
                         scale: k * 0.9,
                         status: busy ? V21ButtonStatus.loading : V21ButtonStatus.normal,
@@ -243,7 +244,7 @@ class _ItemTile extends StatelessWidget {
                 Positioned(
                   right: 0,
                   top: 0,
-                  child: V21Tag(text: 'GİYİLİ', background: V21Colors.success, foreground: Colors.white, scale: k),
+                  child: V21Tag(text: 'GİYİLİ'.tr, background: V21Colors.success, foreground: Colors.white, scale: k),
                 ),
             ],
           ),
@@ -257,7 +258,7 @@ class _ItemTile extends StatelessWidget {
     final action = _action;
     final run = await V21GameDialog.show<bool>(
       context,
-      subtitle: 'EŞYA',
+      subtitle: 'EŞYA'.tr,
       title: V21Format.upper(def.name),
       icon: V21ItemArt(
         category: def.category,
@@ -269,7 +270,7 @@ class _ItemTile extends StatelessWidget {
       message: [def.description, ?_extra].join('\n'),
       actions: [
         if (action != null) V21DialogAction(action.$1, tone: V21ButtonTone.green, result: true),
-        const V21DialogAction('KAPAT', tone: V21ButtonTone.blue, result: false),
+        V21DialogAction('KAPAT'.tr, tone: V21ButtonTone.blue, result: false),
       ],
     );
     if (run == true && action != null) await action.$2();

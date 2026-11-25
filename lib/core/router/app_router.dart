@@ -19,6 +19,7 @@ import '../../ui_v21/layouts/v21_tab_swipe.dart';
 import '../../ui_v21/ui_v21.dart';
 import '../auth/session_manager.dart';
 import 'app_routes.dart';
+import '../../core/l10n/app_language.dart';
 
 /// Uygulamanin yonlendirme (navigasyon) yapisi.
 ///
@@ -155,9 +156,9 @@ class AppRouter {
         child: Center(
           child: V21EmptyState(
             icon: Icons.explore_off_rounded,
-            title: 'SAYFA BULUNAMADI',
-            message: 'Bu adreste bir ekran yok. Bağlantı eskimiş ya da yanlış yazılmış olabilir.',
-            actionLabel: 'ANA SAYFAYA DÖN',
+            title: 'SAYFA BULUNAMADI'.tr,
+            message: 'Bu adreste bir ekran yok. Bağlantı eskimiş ya da yanlış yazılmış olabilir.'.tr,
+            actionLabel: 'ANA SAYFAYA DÖN'.tr,
             onAction: () => context.go(AppRoutes.home),
           ),
         ),

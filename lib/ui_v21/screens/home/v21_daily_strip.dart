@@ -7,14 +7,15 @@ import '../../../features/daily/data/daily_service.dart';
 import '../../../features/daily/domain/daily_texts.dart';
 import '../../../shared/widgets/error_snackbar.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// Şeridin iki satırı (test edilebilsin diye ayrı).
 (String, String) v21DailyLines(DailyStatus d) {
   final sandik = DailyPanelTexts.sandikAdi(d.chestType);
-  final seri = d.streak > 0 ? ' · Seri ${d.streak}' : '';
+  final seri = d.streak > 0 ? ' · Seri {streak}'.trArgs({'streak': d.streak}) : '';
   return (
-    d.claimedToday ? 'Sandık alındı$seri' : '$sandik sandık hazır$seri',
-    d.firstWinToday ? 'Günün ilk galibiyet bonusu alındı' : 'Günün ilk galibiyeti: ${d.firstWinMultiplier} kat XP',
+    d.claimedToday ? 'Sandık alındı{seri}'.trArgs({'seri': seri}) : '{sandik} sandık hazır{seri}'.trArgs({'sandik': sandik, 'seri': seri}),
+    d.firstWinToday ? 'Günün ilk galibiyet bonusu alındı'.tr : 'Günün ilk galibiyeti: {firstWinMultiplier} kat XP'.trArgs({'firstWinMultiplier': d.firstWinMultiplier}),
   );
 }
 
@@ -62,11 +63,11 @@ class _V21DailyStripState extends State<V21DailyStrip> {
       final r = await s.claim();
       if (mounted) {
         final tur = DailyPanelTexts.sandikAdi(r['chest_type']?.toString() ?? 'bronze');
-        AppSnackBar.showInfo(context, '$tur sandığın Sandıklar bölümüne eklendi.');
+        AppSnackBar.showInfo(context, '{tur} sandığın Sandıklar bölümüne eklendi.'.trArgs({'tur': tur}));
       }
       chestInventoryChanged.value++;
     } catch (_) {
-      if (mounted) AppSnackBar.showInfo(context, 'Sandık alınamadı. Tekrar dene.');
+      if (mounted) AppSnackBar.showInfo(context, 'Sandık alınamadı. Tekrar dene.'.tr);
     }
     if (mounted) setState(() => _aliniyor = false);
     await _yukle();
@@ -108,11 +109,11 @@ class _V21DailyStripState extends State<V21DailyStrip> {
               SizedBox(
                 width: 72 * k,
                 child: V21GameButton(
-                  label: 'AL',
+                  label: 'AL'.tr,
                   tone: V21ButtonTone.green,
                   size: V21ButtonSize.small,
                   scale: k,
-                  semanticsLabel: 'Günlük sandığı al',
+                  semanticsLabel: 'Günlük sandığı al'.tr,
                   status: _aliniyor ? V21ButtonStatus.disabled : V21ButtonStatus.normal,
                   onPressed: _al,
                 ),

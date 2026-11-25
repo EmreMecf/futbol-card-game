@@ -10,6 +10,7 @@ import '../../../features/social/social_api.dart';
 import '../../../features/social/social_view_models.dart';
 import '../../components/v21_cosmetics.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 // =====================================================================
 // ARKADAŞLAR (056)
@@ -55,7 +56,7 @@ class _FriendsBodyState extends State<_FriendsBody> {
     final l = vm.lists;
     final istek = l.incoming.length;
     return V21InnerPage(
-      title: 'ARKADAŞLAR',
+      title: 'ARKADAŞLAR'.tr,
       route: AppRoutes.social,
       fallbackRoute: AppRoutes.profile,
       state: !vm.loaded
@@ -68,9 +69,9 @@ class _FriendsBodyState extends State<_FriendsBody> {
         Row(
           children: [
             for (final (s, etiket) in [
-              (_Sekme.friends, 'ARKADAŞLAR (${l.friends.length})'),
-              (_Sekme.requests, istek > 0 ? 'İSTEKLER ($istek)' : 'İSTEKLER'),
-              (_Sekme.search, 'ARA'),
+              (_Sekme.friends, 'ARKADAŞLAR ({length})'.trArgs({'length': l.friends.length})),
+              (_Sekme.requests, istek > 0 ? 'İSTEKLER ({istek})'.trArgs({'istek': istek}) : 'İSTEKLER'.tr),
+              (_Sekme.search, 'ARA'.tr),
             ]) ...[
               if (s != _Sekme.friends) SizedBox(width: 6 * k),
               Expanded(
@@ -114,9 +115,9 @@ class _FriendsBodyState extends State<_FriendsBody> {
       return [
         V21EmptyState(
           icon: Icons.group_add_rounded,
-          title: 'HENÜZ ARKADAŞIN YOK',
-          message: 'Oyuncuları adıyla arayıp arkadaşlık isteği gönder.',
-          actionLabel: 'OYUNCU ARA',
+          title: 'HENÜZ ARKADAŞIN YOK'.tr,
+          message: 'Oyuncuları adıyla arayıp arkadaşlık isteği gönder.'.tr,
+          actionLabel: 'OYUNCU ARA'.tr,
           onAction: () => setState(() => _sekme = _Sekme.search),
           scale: k,
         ),
@@ -129,7 +130,7 @@ class _FriendsBodyState extends State<_FriendsBody> {
           scale: k,
           trailing: V21IconPill(
             icon: Icons.person_remove_rounded,
-            semanticsLabel: '${p.username}: arkadaşlıktan çıkar',
+            semanticsLabel: '{username}: arkadaşlıktan çıkar'.trArgs({'username': p.username}),
             scale: k * 0.8,
             onTap: () => _cikarOnay(context, vm, p),
           ),
@@ -142,12 +143,12 @@ class _FriendsBodyState extends State<_FriendsBody> {
   Future<void> _cikarOnay(BuildContext context, FriendsViewModel vm, PlayerSummary p) async {
     final ok = await V21GameDialog.show<bool>(
       context,
-      subtitle: 'ARKADAŞLIK',
-      title: '${V21Format.upper(p.username)} ÇIKARILSIN MI?',
-      message: 'Arkadaş listenden çıkar. İstersen sonra yeniden istek gönderebilirsin.',
-      actions: const [
-        V21DialogAction('ÇIKAR', tone: V21ButtonTone.red, result: true),
-        V21DialogAction('VAZGEÇ', tone: V21ButtonTone.blue, result: false),
+      subtitle: 'ARKADAŞLIK'.tr,
+      title: '{p} ÇIKARILSIN MI?'.trArgs({'p': V21Format.upper(p.username)}),
+      message: 'Arkadaş listenden çıkar. İstersen sonra yeniden istek gönderebilirsin.'.tr,
+      actions: [
+        V21DialogAction('ÇIKAR'.tr, tone: V21ButtonTone.red, result: true),
+        V21DialogAction('VAZGEÇ'.tr, tone: V21ButtonTone.blue, result: false),
       ],
     );
     if (ok == true) await vm.remove(p);
@@ -160,15 +161,15 @@ class _FriendsBodyState extends State<_FriendsBody> {
       return [
         V21EmptyState(
           icon: Icons.mark_email_unread_rounded,
-          title: 'İSTEK YOK',
-          message: 'Sana gelen ve senin gönderdiğin arkadaşlık istekleri burada görünür.',
+          title: 'İSTEK YOK'.tr,
+          message: 'Sana gelen ve senin gönderdiğin arkadaşlık istekleri burada görünür.'.tr,
           scale: k,
         ),
       ];
     }
     return [
       if (gelen.isNotEmpty) ...[
-        V21SectionTitle('GELEN İSTEKLER', trailing: '${gelen.length}', scale: k),
+        V21SectionTitle('GELEN İSTEKLER'.tr, trailing: '${gelen.length}', scale: k),
         for (final p in gelen) ...[
           V21PlayerRow(
             player: p,
@@ -176,9 +177,9 @@ class _FriendsBodyState extends State<_FriendsBody> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _MiniButton('KABUL', V21ButtonTone.green, vm.isWorking(p.id), () => vm.accept(p), k),
+                _MiniButton('KABUL'.tr, V21ButtonTone.green, vm.isWorking(p.id), () => vm.accept(p), k),
                 SizedBox(width: 6 * k),
-                _MiniButton('REDDET', V21ButtonTone.red, vm.isWorking(p.id), () => vm.decline(p), k),
+                _MiniButton('REDDET'.tr, V21ButtonTone.red, vm.isWorking(p.id), () => vm.decline(p), k),
               ],
             ),
           ),
@@ -187,12 +188,12 @@ class _FriendsBodyState extends State<_FriendsBody> {
         SizedBox(height: 8 * k),
       ],
       if (giden.isNotEmpty) ...[
-        V21SectionTitle('GÖNDERDİKLERİN', trailing: '${giden.length}', scale: k),
+        V21SectionTitle('GÖNDERDİKLERİN'.tr, trailing: '${giden.length}', scale: k),
         for (final p in giden) ...[
           V21PlayerRow(
             player: p,
             scale: k,
-            trailing: _MiniButton('GERİ ÇEK', V21ButtonTone.purple, vm.isWorking(p.id), () => vm.remove(p), k),
+            trailing: _MiniButton('GERİ ÇEK'.tr, V21ButtonTone.purple, vm.isWorking(p.id), () => vm.remove(p), k),
           ),
           SizedBox(height: 8 * k),
         ],
@@ -204,7 +205,7 @@ class _FriendsBodyState extends State<_FriendsBody> {
     V21SearchField(
       key: const Key('oyuncu-ara'),
       controller: _arama,
-      hint: 'Oyuncu adı (en az 2 harf)',
+      hint: 'Oyuncu adı (en az 2 harf)'.tr,
       onChanged: vm.setQuery,
       scale: k,
     ),
@@ -219,8 +220,8 @@ class _FriendsBodyState extends State<_FriendsBody> {
     else if (vm.query.length >= 2 && vm.results.isEmpty)
       V21EmptyState(
         icon: Icons.person_search_rounded,
-        title: 'OYUNCU BULUNAMADI',
-        message: '"${vm.query}" ile başlayan bir oyuncu yok.',
+        title: 'OYUNCU BULUNAMADI'.tr,
+        message: '"{query}" ile başlayan bir oyuncu yok.'.trArgs({'query': vm.query}),
         scale: k,
       )
     else
@@ -233,11 +234,11 @@ class _FriendsBodyState extends State<_FriendsBody> {
   Widget _durumDugmesi(FriendsViewModel vm, PlayerSummary p, double k) {
     final mesgul = vm.isWorking(p.id);
     return switch (p.friendStatus) {
-      FriendStatus.friends => V21Tag(text: 'ARKADAŞ', background: V21Colors.success, foreground: Colors.white, scale: k),
-      FriendStatus.outgoing => V21Tag(text: 'İSTEK GİTTİ', background: V21Colors.ink, foreground: V21Colors.goldTop, scale: k),
-      FriendStatus.incoming => _MiniButton('KABUL', V21ButtonTone.green, mesgul, () => vm.accept(p), k),
+      FriendStatus.friends => V21Tag(text: 'ARKADAŞ'.tr, background: V21Colors.success, foreground: Colors.white, scale: k),
+      FriendStatus.outgoing => V21Tag(text: 'İSTEK GİTTİ'.tr, background: V21Colors.ink, foreground: V21Colors.goldTop, scale: k),
+      FriendStatus.incoming => _MiniButton('KABUL'.tr, V21ButtonTone.green, mesgul, () => vm.accept(p), k),
       FriendStatus.self => const SizedBox.shrink(),
-      FriendStatus.none => _MiniButton('EKLE', V21ButtonTone.blue, mesgul, () => vm.sendRequest(p), k),
+      FriendStatus.none => _MiniButton('EKLE'.tr, V21ButtonTone.blue, mesgul, () => vm.sendRequest(p), k),
     };
   }
 }
@@ -330,7 +331,7 @@ class V21PlayerRow extends StatelessWidget {
     final durum = lastSeenText(p.online, p.lastSeenAt);
     return Semantics(
       button: true,
-      label: '${p.username}, ${V21Format.thousands(p.mmr)} kupa, $durum. Profili aç',
+      label: '{username}, {p} kupa, {durum}. Profili aç'.trArgs({'username': p.username, 'p': V21Format.thousands(p.mmr), 'durum': durum}),
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -449,7 +450,7 @@ class _ProfileBody extends StatelessWidget {
     final vm = context.watch<PlayerProfileViewModel>();
     final p = vm.profile;
     return V21InnerPage(
-      title: 'OYUNCU',
+      title: 'OYUNCU'.tr,
       route: AppRoutes.player,
       fallbackRoute: AppRoutes.social,
       state: p == null ? (vm.isLoading ? V21PageState.loading : V21PageState.error) : V21PageState.ready,
@@ -476,14 +477,14 @@ class _ProfileBody extends StatelessWidget {
           ],
           Row(
             children: [
-              Expanded(child: _Kutu(V21Format.thousands(pr.mmr), 'KUPA', const Color(0xFFFFD45E), k)),
+              Expanded(child: _Kutu(V21Format.thousands(pr.mmr), 'KUPA'.tr, const Color(0xFFFFD45E), k)),
               SizedBox(width: 8 * k),
-              Expanded(child: _Kutu('${pr.totalMatches}', 'MAÇ', const Color(0xFF8FC8FF), k)),
+              Expanded(child: _Kutu('${pr.totalMatches}', 'MAÇ'.tr, const Color(0xFF8FC8FF), k)),
               SizedBox(width: 8 * k),
               Expanded(
                 child: _Kutu(
                   pr.totalMatches == 0 ? '—' : '%${(pr.winRate * 100).round()}',
-                  'KAZANMA',
+                  'KAZANMA'.tr,
                   V21Colors.successText,
                   k,
                 ),
@@ -493,28 +494,28 @@ class _ProfileBody extends StatelessWidget {
           SizedBox(height: 8 * k),
           Row(
             children: [
-              Expanded(child: _Kutu('${pr.collectionCount}', 'KART', const Color(0xFFE4B3FF), k)),
+              Expanded(child: _Kutu('${pr.collectionCount}', 'KART'.tr, const Color(0xFFE4B3FF), k)),
               SizedBox(width: 8 * k),
-              Expanded(child: _Kutu('${pr.friendCount}', 'ARKADAŞ', const Color(0xFF8FC8FF), k)),
+              Expanded(child: _Kutu('${pr.friendCount}', 'ARKADAŞ'.tr, const Color(0xFF8FC8FF), k)),
               SizedBox(width: 8 * k),
-              Expanded(child: _Kutu('${pr.wins}G·${pr.losses}M', 'SONUÇ', Colors.white, k)),
+              Expanded(child: _Kutu('{wins}G·{losses}M'.trArgs({'wins': pr.wins, 'losses': pr.losses}), 'SONUÇ'.tr, Colors.white, k)),
             ],
           ),
           SizedBox(height: 16 * k),
-          V21SectionTitle('SON MAÇLAR', scale: k),
+          V21SectionTitle('SON MAÇLAR'.tr, scale: k),
           _Form(form: pr.recentForm, scale: k),
           if (!vm.isSelf && pr.headToHead.matches > 0) ...[
             SizedBox(height: 16 * k),
-            V21SectionTitle('ARANIZDAKİ MAÇLAR', trailing: '${pr.headToHead.matches} MAÇ', scale: k),
+            V21SectionTitle('ARANIZDAKİ MAÇLAR'.tr, trailing: '{matches} MAÇ'.trArgs({'matches': pr.headToHead.matches}), scale: k),
             Text(
-              'Sen ${pr.headToHead.myWins} · ${pr.username} ${pr.headToHead.theirWins} · Berabere ${pr.headToHead.draws}',
+              'Sen {myWins} · {username} {theirWins} · Berabere {draws}'.trArgs({'myWins': pr.headToHead.myWins, 'username': pr.username, 'theirWins': pr.headToHead.theirWins, 'draws': pr.headToHead.draws}),
               style: V21Type.title(17 * k),
             ),
           ],
           SizedBox(height: 16 * k),
-          V21SectionTitle('EN GÜÇLÜ KARTLARI', scale: k),
+          V21SectionTitle('EN GÜÇLÜ KARTLARI'.tr, scale: k),
           if (pr.topCards.isEmpty)
-            Text('Henüz kartı yok.', style: V21Type.label(13 * k, weight: FontWeight.w600, color: V21Colors.textMuted))
+            Text('Henüz kartı yok.'.tr, style: V21Type.label(13 * k, weight: FontWeight.w600, color: V21Colors.textMuted))
           else
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -526,7 +527,7 @@ class _ProfileBody extends StatelessWidget {
           SizedBox(height: 16 * k),
           if (pr.joinedAt != null)
             Text(
-              'Katılma: ${_tarih(pr.joinedAt!)}',
+              'Katılma: {p}'.trArgs({'p': _tarih(pr.joinedAt!)}),
               textAlign: TextAlign.center,
               style: V21Type.label(12 * k, weight: FontWeight.w600, color: V21Colors.textDim),
             ),
@@ -536,7 +537,7 @@ class _ProfileBody extends StatelessWidget {
   }
 
   static String _tarih(DateTime d) {
-    const aylar = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    final aylar = ['Ocak'.tr, 'Şubat'.tr, 'Mart'.tr, 'Nisan'.tr, 'Mayıs'.tr, 'Haziran'.tr, 'Temmuz'.tr, 'Ağustos'.tr, 'Eylül'.tr, 'Ekim'.tr, 'Kasım'.tr, 'Aralık'.tr];
     return '${d.day} ${aylar[d.month - 1]} ${d.year}';
   }
 }
@@ -552,7 +553,7 @@ class _Kimlik extends StatelessWidget {
     final r = p.rank;
     final avatar = V21PlayerAvatar(
       seed: 'oyuncu-${p.id}',
-      semanticsLabel: 'Avatar',
+      semanticsLabel: 'Avatar'.tr,
       name: p.username,
       size: 96 * k,
       ringColor: const Color(0xFFFFC832),
@@ -590,7 +591,7 @@ class _Kimlik extends StatelessWidget {
                     gradient: const LinearGradient(colors: [Color(0xFFFFE27A), Color(0xFFE0A030)]),
                   ),
                   child: Text(
-                    r == null ? 'LİG' : V21Format.upper(r.label),
+                    r == null ? 'LİG'.tr : V21Format.upper(r.label),
                     style: V21Type.title(15 * k, color: const Color(0xFF3A1E00)),
                   ),
                 ),
@@ -644,24 +645,24 @@ class _ArkadaslikDugmesi extends StatelessWidget {
       onPressed: f,
     );
     return switch (s) {
-      FriendStatus.none => dugme('ARKADAŞ EKLE', V21ButtonTone.green, vm.addFriend),
-      FriendStatus.outgoing => dugme('İSTEĞİ GERİ ÇEK', V21ButtonTone.purple, vm.removeFriend),
+      FriendStatus.none => dugme('ARKADAŞ EKLE'.tr, V21ButtonTone.green, vm.addFriend),
+      FriendStatus.outgoing => dugme('İSTEĞİ GERİ ÇEK'.tr, V21ButtonTone.purple, vm.removeFriend),
       FriendStatus.incoming => Row(
         children: [
-          Expanded(child: dugme('KABUL ET', V21ButtonTone.green, vm.accept)),
+          Expanded(child: dugme('KABUL ET'.tr, V21ButtonTone.green, vm.accept)),
           SizedBox(width: 8 * k),
-          Expanded(child: dugme('REDDET', V21ButtonTone.red, vm.decline)),
+          Expanded(child: dugme('REDDET'.tr, V21ButtonTone.red, vm.decline)),
         ],
       ),
-      FriendStatus.friends => dugme('ARKADAŞSINIZ · ÇIKAR', V21ButtonTone.purple, () async {
+      FriendStatus.friends => dugme('ARKADAŞSINIZ · ÇIKAR'.tr, V21ButtonTone.purple, () async {
         final ok = await V21GameDialog.show<bool>(
           context,
-          subtitle: 'ARKADAŞLIK',
-          title: 'ARKADAŞLIKTAN ÇIKAR?',
-          message: '${vm.profile!.username} arkadaş listenden çıkar.',
-          actions: const [
-            V21DialogAction('ÇIKAR', tone: V21ButtonTone.red, result: true),
-            V21DialogAction('VAZGEÇ', tone: V21ButtonTone.blue, result: false),
+          subtitle: 'ARKADAŞLIK'.tr,
+          title: 'ARKADAŞLIKTAN ÇIKAR?'.tr,
+          message: '{username} arkadaş listenden çıkar.'.trArgs({'username': vm.profile!.username}),
+          actions: [
+            V21DialogAction('ÇIKAR'.tr, tone: V21ButtonTone.red, result: true),
+            V21DialogAction('VAZGEÇ'.tr, tone: V21ButtonTone.blue, result: false),
           ],
         );
         if (ok == true) await vm.removeFriend();
@@ -714,12 +715,12 @@ class _Form extends StatelessWidget {
     final k = scale;
     if (form.isEmpty) {
       return Text(
-        'Henüz dereceli maç oynamadı.',
+        'Henüz dereceli maç oynamadı.'.tr,
         style: V21Type.label(13 * k, weight: FontWeight.w600, color: V21Colors.textMuted),
       );
     }
     return Semantics(
-      label: 'Son maçlar: ${form.map(_ad).join(', ')}',
+      label: 'Son maçlar: {p}'.trArgs({'p': form.map(_ad).join(', ')}),
       excludeSemantics: true,
       child: Row(
         children: [
@@ -738,9 +739,10 @@ class _Form extends StatelessWidget {
                 },
               ),
               child: Text(switch (f) {
-                'win' => 'G',
-                'loss' => 'M',
-                _ => 'B',
+                // Galibiyet / Mağlubiyet / Beraberlik — Win / Loss / Draw
+                'win' => isEnglish ? 'W' : 'G',
+                'loss' => isEnglish ? 'L' : 'M',
+                _ => isEnglish ? 'D' : 'B',
               }, style: V21Type.title(18 * k)),
             ),
             SizedBox(width: 6 * k),
@@ -751,9 +753,9 @@ class _Form extends StatelessWidget {
   }
 
   static String _ad(String f) => switch (f) {
-    'win' => 'galibiyet',
-    'loss' => 'mağlubiyet',
-    _ => 'beraberlik',
+    'win' => 'galibiyet'.tr,
+    'loss' => 'mağlubiyet'.tr,
+    _ => 'beraberlik'.tr,
   };
 }
 
@@ -769,7 +771,7 @@ class V21OpponentSquadSheet extends StatelessWidget {
   static Future<void> show(BuildContext context, String matchId) => showGeneralDialog<void>(
     context: context,
     barrierDismissible: true,
-    barrierLabel: 'Kapat',
+    barrierLabel: 'Kapat'.tr,
     barrierColor: const Color(0xCC120933),
     pageBuilder: (_, _, _) => V21OpponentSquadSheet(matchId: matchId),
   );
@@ -799,7 +801,7 @@ class _SquadBody extends StatelessWidget {
           : Padding(
               padding: EdgeInsets.all(20 * k),
               child: Text(
-                vm.errorText ?? 'Kadro yüklenemedi.',
+                vm.errorText ?? 'Kadro yüklenemedi.'.tr,
                 textAlign: TextAlign.center,
                 style: V21Type.label(14 * k, weight: FontWeight.w800, color: V21Colors.danger),
               ),
@@ -819,9 +821,9 @@ class _SquadBody extends StatelessWidget {
         ),
       );
       final sonuc = switch (s.outcome) {
-        'win' => ('KAZANDIN', V21Colors.success),
-        'loss' => ('KAYBETTİN', V21Colors.danger),
-        _ => ('BERABERE', V21Colors.goldBottom),
+        'win' => ('KAZANDIN'.tr, V21Colors.success),
+        'loss' => ('KAYBETTİN'.tr, V21Colors.danger),
+        _ => ('BERABERE'.tr, V21Colors.goldBottom),
       };
       icerik = Column(
         mainAxisSize: MainAxisSize.min,
@@ -832,7 +834,7 @@ class _SquadBody extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('RAKİBİN KADROSU', style: V21Type.label(12 * k, weight: FontWeight.w800, color: V21Colors.textMuted)),
+                    Text('RAKİBİN KADROSU'.tr, style: V21Type.label(12 * k, weight: FontWeight.w800, color: V21Colors.textMuted)),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(V21Format.upper(s.opponentUsername), style: V21Type.title(24 * k)),
@@ -845,7 +847,7 @@ class _SquadBody extends StatelessWidget {
           ),
           SizedBox(height: 4 * k),
           Text(
-            '${s.cards.length} kart · ortalama güç ${s.averagePower} · ${V21Format.thousands(s.opponentMmr)} kupa',
+            '{length} kart · ortalama güç {averagePower} · {p} kupa'.trArgs({'length': s.cards.length, 'averagePower': s.averagePower, 'p': V21Format.thousands(s.opponentMmr)}),
             style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.goldTop),
           ),
           SizedBox(height: 10 * k),
@@ -875,7 +877,7 @@ class _SquadBody extends StatelessWidget {
               if (s.opponentId.isNotEmpty) ...[
                 Expanded(
                   child: V21GameButton(
-                    label: 'PROFİLİ',
+                    label: 'PROFİLİ'.tr,
                     tone: V21ButtonTone.blue,
                     size: V21ButtonSize.small,
                     scale: k,
@@ -889,7 +891,7 @@ class _SquadBody extends StatelessWidget {
               ],
               Expanded(
                 child: V21GameButton(
-                  label: 'KAPAT',
+                  label: 'KAPAT'.tr,
                   tone: V21ButtonTone.purple,
                   size: V21ButtonSize.small,
                   scale: k,
@@ -969,13 +971,13 @@ class _GemStoreBody extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(child: Text('ELMASLA ALTIN', style: V21Type.title(24 * k, shadows: V21Type.inkShadow(k)))),
+            Expanded(child: Text('ELMASLA ALTIN'.tr, style: V21Type.title(24 * k, shadows: V21Type.inkShadow(k)))),
             V21ResourcePill.gems(gems: vm.gems, scale: k),
           ],
         ),
         SizedBox(height: 4 * k),
         Text(
-          'Elmas sandıklardan çıkar. Sandığı beklemeden açmak ya da altın almak için kullan.',
+          'Elmas sandıklardan çıkar. Sandığı beklemeden açmak ya da altın almak için kullan.'.tr,
           style: V21Type.label(12 * k, weight: FontWeight.w600, color: V21Colors.textMuted, height: 1.35),
         ),
         SizedBox(height: 10 * k),
@@ -1037,16 +1039,16 @@ class _GemOfferCard extends StatelessWidget {
             fit: BoxFit.scaleDown,
             child: Text(V21Format.thousands(o.coins), style: V21Type.title(22 * k, color: V21Colors.goldTop)),
           ),
-          Text('ALTIN', style: V21Type.label(11 * k, weight: FontWeight.w800, color: V21Colors.textMuted)),
+          Text('ALTIN'.tr, style: V21Type.label(11 * k, weight: FontWeight.w800, color: V21Colors.textMuted)),
           SizedBox(height: 8 * k),
           V21GameButton(
             key: Key('elmas-${o.slug}'),
-            label: '${o.gems} ELMAS',
+            label: '{gems} ELMAS'.trArgs({'gems': o.gems}),
             tone: yeter ? V21ButtonTone.green : V21ButtonTone.purple,
             size: V21ButtonSize.small,
             scale: k,
             status: vm.busyOffer == o.slug ? V21ButtonStatus.loading : V21ButtonStatus.normal,
-            semanticsLabel: '${o.gems} elmasa ${o.coins} altın al',
+            semanticsLabel: '{gems} elmasa {coins} altın al'.trArgs({'gems': o.gems, 'coins': o.coins}),
             onPressed: () => vm.buy(o),
           ),
         ],

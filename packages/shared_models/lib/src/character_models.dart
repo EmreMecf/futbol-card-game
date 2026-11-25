@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'card_attributes.dart';
 import 'enums.dart';
+import 'display_text.dart';
 
 part 'character_models.freezed.dart';
 part 'character_models.g.dart';
@@ -48,12 +49,15 @@ enum Playstyle {
   sweeperKeeper('libero_kaleci', 'Libero Kaleci', CardPosition.goalkeeper);
 
   final String code;
-  final String label;
+  final String _label;
+
+  /// Ekranda gösterilecek ad (oyuncunun dilinde)
+  String get label => displayText(_label);
 
   /// Bu tarzın ait olduğu mevki (doğrulayıcı uyumu buna göre denetler)
   final CardPosition position;
 
-  const Playstyle(this.code, this.label, this.position);
+  const Playstyle(this.code, this._label, this.position);
 
   static Playstyle? tryParse(String? code) {
     for (final p in values) {

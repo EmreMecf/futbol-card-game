@@ -4,6 +4,7 @@ import 'package:shared_models/shared_models.dart';
 import '../../../core/audio/game_audio.dart';
 import '../../../core/audio/sound_cues.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 ÖĞRETİCİ İPUCU (referans hf12–hf14).
 ///
@@ -23,7 +24,7 @@ class V21TutorialHint extends StatelessWidget {
 
   const V21TutorialHint({super.key, required this.state, this.scale = 1});
 
-  static const _steps = ['MEVKİ', 'KART', 'TAKTİK'];
+  static List<String> get _steps => ['MEVKİ'.tr, 'KART'.tr, 'TAKTİK'.tr];
 
   /// (başlık, açıklama) — test edilebilsin diye ayrı
   static (String, String) textFor(MatchState s) {
@@ -32,23 +33,18 @@ class V21TutorialHint extends StatelessWidget {
     if (mevki) {
       if (s.amILead) {
         return adim == 1
-            ? ('MEVKİ SEÇ', 'Bu turun mevkisini sen belirliyorsun. En güçlü kartının olduğu mevkiyi seç: '
-                'iki oyuncu da o mevkiden kart oynayacak.')
-            : ('MEVKİ SEÇ', 'Turu kazanan bir sonraki turun mevkisini seçer. Rakibinin zayıf olduğu yeri düşün.');
+            ? ('MEVKİ SEÇ'.tr, 'Bu turun mevkisini sen belirliyorsun. En güçlü kartının olduğu mevkiyi seç: iki oyuncu da o mevkiden kart oynayacak.'.tr)
+            : ('MEVKİ SEÇ'.tr, 'Turu kazanan bir sonraki turun mevkisini seçer. Rakibinin zayıf olduğu yeri düşün.'.tr);
       }
-      return ('RAKİP SEÇİYOR', 'Bu turun mevkisini rakip seçiyor. Turu kazanırsan mevkiyi sen seçersin.');
+      return ('RAKİP SEÇİYOR'.tr, 'Bu turun mevkisini rakip seçiyor. Turu kazanırsan mevkiyi sen seçersin.'.tr);
     }
     if (s.iHavePlayed) {
-      return ('KARTIN GİZLİ', 'Rakip seçince iki kart birlikte açılır. Güçlü kart turu kazanır; '
-          'beraberlikte kartlar ortada kalır, sonraki turu kazanan hepsini alır.');
+      return ('KARTIN GİZLİ'.tr, 'Rakip seçince iki kart birlikte açılır. Güçlü kart turu kazanır; beraberlikte kartlar ortada kalır, sonraki turu kazanan hepsini alır.'.tr);
     }
     return switch (adim) {
-      1 => ('KART SEÇ', 'O mevkiden bir kart seç ve oyna. Kısa maç: 6 kart toplayan kazanır.'),
-      2 => ('GİZLİ SEÇİM', 'Rakip de şu an kartını seçiyor ama birbirinizinkini göremiyorsunuz. '
-          'En güçlü kartını her tur harcama: bazen zayıf kartla turu bırakmak iyidir.'),
-      _ => ('TAKTİK', 'Kartla birlikte taktik seçebilirsin. Pres +9 (3 enerji) ama kontraya yenilir. '
-          'Kontra presi yakalarsa +13 (2 enerji). Duvar savunurken +6 (2 enerji), prese kırılır. '
-          'Enerji her tur +1 artar.'),
+      1 => ('KART SEÇ'.tr, 'O mevkiden bir kart seç ve oyna. Kısa maç: 6 kart toplayan kazanır.'.tr),
+      2 => ('GİZLİ SEÇİM'.tr, 'Rakip de şu an kartını seçiyor ama birbirinizinkini göremiyorsunuz. En güçlü kartını her tur harcama: bazen zayıf kartla turu bırakmak iyidir.'.tr),
+      _ => ('TAKTİK'.tr, 'Kartla birlikte taktik seçebilirsin. Pres +9 (3 enerji) ama kontraya yenilir. Kontra presi yakalarsa +13 (2 enerji). Duvar savunurken +6 (2 enerji), prese kırılır. Enerji her tur +1 artar.'.tr),
     };
   }
 
@@ -64,7 +60,7 @@ class V21TutorialHint extends StatelessWidget {
       child: Semantics(
       container: true,
       liveRegion: true,
-      label: 'Öğretici, adım $step / 3, ${_steps[step - 1].toLowerCase()}. $title. $text',
+      label: 'Öğretici, adım {step} / 3, {p}. {title}. {text}'.trArgs({'step': step, 'p': _steps[step - 1].toLowerCase(), 'title': title, 'text': text}),
       excludeSemantics: true,
       child: V21GamePanel(
         scale: k,
@@ -81,7 +77,7 @@ class V21TutorialHint extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                        'ÖĞRETİCİ · $step/3',
+                        'ÖĞRETİCİ · {step}/3'.trArgs({'step': step}),
                         style: V21Type.title(24 * k, color: V21Colors.goldTop, shadows: V21Type.inkShadow(k)),
                       ),
                     ),
@@ -94,7 +90,7 @@ class V21TutorialHint extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: V21Tag(
-                        text: 'ÖDÜLSÜZ',
+                        text: 'ÖDÜLSÜZ'.tr,
                         background: const Color(0xFF3B2F66),
                         foreground: V21Colors.textMuted,
                         scale: k,

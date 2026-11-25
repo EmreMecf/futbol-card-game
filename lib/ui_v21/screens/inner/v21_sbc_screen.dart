@@ -7,6 +7,7 @@ import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/sbc/presentation/viewmodel/sbc_list_view_model.dart';
 import '../../ui_v21.dart';
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 KART TAKASI (referans `assets/v21/screens/sbc.png`).
 ///
@@ -34,7 +35,7 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<SbcListViewModel>();
     return V21InnerPage(
-      title: 'KART TAKASI',
+      title: 'KART TAKASI'.tr,
       route: AppRoutes.sbc,
       fallbackRoute: AppRoutes.store,
       state: vm.challenges.isEmpty
@@ -43,14 +44,14 @@ class _Body extends StatelessWidget {
       errorMessage: vm.errorMessage,
       onRetry: vm.load,
       onRefresh: vm.load,
-      disabledTitle: 'GÖREV YOK',
-      disabledMessage: 'Şu an aktif kart takası yok. Yeni takaslar eklendiğinde burada görünür.',
+      disabledTitle: 'GÖREV YOK'.tr,
+      disabledMessage: 'Şu an aktif kart takası yok. Yeni takaslar eklendiğinde burada görünür.'.tr,
       children: (context, k) => [
         _Banner(scale: k),
         SizedBox(height: 14 * k),
         for (final c in vm.challenges) ...[_ChallengeCard(challenge: c, scale: k), SizedBox(height: 14 * k)],
         Text(
-          'Verilen kartlar kalıcı olarak silinir',
+          'Verilen kartlar kalıcı olarak silinir'.tr,
           textAlign: TextAlign.center,
           style: V21Type.label(13 * k, weight: FontWeight.w800, color: const Color(0xFFFF8A9B)),
         ),
@@ -78,7 +79,7 @@ class _Banner extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              'Kullanmadığın kartları ver,\ndaha değerli ödül al!',
+              'Kullanmadığın kartları ver,\ndaha değerli ödül al!'.tr,
               style: V21Type.title(19 * k, shadows: V21Type.inkShadow(k * 0.7)),
             ),
           ),
@@ -106,7 +107,7 @@ class _ChallengeCard extends StatelessWidget {
     final summary = c.requirements.map((r) => r.label).join(' · ');
     return Semantics(
       container: true,
-      label: '${c.name}. Ödül: ${c.rewardSummary}. Şartlar: $summary${done ? '. Yapıldı' : ''}',
+      label: '{name}. Ödül: {rewardSummary}. Şartlar: {summary}{p}'.trArgs({'name': c.name, 'rewardSummary': c.rewardSummary, 'summary': summary, 'p': done ? '. Yapıldı'.tr : ''}),
       child: Container(
         padding: EdgeInsets.fromLTRB(14 * k, 12 * k, 14 * k, 12 * k),
         decoration: BoxDecoration(
@@ -155,7 +156,7 @@ class _ChallengeCard extends StatelessWidget {
                   width: 112 * k,
                   child: done
                       ? V21GameButton(
-                          label: 'YAPILDI',
+                          label: 'YAPILDI'.tr,
                           leadingIcon: Icons.check_rounded,
                           tone: V21ButtonTone.green,
                           size: V21ButtonSize.small,
@@ -164,11 +165,11 @@ class _ChallengeCard extends StatelessWidget {
                           onPressed: null,
                         )
                       : V21GameButton(
-                          label: 'BAŞLA',
+                          label: 'BAŞLA'.tr,
                           tone: V21ButtonTone.green,
                           size: V21ButtonSize.small,
                           scale: k,
-                          semanticsLabel: '${c.name}: başla',
+                          semanticsLabel: '{name}: başla'.trArgs({'name': c.name}),
                           onPressed: open,
                         ),
                 ),
@@ -178,7 +179,7 @@ class _ChallengeCard extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.only(top: 4 * k),
                 child: Text(
-                  '${c.completedCount} kez yapıldı · tekrarlanabilir',
+                  '{completedCount} kez yapıldı · tekrarlanabilir'.trArgs({'completedCount': c.completedCount}),
                   style: V21Type.label(11 * k, weight: FontWeight.w700, color: V21Colors.textDim),
                 ),
               ),
@@ -226,7 +227,7 @@ class _CardFan extends StatelessWidget {
       ),
     );
     return Semantics(
-      label: '${r.name} kartlar',
+      label: '{name} kartlar'.trArgs({'name': r.name}),
       excludeSemantics: true,
       child: Stack(
         alignment: Alignment.centerLeft,
@@ -267,8 +268,8 @@ class _RewardBox extends StatelessWidget {
     final hasCard = rewards.any((r) => r.type == 'card');
     final Widget icon = hasPack || hasCard ? V21CardStackIcon(size: 40 * k) : V21CoinIcon(size: 38 * k);
     final label = [
-      if (hasPack) 'PAKET',
-      if (hasCard) 'KART',
+      if (hasPack) 'PAKET'.tr,
+      if (hasCard) 'KART'.tr,
       if (coins > 0) hasPack || hasCard ? '+${V21Format.thousands(coins)}' : V21Format.thousands(coins),
     ].join('');
     return Container(
@@ -288,7 +289,7 @@ class _RewardBox extends StatelessWidget {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                label.isEmpty ? 'ÖDÜL' : label,
+                label.isEmpty ? 'ÖDÜL'.tr : label,
                 style: V21Type.title(24 * k, color: const Color(0xFFFFD45E), shadows: V21Type.inkShadow(k)),
               ),
             ),

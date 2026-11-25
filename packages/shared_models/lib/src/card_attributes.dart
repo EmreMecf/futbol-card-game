@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'display_text.dart';
 
 part 'card_attributes.freezed.dart';
 part 'card_attributes.g.dart';
@@ -97,10 +98,13 @@ abstract class CardAttributes with _$CardAttributes {
 /// Tek bir ozelligin etiketi ve degeri (arayuzde satir cizmek icin)
 class CardAttributeEntry {
   /// Kisa etiket: 'SUT', 'HIZ', 'DRP', 'HZL', 'DEF', 'FIZ'
-  final String label;
+  final String _label;
   final int value;
 
-  const CardAttributeEntry(this.label, this.value);
+  /// Ekranda gösterilecek kısa etiket (oyuncunun dilinde)
+  String get label => displayText(_label);
+
+  const CardAttributeEntry(this._label, this.value);
 
   /// Deger ne kadar iyi? (0.0 - 1.0) Renk ve bar uzunlugu icin.
   ///

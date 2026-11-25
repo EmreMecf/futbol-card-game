@@ -8,6 +8,7 @@ import '../../../features/chests/domain/chest_repository.dart';
 import '../../../features/season/domain/season_repository.dart';
 import '../../ui_v21.dart';
 import '../inner/v21_league_screen.dart' show leagueShield;
+import '../../../core/l10n/app_language.dart';
 
 /// V2.1 maç sonu panelleri (Zafer ekranının altında; yalnız dereceli maç).
 /// Hepsi sunucunun verdiğini gösterir; veri yoksa yer kaplamaz.
@@ -74,8 +75,8 @@ class V21LeagueChangePanel extends StatelessWidget {
     final up = c.isPromoted, down = c.isDemoted;
     final delta = c.mmrDelta;
     final ribbon = up
-        ? (c.changedLeague ? 'LİG ATLADIN' : 'SEVİYE ATLADIN')
-        : (down ? (c.changedLeague ? 'LİG DÜŞTÜN' : 'SEVİYE DÜŞTÜN') : null);
+        ? (c.changedLeague ? 'LİG ATLADIN'.tr : 'SEVİYE ATLADIN'.tr)
+        : (down ? (c.changedLeague ? 'LİG DÜŞTÜN'.tr : 'SEVİYE DÜŞTÜN'.tr) : null);
     final after = c.rankAfter;
     final sameTier = c.rankBefore.tierId == after.tierId;
     final from = sameTier ? c.rankBefore.progress : (up ? 0.0 : 1.0);
@@ -83,8 +84,7 @@ class V21LeagueChangePanel extends StatelessWidget {
     return Semantics(
       container: true,
       label:
-          'Lig: ${c.rankBefore.label}${sameTier ? '' : ' → ${after.label}'}, '
-          '${delta >= 0 ? '+' : ''}$delta kupa, ${c.mmrAfter} kupa${ribbon == null ? '' : ', ${ribbon.toLowerCase()}'}',
+          'Lig: {label}{p}, {p2}{delta} kupa, {mmrAfter} kupa{p3}'.trArgs({'label': c.rankBefore.label, 'p': sameTier ? '' : ' → ${after.label}', 'p2': delta >= 0 ? '+' : '', 'delta': delta, 'mmrAfter': c.mmrAfter, 'p3': ribbon == null ? '' : ', ${ribbon.toLowerCase()}'}),
       excludeSemantics: true,
       child: V21GamePanel(
         scale: k,
@@ -97,7 +97,7 @@ class V21LeagueChangePanel extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text('LİG', style: V21Type.title(18 * k, color: V21Colors.textMuted)),
+                  child: Text('LİG'.tr, style: V21Type.title(18 * k, color: V21Colors.textMuted)),
                 ),
                 if (ribbon != null)
                   V21Tag(
@@ -126,7 +126,7 @@ class V21LeagueChangePanel extends StatelessWidget {
                     children: [
                       Text(V21Format.upper(after.label), style: V21Type.title(20 * k, shadows: V21Type.inkShadow(k))),
                       Text(
-                        '${V21Format.thousands(c.mmrAfter)} kupa (önce ${V21Format.thousands(c.mmrBefore)})',
+                        '{p} kupa (önce {p2})'.trArgs({'p': V21Format.thousands(c.mmrAfter), 'p2': V21Format.thousands(c.mmrBefore)}),
                         style: V21Type.label(12 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
                       ),
                     ],
@@ -149,13 +149,13 @@ class V21LeagueChangePanel extends StatelessWidget {
               duration: V21Motion.reduced(context) ? Duration.zero : const Duration(milliseconds: 1100),
               curve: V21Motion.standard,
               builder: (context, v, _) =>
-                  V21ProgressBar(value: v, height: 12 * k, semanticsLabel: 'Basamak ilerlemesi'),
+                  V21ProgressBar(value: v, height: 12 * k, semanticsLabel: 'Basamak ilerlemesi'.tr),
             ),
             SizedBox(height: 4 * k),
             Text(
               after.isTopTier || after.nextLabel == null
-                  ? 'En üst basamaktasın'
-                  : '${after.pointsToNext} kupa sonra ${after.nextLabel}',
+                  ? 'En üst basamaktasın'.tr
+                  : '{pointsToNext} kupa sonra {nextLabel}'.trArgs({'pointsToNext': after.pointsToNext, 'nextLabel': after.nextLabel}),
               style: V21Type.label(11 * k, weight: FontWeight.w700, color: V21Colors.textMuted),
             ),
           ],
@@ -208,7 +208,7 @@ class _V21LeaguePromotionOverlayState extends State<V21LeaguePromotionOverlay> w
         return Semantics(
           scopesRoute: true,
           explicitChildNodes: true,
-          label: '${c.changedLeague ? 'Lig atladın' : 'Seviye atladın'}: ${c.rankBefore.label} → ${c.rankAfter.label}',
+          label: '${c.changedLeague ? 'Lig atladın'.tr : 'Seviye atladın'.tr}: ${c.rankBefore.label} → ${c.rankAfter.label}',
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.onContinue,
@@ -233,10 +233,10 @@ class _V21LeaguePromotionOverlayState extends State<V21LeaguePromotionOverlay> w
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                c.changedLeague ? 'YENİ LİG!' : 'YENİ SEVİYE!',
+                                c.changedLeague ? 'YENİ LİG!'.tr : 'YENİ SEVİYE!'.tr,
                                 style: V21Type.title(20 * k, color: const Color(0xFFFFE6A0)),
                               ),
-                              V21HeroTitle('TERFİ!', size: 72 * k),
+                              V21HeroTitle('TERFİ!'.tr, size: 72 * k),
                               SizedBox(height: 16 * k),
                               V21RankShield(rank: c.rankAfter, size: 140 * k),
                               SizedBox(height: 16 * k),
@@ -265,7 +265,7 @@ class _V21LeaguePromotionOverlayState extends State<V21LeaguePromotionOverlay> w
                               SizedBox(
                                 width: 260 * k,
                                 child: V21GameButton(
-                                  label: 'DEVAM',
+                                  label: 'DEVAM'.tr,
                                   size: V21ButtonSize.large,
                                   scale: k,
                                   onPressed: widget.onContinue,
@@ -327,8 +327,8 @@ class _V21MatchChestPanelState extends State<V21MatchChestPanel> {
       children.add(
         _Line(
           icon: Icon(Icons.bolt_rounded, size: 34 * k, color: const Color(0xFFFFB648)),
-          title: 'SANDIK HAKKIN BİTMİŞTİ',
-          subtitle: 'Maç ödüllerin (altın, kupa, koruma) geçerli. Sandık için hakkın dolunca oyna.',
+          title: 'SANDIK HAKKIN BİTMİŞTİ'.tr,
+          subtitle: 'Maç ödüllerin (altın, kupa, koruma) geçerli. Sandık için hakkın dolunca oyna.'.tr,
           scale: k,
         ),
       );
@@ -336,21 +336,21 @@ class _V21MatchChestPanelState extends State<V21MatchChestPanel> {
     final c = v.chest;
     if (c != null) {
       final where = switch (c.location) {
-        'instant' when v.noEnergy => 'Sandık hakkın yoktu: Bronz sandık (hemen açılır)',
-        'instant' => 'Hemen açılabilir',
-        'slot' => '${c.slotNo}. yuvaya kondu',
+        'instant' when v.noEnergy => 'Sandık hakkın yoktu: Bronz sandık (hemen açılır)'.tr,
+        'instant' => 'Hemen açılabilir'.tr,
+        'slot' => '{slotNo}. yuvaya kondu'.trArgs({'slotNo': c.slotNo}),
         _ =>
           c.status == ChestStatus.compensated
-              ? 'Kutu doluydu: ${(c.result?['compensation_coins'] as num?)?.toInt() ?? 0} altın telafi'
-              : 'Yuvalar dolu: posta kutusunda bekliyor',
+              ? 'Kutu doluydu: {p} altın telafi'.trArgs({'p': (c.result?['compensation_coins'] as num?)?.toInt() ?? 0})
+              : 'Yuvalar dolu: posta kutusunda bekliyor'.tr,
       };
       children.add(
         _Line(
           icon: V21ChestArt(width: 64 * k),
-          kicker: 'SANDIK KAZANDIN',
-          title: '${V21Format.upper(c.typeName)} SANDIK',
+          kicker: 'SANDIK KAZANDIN'.tr,
+          title: '{p} SANDIK'.trArgs({'p': V21Format.upper(c.typeName)}),
           subtitle: where,
-          action: c.status == ChestStatus.compensated ? null : ('SANDIKLAR', AppRoutes.chests),
+          action: c.status == ChestStatus.compensated ? null : ('SANDIKLAR'.tr, AppRoutes.chests),
           scale: k,
         ),
       );
@@ -360,9 +360,9 @@ class _V21MatchChestPanelState extends State<V21MatchChestPanel> {
       children.add(
         _Line(
           icon: Icon(Icons.trending_up_rounded, size: 34 * k, color: V21Colors.successText),
-          title: '+1 GELİŞİM KOPYASI',
+          title: '+1 GELİŞİM KOPYASI'.tr,
           subtitle: copy,
-          action: ('GELİŞİM', AppRoutes.progress),
+          action: ('GELİŞİM'.tr, AppRoutes.progress),
           scale: k,
         ),
       );
@@ -416,9 +416,9 @@ class _V21MatchSeasonXpLineState extends State<V21MatchSeasonXpLine> {
       padding: EdgeInsets.only(top: 10 * k),
       child: _Line(
         icon: V21StarIcon(size: 36 * k, color: const Color(0xFFFFC832)),
-        title: '+${V21Format.thousands(v.xp)} SEZON XP',
-        subtitle: v.noEnergy ? 'Sandık hakkın yoktu: bu maçta XP %25 verildi.' : 'Sezon yolunda ilerledin.',
-        action: ('SEZON', AppRoutes.season),
+        title: '+{p} SEZON XP'.trArgs({'p': V21Format.thousands(v.xp)}),
+        subtitle: v.noEnergy ? 'Sandık hakkın yoktu: bu maçta XP %25 verildi.'.tr : 'Sezon yolunda ilerledin.'.tr,
+        action: ('SEZON'.tr, AppRoutes.season),
         scale: k,
       ),
     );
