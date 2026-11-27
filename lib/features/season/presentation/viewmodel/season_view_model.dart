@@ -97,6 +97,8 @@ class SeasonViewModel extends BaseViewModel {
 /// "93 altın", "Gümüş sandık", "Altın joker parça ×3"
 String rewardLabel(SeasonReward r) {
   if (r.isCoins) return '{amount} altın'.trArgs({'amount': r.amount});
+  // 063: güçsüz premium yol
+  if (r.isPaidGems) return '{amount} elmas'.trArgs({'amount': r.amount});
   if (r.isChest) {
     final ad = switch (r.chestType) {
       'bronze' => 'Bronz'.tr,

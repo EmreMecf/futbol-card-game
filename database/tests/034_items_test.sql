@@ -52,7 +52,8 @@ begin
   -- kozmetikleri (params.shop) ekler; 034'un kendi katalogu 23
   perform pg_temp.beklenen('katalogda 23 item tanimi (043 lig cerceveleri ve 062 magaza haric)',
     (select count(*)::int from item_definitions
-     where slug not like 'frame_league_%' and not coalesce((params ->> 'shop')::boolean, false)), 23);
+     where slug not like 'frame_league_%' and not coalesce((params ->> 'shop')::boolean, false)
+       and not coalesce((params ->> 'pass')::boolean, false)), 23);  -- 063 pas kozmetikleri
   perform pg_temp.beklenen('043 lig cerceveleri en fazla 3',
     (select count(*)::int from item_definitions where slug like 'frame_league_%') <= 3, true);
   perform pg_temp.beklenen('kozmetiklerin yuvasi var',

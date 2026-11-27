@@ -41,6 +41,19 @@ Tarih: 27 Kasım 2026 · Yerel: Flutter 3.50.1 / Dart 3.14, PostgreSQL 17
 | `database/tests/062_cosmetic_shop_test.sql` (yeni) | Geçti | varsayılan kapalı, kozmetik dışı teklif reddi, beyaz liste/platform, yetersiz elmas, önce ücretsiz sonra ücretli, tekrar anahtarı, sahiplik, giyme, duraklatılan teklif, tekrar kozmetikte altın yok, başlangıç paketi çerçevesi |
 | Yerel uçtan uca (gerçek sunucu + PostgreSQL) | 11/11 | kapalıyken 409, açınca 4 teklif, 50 ücretsiz + 70 ücretli, tekrar anahtarı, sahip olunan 409, yetersiz 409, geçersiz kimlik 404, oturumsuz 401, envanter, defter |
 
+## Faz 5 — Güçsüz premium sezon yolu
+
+| Paket | Sonuç | Not |
+|---|---|---|
+| `flutter analyze` | Temiz | |
+| `flutter test` | **1220 geçti** (45 atlanan) | goldenlar aynı |
+| `test/season_premium_test.dart` (yeni) | 4 geçti | ücretli elmas ödül etiketi, teklif yalnız sunucu satarken, elmas bölümünde premium yol paket olarak görünmez |
+| `test/cosmetic_shop_test.dart` | 7 geçti | "çizilemeyen ürün satılmaz" kontrolü 063 pas çerçevelerini de kapsıyor (paletleri eksikti; bu kontrolle eklendi) |
+| `scripts/db-testleri.sh` | Geçti | 61 migration sıfırdan, tekrar çalıştırma, maç sürerken 063 |
+| `database/tests/063_power_free_season_pass_test.sql` (yeni) | Geçti | sürüm 2, ücretsiz yol aynı, premium yolda güç yok, katalog kapısı, geriye dönük 24 ödül (12+12), premium yol altın vermez, ikinci alım reddi, iade (premium, elmas, giyilen çerçeve), güçlü yolda satış yok |
+| Yerel uçtan uca (gerçek sunucu + PostgreSQL, test sağlayıcı) | 10/10 | yeni sezon güçsüz, satın alma + mağaza bildirimi, premium açıldı, geriye dönük 5+5, 20 ücretli elmas, pas çerçevesi, ikinci alım ödülsüz |
+| Yerel psql notu | — | Windows psql WIN1254 kodlamasıyla "Ş/Ğ" harfinde takılıyordu; 063 metinleri bu harfleri kullanmıyor (CI Linux/UTF-8) |
+
 ## Brif uçtan uca senaryoları
 
 | Senaryo | Durum |

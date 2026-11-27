@@ -54,6 +54,25 @@ Başlangıç paketi (`starter_pack_1`): içerik 50 ücretli elmas + Çaylak
 çerçevesi, hesap yaşı ≤ 7 gün, tek seferlik. Açmak için ürünü `active`
 yapmak ve `starter_pack_enabled` gerekir (gerçek para: açık onay).
 
+## Premium sezon yolu (063)
+
+```sql
+-- Süren sezon satılabilir mi (premium yolu tamamen güçsüz mü)?
+select season_premium_status('<uuid>');
+-- Aç (gerçek para: açık onay)
+update product_catalog set status = 'active' where id = 'season_pass_premium';
+select set_monetization_config('{"monetization_enabled": true, "iap_enabled": true,
+  "premium_season_pass_enabled": true, "whitelist": ["<uuid>"]}', '<ad>', '<gerekce>');
+-- Satışlar ve iadeler
+select status, count(*) from purchase_transactions where product_id = 'season_pass_premium' group by 1;
+```
+
+Sezon ödül tablosu sezon başında dondurulur. 035 tablolu (güçlü premium)
+bir sezon sürerken ürün görünmez; sürüm 2 ile açılan ilk sezonda satılabilir.
+Yeni sezon için yeni pas kozmetiği istenirse yeni bir `season_rules`
+sürümü eklenir (premium yolda yalnız `paid_gems` ve telafisi 0 kozmetik);
+istemcide çizimi (`cosmeticFramePalette`) önce eklenmelidir.
+
 ## Acil kapatma
 
 ```sql

@@ -9,7 +9,7 @@ int _int(Object? v, [int varsayilan = 0]) => v is num ? v.toInt() : int.tryParse
 
 /// Bir kademenin bir yolundaki ödül
 class SeasonReward {
-  /// coins | chest | item
+  /// coins | chest | item | paid_gems
   final String type;
   final int amount;
   final String? chestType;
@@ -41,6 +41,9 @@ class SeasonReward {
   bool get isCoins => type == 'coins';
   bool get isChest => type == 'chest';
   bool get isItem => type == 'item';
+
+  /// 063: ücretli elmas (yalnız kozmetikte harcanır; güç vermez)
+  bool get isPaidGems => type == 'paid_gems';
   bool get isCosmetic =>
       isItem &&
       const {'profile_frame', 'kit', 'card_skin', 'arena_skin', 'victory_anim', 'character_cosmetic', 'season_badge'}

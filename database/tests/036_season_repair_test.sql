@@ -3,6 +3,12 @@
 -- =====================================================================
 begin;
 
+-- 063 sezon kuralini surum 2'ye gecirdi; bu test 035 tablosuyla (surum 1)
+-- yazildi: islem icinde surum 1 icerigi en yeni test surumu olur (geri alinir).
+insert into economy_config_versions (kind, version, payload, note)
+select 'season_rules', 990, payload, 'test: 035 tablosu'
+from economy_config_versions where kind = 'season_rules' and version = 1;
+
 create function pg_temp.beklenen(p_ad text, p_gercek anyelement, p_beklenen anyelement)
 returns void language plpgsql as $$
 begin

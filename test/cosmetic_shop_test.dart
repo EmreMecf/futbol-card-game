@@ -123,7 +123,11 @@ void main() {
   });
 
   test('sunucunun sattığı her kozmetik istemcide çizilebiliyor (görünmeyen ürün satılmaz)', () {
-    final sql = File('database/migrations/062_cosmetic_shop.sql').readAsStringSync();
+    // 062 mağaza + 063 premium sezon yolu (satılan ürünlerin içeriği)
+    final sql = [
+      'database/migrations/062_cosmetic_shop.sql',
+      'database/migrations/063_power_free_season_pass.sql',
+    ].map((p) => File(p).readAsStringSync()).join('\n');
     final kozmetikler = RegExp(r"\('((?:frame|victory)_[a-z0-9_]+)', 'cosmetic'").allMatches(sql).map((m) => m[1]!);
     expect(kozmetikler, isNotEmpty);
     for (final slug in kozmetikler) {

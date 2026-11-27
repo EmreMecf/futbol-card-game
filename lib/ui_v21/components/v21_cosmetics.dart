@@ -34,6 +34,9 @@ List<Color>? cosmeticFramePalette(String? slug) => switch (slug) {
   'frame_crimson' => const [Color(0xFFFF3B3B), Color(0xFFFF9A2E), Color(0xFFFFE08A), Color(0xFFFF9A2E)],
   'frame_emerald' => const [Color(0xFF12C27E), Color(0xFFF8C665), Color(0xFF0E7A64), Color(0xFFF8C665)],
   'frame_starter' => const [Color(0xFF7FB2FF), Color(0xFFFFFFFF), Color(0xFF4A7BD8), Color(0xFFFFFFFF)],
+  // 063: premium sezon yolu çerçeveleri
+  'frame_pass_ice' => const [Color(0xFFBDF4FF), Color(0xFF5FC8FF), Color(0xFFFFFFFF), Color(0xFF5FC8FF)],
+  'frame_pass_gold' => const [Color(0xFFFFE07A), Color(0xFFFFB02E), Color(0xFFFFF6D6), Color(0xFFC77A12)],
   _ => null,
 };
 

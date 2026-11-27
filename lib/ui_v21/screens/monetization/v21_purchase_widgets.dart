@@ -49,7 +49,7 @@ class _V21GemPacksSectionState extends State<V21GemPacksSection> {
         final mesaj = c.message;
         // 062: başlangıç paketi ayrı afiş (tek seferlik; alındıysa gösterilmez)
         final baslangic = c.products.where((p) => p.category == 'STARTER_PACK' && !p.owned).toList();
-        final paketler = c.products.where((p) => p.category != 'STARTER_PACK').toList();
+        final paketler = c.products.where((p) => p.category == 'GEM_PACK').toList();
         return Column(
           key: const Key('elmas-paketleri'),
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -96,6 +96,105 @@ class _V21GemPacksSectionState extends State<V21GemPacksSection> {
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+}
+
+/// 063 — PREMIUM SEZON YOLU teklifi (sezon ekranında).
+///
+/// Yalnız sunucu satıyorsa görünür: süren sezonun premium yolu tamamen
+/// güçsüz (ücretli elmas + pas kozmetiği), bayrak açık, oyuncu bu sezon
+/// almamış. Alınınca ulaşılmış kademelerin premium ödülleri hemen
+/// alınabilir (geriye dönük); [onPremium] sezon ekranını yeniler.
+class V21SeasonPremiumOffer extends StatefulWidget {
+  final double scale;
+  final Future<void> Function()? onPremium;
+  const V21SeasonPremiumOffer({super.key, this.scale = 1, this.onPremium});
+
+  @override
+  State<V21SeasonPremiumOffer> createState() => _V21SeasonPremiumOfferState();
+}
+
+class _V21SeasonPremiumOfferState extends State<V21SeasonPremiumOffer> {
+  PurchaseController? _c;
+  PurchaseFlowState? _onceki;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = getIt.isRegistered<PurchaseController>() ? getIt<PurchaseController>() : null;
+    _c?.addListener(_durum);
+    _c?.load();
+  }
+
+  void _durum() {
+    final s = _c?.state;
+    if (s == PurchaseFlowState.success && _onceki != s) widget.onPremium?.call();
+    _onceki = s;
+  }
+
+  @override
+  void dispose() {
+    _c?.removeListener(_durum);
+    _c?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = _c;
+    if (c == null) return const SizedBox.shrink();
+    return ListenableBuilder(
+      listenable: c,
+      builder: (context, _) {
+        final p = c.products.where((x) => x.category == 'SEASON_PASS' && !x.owned).firstOrNull;
+        if (!c.enabled || p == null) return const SizedBox.shrink();
+        final k = widget.scale;
+        final mesaj = c.message;
+        return Padding(
+          padding: EdgeInsets.only(top: 12 * k),
+          child: Container(
+            key: const Key('premium-sezon-yolu'),
+            padding: EdgeInsets.all(12 * k),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16 * k),
+              border: Border.all(color: V21Colors.ink, width: 3 * k),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFFFB02E), Color(0xFFE5394B), Color(0xFF6A1F8A)],
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('PREMIUM YOL'.tr, style: V21Type.title(22 * k, shadows: V21Type.inkShadow(k))),
+                SizedBox(height: 4 * k),
+                Text(
+                  'Elmas ve sezona özel çerçeveler; ulaştığın kademeler hemen açılır. Güç vermez.'.tr,
+                  style: V21Type.label(12 * k, weight: FontWeight.w700, color: const Color(0xFFFFF1E0), height: 1.35),
+                ),
+                SizedBox(height: 10 * k),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: _BuyButton(p: p, c: c, scale: k),
+                ),
+                if (mesaj != null && mesaj.isNotEmpty) ...[
+                  SizedBox(height: 6 * k),
+                  Text(
+                    mesaj,
+                    style: V21Type.label(
+                      12 * k,
+                      weight: FontWeight.w800,
+                      color: c.state == PurchaseFlowState.failed ? const Color(0xFFFFD0D6) : Colors.white,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         );
       },
     );
@@ -238,7 +337,9 @@ Future<void> confirmStorePurchase(BuildContext context, ShopProduct p, PurchaseC
     context,
     subtitle: 'SATIN AL'.tr,
     title: p.name,
-    message: p.itemSlugs.isEmpty
+    message: p.category == 'SEASON_PASS'
+        ? 'Bu sezonun premium yolu · {price}'.trArgs({'price': p.price!.price})
+        : p.itemSlugs.isEmpty
         ? '{gems} elmas · {price}'.trArgs({'gems': p.paidGems, 'price': p.price!.price})
         : '{gems} elmas + özel çerçeve · {price}'.trArgs({'gems': p.paidGems, 'price': p.price!.price}),
     content: StatefulBuilder(

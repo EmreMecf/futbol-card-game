@@ -1173,4 +1173,10 @@ const Map<String, String> kEnStrings = {
   '{gems} elmas + özel çerçeve · {price}': '{gems} gems + exclusive frame · {price}',
   'TEKLİFLER · KART TAKASI': 'OFFERS · CARD SWAP',
   'ENVANTERİM': 'MY INVENTORY',
+  // 063 — güçsüz premium sezon yolu
+  '{amount} elmas': '{amount} gems',
+  'PREMIUM YOL': 'PREMIUM TRACK',
+  'Elmas ve sezona özel çerçeveler; ulaştığın kademeler hemen açılır. Güç vermez.':
+      'Gems and season-exclusive frames; tiers you already reached unlock at once. No power.',
+  'Bu sezonun premium yolu · {price}': 'This season\'s premium track · {price}',
 };

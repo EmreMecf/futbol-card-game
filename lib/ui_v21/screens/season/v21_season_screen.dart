@@ -5,8 +5,10 @@ import 'package:shared_models/shared_models.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../features/season/presentation/viewmodel/season_view_model.dart';
+import '../../components/v21_cosmetics.dart';
 import '../../ui_v21.dart';
 import '../home/v21_home_nav.dart';
+import '../monetization/v21_purchase_widgets.dart';
 import '../../../core/l10n/app_language.dart';
 
 /// V2.1 SEZON YOLU (referans `assets/v21/screens/season.png`).
@@ -96,6 +98,8 @@ class _Body extends StatelessWidget {
       final missions = vm.missions;
       content = [
         _TierCard(s: s, vm: vm, scale: k),
+        // 063: güçsüz premium yol satışı (kapalıyken görünmez)
+        if (!s.premium) V21SeasonPremiumOffer(scale: k, onPremium: vm.load),
         if (vm.lastInfo != null || vm.actionError != null) ...[
           SizedBox(height: 8 * k),
           Text(
@@ -223,7 +227,10 @@ class _TierCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('KADEME {tier} / {maxTier}'.trArgs({'tier': s.tier, 'maxTier': s.maxTier}), style: V21Type.title(23 * k, shadows: V21Type.inkShadow(k))),
+                Text(
+                  'KADEME {tier} / {maxTier}'.trArgs({'tier': s.tier, 'maxTier': s.maxTier}),
+                  style: V21Type.title(23 * k, shadows: V21Type.inkShadow(k)),
+                ),
                 SizedBox(height: 8 * k),
                 V21ProgressBar(
                   value: s.tierProgress,
@@ -429,7 +436,13 @@ class _TierNode extends StatelessWidget {
       icon: _RewardIcon(t.free, size: 64),
       message: [
         line('Ücretsiz'.tr, t.free, t.freeClaimed, canFree),
-        line(s.premium ? 'Premium'.tr : 'Premium (yakında)'.tr, t.premium, t.premiumClaimed, canPremium, locked: !s.premium),
+        line(
+          s.premium ? 'Premium'.tr : 'Premium (yakında)'.tr,
+          t.premium,
+          t.premiumClaimed,
+          canPremium,
+          locked: !s.premium,
+        ),
       ].join('\n'),
       actions: [
         if (canFree) V21DialogAction('ÜCRETSİZ ÖDÜLÜ AL'.tr, tone: V21ButtonTone.green, result: 'free'),
@@ -450,6 +463,14 @@ class _RewardIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (reward.isCoins) return V21CoinIcon(size: size * 0.82);
+    if (reward.isPaidGems) return V21GemIcon(size: size * 0.82);
+    if (reward.isItem && reward.slug != null && cosmeticFramePalette(reward.slug) != null) {
+      return CosmeticFrame(
+        slug: reward.slug,
+        size: size * 0.7,
+        child: Icon(Icons.person_rounded, size: size * 0.5, color: Colors.white70),
+      );
+    }
     if (reward.isChest) return SizedBox.square(dimension: size, child: const V21ChestArt());
     return V21CardStackIcon(size: size * 0.85);
   }
@@ -472,8 +493,13 @@ class _MissionRow extends StatelessWidget {
       _ => (const Color(0xFF8BE38A), const Color(0xFF14361A)),
     };
     return Semantics(
-      label:
-          '{tag} görev: {title}, {progress} / {target}, {p}'.trArgs({'tag': tag, 'title': m.title, 'progress': m.progress, 'target': m.target, 'p': done ? 'tamamlandı, {xp} XP alındı'.trArgs({'xp': m.xp}) : '{xp} XP ödül'.trArgs({'xp': m.xp})}),
+      label: '{tag} görev: {title}, {progress} / {target}, {p}'.trArgs({
+        'tag': tag,
+        'title': m.title,
+        'progress': m.progress,
+        'target': m.target,
+        'p': done ? 'tamamlandı, {xp} XP alındı'.trArgs({'xp': m.xp}) : '{xp} XP ödül'.trArgs({'xp': m.xp}),
+      }),
       excludeSemantics: true,
       child: Container(
         padding: EdgeInsets.fromLTRB(12 * k, 10 * k, 10 * k, 10 * k),

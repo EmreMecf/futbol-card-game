@@ -18,7 +18,7 @@ Kural: gerçek para bu zincirin **hiçbir halkasına** doğrudan girmemeli.
 | # | Çatışma | Risk | Karar |
 |---|---|---|---|
 | R1 | Elmas parayla satılırsa elmas→altın→paket | Doğrudan parayla güç | **Ücretli elmas ayrı bakiye** (`users.paid_gems`). Altın değişimi ve sandık açma yalnız **ücretsiz** elmas (`users.gems`) harcar. Ücretli elmas yalnız kozmetik ve güçsüz premium yol. |
-| R2 | Premium sezon yolu joker/sandık/altın veriyor | Parayla güç | Premium satın alma **kapalı kalır** (`premium_purchase_enabled=false`). Açılmadan önce premium yolun güç veren ödülleri kozmetiğe çevrilmiş yeni bir sezon tanımı gerekir (Faz 5). |
+| R2 | Premium sezon yolu joker/sandık/altın veriyor | Parayla güç | 063: sezon kuralı sürüm 2'de premium yol yalnız ücretli elmas + pas kozmetiği; satış yalnız premium yolu **tamamen güçsüz** sezonda (`_season_premium_power_free`), 035 tablolu sezonda satış yok. Ücretsiz yol değişmedi. |
 | R3 | Elmasla sandığı hemen açma | Zaman = kart akışı. Dolaylı avantaj | Yalnız ücretsiz elmasla (R1). Ücretli elmasla sandık açma ayarı (`paid_gems_chest_open_enabled`) varsayılan **kapalı**; açmak simülasyon sonrası ürün kararıdır. |
 | R4 | Reklamla elmas/altın | Reklam çiftçiliği, enflasyon | Reklam ödülü: küçük altın (günlük ödül merkezi) ve sandık süresi kısaltma. **Elmas verilmez.** Günde en fazla 3 doğrulanmış reklam, sunucuda. |
 | R5 | Mevcut bakiyeler | Haksız değişiklik | Hiçbir bakiye değişmez. Bugünkü elmaslar ücretsiz elmas olarak kalır. |

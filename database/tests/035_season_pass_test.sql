@@ -3,6 +3,13 @@
 -- =====================================================================
 begin;
 
+-- 063 sezon kuralini surum 2'ye (gucsuz premium yol) gecirdi. Bu test 035
+-- tablosunu (surum 1) dogrular: islem icinde surum 1 icerigi en yeni test
+-- surumu olarak verilir (geri alinir).
+insert into economy_config_versions (kind, version, payload, note)
+select 'season_rules', 990, payload, 'test: 035 tablosu'
+from economy_config_versions where kind = 'season_rules' and version = 1;
+
 create function pg_temp.beklenen(p_ad text, p_gercek anyelement, p_beklenen anyelement)
 returns void language plpgsql as $$
 begin
@@ -254,7 +261,8 @@ begin
   select count(*) into n from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
   where ns.nspname = 'public'
     and p.prosrc ~* '(user_seasons|season_claims|season_xp|user_missions)'
-    and p.proname !~ '^(_season|_mission|_current_season|_economy_season|season_|missions_|claim_season|claim_all_season|close_due_seasons|repair_season_rewards|admin_repair_season_rewards|dev_season|dev_set_season)';
+    -- 063: satin alma premium yolu acar/iade eder (mac kurali degil)
+    and p.proname !~ '^(_season|_mission|_current_season|_economy_season|season_|missions_|claim_season|claim_all_season|close_due_seasons|repair_season_rewards|admin_repair_season_rewards|dev_season|dev_set_season|purchase_grant_verified|purchase_refund)';
   perform pg_temp.beklenen('K1: sezon verisini okuyan baska fonksiyon yok', n, 0);
 
   raise notice '035 battle pass testleri: HEPSI GECTI';

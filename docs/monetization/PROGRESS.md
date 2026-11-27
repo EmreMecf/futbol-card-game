@@ -70,6 +70,24 @@ Bağlam yenilenirse buradan devam edilir.
   açık profil; zafer: maç sonu). Test sunucu tohumuyla istemci çizimini
   karşılaştırır.
 
+### Faz 5 — Güçsüz premium sezon yolu (migration 063)
+* Sezon kuralı sürüm 2: ücretsiz yol 035 ile birebir aynı; premium yol
+  yalnız ücretli elmas (kademe başına 5, 10/20/30/40'ta 20, 25'te 25) ve
+  pas çerçeveleri (1: Buz Kristali, 50: Altın Kupa; telafi 0). Tablo sezon
+  başında dondurulduğu için SÜREN sezon değişmez; yeni sezonlar sürüm 2.
+* Satış kapısı `_season_premium_power_free`: süren sezonun premium yolu
+  tamamen güçsüz değilse ürün katalogda görünmez, doğrulansa da premium
+  verilmez (iade için işaretlenir). Sezon başına tek alım.
+* Ürün `season_pass_premium` (SEASON_PASS, taslak). Satın alma süren sezona
+  bağlanır; ulaşılmış kademeler hemen alınabilir (geriye dönük), alınmayanlar
+  sezon sonunda otomatik. İade: premium kalkar, premium yoldan alınan ücretli
+  elmas (borçla) ve pas kozmetikleri geri alınır.
+* `_season_grant` yeni ödül türü `paid_gems`; `season_premium_status`.
+* İstemci: `SeasonReward.isPaidGems`, sezon ekranında `V21SeasonPremiumOffer`
+  (yalnız sunucu satarken), ödül yolunda elmas ve çerçeve simgesi; elmas
+  bölümünde premium yol paket gibi listelenmez.
+* 035/036 testleri kendi tablolarını (sürüm 1) işlem içinde sabitler.
+
 ## Sıradaki
 
 | Adım | Not |
@@ -78,7 +96,7 @@ Bağlam yenilenirse buradan devam edilir.
 | 2e | Maç sonu teklifi arayüzü (`post_match`, sunucu hazır, arayüz yok; bayrak kapalı) |
 | 3b | Gerçek cihazda Google lisans testi / Apple sandbox (hesaplar BLOCKED); hukuk metni onayı (cayma hakkı cümlesi) |
 | 4b | Kart görünümü / arena / forma kozmetiklerinin çizimi oyunda bağlı değil (034'te tanımlı, ekranda yok); bağlanınca mağazaya eklenebilir. 043 lig çerçeveleri de çizilmiyor |
-| 5 | Güçsüz premium sezon yolu |
+| 5b | Her yeni sezon için yeni pas kozmetikleri (sürüm 3+): aynı çerçeve ikinci sezonda tekrar gelirse telafisi 0 olduğu için boş ödül olur |
 | 6 | Yönetici uçları (rol + denetim), deney tablosu, olay saklama süresi |
 
 ## BLOCKED (insan / hesap)
@@ -89,7 +107,8 @@ Bağlam yenilenirse buradan devam edilir.
 
 ## Onay bekleyen (yapılmadı)
 
-* Staging'e 060 + 061 + 062 deploy (commit/push kullanıcı kararı)
+* Staging'e 060 + 061 + 062 + 063 deploy (commit/push kullanıcı kararı)
+* Premium sezon yolunu satışa açmak (`season_pass_premium` active, `premium_season_pass_enabled`; gerçek para)
 * Kozmetik mağazayı açmak (`cosmetic_shop_enabled`) ve teklif fiyatlarını onaylamak
 * Gerçek para tahsilatını açmak (`iap_enabled`, ürünleri `active` yapmak)
 * Üretimde herhangi bir monetizasyon bayrağını açmak
