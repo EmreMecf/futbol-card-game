@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../features/monetization/purchase/purchase_controller.dart';
+import '../../features/monetization/purchase/store_client.dart';
 import '../../features/monetization/monetization_api.dart';
 import '../../features/monetization/rewarded_ad_controller.dart';
 import '../../features/monetization/rewarded_ad_provider.dart';
@@ -251,6 +253,11 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<SocialApi>(() => SocialApi(getIt<ApiClient>()))
     // 060: ödüllü reklam (sunucu ayarı kapalıyken hiçbir şey gösterilmez)
     ..registerLazySingleton<MonetizationApi>(() => MonetizationApi(getIt<ApiClient>()))
+    // 061: satın alma (sunucu bayrağı + mağaza fiyatı yoksa görünmez)
+    ..registerLazySingleton<PurchaseApi>(() => PurchaseApi(getIt<ApiClient>()))
+    ..registerFactory<PurchaseController>(
+      () => PurchaseController(getIt<PurchaseApi>(), StoreClient.create(), session: getIt<SessionManager>()),
+    )
     ..registerFactory<RewardedAdController>(
       () => RewardedAdController(getIt<MonetizationApi>(), RewardedAdProvider.create(), session: getIt<SessionManager>()),
     )

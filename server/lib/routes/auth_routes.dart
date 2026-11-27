@@ -67,7 +67,7 @@ Router authRoutes(Database db, JwtService jwt, {SocialTokenVerifier? socialVerif
       '''
       insert into users (email, password_hash, username, protection_slots)
       values (@email, @hash, @username, base_protection_slots())
-      returning id, email, username, coins, gems, protection_slots, mmr,
+      returning id, email, username, coins, gems, paid_gems, protection_slots, mmr,
                 wins, losses, draws, avatar_url, created_at
       ''',
       params: {'email': email, 'hash': hash, 'username': username},
@@ -105,7 +105,7 @@ Router authRoutes(Database db, JwtService jwt, {SocialTokenVerifier? socialVerif
 
     final kullanici = await db.queryOne(
       '''
-      select id, email, username, password_hash, coins, gems, protection_slots, mmr,
+      select id, email, username, password_hash, coins, gems, paid_gems, protection_slots, mmr,
              wins, losses, draws, avatar_url, is_banned, ban_reason, created_at
       from users where email = @email
       ''',
@@ -223,7 +223,7 @@ Router authRoutes(Database db, JwtService jwt, {SocialTokenVerifier? socialVerif
         with yeni as (
           insert into users (email, password_hash, username, protection_slots)
           values (@email::text, @hash, @username, base_protection_slots())
-          returning id, email, username, coins, gems, protection_slots, mmr,
+          returning id, email, username, coins, gems, paid_gems, protection_slots, mmr,
                     wins, losses, draws, avatar_url, is_banned, ban_reason, created_at
         ), kimlik as (
           insert into user_identities (user_id, provider, provider_subject, email)
@@ -396,7 +396,7 @@ Router meRoutes(Database db, {SocialTokenVerifier? socialVerifier}) {
 
     final kullanici = await db.queryOne(
       '''
-      select id, email, username, coins, gems, protection_slots, mmr,
+      select id, email, username, coins, gems, paid_gems, protection_slots, mmr,
              wins, losses, draws, avatar_url, created_at
       from users where id = @id::uuid
       ''',

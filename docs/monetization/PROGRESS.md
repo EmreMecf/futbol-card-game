@@ -35,13 +35,28 @@ Bağlam yenilenirse buradan devam edilir.
   APPLE_IAP_SETUP (plan).
 * Simülasyon: `tool/ekonomi/monetizasyon_simulasyonu.dart`.
 
+### Faz 3 — Satın alma (migration 061)
+* SQL: `gem_ledger.currency`, `users.paid_gems_debt`, `_paid_gem_add`
+  (önce borç kapanır), `product_catalog` (güç içeriği CHECK ile yasak;
+  4 ürün `draft`), `purchase_transactions`, `purchase_verification_events`,
+  `purchase_grant_verified` (tekil, hesaplar arası engel, bekleyen ödeme),
+  `purchase_mark_acknowledged`, `purchase_refund`, `purchase_history`.
+* Sunucu: `purchase_verifier.dart` (Google Play, App Store, test sağlayıcı
+  yalnız staging), `purchase_routes.dart` (`/api/purchases/*`,
+  `/api/webhooks/google-play`, `/api/webhooks/apple`). Anahtar yoksa 503.
+* İstemci: `in_app_purchase`, `lib/features/monetization/purchase/*`
+  (mağaza arayüzü + IAP + yok, akış denetleyicisi), mağazada
+  `V21GemPacksSection` (cayma hakkı onayı, geri yükleme).
+* CI: simülatör analiz uyarıları; Android release'te eklenti lint çökmesi
+  (`lint { checkReleaseBuilds = false }`).
+
 ## Sıradaki
 
 | Adım | Not |
 |---|---|
 | 2d | Ayarlar > "Gizlilik seçenekleri" düğmesi (UMP `privacyOptionsRequired`), KVKK rıza ekranı (metin insan onayı), iOS ATT kararı |
 | 2e | Maç sonu teklifi arayüzü (`post_match`, sunucu hazır, arayüz yok; bayrak kapalı) |
-| 3 | Satın alma: `purchase_transactions`, doğrulayıcı arayüzü, test sağlayıcı (yalnız staging), Google/Apple gerçek doğrulayıcılar BLOCKED |
+| 3b | Gerçek cihazda Google lisans testi / Apple sandbox (hesaplar BLOCKED); hukuk metni onayı (cayma hakkı cümlesi) |
 | 4 | Mağaza sekmeleri, kozmetik satış + önizleme, başlangıç paketi |
 | 5 | Güçsüz premium sezon yolu |
 | 6 | Yönetici uçları (rol + denetim), deney tablosu, olay saklama süresi |
@@ -54,5 +69,6 @@ Bağlam yenilenirse buradan devam edilir.
 
 ## Onay bekleyen (yapılmadı)
 
-* Staging'e 060 deploy (commit/push kullanıcı kararı)
+* Staging'e 060 + 061 deploy (commit/push kullanıcı kararı)
+* Gerçek para tahsilatını açmak (`iap_enabled`, ürünleri `active` yapmak)
 * Üretimde herhangi bir monetizasyon bayrağını açmak

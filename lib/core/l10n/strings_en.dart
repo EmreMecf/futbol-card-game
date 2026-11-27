@@ -1122,4 +1122,28 @@ const Map<String, String> kEnStrings = {
   'Hazırlanıyor…': 'Preparing…',
   'Reklam yükleniyor…': 'Loading ad…',
   'Reklam oynatılıyor…': 'Ad playing…',
+  // 061 — satın alma
+  'Satın alma başlatılamadı.': 'Could not start the purchase.',
+  'Ödeme onay bekliyor. Onaylanınca elmasların hesabına geçecek.':
+      'Payment is pending. Your gems will arrive once it is approved.',
+  'Satın alma iptal edildi.': 'Purchase cancelled.',
+  'Satın alma tamamlanamadı. Ücret alınmadıysa tekrar deneyebilirsin.':
+      'The purchase could not be completed. If you were not charged, you can try again.',
+  'Satın alma doğrulanıyor…': 'Verifying purchase…',
+  'Bu ürün zaten alınmış; ücret iadesi için destekle iletişime geç.':
+      'You already own this item; contact support for a refund.',
+  'Satın alma tamamlandı!': 'Purchase complete!',
+  'Satın alma doğrulanamadı.': 'The purchase could not be verified.',
+  'Satın alma şu an doğrulanamadı; ödemen kaybolmaz, uygulama açılınca yeniden denenecek.':
+      'The purchase could not be verified right now; your payment is safe and will be retried when the app opens.',
+  'ELMAS PAKETLERİ': 'GEM PACKS',
+  'Elmas kozmetik ürünlerde kullanılır; maç gücü vermez.': 'Gems are used for cosmetics; they give no match power.',
+  'SATIN ALIMLARI GERİ YÜKLE': 'RESTORE PURCHASES',
+  'SATIN AL': 'BUY',
+  '{gems} elmas · {price}': '{gems} gems · {price}',
+  'Dijital içerik anında teslim edilir; teslimden sonra cayma hakkım olmadığını kabul ediyorum.':
+      'Digital content is delivered immediately; I accept that I lose my right of withdrawal after delivery.',
+  'ONAY GEREKLİ': 'CONFIRMATION REQUIRED',
+  'Satın almak için teslim ve cayma hakkı bilgisini onaylaman gerekiyor.':
+      'To buy, you need to accept the delivery and withdrawal notice.',
 };

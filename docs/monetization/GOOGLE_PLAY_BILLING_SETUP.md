@@ -1,27 +1,45 @@
-# Google Play Billing Kurulumu — Faz 3 (BLOCKED)
+# Google Play Billing Kurulumu — Faz 3
 
-Durum: **henüz uygulanmadı.** Gerçek doğrulama Google hesabı ve anahtar
-gerektirir; bu olmadan satın alma açılmaz (`iap_enabled=false`, fail-closed).
+Durum: **kod hazır, hesap BLOCKED.** Anahtar yoksa doğrulayıcı kurulmaz ve
+`/api/purchases/verify` 503 döner (fail-closed). Satış bayrağı
+(`iap_enabled`) kapalıyken mağazada ürün görünmez.
 
 ## Gerekenler (insan)
 
-1. Play Console → Uygulama → Para kazanma → Ürünler → Uygulama içi ürünler:
-   `gems_starter_100`, `gems_popular_300`, `gems_large_700` (tüketilebilir).
-   Fiyatlar Play Console TL kademelerinden **elle** seçilir; kodda fiyat yok.
-2. Google Cloud → hizmet hesabı → Play Console'da "Finansal veriler" + "Siparişler" yetkisi.
-   JSON anahtarı **Render gizli ortam değişkeni** olur: `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` (depoya girmez).
-3. Real-time Developer Notifications: Pub/Sub konusu → itme aboneliği
-   `https://<sunucu>/api/webhooks/google-play` (Faz 3'te eklenecek).
-4. Lisans test kullanıcıları (gerçek tahsilat olmadan test).
+1. Play Console → Para kazanma → Uygulama içi ürünler (tüketilebilir):
+   `gems_starter_100`, `gems_popular_300`, `gems_large_700`;
+   başlangıç paketi `starter_pack_1` (tek seferlik). Fiyat Play Console TL
+   kademesinden **elle**; kodda fiyat yok, istemci fiyatı mağazadan alır.
+2. Google Cloud → hizmet hesabı → Play Console'da "Finansal veriler" +
+   "Siparişleri yönet" yetkisi. JSON anahtarı **Render gizli değişkeni**:
+   `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` (depoya ve günlüğe girmez).
+3. `GOOGLE_PLAY_PACKAGE_NAME=com.futbolcard.futbol_card`.
+4. Real-time Developer Notifications: Pub/Sub konusu → itme aboneliği
+   `https://<sunucu>/api/webhooks/google-play`, "kimlik doğrulama etkin"
+   (OIDC). `GOOGLE_RTDN_AUDIENCE` (abonelikte verilen hedef kitle) ve
+   `GOOGLE_RTDN_SERVICE_ACCOUNT` (itme hizmet hesabı e-postası) tanımlanır.
+5. Lisans test kullanıcıları (gerçek tahsilat olmadan).
+6. Katalogda ürünü yayına al: `product_catalog.status='active'`
+   (LIVEOPS_GUIDE), sonra `iap_enabled` + beyaz liste ile kademeli aç.
 
-## Plan (kod)
+## Uygulanan (kod)
 
-* `purchase_transactions` (purchase_token UNIQUE, durum: created → pending →
-  verification_required → verified → granted → acknowledged; cancelled,
-  failed, refunded, revoked), ödül `gem_ledger`'a (`users.paid_gems`).
-* Doğrulama: Android Publisher API `purchases.products.get`; ürün kimliği,
-  paket adı, `purchaseState=0`, `obfuscatedExternalAccountId` = oyuncu.
-* İade: RTDN `voidedPurchaseNotification` + Voided Purchases API (30 gün).
-  İade edilen ücretli elmas geri alınır.
-* İstemci `in_app_purchase`: fiyat SDK'dan, `completePurchase` yalnız sunucu
-  onayından sonra.
+* `database/migrations/061_purchases.sql`: `product_catalog`,
+  `purchase_transactions` (platform+mağaza işlemi UNIQUE, jeton özeti
+  UNIQUE), `purchase_verification_events`, `purchase_grant_verified`,
+  `purchase_refund` (ücretli elmas geri alınır; yetmezse borç
+  `paid_gems_debt`, sonraki alımdan önce kapanır).
+* `server/lib/monetization/purchase_verifier.dart` —
+  `GooglePlayPurchaseVerifier`: Android Publisher
+  `purchases.products.get`; paket adı, ürün, `purchaseState=0`,
+  `obfuscatedExternalAccountId` = oyuncu kimliği; bekleyen ödeme ödül vermez.
+  Ödül verildikten sonra sunucu `acknowledge` eder.
+* İade: RTDN `voidedPurchaseNotification` → `purchase_refund`.
+* İstemci (`in_app_purchase`): `completePurchase` yalnız sunucu cevabından
+  sonra; geçici hatada işlem açık kalır ve sonraki açılışta yeniden doğrulanır.
+
+## Staging testi
+
+`MONETIZATION_TEST_PROVIDERS=true` ve `DEPLOY_STAGE=staging` iken
+`test:<ürün>:<kimlik>` jetonları sahte doğrulayıcıyla geçer. Üretimde bu
+sağlayıcı kurulmaz.

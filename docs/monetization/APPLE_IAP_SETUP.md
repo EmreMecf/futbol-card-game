@@ -1,23 +1,25 @@
-# Apple In-App Purchase Kurulumu — Faz 3 (BLOCKED)
+# Apple In-App Purchase Kurulumu — Faz 3
 
-Durum: **henüz uygulanmadı.** Apple Developer hesabı ve App Store Connect
-anahtarı gerekir; `iap_enabled=false` iken satın alma görünmez.
+Durum: **kod hazır, hesap BLOCKED.** Anahtar yoksa iOS doğrulaması 503
+döner (fail-closed); `iap_enabled=false` iken satış görünmez.
 
 ## Gerekenler (insan)
 
-1. App Store Connect → Uygulama içi satın alımlar: tüketilebilir elmas
-   paketleri (Google ile aynı kimlikler). Fiyat TL kademesinden elle.
+1. App Store Connect → Uygulama içi satın alımlar: Google ile aynı
+   kimlikler (tüketilebilir elmas paketleri + `starter_pack_1`). Fiyat TL
+   kademesinden elle.
 2. Kullanıcılar ve Erişim → Entegrasyonlar → App Store Server API anahtarı
-   (`.p8`, Key ID, Issuer ID) → Render gizli değişkenleri:
-   `APPLE_IAP_KEY_ID`, `APPLE_IAP_ISSUER_ID`, `APPLE_IAP_PRIVATE_KEY`.
-3. App Store Server Notifications V2 adresi:
-   `https://<sunucu>/api/webhooks/apple` (Faz 3).
-4. Sandbox test kullanıcıları.
-5. Small Business Program kaydı (%15 komisyon).
+   (`.p8`) → Render gizli değişkenleri: `APPLE_IAP_KEY_ID`,
+   `APPLE_IAP_ISSUER_ID`, `APPLE_IAP_PRIVATE_KEY`, `APPLE_BUNDLE_ID`.
+3. App Store Server Notifications V2: `https://<sunucu>/api/webhooks/apple`.
+4. Sandbox test kullanıcıları; Small Business Program (%15 komisyon).
 
-## Plan (kod)
+## Uygulanan (kod)
 
-* StoreKit 2 işlem kimliği UNIQUE; doğrulama App Store Server API
-  `GET /inApps/v1/transactions/{id}` (JWS imzası Apple kök sertifikasıyla).
-* Bildirim V2 JWS doğrulaması; `REFUND` / `REVOKE` → ücretli elmas geri alınır.
-* Aynı işlem başka hesapta kullanılamaz (`appAccountToken` = oyuncu UUID).
+* `AppStorePurchaseVerifier`: ES256 JWT ile App Store Server API
+  `GET /inApps/v1/transactions/{id}` (önce üretim, bulunamazsa sandbox).
+  Paket kimliği, ürün ve `appAccountToken` = oyuncu UUID denetlenir;
+  iptal/iade edilmiş işlem reddedilir.
+* Bildirim ucu imzalı yüke güvenmez: bildirimdeki işlem kimliğiyle Apple
+  API'si yeniden sorgulanır; `REFUND` / `REVOKE` → `purchase_refund`.
+* Aynı işlem başka hesapta kullanılamaz (veritabanı kuralı).

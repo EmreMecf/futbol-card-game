@@ -21,6 +21,9 @@ import 'package:futbol_card_server/routes/progress_routes.dart';
 import 'package:futbol_card_server/routes/sbc_routes.dart';
 import 'package:futbol_card_server/monetization/ad_ssv_verifier.dart';
 import 'package:futbol_card_server/monetization/monetization_routes.dart';
+import 'package:futbol_card_server/monetization/purchase_routes.dart';
+import 'package:futbol_card_server/monetization/purchase_verifier.dart';
+import 'package:futbol_card_server/auth/social_token_verifier.dart';
 import 'package:futbol_card_server/routes/social_routes.dart';
 import 'package:futbol_card_server/scheduler/timeout_sweeper.dart';
 import 'package:futbol_card_server/utils/api_response.dart';
@@ -122,6 +125,32 @@ Future<void> main(List<String> args) async {
     Pipeline()
         .addMiddleware(rateLimit(ssvSiniri, trustProxy: Env.trustProxy))
         .addHandler(adSsvRoutes(db, AdSsvVerifier(ssvAnahtarlari)).call),
+  );
+  // 061: satın alma. Anahtarı olmayan mağaza için doğrulayıcı YOK (fail-closed);
+  // test sağlayıcı yalnız DEPLOY_STAGE != production ve açıkça istenirse.
+  final satinAlmaDogrulayicilari = PurchaseVerifiers([
+    ?GooglePlayPurchaseVerifier.fromServiceAccountJson(Env.googlePlayServiceAccountJson, Env.googlePlayPackageName),
+    ?AppStorePurchaseVerifier.fromEnv(
+      bundleId: Env.appleBundleId,
+      keyId: Env.appleIapKeyId,
+      issuerId: Env.appleIapIssuerId,
+      privateKey: Env.appleIapPrivateKey,
+    ),
+    if (Env.monetizationTestProviders) TestPurchaseVerifier(),
+  ]);
+  api.mount('/purchases', korumali.addHandler(purchaseRoutes(db, satinAlmaDogrulayicilari).call));
+  api.mount(
+    '/webhooks',
+    Pipeline()
+        .addMiddleware(rateLimit(ssvSiniri, trustProxy: Env.trustProxy))
+        .addHandler(purchaseWebhookRoutes(
+          db,
+          satinAlmaDogrulayicilari,
+          pubsubTokenVerifier: Env.googleRtdnAudience.isEmpty
+              ? null
+              : SocialTokenVerifier(googleClientIds: {Env.googleRtdnAudience}, appleClientIds: const {}),
+          pubsubServiceAccount: Env.googleRtdnServiceAccount,
+        ).call),
   );
   // 056: arkadaşlık, oyuncu arama, açık profil
   api.mount('/social', korumali.addHandler(socialRoutes(db).call));

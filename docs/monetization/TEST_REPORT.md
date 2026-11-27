@@ -16,6 +16,19 @@ Tarih: 27 Kasım 2026 · Yerel: Flutter 3.50.1 / Dart 3.14, PostgreSQL 17
 | Web derlemesi (release) | Geçti | `google_mobile_ads` web'de koşullu içe aktarma ile dışarıda (reklam yok) |
 | Android derlemesi | **Yerelde yapılamadı** | Bu bilgisayarda Java 8 var, Gradle 9.5 Java 17+ istiyor; Android derlemesini GitHub CI doğrular. AdMob test uygulama kimliği bildirimde |
 
+## Faz 3 — Satın alma
+
+| Paket | Sonuç | Not |
+|---|---|---|
+| `flutter analyze` / `dart analyze` (sunucu) | Temiz | simülatör uyarıları da giderildi |
+| `flutter test` | **1209 geçti** (45 atlanan) | bayraklar kapalı, goldenlar aynı |
+| `test/purchase_test.dart` (yeni) | 8 geçti | yalnız mağaza fiyatlı ürün, bayrak/mağaza kapalı, doğrula→tamamla, geçici hatada işlem açık kalır, kalıcı hata, sunucu pending, bekleyen/iptal, oturumsuz satın alma yok. Başarı mesajının hemen silinmesi hatası bu testle bulundu ve düzeltildi |
+| `server: dart test` | **64 geçti** | yeni `purchase_verifier_test.dart`: Google/Apple yanıt denetimleri, hesap eşleşmesi, bekleyen, iade, test sağlayıcı |
+| `database/tests/061_purchases_test.sql` (yeni) | Geçti | tekil ödül, tekrar, hesaplar arası engel, bekleyen→gerçek kimlik, iade + borç, katalog güç yasağı, sınır |
+| Yerel uçtan uca (sunucu + PostgreSQL, test sağlayıcı) | 16/16 | katalog, doğrulama, tekrar, geçmiş, geri yükleme, reklam akışı |
+| Üretim kapısı (`DEPLOY_STAGE=production`) | 4/4 | test sağlayıcı yok, anahtarsız 503, simülasyon ucu yok |
+| Android release (CI) | Bekliyor | eklenti lint çökmesi için `checkReleaseBuilds = false`; CI'da doğrulanacak |
+
 ## Brif uçtan uca senaryoları
 
 | Senaryo | Durum |
@@ -27,7 +40,7 @@ Tarih: 27 Kasım 2026 · Yerel: Flutter 3.50.1 / Dart 3.14, PostgreSQL 17
 | Aktif PvP'de reklam yok | SQL ✔ |
 | Reklam yüklenmezse oyun devam | istemci ✔ |
 | Bayrak kapalıyken eski davranış | 1201 test, golden aynı ✔ |
-| Satın alma senaryoları | Faz 3 — **BLOCKED** (mağaza hesapları) |
+| Satın alma senaryoları | Faz 3 ✔ test sağlayıcıyla; gerçek mağaza sandbox testi **BLOCKED** (hesaplar) |
 | Gerçek cihazda gerçek AdMob test reklamı | Yapılmadı: AdMob hesabı ve cihaz gerekiyor |
 
 ## Ekonomi simülasyonu (`dart run tool/ekonomi/monetizasyon_simulasyonu.dart`)

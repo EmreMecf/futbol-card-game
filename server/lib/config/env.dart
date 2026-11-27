@@ -95,6 +95,18 @@ class Env {
   static bool get monetizationTestProviders =>
       deployStage != 'production' && str('MONETIZATION_TEST_PROVIDERS', 'false') == 'true';
 
+  // ---- SATIN ALMA (061). Değerler GİZLİ: depoya değil Render ortamına ----
+  static String get googlePlayPackageName => str('GOOGLE_PLAY_PACKAGE_NAME', 'com.futbolcard.futbol_card');
+  static String get googlePlayServiceAccountJson => str('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON', '');
+  /// RTDN (Pub/Sub itme) için: OIDC jetonunun hedef kitlesi ve gönderen hizmet hesabı
+  static String get googleRtdnAudience => str('GOOGLE_RTDN_AUDIENCE', '');
+  static String get googleRtdnServiceAccount => str('GOOGLE_RTDN_SERVICE_ACCOUNT', '');
+  static String get appleBundleId => str('APPLE_BUNDLE_ID', 'com.futbolcard.futbolCard');
+  static String get appleIapKeyId => str('APPLE_IAP_KEY_ID', '');
+  static String get appleIapIssuerId => str('APPLE_IAP_ISSUER_ID', '');
+  /// .p8 içeriği; ortamda "\n" ile tek satır verilebilir
+  static String get appleIapPrivateKey => str('APPLE_IAP_PRIVATE_KEY', '').replaceAll(r'\n', '\n');
+
   /// AdMob SSV açık anahtar adresi (varsayılan Google'ın resmi adresi)
   static String get admobSsvKeysUrl =>
       str('ADMOB_SSV_KEYS_URL', 'https://www.gstatic.com/admob/reward/verifier-keys.json');

@@ -23,6 +23,9 @@ abstract class UserModel with _$UserModel {
     /// 056: elmas (nadir para birimi)
     @Default(0) int gems,
 
+    /// 061: gerçek parayla alınan elmas (yalnız kozmetik; altına çevrilemez)
+    @Default(0) int paidGems,
+
     /// Maca girerken korumaya alinabilecek kart sayisi.
     /// Her galibiyette 1 artar (ust sinir [GameRules.maxProtectionSlots]).
     @Default(GameRules.baseProtectionSlots) int protectionSlots,

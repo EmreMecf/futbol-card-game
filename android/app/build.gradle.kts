@@ -64,6 +64,15 @@ android {
         }
     }
 
+    // 060: google_mobile_ads, webview_flutter_android eklentisini getiriyor;
+    // release derlemesindeki "lintVital" analizi bu kütüphanede lint'in kendi
+    // hatasıyla çöküyor ("Unexpected failure during lint analysis ... this is
+    // a bug in lint"). Yayın derlemesi bu analizle durmasın; Dart kodu
+    // flutter analyze ve testlerle ayrıca denetleniyor.
+    lint {
+        checkReleaseBuilds = false
+    }
+
     buildTypes {
         release {
             signingConfig = if (anahtarDosyasi.exists()) {

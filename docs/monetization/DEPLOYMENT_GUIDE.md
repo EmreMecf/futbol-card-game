@@ -16,6 +16,14 @@ onayı ister.** Bu belge staging içindir.
 | `DEPLOY_STAGE` | `staging` | `production` |
 | `MONETIZATION_TEST_PROVIDERS` | `true` (isteğe bağlı) | tanımsız / `false` |
 | `ADMOB_SSV_KEYS_URL` | tanımsız (varsayılan) | tanımsız |
+| `GOOGLE_PLAY_PACKAGE_NAME` | `com.futbolcard.futbol_card` | aynı |
+| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | gizli (isteğe bağlı) | gizli |
+| `GOOGLE_RTDN_AUDIENCE` / `GOOGLE_RTDN_SERVICE_ACCOUNT` | Pub/Sub itme ayarı | aynı |
+| `APPLE_BUNDLE_ID` / `APPLE_IAP_KEY_ID` / `APPLE_IAP_ISSUER_ID` / `APPLE_IAP_PRIVATE_KEY` | gizli (isteğe bağlı) | gizli |
+
+Mağaza anahtarı yoksa o platformun doğrulaması 503 döner; satın alma
+ödülü hiçbir koşulda istemci beyanıyla verilmez. 061 da yalnız ekleme
+yapar (yeni tablo/sütun; ürünler `draft`).
 
 4. Doğrulama: `GET /api/health`; ayar kapalı olmalı:
    `select monetization_config()->>'monetization_enabled'` → `false`.

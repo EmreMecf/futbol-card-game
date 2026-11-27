@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 // Monetizasyon ekonomi simülasyonu (beklenen değer modeli, rastgelelik yok).
 //
 //   dart run tool/ekonomi/monetizasyon_simulasyonu.dart
@@ -37,7 +38,7 @@ class Profile {
 }
 
 Map<String, double> _mix() {
-  final lossRate = 1 - winRate - drawRate;
+  const lossRate = 1 - winRate - drawRate;
   final m = <String, double>{};
   for (final t in unlock.keys) {
     m[t] = (winRate * typeOdds['win']![t]! + drawRate * typeOdds['draw']![t]! + lossRate * typeOdds['loss']![t]!) / 1000;

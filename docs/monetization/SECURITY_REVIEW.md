@@ -17,8 +17,23 @@
 | Hassas veri günlüğü | İmza, makbuz, jeton saklanmaz/günlüklenmez | `ad_ssv_events` imza sütunu yok |
 | Geri çağrı ucu oturum gerektirmez | Bilerek: Google oyuncu jetonu taşımaz; koruma imza + hız sınırı (dakikada 120/IP) | `server.dart` |
 
+## Faz 3 — Satın alma
+
+| Tehdit | Önlem | Kanıt |
+|---|---|---|
+| Sahte makbuz / istemci "satın aldım" demesi | Ödül yalnız mağaza API'si doğrulayınca (`purchase_grant_verified`); istemci yalnız jeton/işlem kimliği gönderir | `purchase_verifier_test.dart`, `purchase_test.dart` |
+| Aynı makbuzun tekrar kullanımı | (platform, mağaza işlemi) UNIQUE + jeton özeti UNIQUE; tekrar aynı cevabı alır | `061_purchases_test.sql` |
+| Başka hesabın makbuzu | Google `obfuscatedExternalAccountId`, Apple `appAccountToken` = oyuncu; ayrıca veritabanında hesaplar arası engel | SQL + sunucu testi |
+| Bekleyen ödeme | Ödül yok; tamamlanınca mağaza yeniden bildirir | SQL + istemci testi |
+| İade / geri alma | RTDN / Apple bildirimi → ücretli elmas geri alınır, yetmezse borç | SQL test |
+| Sahte bildirim | Google: Pub/Sub OIDC imzası + hizmet hesabı; Apple: yük güvenilmez, API yeniden sorgulanır | `purchase_routes.dart` |
+| Fiyat manipülasyonu | Fiyat istemcide yalnız mağaza SDK'sından; sunucu fiyat almaz, ürün içeriği katalogdan | — |
+| Güç satışı | Katalog CHECK: içerikte `coins/jokers/chests/cards/gems` yasak; ücretli elmas altın/sandık açamaz (R1) | SQL test |
+| Anahtar eksik | Doğrulayıcı kurulmaz, 503 (fail-closed); test sağlayıcı üretimde kurulmaz | e2e kapı kontrolleri |
+| Hassas veri | Jeton yalnız SHA-256 özetiyle saklanır; makbuz/özel anahtar günlüğe yazılmaz | şema |
+
 ## Açık kalanlar
 
 * Yönetici rolü yok: ayar değişikliği bugün veritabanı erişimiyle (`set_monetization_config`). Yönetici uçları Faz 6.
-* Satın alma doğrulaması Faz 3 (Google/Apple anahtarları **BLOCKED**).
+* Gerçek mağaza doğrulaması kodda hazır, hesap ve anahtarlar **BLOCKED**; gerçek cihazda sandbox testi yapılmadı.
 * `ad_ssv_events` ve `monetization_events` için saklama süresi (KVKK veri minimizasyonu) — Faz 6'da temizleme işi.
