@@ -54,6 +54,16 @@ Tarih: 27 Kasım 2026 · Yerel: Flutter 3.50.1 / Dart 3.14, PostgreSQL 17
 | Yerel uçtan uca (gerçek sunucu + PostgreSQL, test sağlayıcı) | 10/10 | yeni sezon güçsüz, satın alma + mağaza bildirimi, premium açıldı, geriye dönük 5+5, 20 ücretli elmas, pas çerçevesi, ikinci alım ödülsüz |
 | Yerel psql notu | — | Windows psql WIN1254 kodlamasıyla "Ş/Ğ" harfinde takılıyordu; 063 metinleri bu harfleri kullanmıyor (CI Linux/UTF-8) |
 
+## Faz 6 — Yönetim / LiveOps
+
+| Paket | Sonuç | Not |
+|---|---|---|
+| `server: dart analyze` / `dart test` | Temiz / 64 geçti | |
+| `scripts/db-testleri.sh` | Geçti | 62 migration sıfırdan, tekrar çalıştırma, maç sürerken 064 |
+| `database/tests/064_monetization_admin_test.sql` (yeni) | Geçti | rolsüz red, viewer okur ama değiştiremez, operator ayar + denetim aktörü, operator gerçek parayı açamaz / ürünü yayına alamaz, gerekçe zorunlu, owner yayına alır, geri alınan rol, teklif fiyatı ve bilinmeyen alan reddi, acil kapatma, 6 denetim satırı, deney (geçersiz ağırlık, taslakta grup yok, kalıcı atama, dağılım, durmuş deney), istemci ayarında deney, metrik biçimi, saklama süresi ve 30 gün alt sınırı |
+| Yerel uçtan uca (gerçek sunucu + PostgreSQL) | 17/17 | 401, rolsüz 403, operator 200/403, gerekçesiz 409, bilinmeyen 404, teklif, deney, acil kapatma, denetim, owner yayın |
+| Flutter | Değişiklik yok | Faz 6 yalnız sunucu ve veritabanı |
+
 ## Brif uçtan uca senaryoları
 
 | Senaryo | Durum |

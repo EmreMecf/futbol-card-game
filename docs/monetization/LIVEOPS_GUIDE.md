@@ -1,9 +1,50 @@
 # LiveOps Rehberi
 
-Yönetim paneli henüz yok (Faz 6). Bugün bütün işlemler veritabanı
-fonksiyonlarıyla yapılır; her biri **yeni ayar sürümü + değiştirilemez
-denetim kaydı** üretir. Eski sürüm silinmez, geri dönüş = eski değerleri
-yeniden yazmak.
+Görsel yönetim paneli yok; işlemler **yönetici API'si** (064) ya da
+veritabanı fonksiyonlarıyla yapılır. Her değişiklik **değiştirilemez
+denetim kaydı** (kim, ne, neden) üretir; ayar değişikliği ayrıca yeni ayar
+sürümü. Eski sürüm silinmez, geri dönüş = eski değerleri yeniden yazmak.
+
+## Roller (064)
+
+| Rol | Yetki |
+|---|---|
+| `viewer` | genel bakış, metrik, deney raporu |
+| `operator` | + ayar (gerçek para hariç), kozmetik teklif, ürünü durdurma, acil kapatma, deney |
+| `owner` | + gerçek para: `iap_enabled`, `gem_packs_enabled`, `starter_pack_enabled`, `premium_season_pass_enabled` açmak ve ücretli ürünü `active` yapmak |
+
+Rol **yalnız veritabanından** verilir (API ile rol verilemez):
+
+```sql
+insert into admin_users (user_id, role, granted_by, note)
+values ((select id from users where username = '<kullanici>'), 'operator', '<veren>', '<neden>');
+update admin_users set revoked_at = now() where user_id = '<uuid>';   -- geri al
+```
+
+## Yönetici API'si (`/api/admin/monetization`, oyuncu oturumu + rol)
+
+```bash
+A=https://<sunucu>/api/admin/monetization; H="authorization: Bearer <jeton>"
+curl -H "$H" $A/overview                        # ayar, ürünler, teklifler, deneyler, son 30 denetim
+curl -H "$H" "$A/metrics?days=7"                # reklam, satın alma (tahmini gelir), iade, kozmetik, ücretli elmas
+curl -H "$H" -X POST $A/config -d '{"patch": {"rewarded_ads_enabled": true}, "reason": "..."}'
+curl -H "$H" -X POST $A/kill-switch -d '{"reason": "..."}'
+curl -H "$H" -X POST $A/products/gems_starter_100 -d '{"status": "paused", "reason": "..."}'
+curl -H "$H" -X POST $A/offers/offer_frame_neon -d '{"patch": {"price_gems": 100}, "reason": "..."}'
+curl -H "$H" -X POST $A/experiments -d '{"key": "odul_metni", "variants": [{"name": "control", "weight": 50}, {"name": "b", "weight": 50}], "reason": "..."}'
+curl -H "$H" -X POST $A/experiments/odul_metni -d '{"status": "running", "reason": "..."}'
+curl -H "$H" $A/experiments/odul_metni          # grup başına oyuncu, reklam ödülü, ödeyen
+```
+
+Hata: rol yetmezse 403 `admin_forbidden`; gerekçe boşsa 409 `invalid_reason`.
+Hız sınırı dakikada 60 istek.
+
+## Saklama süresi (064)
+
+`purge_monetization_events()` saatlik zamanlayıcıyla çalışır: analitik
+olay 180 gün, ham SSV kaydı 90 gün, doğrulama olayı 400 gün. Satın alma
+kaydı, defterler (`gem_ledger`, `economy_ledger`) ve denetim kaydı
+**silinmez** (mali kayıt).
 
 ## Ayar okuma
 
@@ -102,8 +143,13 @@ sayar. Tahmini ve kesin gelir karıştırılmaz.
 
 ## A/B (deney)
 
-Yüzde dilimi `monetization_bucket(user_id, özellik)` deterministiktir.
-Kontrol: `rollout_percent=0`; A: %50 ve `daily_reward` limit 2; B için
-ayrı bir özellik anahtarıyla ikinci dilim (Faz 6'da deney tablosu).
+064 deney tablosu: `monetization_experiments` (gruplar ve ağırlıklar, toplam
+100), `experiment_assignments` (ilk görülmede yazılır, **kalıcı**: ağırlık
+sonradan değişse de oyuncunun grubu değişmez). Durum: taslak → çalışıyor →
+durdu (durmuş deney yeniden başlamaz). İstemci grubunu
+`/api/monetization/config` cevabındaki `experiments` alanından okur.
+Bugün deney yalnız istemci tarafı değişiklikleri (metin, yerleşim) için
+hazır; sunucu kurallarını gruba göre değiştirmek (ör. günlük reklam
+limiti) henüz bağlı değil.
 Başarı ölçütü yalnız gelir değildir: D1/D7 elde tutma ve maç sayısı
 kontrolden kötüyse deney başarısızdır.

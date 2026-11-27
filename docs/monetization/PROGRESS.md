@@ -88,6 +88,20 @@ Bağlam yenilenirse buradan devam edilir.
   bölümünde premium yol paket gibi listelenmez.
 * 035/036 testleri kendi tablolarını (sürüm 1) işlem içinde sabitler.
 
+### Faz 6 — Yönetim / LiveOps (migration 064)
+* `admin_users` (viewer / operator / owner; yalnız veritabanından verilir),
+  rol denetimli fonksiyonlar: ayar, acil kapatma, ürün durumu, kozmetik
+  teklif, deney oluştur/başlat/durdur, genel bakış, metrik, deney raporu.
+  Gerçek para açan bayraklar ve ücretli ürünü yayına alma yalnız owner.
+  Her değişiklik gerekçeyle değiştirilemez denetime.
+* Deneyler: `monetization_experiments`, kalıcı `experiment_assignments`,
+  `experiment_variant`; istemci ayarında `experiments`.
+* Metrikler: günlük reklam, satın alma (tahmini gelir, sandbox ayrı),
+  iade, kozmetik (ücretsiz/ücretli elmas), dolaşımdaki ücretli elmas ve borç.
+* Saklama: `purge_monetization_events` (180/90/400 gün), saatlik zamanlayıcı.
+* Sunucu: `server/lib/monetization/admin_routes.dart`
+  (`/api/admin/monetization/*`, dakikada 60 istek).
+
 ## Sıradaki
 
 | Adım | Not |
@@ -97,7 +111,8 @@ Bağlam yenilenirse buradan devam edilir.
 | 3b | Gerçek cihazda Google lisans testi / Apple sandbox (hesaplar BLOCKED); hukuk metni onayı (cayma hakkı cümlesi) |
 | 4b | Kart görünümü / arena / forma kozmetiklerinin çizimi oyunda bağlı değil (034'te tanımlı, ekranda yok); bağlanınca mağazaya eklenebilir. 043 lig çerçeveleri de çizilmiyor |
 | 5b | Her yeni sezon için yeni pas kozmetikleri (sürüm 3+): aynı çerçeve ikinci sezonda tekrar gelirse telafisi 0 olduğu için boş ödül olur |
-| 6 | Yönetici uçları (rol + denetim), deney tablosu, olay saklama süresi |
+| 6b | Görsel yönetim paneli (bugün API + SQL); ayrı yönetici girişi / iki adımlı doğrulama; deney grubuna göre sunucu kuralı (ör. reklam limiti) |
+| 7 | Tam regresyon, güvenlik incelemesi, yayın belgeleri |
 
 ## BLOCKED (insan / hesap)
 
@@ -107,7 +122,8 @@ Bağlam yenilenirse buradan devam edilir.
 
 ## Onay bekleyen (yapılmadı)
 
-* Staging'e 060 + 061 + 062 + 063 deploy (commit/push kullanıcı kararı)
+* Staging'e 060 + 061 + 062 + 063 + 064 deploy (commit/push kullanıcı kararı)
+* İlk yönetici rolünü vermek (`admin_users`; kime, hangi rol)
 * Premium sezon yolunu satışa açmak (`season_pass_premium` active, `premium_season_pass_enabled`; gerçek para)
 * Kozmetik mağazayı açmak (`cosmetic_shop_enabled`) ve teklif fiyatlarını onaylamak
 * Gerçek para tahsilatını açmak (`iap_enabled`, ürünleri `active` yapmak)

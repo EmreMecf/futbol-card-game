@@ -43,8 +43,19 @@
 | Eksi bakiye | Toplam yetmezse ret; ücretsiz ve ücretli defter satırları ayrı | SQL test |
 | Girdi | Teklif kimliği ve anahtar biçim denetimi (`^[a-z0-9_]{3,60}$`), parametreli sorgu | uçtan uca (404) |
 
+## Faz 6 — Yönetim
+
+| Tehdit | Önlem | Kanıt |
+|---|---|---|
+| Oyuncunun yönetici işlemi yapması | Rol `admin_users`'ta; her yönetici fonksiyonu SQL'de rol denetler; rolsüz 403 | SQL test, uçtan uca |
+| Yetki yükseltme | API ile rol verilemez; rol yalnız veritabanından | şema |
+| Gerçek parayı yanlışlıkla açmak | Satın alma bayraklarını açmak ve ücretli ürünü yayına almak yalnız `owner` | SQL test, uçtan uca (operator 403) |
+| İz bırakmadan değişiklik | Her değişiklik değiştirilemez denetim kaydına, gerekçe zorunlu; reddedilen işlem yazılmaz | SQL test |
+| Kaba kuvvet / otomasyon | Yönetim uçlarında dakikada 60 istek | `server.dart` |
+| Kişisel verinin süresiz tutulması | Olaylar 180, ham SSV 90, doğrulama olayı 400 gün; mali kayıt silinmez | `purge_monetization_events` |
+
 ## Açık kalanlar
 
-* Yönetici rolü yok: ayar değişikliği bugün veritabanı erişimiyle (`set_monetization_config`). Yönetici uçları Faz 6.
+* Yönetici işlemleri oyuncu oturumuyla yapılıyor; ayrı yönetici girişi ve iki adımlı doğrulama yok. Rol yalnız güvenilir hesaplara verilmeli.
 * Gerçek mağaza doğrulaması kodda hazır, hesap ve anahtarlar **BLOCKED**; gerçek cihazda sandbox testi yapılmadı.
-* `ad_ssv_events` ve `monetization_events` için saklama süresi (KVKK veri minimizasyonu) — Faz 6'da temizleme işi.
+* Saklama süreleri (180/90/400 gün) varsayımdır; KVKK aydınlatma metniyle birlikte hukukçu onaylamalı.

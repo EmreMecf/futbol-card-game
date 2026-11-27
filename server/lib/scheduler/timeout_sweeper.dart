@@ -90,6 +90,14 @@ class TimeoutSweeper {
       // ignore: avoid_print
       print('[ZAMANLAYICI] Jeton temizligi basarisiz: $e');
     }
+    // 064: monetizasyon olaylarının saklama süresi (ayrı: önceki adımlar
+    // hata alsa da çalışsın; tablo yoksa sessizce geçer)
+    try {
+      await _db.scalar('select purge_monetization_events()');
+    } catch (e) {
+      // ignore: avoid_print
+      print('[ZAMANLAYICI] Monetizasyon olay temizligi basarisiz: $e');
+    }
   }
 
   void stop() {

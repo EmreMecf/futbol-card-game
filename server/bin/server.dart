@@ -20,6 +20,7 @@ import 'package:futbol_card_server/routes/friend_routes.dart';
 import 'package:futbol_card_server/routes/progress_routes.dart';
 import 'package:futbol_card_server/routes/sbc_routes.dart';
 import 'package:futbol_card_server/monetization/ad_ssv_verifier.dart';
+import 'package:futbol_card_server/monetization/admin_routes.dart';
 import 'package:futbol_card_server/monetization/cosmetic_shop_routes.dart';
 import 'package:futbol_card_server/monetization/monetization_routes.dart';
 import 'package:futbol_card_server/monetization/purchase_routes.dart';
@@ -152,6 +153,14 @@ Future<void> main(List<String> args) async {
               : SocialTokenVerifier(googleClientIds: {Env.googleRtdnAudience}, appleClientIds: const {}),
           pubsubServiceAccount: Env.googleRtdnServiceAccount,
         ).call),
+  );
+  // 064: monetizasyon yönetimi (rol veritabanında denetlenir; sıkı hız sınırı)
+  final yonetimSiniri = RateLimiter(maxRequests: 60, window: const Duration(minutes: 1));
+  api.mount(
+    '/admin/monetization',
+    korumali
+        .addMiddleware(rateLimit(yonetimSiniri, trustProxy: Env.trustProxy))
+        .addHandler(monetizationAdminRoutes(db).call),
   );
   // 062: elmasla kozmetik (kapı kapalıyken satış yok)
   api.mount('/shop', korumali.addHandler(cosmeticShopRoutes(db).call));
