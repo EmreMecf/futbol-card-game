@@ -23,7 +23,9 @@ Kural: gerçek para bu zincirin **hiçbir halkasına** doğrudan girmemeli.
 | R4 | Reklamla elmas/altın | Reklam çiftçiliği, enflasyon | Reklam ödülü: küçük altın (günlük ödül merkezi) ve sandık süresi kısaltma. **Elmas verilmez.** Günde en fazla 3 doğrulanmış reklam, sunucuda. |
 | R5 | Mevcut bakiyeler | Haksız değişiklik | Hiçbir bakiye değişmez. Bugünkü elmaslar ücretsiz elmas olarak kalır. |
 | R6 | Rastgele içerikli ücretli ürün | Hukuk (Belçika, Brezilya, Kore), mağaza kuralı | İlk sürümde **ücretli rastgele ürün yok**. Elmas paketleri ve kozmetik sabit içerikli. Rastgele ürün satılırsa oranlar sunucudaki aynı ayardan, satın almadan önce gösterilir. |
-| R7 | Başlangıç paketi | Güç satışı | İçerik yalnız kozmetik + az miktar **ücretli** elmas (R1 gereği güç veremez). |
+| R7 | Başlangıç paketi | Güç satışı | İçerik yalnız kozmetik + az miktar **ücretli** elmas (R1 gereği güç veremez). 062: 50 elmas + mağazada satılmayan Çaylak çerçevesi. |
+| R8 | Elmasla alınan kozmetik tekrar gelirse altına döner (034 telafi) | Ücretli elmas → kozmetik → altın | 062 mağaza kozmetiklerinin telafisi **0 altın**; aynı kozmetik ikinci kez satılmaz (veritabanı tekilliği). |
+| R9 | Görünmeyen ürün satmak | Oyuncuyu yanıltma | Yalnız oyunda çizilen kozmetik satılır; test sunucu tohumuyla istemci çizimini karşılaştırır. |
 
 ## 3. Reklam ödülü bütçesi (varsayılan ayar)
 

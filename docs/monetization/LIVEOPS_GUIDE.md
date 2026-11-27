@@ -30,6 +30,30 @@ select set_monetization_config(jsonb_build_object('placements',
 select set_monetization_config('{"min_app_version": "1.2.0"}', '<ad>', '<gerekce>');
 ```
 
+## Kozmetik mağaza (062)
+
+```sql
+-- Aç (önce beyaz liste)
+select set_monetization_config('{"monetization_enabled": true, "cosmetic_shop_enabled": true,
+  "whitelist": ["<uuid>"]}', '<ad>', '<gerekce>');
+-- Teklif fiyatı / durumu (yalnız kozmetik item teklif olabilir)
+update cosmetic_offers set price_gems = 100 where id = 'offer_frame_neon';
+update cosmetic_offers set status = 'paused' where id = 'offer_frame_crimson';
+-- Süreli teklif
+update cosmetic_offers set ends_at = now() + interval '7 days', featured = true where id = 'offer_frame_emerald';
+-- Satışlar: ne kadarı ücretsiz, ne kadarı ücretli elmasla
+select offer_id, count(*), sum(free_spent) ucretsiz, sum(paid_spent) ucretli
+from cosmetic_purchases group by 1;
+```
+
+Yeni kozmetik eklemeden önce istemcide çizimi olmalı (`cosmeticFramePalette`,
+`cosmeticVictoryOverlay`); çizilmeyen ürün satılmaz. Fiyat değişikliği
+satın alınmış ürünleri etkilemez.
+
+Başlangıç paketi (`starter_pack_1`): içerik 50 ücretli elmas + Çaylak
+çerçevesi, hesap yaşı ≤ 7 gün, tek seferlik. Açmak için ürünü `active`
+yapmak ve `starter_pack_enabled` gerekir (gerçek para: açık onay).
+
 ## Acil kapatma
 
 ```sql

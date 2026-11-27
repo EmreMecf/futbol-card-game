@@ -18,13 +18,35 @@ import '../../core/l10n/app_language.dart';
 // ---------------------------------------------------------------------
 /// (forma, şerit) ya da null
 (Color, Color)? cosmeticKitColors(String? slug) => switch (slug) {
-      'kit_season1' => (const Color(0xFF0E7A64), V21Colors.goldTop),
-      _ => null,
-    };
+  'kit_season1' => (const Color(0xFF0E7A64), V21Colors.goldTop),
+  _ => null,
+};
 
 // ---------------------------------------------------------------------
 // PROFİL ÇERÇEVESİ
 // ---------------------------------------------------------------------
+/// Çerçeve halkasının renkleri (çizilebilen çerçeveler). null: çizilmez.
+/// Mağaza YALNIZ burada karşılığı olan çerçeveyi satar (görünmeyen ürün
+/// satılmaz; `test/cosmetic_shop_test.dart` sunucu tohumuyla karşılaştırır).
+List<Color>? cosmeticFramePalette(String? slug) => switch (slug) {
+  'frame_season1' => const [Color(0xFFF8C665), Color(0xFF21DFAA), Color(0xFFFFF1C4), Color(0xFF21DFAA)],
+  'frame_neon' => const [Color(0xFF3DE0FF), Color(0xFF8A5CFF), Color(0xFFE15BFF), Color(0xFF8A5CFF)],
+  'frame_crimson' => const [Color(0xFFFF3B3B), Color(0xFFFF9A2E), Color(0xFFFFE08A), Color(0xFFFF9A2E)],
+  'frame_emerald' => const [Color(0xFF12C27E), Color(0xFFF8C665), Color(0xFF0E7A64), Color(0xFFF8C665)],
+  'frame_starter' => const [Color(0xFF7FB2FF), Color(0xFFFFFFFF), Color(0xFF4A7BD8), Color(0xFFFFFFFF)],
+  _ => null,
+};
+
+/// Zafer animasyonu çizilebiliyor mu
+bool cosmeticVictoryDrawable(String? slug) => slug == 'victory_fireworks' || slug == 'victory_star_rain';
+
+/// Giyilen zafer animasyonunu çizer (bilinmeyen slug: hiçbir şey)
+Widget cosmeticVictoryOverlay(String? slug, {required bool active}) => switch (slug) {
+  'victory_fireworks' => FireworksOverlay(active: active),
+  'victory_star_rain' => StarRainOverlay(active: active),
+  _ => const SizedBox.shrink(),
+};
+
 /// Avatarın çevresine sezon halkası çizer. [slug] null ise yalnız
 /// [fallbackBorder] ile düz çerçeve (eski görünüm).
 class CosmeticFrame extends StatelessWidget {
@@ -43,6 +65,25 @@ class CosmeticFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palet = cosmeticFramePalette(slug);
+    if (slug != 'frame_season1' && palet != null) {
+      // 062: mağaza çerçeveleri (sezon plakası yok)
+      final kalinlik = math.max(3.0, size * 0.05);
+      return Container(
+        width: size + kalinlik * 2,
+        height: size + kalinlik * 2,
+        padding: EdgeInsets.all(kalinlik),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: SweepGradient(colors: [...palet, palet.first]),
+          boxShadow: [BoxShadow(color: palet.first.withValues(alpha: 0.4), blurRadius: 14)],
+        ),
+        child: Container(
+          decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF0B1424)),
+          child: ClipOval(child: child),
+        ),
+      );
+    }
     if (slug != 'frame_season1') {
       return Container(
         width: size,
@@ -59,41 +100,41 @@ class CosmeticFrame extends StatelessWidget {
     return SizedBox(
       width: size + kalinlik * 2,
       height: size + kalinlik * 2 + 8,
-      child: Stack(clipBehavior: Clip.none, alignment: Alignment.topCenter, children: [
-        Container(
-          width: size + kalinlik * 2,
-          height: size + kalinlik * 2,
-          padding: EdgeInsets.all(kalinlik),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: const SweepGradient(colors: [
-              Color(0xFFF8C665),
-              Color(0xFF21DFAA),
-              Color(0xFFFFF1C4),
-              Color(0xFF21DFAA),
-              Color(0xFFF8C665),
-            ]),
-            boxShadow: [BoxShadow(color: V21Colors.goldTop.withValues(alpha: 0.35), blurRadius: 14)],
-          ),
-          child: Container(
-            decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF0B1424)),
-            child: ClipOval(child: child),
-          ),
-        ),
-        // Sezon plakası
-        Positioned(
-          bottom: 0,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
+        children: [
+          Container(
+            width: size + kalinlik * 2,
+            height: size + kalinlik * 2,
+            padding: EdgeInsets.all(kalinlik),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1205),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: V21Colors.goldTop, width: 1.2),
+              shape: BoxShape.circle,
+              gradient: const SweepGradient(
+                colors: [Color(0xFFF8C665), Color(0xFF21DFAA), Color(0xFFFFF1C4), Color(0xFF21DFAA), Color(0xFFF8C665)],
+              ),
+              boxShadow: [BoxShadow(color: V21Colors.goldTop.withValues(alpha: 0.35), blurRadius: 14)],
             ),
-            child: Text('S1', style: V21Type.title(11, color: V21Colors.goldTop, height: 1)),
+            child: Container(
+              decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF0B1424)),
+              child: ClipOval(child: child),
+            ),
           ),
-        ),
-      ]),
+          // Sezon plakası
+          Positioned(
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1205),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: V21Colors.goldTop, width: 1.2),
+              ),
+              child: Text('S1', style: V21Type.title(11, color: V21Colors.goldTop, height: 1)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -107,20 +148,20 @@ class CaptainBandBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        label: 'Kaptan bandı'.tr,
-        child: Container(
-          width: size * 1.3,
-          height: size * 0.8,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFD43B),
-            borderRadius: BorderRadius.circular(size * 0.22),
-            border: Border.all(color: const Color(0xFF3A2A00), width: 1.2),
-            boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 4, offset: Offset(0, 2))],
-          ),
-          child: Text('C', style: V21Type.title(size * 0.62, color: const Color(0xFF241A00), height: 1)),
-        ),
-      );
+    label: 'Kaptan bandı'.tr,
+    child: Container(
+      width: size * 1.3,
+      height: size * 0.8,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFD43B),
+        borderRadius: BorderRadius.circular(size * 0.22),
+        border: Border.all(color: const Color(0xFF3A2A00), width: 1.2),
+        boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 4, offset: Offset(0, 2))],
+      ),
+      child: Text('C', style: V21Type.title(size * 0.62, color: const Color(0xFF241A00), height: 1)),
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------
@@ -144,11 +185,17 @@ class SeasonBadgeChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: renk.withValues(alpha: 0.8)),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.military_tech_rounded, size: 14, color: renk),
-        const SizedBox(width: 4),
-        Text(ad, style: V21Type.label(10, weight: FontWeight.w900, color: renk, letterSpacing: 0.8)),
-      ]),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.military_tech_rounded, size: 14, color: renk),
+          const SizedBox(width: 4),
+          Text(
+            ad,
+            style: V21Type.label(10, weight: FontWeight.w900, color: renk, letterSpacing: 0.8),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -162,14 +209,15 @@ bool paintCardSkinBase(Canvas c, Size s, double k, String? slug) {
   if (slug != 'card_skin_night') return false;
   final rect = Offset.zero & s;
   c.drawRect(
-      rect,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF0A1030), Color(0xFF161A4A), Color(0xFF0B0F24)],
-          stops: [0, 0.6, 1],
-        ).createShader(rect));
+    rect,
+    Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFF0A1030), Color(0xFF161A4A), Color(0xFF0B0F24)],
+        stops: [0, 0.6, 1],
+      ).createShader(rect),
+  );
   // Hilal (sağ üst)
   final ay = Offset(s.width * 0.8, s.height * 0.14);
   final r = 9 * k;
@@ -185,20 +233,31 @@ bool paintCardSkinBase(Canvas c, Size s, double k, String? slug) {
   // Alt ufuk ışığı
   final alt = Rect.fromLTWH(0, s.height * 0.72, s.width, s.height * 0.28);
   c.drawRect(
-      alt,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [const Color(0x005A7CFF), const Color(0xFF5A7CFF).withValues(alpha: 0.16)],
-        ).createShader(alt));
+    alt,
+    Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [const Color(0x005A7CFF), const Color(0xFF5A7CFF).withValues(alpha: 0.16)],
+      ).createShader(alt),
+  );
   return true;
 }
 
 const _yildizlar = <(double, double, double)>[
-  (0.12, 0.08, 0.9), (0.27, 0.19, 0.6), (0.44, 0.06, 0.7), (0.62, 0.22, 0.5), (0.92, 0.31, 0.7),
-  (0.08, 0.36, 0.5), (0.35, 0.33, 0.4), (0.71, 0.05, 0.6), (0.18, 0.55, 0.5), (0.88, 0.58, 0.6),
-  (0.55, 0.47, 0.4), (0.05, 0.74, 0.6), (0.95, 0.80, 0.5),
+  (0.12, 0.08, 0.9),
+  (0.27, 0.19, 0.6),
+  (0.44, 0.06, 0.7),
+  (0.62, 0.22, 0.5),
+  (0.92, 0.31, 0.7),
+  (0.08, 0.36, 0.5),
+  (0.35, 0.33, 0.4),
+  (0.71, 0.05, 0.6),
+  (0.18, 0.55, 0.5),
+  (0.88, 0.58, 0.6),
+  (0.55, 0.47, 0.4),
+  (0.05, 0.74, 0.6),
+  (0.95, 0.80, 0.5),
 ];
 
 // ---------------------------------------------------------------------
@@ -231,23 +290,26 @@ class _RainyNightOverlayState extends State<RainyNightOverlay> with SingleTicker
 
   @override
   Widget build(BuildContext context) => IgnorePointer(
-        child: Stack(fit: StackFit.expand, children: [
-          // Gece tonu + sis (durağan katman)
-          const RepaintBoundary(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0x99040A1E), Color(0x33061430), Color(0x6610213F)],
-                ),
+    child: Stack(
+      fit: StackFit.expand,
+      children: [
+        // Gece tonu + sis (durağan katman)
+        const RepaintBoundary(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0x99040A1E), Color(0x33061430), Color(0x6610213F)],
               ),
             ),
           ),
-          // Yağmur (her karede yalnız ince çizgiler)
-          RepaintBoundary(child: CustomPaint(painter: _Yagmur(_ak))),
-        ]),
-      );
+        ),
+        // Yağmur (her karede yalnız ince çizgiler)
+        RepaintBoundary(child: CustomPaint(painter: _Yagmur(_ak))),
+      ],
+    ),
+  );
 }
 
 class _Yagmur extends CustomPainter {
@@ -307,7 +369,11 @@ class _FireworksOverlayState extends State<FireworksOverlay> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     if (!widget.active || !GameFeedback.cardAnimationsEnabled) return const SizedBox.shrink();
-    return IgnorePointer(child: RepaintBoundary(child: CustomPaint(painter: _Fisek(_ak), size: Size.infinite)));
+    return IgnorePointer(
+      child: RepaintBoundary(
+        child: CustomPaint(painter: _Fisek(_ak), size: Size.infinite),
+      ),
+    );
   }
 }
 
@@ -355,8 +421,12 @@ class _Fisek extends CustomPainter {
         final r = tam * _hizlar[i] * ilerleme;
         final uc = merkez + yon * r + Offset(0, dusme);
         final kuyruk = merkez + yon * (r * 0.62) + Offset(0, dusme * 0.6);
-        iz.shader = LinearGradient(colors: [renk.withValues(alpha: 0), renk.withValues(alpha: alfa)])
-            .createShader(Rect.fromPoints(kuyruk, uc));
+        iz.shader = LinearGradient(
+          colors: [
+            renk.withValues(alpha: 0),
+            renk.withValues(alpha: alfa),
+          ],
+        ).createShader(Rect.fromPoints(kuyruk, uc));
         c.drawLine(kuyruk, uc, iz);
         c.drawCircle(uc, 4.2 * (1 - yerel * 0.6), hale);
         c.drawCircle(uc, 1.9 * (1 - yerel * 0.5), nokta);
@@ -365,15 +435,114 @@ class _Fisek extends CustomPainter {
       if (yerel < 0.22) {
         final g = 1 - yerel / 0.22;
         c.drawCircle(
-            merkez,
-            16 * g,
-            Paint()
-              ..color = Colors.white.withValues(alpha: 0.75 * g)
-              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6));
+          merkez,
+          16 * g,
+          Paint()
+            ..color = Colors.white.withValues(alpha: 0.75 * g)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+        );
       }
     }
   }
 
   @override
   bool shouldRepaint(_Fisek old) => false;
+}
+
+// ---------------------------------------------------------------------
+// ZAFER ANİMASYONU: "Yıldız Yağmuru" (062, mağaza)
+// ---------------------------------------------------------------------
+class StarRainOverlay extends StatefulWidget {
+  final bool active;
+
+  /// Önizlemede döngü (mağaza); maç sonunda tek sefer
+  final bool loop;
+  const StarRainOverlay({super.key, required this.active, this.loop = false});
+
+  @override
+  State<StarRainOverlay> createState() => _StarRainOverlayState();
+}
+
+class _StarRainOverlayState extends State<StarRainOverlay> with SingleTickerProviderStateMixin {
+  late final AnimationController _ak;
+
+  @override
+  void initState() {
+    super.initState();
+    _ak = AnimationController(vsync: this, duration: const Duration(milliseconds: 3400));
+    if (widget.active && GameFeedback.cardAnimationsEnabled) {
+      widget.loop ? _ak.repeat() : _ak.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ak.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.active || !GameFeedback.cardAnimationsEnabled) return const SizedBox.shrink();
+    return IgnorePointer(
+      child: RepaintBoundary(
+        child: CustomPaint(painter: _Konfeti(_ak), size: Size.infinite),
+      ),
+    );
+  }
+}
+
+class _Konfeti extends CustomPainter {
+  final Animation<double> t;
+  _Konfeti(this.t) : super(repaint: t);
+
+  static const _renkler = [V21Colors.goldTop, Color(0xFFFFF1C4), Color(0xFFFFB02E), Color(0xFFFFE07A)];
+
+  /// (x 0..1, gecikme 0..0.5, hız çarpanı, dönme, genişlik)
+  static final _parcalar = () {
+    final r = math.Random(23);
+    return List.generate(
+      70,
+      (_) => (
+        r.nextDouble(),
+        r.nextDouble() * 0.5,
+        0.7 + r.nextDouble() * 0.6,
+        (r.nextDouble() - 0.5) * 14,
+        5 + r.nextDouble() * 4,
+      ),
+    );
+  }();
+
+  @override
+  void paint(Canvas c, Size s) {
+    final p = Paint();
+    for (var i = 0; i < _parcalar.length; i++) {
+      final (x, gecikme, hiz, donme, gen) = _parcalar[i];
+      final yerel = ((t.value - gecikme) / 0.5).clamp(0.0, 1.0);
+      if (yerel <= 0 || yerel >= 1) continue;
+      final y = -20 + (s.height + 40) * yerel * hiz;
+      final sallanma = math.sin(yerel * math.pi * 4 + i) * 14;
+      p.color = _renkler[i % _renkler.length].withValues(alpha: (1 - yerel * 0.6).clamp(0.0, 1.0));
+      c.save();
+      c.translate(s.width * x + sallanma, y);
+      c.rotate(donme * yerel);
+      c.drawPath(_yildiz(gen), p);
+      c.restore();
+    }
+  }
+
+  /// Beş köşeli yıldız (yarıçap [r])
+  static Path _yildiz(double r) {
+    final yol = Path();
+    for (var i = 0; i < 10; i++) {
+      final a = -math.pi / 2 + i * math.pi / 5;
+      final u = i.isEven ? r : r * 0.45;
+      final n = Offset(math.cos(a) * u, math.sin(a) * u);
+      i == 0 ? yol.moveTo(n.dx, n.dy) : yol.lineTo(n.dx, n.dy);
+    }
+    return yol..close();
+  }
+
+  @override
+  bool shouldRepaint(_Konfeti old) => false;
 }

@@ -50,6 +50,26 @@ Bağlam yenilenirse buradan devam edilir.
 * CI: simülatör analiz uyarıları; Android release'te eklenti lint çökmesi
   (`lint { checkReleaseBuilds = false }`).
 
+### Faz 4 — Kozmetik mağaza + başlangıç paketi (migration 062)
+* SQL: 5 yeni kozmetik (Neon / Kızıl Alev / Zümrüt / Çaylak çerçeve,
+  Yıldız Yağmuru zafer animasyonu; tekrar telafisi 0 altın),
+  `cosmetic_offers` (yalnız kozmetik; tetikleyiciyle denetlenir),
+  `cosmetic_purchases` (oyuncu+kozmetik tekil, istek anahtarı tekil, ücretsiz/ücretli
+  dağılımı), `cosmetic_shop`, `buy_cosmetic` (önce ücretsiz elmas, kapı
+  `cosmetic_shop_enabled`). Başlangıç paketi içeriği: 50 ücretli elmas +
+  Çaylak çerçevesi (taslak kalır).
+* Sunucu: `cosmetic_shop_routes.dart` (`GET /api/shop/cosmetics`,
+  `POST /api/shop/cosmetics/buy`).
+* İstemci: `lib/features/monetization/cosmetics/cosmetic_shop.dart`,
+  `lib/ui_v21/screens/monetization/v21_cosmetic_shop.dart` (teklif kartları,
+  önizleme, açık onay, giy). Kozmetik mağaza açıkken mağaza sekmeli
+  (PAKETLER / KOZMETİK / ELMAS); kapalıyken ekran aynen eski hâli.
+  Başlangıç paketi afişi elmas bölümünde. Çerçeve paleti ve zafer
+  animasyonu çizimleri `v21_cosmetics.dart`.
+* Yalnız oyunda gerçekten çizilen kozmetikler satılır (çerçeve: profil ve
+  açık profil; zafer: maç sonu). Test sunucu tohumuyla istemci çizimini
+  karşılaştırır.
+
 ## Sıradaki
 
 | Adım | Not |
@@ -57,7 +77,7 @@ Bağlam yenilenirse buradan devam edilir.
 | 2d | Ayarlar > "Gizlilik seçenekleri" düğmesi (UMP `privacyOptionsRequired`), KVKK rıza ekranı (metin insan onayı), iOS ATT kararı |
 | 2e | Maç sonu teklifi arayüzü (`post_match`, sunucu hazır, arayüz yok; bayrak kapalı) |
 | 3b | Gerçek cihazda Google lisans testi / Apple sandbox (hesaplar BLOCKED); hukuk metni onayı (cayma hakkı cümlesi) |
-| 4 | Mağaza sekmeleri, kozmetik satış + önizleme, başlangıç paketi |
+| 4b | Kart görünümü / arena / forma kozmetiklerinin çizimi oyunda bağlı değil (034'te tanımlı, ekranda yok); bağlanınca mağazaya eklenebilir. 043 lig çerçeveleri de çizilmiyor |
 | 5 | Güçsüz premium sezon yolu |
 | 6 | Yönetici uçları (rol + denetim), deney tablosu, olay saklama süresi |
 
@@ -69,6 +89,7 @@ Bağlam yenilenirse buradan devam edilir.
 
 ## Onay bekleyen (yapılmadı)
 
-* Staging'e 060 + 061 deploy (commit/push kullanıcı kararı)
+* Staging'e 060 + 061 + 062 deploy (commit/push kullanıcı kararı)
+* Kozmetik mağazayı açmak (`cosmetic_shop_enabled`) ve teklif fiyatlarını onaylamak
 * Gerçek para tahsilatını açmak (`iap_enabled`, ürünleri `active` yapmak)
 * Üretimde herhangi bir monetizasyon bayrağını açmak

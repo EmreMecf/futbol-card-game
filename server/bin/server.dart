@@ -20,6 +20,7 @@ import 'package:futbol_card_server/routes/friend_routes.dart';
 import 'package:futbol_card_server/routes/progress_routes.dart';
 import 'package:futbol_card_server/routes/sbc_routes.dart';
 import 'package:futbol_card_server/monetization/ad_ssv_verifier.dart';
+import 'package:futbol_card_server/monetization/cosmetic_shop_routes.dart';
 import 'package:futbol_card_server/monetization/monetization_routes.dart';
 import 'package:futbol_card_server/monetization/purchase_routes.dart';
 import 'package:futbol_card_server/monetization/purchase_verifier.dart';
@@ -152,6 +153,8 @@ Future<void> main(List<String> args) async {
           pubsubServiceAccount: Env.googleRtdnServiceAccount,
         ).call),
   );
+  // 062: elmasla kozmetik (kapı kapalıyken satış yok)
+  api.mount('/shop', korumali.addHandler(cosmeticShopRoutes(db).call));
   // 056: arkadaşlık, oyuncu arama, açık profil
   api.mount('/social', korumali.addHandler(socialRoutes(db).call));
 

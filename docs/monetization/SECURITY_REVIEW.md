@@ -32,6 +32,17 @@
 | Anahtar eksik | Doğrulayıcı kurulmaz, 503 (fail-closed); test sağlayıcı üretimde kurulmaz | e2e kapı kontrolleri |
 | Hassas veri | Jeton yalnız SHA-256 özetiyle saklanır; makbuz/özel anahtar günlüğe yazılmaz | şema |
 
+## Faz 4 — Kozmetik mağaza
+
+| Tehdit | Önlem | Kanıt |
+|---|---|---|
+| Fiyat manipülasyonu | İstemci yalnız teklif kimliği gönderir; fiyat sunucu tablosundan | `buy_cosmetic` |
+| Çift harcama (çift dokunma, ağ tekrarı) | Oyuncu satır kilidi + `(user, request_key)` tekil; aynı anahtar aynı sonucu döndürür | SQL test, uçtan uca |
+| Aynı kozmetiği iki kez almak | `(user, item_slug)` tekil + sahiplik kontrolü | SQL test |
+| Güç veren item satmak | Tetikleyici: yalnız `kind='cosmetic'` teklif olabilir | SQL test |
+| Eksi bakiye | Toplam yetmezse ret; ücretsiz ve ücretli defter satırları ayrı | SQL test |
+| Girdi | Teklif kimliği ve anahtar biçim denetimi (`^[a-z0-9_]{3,60}$`), parametreli sorgu | uçtan uca (404) |
+
 ## Açık kalanlar
 
 * Yönetici rolü yok: ayar değişikliği bugün veritabanı erişimiyle (`set_monetization_config`). Yönetici uçları Faz 6.

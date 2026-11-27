@@ -20,6 +20,9 @@ class ShopProduct {
   final int paidGems;
   final bool owned;
   final StorePrice? price;
+
+  /// 062: içerikteki kozmetikler (başlangıç paketi çerçevesi)
+  final List<String> itemSlugs;
   const ShopProduct({
     required this.id,
     required this.category,
@@ -30,6 +33,7 @@ class ShopProduct {
     this.paidGems = 0,
     this.owned = false,
     this.price,
+    this.itemSlugs = const [],
   });
 
   factory ShopProduct.fromJson(Map<String, dynamic> j, StorePrice? price) => ShopProduct(
@@ -42,6 +46,11 @@ class ShopProduct {
     paidGems: (j['contents'] is Map ? (j['contents']['paid_gems'] as num?)?.toInt() : null) ?? 0,
     owned: j['problem'] == 'already_owned',
     price: price,
+    itemSlugs: [
+      if (j['contents'] is Map && j['contents']['items'] is List)
+        for (final i in j['contents']['items'] as List)
+          if (i is Map && i['slug'] != null) i['slug'].toString(),
+    ],
   );
 
   /// Mağaza fiyatı yoksa satılamaz (fiyat uydurulmaz)
@@ -55,12 +64,15 @@ class PurchaseApi {
   Future<Map<String, dynamic>> catalog() =>
       api.get('/purchases/catalog', sorgu: {'platform': clientPlatform, 'app_version': kAppVersion});
 
-  Future<Map<String, dynamic>> verify(StorePurchase p) => api.post('/purchases/verify', govde: {
-    'platform': clientPlatform,
-    'product_id': p.storeProductId,
-    'purchase_token': ?p.purchaseToken,
-    'transaction_id': ?p.transactionId,
-  });
+  Future<Map<String, dynamic>> verify(StorePurchase p) => api.post(
+    '/purchases/verify',
+    govde: {
+      'platform': clientPlatform,
+      'product_id': p.storeProductId,
+      'purchase_token': ?p.purchaseToken,
+      'transaction_id': ?p.transactionId,
+    },
+  );
 }
 
 enum PurchaseFlowState { idle, loading, purchasing, pending, verifying, success, failed, cancelled }
@@ -196,14 +208,16 @@ class PurchaseController extends ChangeNotifier {
     _islenen = null;
     // Geçici hata: mağazaya "tamam" DENMEZ; işlem bir sonraki açılışta
     // yeniden gelir ve doğrulama tekrar denenir (ödeme kaybolmaz).
-    final kalici = hata != null && const {
-      'invalid_receipt',
-      'account_mismatch',
-      'purchase_cancelled',
-      'wrong_product',
-      'wrong_app',
-      'purchase_belongs_to_another_account',
-    }.contains(hata.technicalDetail);
+    final kalici =
+        hata != null &&
+        const {
+          'invalid_receipt',
+          'account_mismatch',
+          'purchase_cancelled',
+          'wrong_product',
+          'wrong_app',
+          'purchase_belongs_to_another_account',
+        }.contains(hata.technicalDetail);
     if (kalici) await _store.complete(p);
     _git(
       PurchaseFlowState.failed,
@@ -222,4 +236,3 @@ class PurchaseController extends ChangeNotifier {
     super.dispose();
   }
 }
-

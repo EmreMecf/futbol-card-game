@@ -29,6 +29,18 @@ Tarih: 27 Kasım 2026 · Yerel: Flutter 3.50.1 / Dart 3.14, PostgreSQL 17
 | Üretim kapısı (`DEPLOY_STAGE=production`) | 4/4 | test sağlayıcı yok, anahtarsız 503, simülasyon ucu yok |
 | Android release (CI) | Bekliyor | eklenti lint çökmesi için `checkReleaseBuilds = false`; CI'da doğrulanacak |
 
+## Faz 4 — Kozmetik mağaza
+
+| Paket | Sonuç | Not |
+|---|---|---|
+| `flutter analyze` / sunucu `dart analyze` | Temiz | |
+| `flutter test` | **1216 geçti** (45 atlanan) | bayrak kapalıyken mağaza goldenı aynı |
+| `test/cosmetic_shop_test.dart` (yeni) | 7 geçti | kapalı mağaza, liste, satın alma, ağ hatasında aynı anahtar, kural hatasında yeni anahtar, sunucu kozmetiklerinin istemcide çizilebilmesi, önizleme → onay → satın alma → giy |
+| `server: dart test` | 64 geçti | |
+| `scripts/db-testleri.sh` | Geçti | 60 migration sıfırdan, tekrar çalıştırma, maç sürerken 062 |
+| `database/tests/062_cosmetic_shop_test.sql` (yeni) | Geçti | varsayılan kapalı, kozmetik dışı teklif reddi, beyaz liste/platform, yetersiz elmas, önce ücretsiz sonra ücretli, tekrar anahtarı, sahiplik, giyme, duraklatılan teklif, tekrar kozmetikte altın yok, başlangıç paketi çerçevesi |
+| Yerel uçtan uca (gerçek sunucu + PostgreSQL) | 11/11 | kapalıyken 409, açınca 4 teklif, 50 ücretsiz + 70 ücretli, tekrar anahtarı, sahip olunan 409, yetersiz 409, geçersiz kimlik 404, oturumsuz 401, envanter, defter |
+
 ## Brif uçtan uca senaryoları
 
 | Senaryo | Durum |

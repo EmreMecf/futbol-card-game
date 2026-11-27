@@ -48,9 +48,11 @@ begin
 
   -- 1) Katalog
   -- 038 etkinlik biletini pasif yapar: tanim sayisi 23 kalir (satir silinmez)
-  -- 043 kupa yolu 3 lig cercevesi ekler (frame_league_*); 034'un kendi katalogu 23
-  perform pg_temp.beklenen('katalogda 23 item tanimi (043 lig cerceveleri haric)',
-    (select count(*)::int from item_definitions where slug not like 'frame_league_%'), 23);
+  -- 043 kupa yolu 3 lig cercevesi ekler (frame_league_*); 062 magaza
+  -- kozmetikleri (params.shop) ekler; 034'un kendi katalogu 23
+  perform pg_temp.beklenen('katalogda 23 item tanimi (043 lig cerceveleri ve 062 magaza haric)',
+    (select count(*)::int from item_definitions
+     where slug not like 'frame_league_%' and not coalesce((params ->> 'shop')::boolean, false)), 23);
   perform pg_temp.beklenen('043 lig cerceveleri en fazla 3',
     (select count(*)::int from item_definitions where slug like 'frame_league_%') <= 3, true);
   perform pg_temp.beklenen('kozmetiklerin yuvasi var',

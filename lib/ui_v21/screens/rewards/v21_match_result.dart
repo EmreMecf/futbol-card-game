@@ -104,7 +104,9 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
       );
     }
     _haptic(s);
-    final fireworks = EquippedCosmetics.current?.victory == 'victory_fireworks';
+    // Giyilen zafer animasyonu varsa varsayılan konfetinin yerine o çizilir
+    final zafer = EquippedCosmetics.current?.victory;
+    final fireworks = cosmeticVictoryDrawable(zafer);
     final effects = V21Motion.cardEffects(context);
     return Theme(
       data: V21Theme.data(context),
@@ -149,7 +151,7 @@ class _V21MatchResultViewState extends State<V21MatchResultView> with SingleTick
                       ),
                     ),
                   ),
-                if (s.didIWin && fireworks) FireworksOverlay(active: effects),
+                if (s.didIWin && fireworks) cosmeticVictoryOverlay(zafer, active: effects),
               ],
             );
           },

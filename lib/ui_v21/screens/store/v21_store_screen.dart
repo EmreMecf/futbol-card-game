@@ -9,6 +9,8 @@ import '../../../core/router/app_routes.dart';
 import '../../../features/store/presentation/viewmodel/store_view_model.dart';
 import '../rewards/v21_pack_opening.dart';
 import '../../../shared/widgets/error_snackbar.dart';
+import '../../../features/monetization/cosmetics/cosmetic_shop.dart';
+import '../monetization/v21_cosmetic_shop.dart';
 import '../monetization/v21_purchase_widgets.dart';
 import '../social/v21_social_screens.dart';
 import '../../ui_v21.dart';
@@ -101,8 +103,32 @@ class _Body extends StatefulWidget {
   State<_Body> createState() => _BodyState();
 }
 
+/// 062: kozmetik mağaza açıkken mağaza sekmeli olur
+enum _StoreTab { packs, cosmetics, gems }
+
 class _BodyState extends State<_Body> {
   String? _selectedSlug;
+  CosmeticShopController? _kozmetik;
+  _StoreTab _sekme = _StoreTab.packs;
+
+  @override
+  void initState() {
+    super.initState();
+    _kozmetik = getIt.isRegistered<CosmeticShopController>() ? getIt<CosmeticShopController>() : null;
+    _kozmetik?.addListener(_yenile);
+    _kozmetik?.load();
+  }
+
+  void _yenile() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _kozmetik?.removeListener(_yenile);
+    _kozmetik?.dispose();
+    super.dispose();
+  }
 
   PackType? _selected(StoreViewModel vm) {
     final slug = _selectedSlug ?? vm.featuredSlug;
@@ -156,6 +182,57 @@ class _BodyState extends State<_Body> {
           onAction: vm.load,
           scale: k,
         ),
+      ];
+    } else if (_kozmetik?.enabled == true) {
+      // 062: sekmeli mağaza (yalnız kozmetik mağaza açıkken)
+      final kozmetik = _kozmetik!;
+      content = [
+        _StoreTabs(current: _sekme, scale: k, onChanged: (t) => setState(() => _sekme = t)),
+        SizedBox(height: 14 * k),
+        ...switch (_sekme) {
+          _StoreTab.packs => [
+            if (vm.dailyOffer != null) ...[
+              _DailyOffer(vm: vm, scale: k, onBuy: () => _buyOffer(vm)),
+              SizedBox(height: 18 * k),
+            ],
+            Text('KART PAKETLERİ'.tr, style: V21Type.title(26 * k, shadows: V21Type.inkShadow(k))),
+            SizedBox(height: 10 * k),
+            _PackGrid(
+              vm: vm,
+              selectedSlug: selected?.slug,
+              scale: k,
+              onSelect: (p) => setState(() => _selectedSlug = p.slug),
+              onBuy: (p) => _buy(vm, p),
+            ),
+            if (selected != null) ...[SizedBox(height: 16 * k), _Odds(pack: selected, scale: k)],
+            SizedBox(height: 18 * k),
+            V21GameButton(
+              label: 'TEKLİFLER · KART TAKASI'.tr,
+              tone: V21ButtonTone.blue,
+              size: V21ButtonSize.small,
+              scale: k * 1.1,
+              onPressed: () => context.push(AppRoutes.sbc),
+            ),
+            SizedBox(height: 14 * k),
+            Text(
+              'Paketten çıkan kartları sunucu belirler; oranlar gerçekten uygulanan değerlerdir.'.tr,
+              textAlign: TextAlign.center,
+              style: V21Type.label(11 * k, weight: FontWeight.w600, color: V21Colors.textDim, height: 1.4),
+            ),
+          ],
+          _StoreTab.cosmetics => [
+            V21CosmeticShopSection(controller: kozmetik, scale: k),
+            SizedBox(height: 14 * k),
+            V21GameButton(
+              label: 'ENVANTERİM'.tr,
+              tone: V21ButtonTone.purple,
+              size: V21ButtonSize.small,
+              scale: k * 1.1,
+              onPressed: () => context.push(AppRoutes.inventory),
+            ),
+          ],
+          _StoreTab.gems => [V21GemStoreSection(scale: k), V21GemPacksSection(scale: k)],
+        },
       ];
     } else {
       content = [
@@ -234,7 +311,11 @@ class _DailyOffer extends StatelessWidget {
     final busy = vm.openingPackSlug == t.packSlug;
     return Semantics(
       container: true,
-      label: 'Günün teklifi: {name}, {cardCount} kart, %{discountPct} indirim'.trArgs({'name': t.name, 'cardCount': t.cardCount, 'discountPct': t.discountPct}),
+      label: 'Günün teklifi: {name}, {cardCount} kart, %{discountPct} indirim'.trArgs({
+        'name': t.name,
+        'cardCount': t.cardCount,
+        'discountPct': t.discountPct,
+      }),
       child: Container(
         height: 168 * k,
         decoration: BoxDecoration(
@@ -249,13 +330,7 @@ class _DailyOffer extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            Positioned(
-              right: 4 * k,
-              top: -8 * k,
-              bottom: 8 * k,
-              width: 150 * k,
-              child: const V21ChestArt(),
-            ),
+            Positioned(right: 4 * k, top: -8 * k, bottom: 8 * k, width: 150 * k, child: const V21ChestArt()),
             Positioned(
               right: 18 * k,
               top: -6 * k,
@@ -295,7 +370,10 @@ class _DailyOffer extends StatelessWidget {
                     child: Text(t.name, style: V21Type.title(28 * k, shadows: V21Type.inkShadow(k))),
                   ),
                   Text(
-                    '{cardCount} kart · {p} yerine'.trArgs({'cardCount': t.cardCount, 'p': V21Format.thousands(t.price)}),
+                    '{cardCount} kart · {p} yerine'.trArgs({
+                      'cardCount': t.cardCount,
+                      'p': V21Format.thousands(t.price),
+                    }),
                     style: V21Type.label(12 * k, weight: FontWeight.w700, color: const Color(0xFFFFE3D6)),
                   ),
                   const Spacer(),
@@ -614,6 +692,41 @@ class _Odds extends StatelessWidget {
               ),
           ],
         ),
+      ],
+    );
+  }
+}
+
+/// 062: PAKETLER | KOZMETİK | ELMAS
+class _StoreTabs extends StatelessWidget {
+  final _StoreTab current;
+  final double scale;
+  final ValueChanged<_StoreTab> onChanged;
+  const _StoreTabs({required this.current, required this.scale, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final k = scale;
+    Widget tab(_StoreTab t, String label) => Expanded(
+      child: Semantics(
+        selected: t == current,
+        child: V21GameButton(
+          key: Key('magaza-sekme-${t.name}'),
+          label: label,
+          tone: t == current ? V21ButtonTone.gold : V21ButtonTone.blue,
+          size: V21ButtonSize.small,
+          scale: k * 1.05,
+          onPressed: () => onChanged(t),
+        ),
+      ),
+    );
+    return Row(
+      children: [
+        tab(_StoreTab.packs, 'PAKETLER'.tr),
+        SizedBox(width: 8 * k),
+        tab(_StoreTab.cosmetics, 'KOZMETİK'.tr),
+        SizedBox(width: 8 * k),
+        tab(_StoreTab.gems, 'ELMAS'.tr),
       ],
     );
   }

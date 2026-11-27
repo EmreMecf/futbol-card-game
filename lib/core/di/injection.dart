@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../features/monetization/cosmetics/cosmetic_shop.dart';
 import '../../features/monetization/purchase/purchase_controller.dart';
 import '../../features/monetization/purchase/store_client.dart';
 import '../../features/monetization/monetization_api.dart';
@@ -254,6 +255,15 @@ Future<void> configureDependencies() async {
     // 060: ödüllü reklam (sunucu ayarı kapalıyken hiçbir şey gösterilmez)
     ..registerLazySingleton<MonetizationApi>(() => MonetizationApi(getIt<ApiClient>()))
     // 061: satın alma (sunucu bayrağı + mağaza fiyatı yoksa görünmez)
+    // 062: elmasla kozmetik mağaza (bayrak kapalıyken görünmez)
+    ..registerLazySingleton<CosmeticShopApi>(() => CosmeticShopApi(getIt<ApiClient>()))
+    ..registerFactory<CosmeticShopController>(
+      () => CosmeticShopController(
+        getIt<CosmeticShopApi>(),
+        session: getIt<SessionManager>(),
+        items: getIt<ItemsRepository>(),
+      ),
+    )
     ..registerLazySingleton<PurchaseApi>(() => PurchaseApi(getIt<ApiClient>()))
     ..registerFactory<PurchaseController>(
       () => PurchaseController(getIt<PurchaseApi>(), StoreClient.create(), session: getIt<SessionManager>()),
