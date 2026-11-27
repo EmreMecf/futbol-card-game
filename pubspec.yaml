@@ -68,6 +68,11 @@ dev_dependencies:
   fake_async: ^1.3.3
   flutter_test:
     sdk: flutter
+  # Uçtan uca test: gerçek tarayıcıda (chromedriver) gerçek sunucuya bağlanır
+  integration_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

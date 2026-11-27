@@ -282,6 +282,75 @@ jobs:
           echo "Gunlukte jeton yok"
 
   # -------------------------------------------------------------------
+  # Gercek Chrome'da uygulama: kayit, koleksiyon, dil, cikis/giris ve
+  # botla antrenman maci sonuna kadar (integration_test/uctan_uca_test.dart).
+  # Betik gecici veritabani, sunucu ve chromedriver'i kendisi kurar.
+  tarayici:
+    name: Uctan uca (gercek tarayici)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: futbol
+          POSTGRES_PASSWORD: ci_gecici_sifre
+          POSTGRES_DB: futbol_card
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U futbol -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: localhost
+      PGUSER: futbol
+      PGPASSWORD: ci_gecici_sifre
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: psql istemcisi
+        run: |
+          for attempt in 1 2 3; do
+            if sudo apt-get update -o Acquire::Retries=3 -qq &&
+               sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq -o Acquire::Retries=3 postgresql-client; then
+              psql --version
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "PostgreSQL istemcisi 3 denemede de kurulamadi"
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
+      - name: .env olustur
+        run: cp .env.example .env
+      - name: Ortak modellerin kodunu uret
+        working-directory: packages/shared_models
+        run: |
+          dart pub get
+          dart run build_runner build --delete-conflicting-outputs
+      - name: Bagimliliklar
+        run: |
+          flutter pub get
+          (cd server && dart pub get)
+      # Runner'da Chrome ve ona uygun chromedriver hazir gelir
+      - name: Telefon duzeni (430x900)
+        env:
+          E2E_HEADLESS: "1"
+          E2E_BOYUT: "430,900"
+        run: CHROMEDRIVER="$CHROMEWEBDRIVER/chromedriver" bash scripts/uctan-uca-test.sh
+      - name: Genis web duzeni (1366x860)
+        env:
+          E2E_HEADLESS: "1"
+          E2E_BOYUT: "1366,860"
+        run: CHROMEDRIVER="$CHROMEWEBDRIVER/chromedriver" bash scripts/uctan-uca-test.sh
+
+  # -------------------------------------------------------------------
   android:
     name: Android release derleme
     runs-on: ubuntu-latest
