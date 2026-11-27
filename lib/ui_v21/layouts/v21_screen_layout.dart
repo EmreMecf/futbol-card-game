@@ -144,7 +144,7 @@ class V21ScreenLayout extends StatelessWidget {
       );
     }
     final navSpace = navBuilder == null ? bottomInset : V21Metrics.navHeight * scale.s + bottomInset;
-    return Scaffold(
+    final sayfa = Scaffold(
       backgroundColor: V21Colors.inkDeep,
       body: Stack(
         children: [
@@ -153,6 +153,22 @@ class V21ScreenLayout extends StatelessWidget {
           if (navBuilder != null) Positioned(left: 0, right: 0, bottom: 0, child: navBuilder(context, scale)),
         ],
       ),
+    );
+    if (navBuilder == null) return sayfa;
+    // Alt menü Scaffold'un kendi alt çubuğu değil (gövdenin içinde çizilir).
+    // Bu yüzden bildirimler (SnackBar) varsayılan olarak menünün ÜSTÜNE
+    // biner ve 3 saniye boyunca menüye dokunmayı yutardı (uçtan uca testte
+    // bulundu). Burada bildirimler menünün hemen üstünde süzülür.
+    final tema = Theme.of(context);
+    final menuYuksekligi = (V21Metrics.navHeight + V21Metrics.navActiveRise) * scale.s + bottomInset;
+    return Theme(
+      data: tema.copyWith(
+        snackBarTheme: tema.snackBarTheme.copyWith(
+          behavior: SnackBarBehavior.floating,
+          insetPadding: EdgeInsets.fromLTRB(12, 0, 12, menuYuksekligi + 8),
+        ),
+      ),
+      child: sayfa,
     );
   }
 }
