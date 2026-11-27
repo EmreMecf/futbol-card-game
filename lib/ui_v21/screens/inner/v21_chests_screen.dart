@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../monetization/v21_ad_widgets.dart';
+import '../../../features/monetization/rewarded_ad_controller.dart';
+import '../../../features/monetization/monetization_models.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
 import '../rewards/v21_chest_opening.dart';
@@ -323,6 +326,17 @@ class _SlotGrid extends StatelessWidget {
 
 /// Kilitli / sayacı çalışan sandık için seçenekler (FAZ 3 itemleri)
 Future<void> _options(BuildContext context, ChestsViewModel vm, Chest c, bool unlocking) async {
+  // 060: isteğe bağlı reklamla süre kısaltma (sunucu ayarı kapalıyken görünmez)
+  final ads = getIt.isRegistered<RewardedAdController>() ? getIt<RewardedAdController>() : null;
+  await ads?.refreshStatus();
+  final adE = ads?.status?.of(AdPlacement.chestSpeedup);
+  final reklamVar = adE != null && !adE.featureOff && adE.eligible && c.isUnlocking &&
+      (vm.remaining(c)?.inSeconds ?? 0) > 60;
+  final krediVar = c.isUnlocking && (ads?.status?.creditSessionIds.isNotEmpty ?? false);
+  if (!context.mounted) {
+    ads?.dispose();
+    return;
+  }
   final choice = await V21GameDialog.show<String>(
     context,
     subtitle: 'SANDIK'.tr,
@@ -331,6 +345,13 @@ Future<void> _options(BuildContext context, ChestsViewModel vm, Chest c, bool un
     message: c.isUnlocking
         ? 'Sayaç çalışıyor. Beklemeden açmak için elmas ya da anahtar kullanabilirsin.'.tr
         : 'Sayacı başlatabilir ya da elmasla hemen açabilirsin.'.tr,
+    content: reklamVar
+        ? Text(
+            'Elmasla: sandık hemen açılır. Reklamla: süre {m} dk kısalır (isteğe bağlı).'.trArgs({'m': adE.reward.amount}),
+            textAlign: TextAlign.center,
+            style: V21Type.label(12, weight: FontWeight.w700, color: V21Colors.textMuted),
+          )
+        : null,
     actions: [
       if (c.isSealed && !unlocking)
         V21DialogAction(
@@ -347,10 +368,27 @@ Future<void> _options(BuildContext context, ChestsViewModel vm, Chest c, bool un
       if (vm.canUseKey(c)) V21DialogAction('ANAHTARLA AÇ ({p} / {keys})'.trArgs({'p': vm.keyCost(c), 'keys': vm.keys}), result: 'key'),
       if (vm.canSpeedUp(c))
         V21DialogAction('2 SAAT HIZLANDIR ({speedups})'.trArgs({'speedups': vm.speedups}), tone: V21ButtonTone.blue, result: 'speed'),
+      if (reklamVar)
+        V21DialogAction(
+          'REKLAM İZLE: −{m} DK ({n}/{l})'.trArgs({
+            'm': adE.reward.amount,
+            'n': adE.remainingToday,
+            'l': adE.placementLimit,
+          }),
+          tone: V21ButtonTone.green,
+          result: 'ad',
+        ),
+      if (krediVar) V21DialogAction('KAYITLI HIZLANDIRMAYI KULLAN'.tr, tone: V21ButtonTone.green, result: 'credit'),
       V21DialogAction('VAZGEÇ'.tr, tone: V21ButtonTone.purple),
     ],
   );
   switch (choice) {
+    case 'ad':
+      if (context.mounted) await runRewardedAd(context, ads!, AdPlacement.chestSpeedup, targetId: c.id);
+      await vm.refresh();
+    case 'credit':
+      await ads!.applyCredit(c.id);
+      await vm.refresh();
     case 'unlock':
       await vm.startUnlock(c);
     case 'gems':
@@ -360,6 +398,7 @@ Future<void> _options(BuildContext context, ChestsViewModel vm, Chest c, bool un
     case 'speed':
       await vm.speedUp(c);
   }
+  ads?.dispose();
 }
 
 /// Geniş sandık satırı (referans "BRONZ SANDIK · Maç ödülü · hazır · AÇ!")

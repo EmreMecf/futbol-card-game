@@ -84,6 +84,21 @@ class Env {
   static bool get isProduction =>
       str('ENVIRONMENT', 'development') == 'production';
 
+  // ---- MONETİZASYON (060) ----
+  /// Dağıtım aşaması: local | staging | production. Staging de
+  /// ENVIRONMENT=production ile çalıştığı için test sağlayıcılarını bu
+  /// değer ayırır. Tanımsızsa "production" sayılır (fail-closed).
+  static String get deployStage => str('DEPLOY_STAGE', isProduction ? 'production' : 'local');
+
+  /// Test sağlayıcıları (SSV benzetimi, ileride sandbox satın alma).
+  /// ÜRETİMDE HİÇBİR KOŞULDA AÇILMAZ: DEPLOY_STAGE=production iken false.
+  static bool get monetizationTestProviders =>
+      deployStage != 'production' && str('MONETIZATION_TEST_PROVIDERS', 'false') == 'true';
+
+  /// AdMob SSV açık anahtar adresi (varsayılan Google'ın resmi adresi)
+  static String get admobSsvKeysUrl =>
+      str('ADMOB_SSV_KEYS_URL', 'https://www.gstatic.com/admob/reward/verifier-keys.json');
+
   /// Uretim ortaminda sunucunun ACILMASINI ENGELLEYEN sorunlar.
   ///
   /// Bos liste = guvenli. Doluysa sunucu baslamaz.

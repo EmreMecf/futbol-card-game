@@ -19,6 +19,8 @@ import 'package:futbol_card_server/routes/match_routes.dart';
 import 'package:futbol_card_server/routes/friend_routes.dart';
 import 'package:futbol_card_server/routes/progress_routes.dart';
 import 'package:futbol_card_server/routes/sbc_routes.dart';
+import 'package:futbol_card_server/monetization/ad_ssv_verifier.dart';
+import 'package:futbol_card_server/monetization/monetization_routes.dart';
 import 'package:futbol_card_server/routes/social_routes.dart';
 import 'package:futbol_card_server/scheduler/timeout_sweeper.dart';
 import 'package:futbol_card_server/utils/api_response.dart';
@@ -111,6 +113,16 @@ Future<void> main(List<String> args) async {
   api.mount('/sbc', korumali.addHandler(sbcRoutes(db).call));
   api.mount('/leaderboard', korumali.addHandler(leaderboardRoutes(db).call));
   api.mount('/characters', korumali.addHandler(characterRoutes(db).call));
+  // 060: monetizasyon (oyuncu oturumu) + AdMob SSV geri çağrısı (imzalı, oturumsuz)
+  api.mount('/monetization', korumali.addHandler(monetizationRoutes(db).call));
+  final ssvSiniri = RateLimiter(maxRequests: 120, window: const Duration(minutes: 1));
+  final ssvAnahtarlari = AdMobKeyStore(fetch: () => AdMobKeyStore.httpGet(Env.admobSsvKeysUrl));
+  api.mount(
+    '/ads',
+    Pipeline()
+        .addMiddleware(rateLimit(ssvSiniri, trustProxy: Env.trustProxy))
+        .addHandler(adSsvRoutes(db, AdSsvVerifier(ssvAnahtarlari)).call),
+  );
   // 056: arkadaşlık, oyuncu arama, açık profil
   api.mount('/social', korumali.addHandler(socialRoutes(db).call));
 

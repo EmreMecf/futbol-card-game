@@ -46,6 +46,11 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // 060: AdMob uygulama kimliği (varsayılan: Google'ın resmi test kimliği)
+        manifestPlaceholders["admobAppId"] =
+            (project.findProperty("admobAppId") as String?)
+                ?: System.getenv("ADMOB_APP_ID_ANDROID")
+                ?: "ca-app-pub-3940256099942544~3347511713"
     }
 
     signingConfigs {

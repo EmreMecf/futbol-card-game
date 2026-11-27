@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../monetization/v21_ad_widgets.dart';
 import '../../../core/auth/session_manager.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
@@ -178,8 +179,15 @@ class _HomeContent extends StatelessWidget {
         const _Header(),
         SizedBox(height: 14 * k),
         Padding(
-          padding: EdgeInsets.only(left: V21Metrics.leagueBadgeLeft * k),
-          child: const Align(alignment: Alignment.centerLeft, child: _League()),
+          padding: EdgeInsets.only(left: V21Metrics.leagueBadgeLeft * k, right: 12 * k),
+          child: Row(
+            children: [
+              const _League(),
+              const Spacer(),
+              // 060: günlük ödül merkezi (isteğe bağlı reklam; kapalıyken görünmez)
+              V21AdRewardPill(scale: k),
+            ],
+          ),
         ),
         SizedBox(height: 2 * k),
         const Expanded(child: _Hero()),

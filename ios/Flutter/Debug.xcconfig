@@ -1,1 +1,4 @@
 #include "Generated.xcconfig"
+// 060: AdMob uygulama kimligi. Google RESMI TEST kimligi; yayinda
+// ADMOB_APP_ID_IOS derleme ayariyla (ortam/CI) degistirilir.
+ADMOB_APP_ID_IOS = ca-app-pub-3940256099942544~1458002511

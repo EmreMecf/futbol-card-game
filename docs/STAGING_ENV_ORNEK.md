@@ -16,6 +16,9 @@ Bu dosya sade bir kontrol listesidir. Gercek degerleri Render Dashboard'da yalni
 | AUTH_RATE_LIMIT | Varsayilan 20/dakika; staging'de dusunerek ayarla |
 | TRUST_PROXY | Proxy IP guvenligi denetlenmeden true yapma |
 | CORS_ORIGIN | Yalniz bilinen web origin; birden cok adres virgulle yazilir (ornek: https://oyun.ornek.com,https://test.ornek.com) |
+| DEPLOY_STAGE | staging (uretimde production; tanimsizsa ENVIRONMENT=production iken production sayilir) |
+| MONETIZATION_TEST_PROVIDERS | Yalniz staging: true ise SSV benzetim ucu acilir; DEPLOY_STAGE=production iken etkisiz |
+| ADMOB_SSV_KEYS_URL | Bos birak (Google resmi adresi kullanilir) |
 
 Saglik kontrolu: `https://<host>/api/health`; WebSocket: `wss://<host>/ws?token=<jwt>`. WebSocket JWT'yi URL/query icinde tasir: request URL'lerini loglama ya da paylasma.
 

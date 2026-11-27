@@ -38,6 +38,13 @@
                 <data android:scheme="futbolcard"/>
             </intent-filter>
         </activity>
+        <!-- 060: AdMob uygulama kimliği. Varsayılan Google'ın RESMİ TEST kimliğidir;
+             gerçek kimlik yalnız yayın derlemesinde -PadmobAppId=... ya da
+             ADMOB_APP_ID_ANDROID ortam değişkeniyle verilir (koda gömülmez).
+             Reklamlar sunucu ayarıyla kapalıyken hiç yüklenmez. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}"/>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

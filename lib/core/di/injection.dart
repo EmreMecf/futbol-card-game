@@ -1,6 +1,9 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_models/shared_models.dart';
 
+import '../../features/monetization/monetization_api.dart';
+import '../../features/monetization/rewarded_ad_controller.dart';
+import '../../features/monetization/rewarded_ad_provider.dart';
 import '../../features/social/social_api.dart';
 import '../../features/social/friend_challenge.dart';
 import '../../features/chests/data/chest_repository_impl.dart';
@@ -246,6 +249,11 @@ Future<void> configureDependencies() async {
     )
     // 056: arkadaşlık, açık profil, elmas, rakip kadrosu
     ..registerLazySingleton<SocialApi>(() => SocialApi(getIt<ApiClient>()))
+    // 060: ödüllü reklam (sunucu ayarı kapalıyken hiçbir şey gösterilmez)
+    ..registerLazySingleton<MonetizationApi>(() => MonetizationApi(getIt<ApiClient>()))
+    ..registerFactory<RewardedAdController>(
+      () => RewardedAdController(getIt<MonetizationApi>(), RewardedAdProvider.create(), session: getIt<SessionManager>()),
+    )
     // 058: arkadaşı dostluk maçına çağırma (ekranın üstündeki davet kutucuğu)
     ..registerLazySingleton<FriendChallengeController>(
       () => FriendChallengeController(
