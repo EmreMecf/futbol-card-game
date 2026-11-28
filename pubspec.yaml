@@ -65,6 +65,8 @@ dependencies:
   cupertino_ui: ^1.1.7
   google_mobile_ads: ^9.2.0
   in_app_purchase: ^3.3.1
+  # Android'de elmas paketini sunucu ödülü verdikten SONRA tüketmek için
+  in_app_purchase_android: ^0.5.5
 dev_dependencies:
   # Zaman ilerletmeli birim testleri (yoklama, sayaç)
   fake_async: ^1.3.3

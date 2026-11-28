@@ -27,9 +27,17 @@ class AdSsvVerifier {
     final i = rawQuery.indexOf('&signature=');
     if (i <= 0) return const SsvResult.invalid('signature_missing');
     final icerik = rawQuery.substring(0, i);
-    final params = Uri.splitQueryString(rawQuery);
-    final imza = params['signature'];
-    final keyId = int.tryParse(params['key_id'] ?? '');
+    // Ödül bilgileri YALNIZ imzalı kısımdan okunur. Sorgunun tamamından
+    // okunsaydı, imzadan sonra eklenen bir "&user_id=..." gibi parametre
+    // (aynı adlı son değer kazanır) imzalı değeri ezebilirdi.
+    final params = Uri.splitQueryString(icerik);
+    // İmzadan sonra Google yalnız signature ve key_id gönderir; başka bir şey varsa ret
+    final kuyruk = Uri.splitQueryString(rawQuery.substring(i + 1));
+    if (kuyruk.keys.any((k) => k != 'signature' && k != 'key_id')) {
+      return const SsvResult.invalid('unexpected_params');
+    }
+    final imza = kuyruk['signature'];
+    final keyId = int.tryParse(kuyruk['key_id'] ?? '');
     if (imza == null || imza.isEmpty || keyId == null) return const SsvResult.invalid('signature_missing');
 
     var anahtar = await keys.keyFor(keyId);

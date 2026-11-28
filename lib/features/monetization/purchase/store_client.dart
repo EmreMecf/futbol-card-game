@@ -16,8 +16,17 @@ abstract class StoreClient {
   /// tamamlanmamış işlemler de buradan yeniden gelir)
   Stream<List<StorePurchase>> get updates;
 
-  /// Mağazaya "teslim edildi" de (yalnız SUNUCU ödülü verdikten sonra)
-  Future<void> complete(StorePurchase p);
+  /// Mağazaya "teslim edildi" de (yalnız SUNUCU ödülü verdikten sonra).
+  /// [consume] tüketilebilir ürün (elmas paketi) içindir: Android'de ürün
+  /// ancak burada tüketilir, böylece sunucu doğrulayamazsa ödeme kaybolmaz
+  /// ve paket yeniden satın alınabilir hâle gelir.
+  Future<void> complete(StorePurchase p, {bool consume = false});
+
+  /// Yarım kalmış satın almalar (Android): ödenmiş ama henüz teslim
+  /// edilmemiş ya da tüketilmemiş işlemler. Android bunları kendiliğinden
+  /// yeniden göndermez; açılışta buradan sorulur. iOS'ta StoreKit
+  /// bitmemiş işlemleri [updates] üzerinden zaten yeniden gönderir.
+  Future<List<StorePurchase>> unfinished(Set<String> consumableStoreIds);
 
   Future<void> restore();
 
@@ -69,7 +78,9 @@ class NoStoreClient implements StoreClient {
   @override
   Stream<List<StorePurchase>> get updates => const Stream.empty();
   @override
-  Future<void> complete(StorePurchase p) async {}
+  Future<void> complete(StorePurchase p, {bool consume = false}) async {}
+  @override
+  Future<List<StorePurchase>> unfinished(Set<String> consumableStoreIds) async => const [];
   @override
   Future<void> restore() async {}
 }

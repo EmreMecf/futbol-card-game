@@ -94,6 +94,11 @@ Router purchaseRoutes(Database db, PurchaseVerifiers verifiers) {
         'kur': dogru.currency,
       },
     ));
+    // İstemci elmas paketini ancak bu cevaptan sonra tüketir (Android):
+    // ürün türünü sunucu söyler, istemcinin önbelleğine kalmaz.
+    sonuc['consumable'] = await db.scalar(
+        "select product_type = 'consumable' from _product_for_store(@p, @urun)",
+        params: {'p': platform, 'urun': dogru.storeProductId});
     // Ödül verildiyse mağazaya teslimi bildir. Başarısızsa ödül geri
     // alınmaz; istemci yeniden doğrulayınca (aynı işlem) tekrar denenir.
     if (sonuc['status'] == 'granted') {

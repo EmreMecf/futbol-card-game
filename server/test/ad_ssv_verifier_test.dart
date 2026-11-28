@@ -89,6 +89,27 @@ void main() {
     expect((await dogrulayici.verify(q.replaceFirst('user_id=oyuncu-1', 'user_id=oyuncu-2'))).reason, 'bad_signature');
   });
 
+  test('imzadan SONRA eklenen parametre imzalı değeri ezemez', () async {
+    final q = sorgu();
+    // Aynı adlı son değer kazanırdı: geçerli imzayla başka oyuncuya / yeni işleme ödül
+    for (final ek in ['&user_id=oyuncu-2', '&transaction_id=tx-yeni', '&custom_data=baska-oturum', '&reward_amount=99']) {
+      final r = await dogrulayici.verify('$q$ek');
+      expect(r.valid, isFalse, reason: ek);
+      expect(r.reason, 'unexpected_params');
+    }
+  });
+
+  test('alanlar yalnız imzalı kısımdan okunur', () async {
+    // İmza ile key_id arasına sıkıştırılan alan da kabul edilmez
+    final q = sorgu();
+    final parca = q.split('&key_id=');
+    final r = await dogrulayici.verify('${parca[0]}&user_id=oyuncu-2&key_id=${parca[1]}');
+    expect(r.valid, isFalse);
+    expect(r.reason, 'unexpected_params');
+    // Geçerli istekte değer imzalı kısımdakidir
+    expect((await dogrulayici.verify(q)).userId, 'oyuncu-1');
+  });
+
   test('imzasız, bilinmeyen anahtar, bozuk imza reddedilir', () async {
     expect((await dogrulayici.verify('transaction_id=1&user_id=x')).reason, 'signature_missing');
     expect((await dogrulayici.verify(sorgu().replaceFirst('key_id=3335741209', 'key_id=42'))).reason, 'unknown_key');

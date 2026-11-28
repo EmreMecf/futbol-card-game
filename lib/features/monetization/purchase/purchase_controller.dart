@@ -140,6 +140,33 @@ class PurchaseController extends ChangeNotifier {
     ];
     _acik = _urunler.isNotEmpty;
     _git(PurchaseFlowState.idle);
+    await _yarimKalanlariKurtar();
+  }
+
+  /// Kurtarmanın denendiği oyuncu (hesap değişince yeniden denenir)
+  String? _kurtarilanHesap;
+
+  /// Android: ödenmiş ama teslim edilmemiş / tüketilmemiş işlemleri her
+  /// hesap için açılışta BİR KEZ sunucuya doğrulat (uygulama satın alma
+  /// sırasında kapandıysa). Sunucu aynı işleme ikinci kez ödül vermez;
+  /// yalnız eksik teslimi tamamlar.
+  Future<void> _yarimKalanlariKurtar() async {
+    final hesap = _session?.user?.id;
+    if (hesap == null || _kurtarilanHesap == hesap) return;
+    _kurtarilanHesap = hesap;
+    final tuketilebilir = {for (final p in _urunler) if (p.consumable) p.storeProductId};
+    final kalan = (await Result.guard(() => _store.unfinished(tuketilebilir))).dataOrNull ?? const [];
+    if (kalan.isNotEmpty) await _guncellemeler(kalan);
+  }
+
+  /// Ürün tüketilebilir mi (elmas paketi)? Sunucu cevabı önceliklidir.
+  bool _tuketilir(StorePurchase p, [Map<String, dynamic>? cevap]) {
+    final s = cevap?['consumable'];
+    if (s is bool) return s;
+    for (final u in _urunler) {
+      if (u.storeProductId == p.storeProductId) return u.consumable;
+    }
+    return false;
   }
 
   Future<void> buy(ShopProduct p) async {
@@ -189,8 +216,9 @@ class PurchaseController extends ChangeNotifier {
         _git(PurchaseFlowState.pending, 'Ödeme onay bekliyor. Onaylanınca elmasların hesabına geçecek.'.tr);
         return;
       }
-      // Sunucu ödülü verdi (ya da zaten vermişti): artık mağazaya "tamam" de
-      await _store.complete(p);
+      // Sunucu ödülü verdi (ya da zaten vermişti): artık mağazaya "tamam" de.
+      // Elmas paketi ancak şimdi tüketilir (yeniden satın alınabilsin).
+      await _store.complete(p, consume: _tuketilir(p, cevap));
       _islenen = null;
       final elmas = (cevap['paid_gems'] as num?)?.toInt();
       final u = _session?.user;
@@ -208,20 +236,19 @@ class PurchaseController extends ChangeNotifier {
     _islenen = null;
     // Geçici hata: mağazaya "tamam" DENMEZ; işlem bir sonraki açılışta
     // yeniden gelir ve doğrulama tekrar denenir (ödeme kaybolmaz).
-    final kalici =
-        hata != null &&
-        const {
-          'invalid_receipt',
-          'account_mismatch',
-          'purchase_cancelled',
-          'wrong_product',
-          'wrong_app',
-          'purchase_belongs_to_another_account',
-        }.contains(hata.technicalDetail);
-    if (kalici) await _store.complete(p);
+    final kod = hata?.technicalDetail;
+    // Ödeme BAŞKA bir oyun hesabına ait (aynı telefonda iki hesap): işleme
+    // dokunulmaz. Tüketilirse asıl sahibi elmasını hiç alamaz; o hesap
+    // açılınca işlem yeniden doğrulanır.
+    final baskaHesap = const {'account_mismatch', 'purchase_belongs_to_another_account'}.contains(kod);
+    final kalici = const {'invalid_receipt', 'purchase_cancelled', 'wrong_product', 'wrong_app'}.contains(kod);
+    // Kalıcı ret: işlem kapatılır; tüketilebilir ürün takılı kalmasın
+    if (kalici) await _store.complete(p, consume: _tuketilir(p));
     _git(
       PurchaseFlowState.failed,
-      kalici
+      baskaHesap
+          ? 'Bu satın alma başka bir oyun hesabına ait. O hesapla girince teslim edilir.'.tr
+          : kalici
           ? 'Satın alma doğrulanamadı.'.tr
           : 'Satın alma şu an doğrulanamadı; ödemen kaybolmaz, uygulama açılınca yeniden denenecek.'.tr,
     );

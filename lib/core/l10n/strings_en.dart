@@ -1134,6 +1134,8 @@ const Map<String, String> kEnStrings = {
       'You already own this item; contact support for a refund.',
   'Satın alma tamamlandı!': 'Purchase complete!',
   'Satın alma doğrulanamadı.': 'The purchase could not be verified.',
+  'Bu satın alma başka bir oyun hesabına ait. O hesapla girince teslim edilir.':
+      'This purchase belongs to another game account. It will be delivered when you sign in with that account.',
   'Satın alma şu an doğrulanamadı; ödemen kaybolmaz, uygulama açılınca yeniden denenecek.':
       'The purchase could not be verified right now; your payment is safe and will be retried when the app opens.',
   'ELMAS PAKETLERİ': 'GEM PACKS',

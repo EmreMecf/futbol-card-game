@@ -38,7 +38,9 @@ class _Store implements StoreClient {
   @override
   Stream<List<StorePurchase>> get updates => _c.stream;
   @override
-  Future<void> complete(StorePurchase p) async {}
+  Future<void> complete(StorePurchase p, {bool consume = false}) async {}
+  @override
+  Future<List<StorePurchase>> unfinished(Set<String> consumableStoreIds) async => const [];
   @override
   Future<void> restore() async {}
 }
